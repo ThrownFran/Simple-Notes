@@ -1,17 +1,16 @@
 package brillembourg.notes.simple.ui.home
 
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentMainBinding
+import brillembourg.notes.simple.ui.TaskPresentationModel
 import dagger.hilt.android.AndroidEntryPoint
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -21,7 +20,6 @@ class HomeFragment : Fragment() {
     }
 
     private val viewModel: HomeViewModel by viewModels()
-//    private lateinit var viewModel: HomeViewModel
     private lateinit var binding: FragmentMainBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -32,12 +30,18 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
         setupObservers()
         viewModel.getTaskList()
     }
 
     private fun setupObservers() {
+        viewModel.navigateToDetail.observe(viewLifecycleOwner) {
+            //navigate to detail fragment
+            val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
+            directions.setTask(TaskPresentationModel(it.id,it.content,it.date))
+            findNavController().navigate(directions)
+        }
+
         viewModel.state.observe(viewLifecycleOwner) {
             when (it) {
                 is HomeState.Loading -> {

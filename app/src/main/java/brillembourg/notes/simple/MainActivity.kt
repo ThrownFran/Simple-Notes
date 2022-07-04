@@ -18,8 +18,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initFragments() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.container, HomeFragment.newInstance())
-            .commitNow()
+//        supportFragmentManager.beginTransaction()
+//            .replace(R.id.container, HomeFragment.newInstance())
+//            .commitNow()
     }
 }

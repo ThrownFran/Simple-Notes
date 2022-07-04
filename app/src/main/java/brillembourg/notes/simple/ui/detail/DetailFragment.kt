@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
 import brillembourg.notes.simple.databinding.FragmentMainBinding
@@ -17,7 +18,7 @@ class DetailFragment : Fragment() {
     }
 
     private lateinit var binding: FragmentDetailBinding
-    private lateinit var viewModel: DetailViewModel
+    private val viewModel: DetailViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -27,7 +28,6 @@ class DetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this).get(DetailViewModel::class.java)
     }
 
 
