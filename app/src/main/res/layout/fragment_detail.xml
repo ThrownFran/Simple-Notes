@@ -11,6 +11,6 @@
         android:layout_height="match_parent"
         android:gravity="top"
         tools:text="Hello"
-        android:inputType="text" />
+        android:inputType="textMultiLine" />
 
 </FrameLayout>

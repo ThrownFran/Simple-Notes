@@ -1,16 +1,19 @@
 package brillembourg.notes.simple.ui.home
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import brillembourg.notes.simple.databinding.FragmentMainBinding
+import brillembourg.notes.simple.domain.models.Task
 import brillembourg.notes.simple.ui.TaskPresentationModel
 import dagger.hilt.android.AndroidEntryPoint
+
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -21,6 +24,7 @@ class HomeFragment : Fragment() {
 
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var binding: FragmentMainBinding
+    private var recylerViewState: Parcelable? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -31,15 +35,16 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupObservers()
-        viewModel.getTaskList()
+    }
+
+    override fun onDestroyView() {
+        saveRecyclerState()
+        super.onDestroyView()
     }
 
     private fun setupObservers() {
         viewModel.navigateToDetail.observe(viewLifecycleOwner) {
-            //navigate to detail fragment
-            val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
-            directions.setTask(TaskPresentationModel(it.id,it.content,it.date))
-            findNavController().navigate(directions)
+            navigateToDetail(it)
         }
 
         viewModel.state.observe(viewLifecycleOwner) {
@@ -55,13 +60,30 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun navigateToDetail(it: Task) {
+        //navigate to detail fragment
+        val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
+        directions.task = TaskPresentationModel(it.id, it.content, it.date)
+        findNavController().navigate(directions)
+    }
+
     private fun setupTaskList(it: HomeState.TaskListSuccess) {
         binding.homeRecycler.apply {
             adapter = TaskAdapter(it.taskList) {
                 viewModel.clickItem(it)
             }
-            layoutManager = LinearLayoutManager(context)
+            layoutManager = LinearLayoutManager(context).also { layoutManager ->
+                retrieveRecyclerStateIfApplies(layoutManager)
+            }
         }
+    }
+
+    private fun retrieveRecyclerStateIfApplies(layoutManager: LinearLayoutManager) {
+        recylerViewState?.let { layoutManager.onRestoreInstanceState(it) }
+    }
+
+    private fun saveRecyclerState() {
+        recylerViewState = binding.homeRecycler.layoutManager?.onSaveInstanceState()
     }
 
 }

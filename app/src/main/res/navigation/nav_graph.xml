@@ -8,23 +8,22 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="brillembourg.notes.simple.ui.home.HomeFragment"
-        android:label="fragment_main"
-        tools:layout="@layout/fragment_main" >
+        android:label="Simple Notes"
+        tools:layout="@layout/fragment_main">
         <action
             android:id="@+id/action_homeFragment_to_detailFragment"
-            app:destination="@id/detailFragment">
-            <argument
-                android:name="Task"
-                app:argType="brillembourg.notes.simple.ui.TaskPresentationModel"
-                app:nullable="true"
-                android:defaultValue="@null" />
-        </action>
+            app:destination="@id/detailFragment"
+            app:popUpTo="@id/homeFragment"></action>
     </fragment>
     <fragment
         android:id="@+id/detailFragment"
         android:name="brillembourg.notes.simple.ui.detail.DetailFragment"
-        android:label="fragment_detail"
-        tools:layout="@layout/fragment_detail" >
-
+        android:label="Edit note"
+        tools:layout="@layout/fragment_detail">
+        <argument
+            android:name="Task"
+            android:defaultValue="@null"
+            app:argType="brillembourg.notes.simple.ui.TaskPresentationModel"
+            app:nullable="true" />
     </fragment>
 </navigation>
