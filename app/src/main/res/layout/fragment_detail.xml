@@ -1,16 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.detail.DetailFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <EditText
-        android:id="@+id/detail_edit"
+    <data>
+        <variable
+            name="viewmodel"
+            type="brillembourg.notes.simple.ui.detail.DetailViewModel" />
+    </data>
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="top"
-        tools:text="Hello"
-        android:inputType="textMultiLine" />
+        tools:context=".ui.detail.DetailFragment">
 
-</FrameLayout>
+
+
+        <EditText
+            android:id="@+id/detail_edit"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="top"
+            android:onTextChanged="@{viewmodel.onTextChanged}"
+            tools:text="Hello"
+            android:inputType="textMultiLine" />
+
+    </FrameLayout>
+</layout>
