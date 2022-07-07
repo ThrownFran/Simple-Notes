@@ -5,4 +5,4 @@ import brillembourg.notes.simple.domain.models.Task
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class TaskPresentationModel (val id: Long, var content: String, val date: String): Parcelable
+data class TaskPresentationModel (val id: Long, var content: String, val date: String): Parcelable

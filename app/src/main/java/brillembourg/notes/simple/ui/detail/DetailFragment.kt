@@ -37,41 +37,23 @@ class DetailFragment : Fragment() {
         val onBackPressedCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 // Handle the back button event
-                viewModel.saveTask()
+                viewModel.onBackPressed()
             }
         }
-        requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback)
+        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupObservers()
-//        setupBackButton()
     }
-
-//    // This callback will only be called when MyFragment is at least Started.
-//    private fun setupBackButton() {
-//        // This callback will only be called when MyFragment is at least Started.
-//        val callback: OnBackPressedCallback =
-//            object : OnBackPressedCallback(true /* enabled by default */) {
-//                override fun handleOnBackPressed() {
-//                    // Handle the back button event
-//                    viewModel.saveTask()
-//                }
-//            }
-//        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
-//
-////        val callback = requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-//            // Handle the back button event
-////            viewModel.saveTask()
-////        }
-//    }
 
     private fun setupObservers() {
         viewModel.state.observe(viewLifecycleOwner) {
             when (it) {
                 is DetailState.TaskLoaded -> onStateTaskLoaded(it)
                 is DetailState.TaskSaved -> onStateTaskSaved(it)
+                is DetailState.ExitWithoutSaving -> finishView()
             }
         }
     }
@@ -82,6 +64,10 @@ class DetailFragment : Fragment() {
 
     private fun onStateTaskSaved(it: DetailState.TaskSaved) {
         showToast(it.message)
+        finishView()
+    }
+
+    private fun finishView() {
         findNavController().popBackStack()
     }
 
@@ -91,6 +77,7 @@ class DetailFragment : Fragment() {
 
     private fun setupContent(task: TaskPresentationModel) {
         binding.detailEdit.setText(task.content)
+        binding.detailEdit.requestFocus()
     }
 
 

@@ -29,6 +29,7 @@ class HomeFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         binding = FragmentMainBinding.inflate(inflater,container,false)
+        binding.viewmodel = viewModel
         return binding.root
     }
 
@@ -47,6 +48,10 @@ class HomeFragment : Fragment() {
             navigateToDetail(it)
         }
 
+        viewModel.navigateToCreateTask.observe(viewLifecycleOwner) {
+            navigateToCreateTask()
+        }
+
         viewModel.state.observe(viewLifecycleOwner) {
             when (it) {
                 is HomeState.Loading -> {
@@ -58,6 +63,11 @@ class HomeFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun navigateToCreateTask() {
+        val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
+        findNavController().navigate(directions)
     }
 
     private fun navigateToDetail(it: Task) {

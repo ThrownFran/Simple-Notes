@@ -7,6 +7,7 @@ sealed class DetailState {
 
     data class TaskLoaded(val task: TaskPresentationModel): DetailState()
     data class TaskSaved(val message: String) : DetailState()
+    object ExitWithoutSaving: DetailState()
 //    data class CreateTask(val message: String): DetailState()
 //    object Loading: DetailState()
 

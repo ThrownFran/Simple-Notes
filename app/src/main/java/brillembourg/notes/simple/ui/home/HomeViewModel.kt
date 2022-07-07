@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.ui.home
 
+import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -15,10 +16,11 @@ import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(val getTaskListUseCase: GetTaskListUseCase) : ViewModel() {
+class HomeViewModel @Inject constructor(private val getTaskListUseCase: GetTaskListUseCase) : ViewModel() {
 
     var state: MutableLiveData<HomeState> = MutableLiveData()
     val navigateToDetail: SingleLiveEvent<Task> = SingleLiveEvent()
+    val navigateToCreateTask: SingleLiveEvent<Any> = SingleLiveEvent()
 
     init {
         getTaskList()
@@ -32,6 +34,10 @@ class HomeViewModel @Inject constructor(val getTaskListUseCase: GetTaskListUseCa
 
     fun clickItem(it: Task) {
         navigateToDetail.value = it
+    }
+
+    fun createTask () {
+        navigateToCreateTask.value = Any()
     }
 
 }
