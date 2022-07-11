@@ -40,7 +40,7 @@ class DetailViewModel @Inject constructor(
         return TaskPresentationModel(-1L,"","")
     }
 
-    fun saveTask() {
+    private fun saveTask() {
         saveTaskUseCase.execute(SaveTaskUseCase.Params(currentTask.id,currentTask.content))
             .onEach { state.value = DetailState.TaskSaved(it.message) }
             .launchIn(viewModelScope)

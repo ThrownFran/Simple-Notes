@@ -10,8 +10,8 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import brillembourg.notes.simple.databinding.FragmentMainBinding
-import brillembourg.notes.simple.domain.models.Task
 import brillembourg.notes.simple.ui.TaskPresentationModel
+import brillembourg.notes.simple.ui.showToast
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -26,9 +26,11 @@ class HomeFragment : Fragment() {
     private lateinit var binding: FragmentMainBinding
     private var recylerViewState: Parcelable? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
-        binding = FragmentMainBinding.inflate(inflater,container,false)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentMainBinding.inflate(inflater, container, false)
         binding.viewmodel = viewModel
         return binding.root
     }
@@ -36,6 +38,7 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupObservers()
+        viewModel.getTaskList()
     }
 
     override fun onDestroyView() {
@@ -57,7 +60,9 @@ class HomeFragment : Fragment() {
                 is HomeState.Loading -> {
 
                 }
-                is HomeState.TaskListError -> {}
+                is HomeState.TaskListError -> {
+                    showMessage(it.message)
+                }
                 is HomeState.TaskListSuccess -> {
                     setupTaskList(it)
                 }
@@ -65,23 +70,30 @@ class HomeFragment : Fragment() {
         }
     }
 
+    private fun showMessage(message: String) {
+        context?.showToast(message)
+    }
+
     private fun navigateToCreateTask() {
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         findNavController().navigate(directions)
     }
 
-    private fun navigateToDetail(it: Task) {
+    private fun navigateToDetail(it: TaskPresentationModel) {
         //navigate to detail fragment
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
-        directions.task = TaskPresentationModel(it.id, it.content, it.date)
+        directions.task = it
         findNavController().navigate(directions)
     }
 
     private fun setupTaskList(it: HomeState.TaskListSuccess) {
         binding.homeRecycler.apply {
-            adapter = TaskAdapter(it.taskList) {
-                viewModel.clickItem(it)
-            }
+            adapter = TaskAdapter(it.taskList,
+                onLongClick = {
+                    viewModel.longClick(it)
+                }, onClick = {
+                    viewModel.clickItem(it)
+                })
             layoutManager = LinearLayoutManager(context).also { layoutManager ->
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
