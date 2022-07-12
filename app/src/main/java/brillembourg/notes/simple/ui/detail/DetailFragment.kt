@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
 import brillembourg.notes.simple.ui.TaskPresentationModel
+import brillembourg.notes.simple.ui.showSoftKeyboard
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -56,6 +57,11 @@ class DetailFragment : Fragment() {
                 is DetailState.ExitWithoutSaving -> finishView()
             }
         }
+
+        binding.detailEdit.apply {
+            requestFocus()
+            showSoftKeyboard()
+        }
     }
 
     private fun onStateTaskLoaded(it: DetailState.TaskLoaded) {
@@ -77,7 +83,6 @@ class DetailFragment : Fragment() {
 
     private fun setupContent(task: TaskPresentationModel) {
         binding.detailEdit.setText(task.content)
-        binding.detailEdit.requestFocus()
     }
 
 
