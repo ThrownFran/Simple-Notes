@@ -62,18 +62,11 @@ dependencies {
     implementation "com.google.dagger:hilt-android:2.42"
     kapt "com.google.dagger:hilt-compiler:2.42"
 
-    // Koin
+    def room_version = "2.4.2"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
 
-    // Koin main features for Android
-    implementation "io.insert-koin:koin-android:3.1.6"
-// No more koin-android-viewmodel, koin-android-scope, koin-android-fragment
-
-// Java Compatibility
-//    implementation "io.insert-koin:koin-android-compat:3.2.0"
-// Jetpack WorkManager
-//    implementation "io.insert-koin:koin-androidx-workmanager:3.2.0"
-// Navigation Graph
-    implementation "io.insert-koin:koin-androidx-navigation:3.1.6"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
