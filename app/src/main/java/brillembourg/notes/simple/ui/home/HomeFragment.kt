@@ -47,11 +47,11 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        viewModel.navigateToDetail.observe(viewLifecycleOwner) {
+        viewModel.navigateToDetailEvent.observe(viewLifecycleOwner) {
             navigateToDetail(it)
         }
 
-        viewModel.navigateToCreateTask.observe(viewLifecycleOwner) {
+        viewModel.navigateToCreateEvent.observe(viewLifecycleOwner) {
             navigateToCreateTask()
         }
 
@@ -67,6 +67,10 @@ class HomeFragment : Fragment() {
                     setupTaskList(it)
                 }
             }
+        }
+
+        viewModel.messageEvent.observe(viewLifecycleOwner) {
+            showMessage(it)
         }
     }
 

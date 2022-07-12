@@ -9,15 +9,15 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 
 @Database(
-    entities = arrayOf(), version = 1
+    entities = arrayOf(TaskEntity::class), version = 3
 )
-abstract class RoomDatabase : RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
 
     abstract fun taskDao(): TaskDao
 
     companion object {
         @Volatile
-        private var instance: RoomDatabase? = null
+        private var instance: AppDatabase? = null
         private val LOCK = Any()
 
         operator fun invoke(context: Context) = instance
@@ -32,7 +32,7 @@ abstract class RoomDatabase : RoomDatabase() {
 
         private fun buildDatabase(context: Context) = Room.databaseBuilder(
             context.applicationContext,
-            RoomDatabase::class.java,
+            AppDatabase::class.java,
             "task_database"
         )
             .fallbackToDestructiveMigration()

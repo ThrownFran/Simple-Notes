@@ -1,14 +1,15 @@
 package brillembourg.notes.simple.ui.home
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import brillembourg.notes.simple.domain.models.Task
 import brillembourg.notes.simple.domain.use_cases.DeleteTaskUseCase
 import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
 import brillembourg.notes.simple.ui.SingleLiveEvent
 import brillembourg.notes.simple.ui.TaskPresentationModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -19,14 +20,21 @@ class HomeViewModel @Inject constructor(
     private val deleteTaskUseCase: DeleteTaskUseCase
 ) : ViewModel() {
 
-    var state: MutableLiveData<HomeState> = MutableLiveData()
-    val navigateToDetail: SingleLiveEvent<TaskPresentationModel> = SingleLiveEvent()
-    val navigateToCreateTask: SingleLiveEvent<Any> = SingleLiveEvent()
+    private val _state: MutableLiveData<HomeState> = MutableLiveData()
+    private val _navigateToDetailEvent: SingleLiveEvent<TaskPresentationModel> = SingleLiveEvent()
+    private val _navigateToCreateEvent: SingleLiveEvent<Any> = SingleLiveEvent()
+    private val _messageEvent: SingleLiveEvent<String> = SingleLiveEvent()
+
+    //Observables
+    val state : LiveData<HomeState> = _state
+    val navigateToDetailEvent: LiveData<TaskPresentationModel> = _navigateToDetailEvent
+    val navigateToCreateEvent: SingleLiveEvent<Any> = _navigateToCreateEvent
+    val messageEvent: LiveData<String> = _messageEvent
 
     fun getTaskList() {
         getTaskListUseCase.execute(GetTaskListUseCase.Params())
             .onEach {
-                state.value = HomeState.TaskListSuccess(it.taskList.map { taskModel ->
+                _state.value = HomeState.TaskListSuccess(it.taskList.map { taskModel ->
                     TaskPresentationModel(
                         taskModel.id,
                         taskModel.content,
@@ -34,15 +42,18 @@ class HomeViewModel @Inject constructor(
                     )
                 })
             }
+            .catch {
+                _state.value = HomeState.TaskListError("Error loading tasks")
+            }
             .launchIn(viewModelScope)
     }
 
     fun clickItem(it: TaskPresentationModel) {
-        navigateToDetail.value = it
+        _navigateToDetailEvent.value = it
     }
 
     fun createTask() {
-        navigateToCreateTask.value = Any()
+        _navigateToCreateEvent.value = Any()
     }
 
     fun longClick(it: TaskPresentationModel) {
@@ -53,8 +64,13 @@ class HomeViewModel @Inject constructor(
         deleteTaskUseCase.execute(DeleteTaskUseCase.Params(it.id))
             .onEach {
                 getTaskList()
+                showMessage(it.message)
             }
             .launchIn(viewModelScope)
+    }
+
+    private fun showMessage(message: String) {
+        _messageEvent.value = message
     }
 
 }

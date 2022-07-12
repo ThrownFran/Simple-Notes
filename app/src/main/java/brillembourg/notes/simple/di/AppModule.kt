@@ -4,7 +4,7 @@ import android.content.Context
 import brillembourg.notes.simple.data.TaskCache
 import brillembourg.notes.simple.data.TaskDatabase
 import brillembourg.notes.simple.data.TaskRepositoryImp
-import brillembourg.notes.simple.data.room.RoomDatabase
+import brillembourg.notes.simple.data.room.AppDatabase
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import dagger.Module
 import dagger.Provides
@@ -30,8 +30,14 @@ class AppModule {
     @Provides
     fun taskDatabase(
         @ApplicationContext appContext: Context,
-        roomDatabase: RoomDatabase
+        roomDatabase: AppDatabase
     ): TaskDatabase =
         TaskDatabase(appContext,roomDatabase)
+
+    @Singleton
+    @Provides
+    fun getAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        return AppDatabase.invoke(context)
+    }
 
 }

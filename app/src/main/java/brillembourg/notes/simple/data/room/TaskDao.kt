@@ -9,14 +9,16 @@ import androidx.room.Query
 abstract class TaskDao {
 
     @Query("SELECT * FROM taskentity")
-    abstract suspend fun getTaskList(): List<TaskEntity>
+    abstract suspend fun getList(): List<TaskEntity>
 
     @Query("DELETE FROM taskentity WHERE id = :taskId")
-    abstract suspend fun deleteTask(taskId: String)
+    abstract suspend fun delete(taskId: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun saveCurrentWeather(task: TaskEntity)
+    abstract suspend fun save(task: TaskEntity)
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract suspend fun create(item: TaskEntity): Long
 
 
 }

@@ -20,9 +20,10 @@ class TaskCache {
 
     fun createTask(params: CreateTaskUseCase.Params): Flow<CreateTaskUseCase.Result> {
         return flow {
-            cacheList.add(Task(cacheIdCounter, params.content, params.date))
+            val task = Task(cacheIdCounter, params.content,"")
+            cacheList.add(task)
             cacheIdCounter += 1L
-            emit(CreateTaskUseCase.Result("Task created"))
+            emit(CreateTaskUseCase.Result(task,"Task created"))
         }
     }
 
@@ -52,17 +53,17 @@ class TaskCache {
     fun saveTask(params: SaveTaskUseCase.Params): Flow<SaveTaskUseCase.Result> {
 
         //Update Task
-        val taskToUpdate: Task? = params.id?.let { findTaskById(it) }
+        val taskToUpdate: Task? = params.task.id?.let { findTaskById(it) }
         taskToUpdate?.let {
             return flow {
-                it.content = params.content
+                it.content = params.task.content
                 emit(SaveTaskUseCase.Result("Task updated"))
             }
         }
 
         //Create Task
         return flow {
-            cacheList.add(Task(cacheIdCounter, params.content, ""))
+            cacheList.add(Task(cacheIdCounter, params.task.content, ""))
             cacheIdCounter += 1L
             emit(SaveTaskUseCase.Result("Task saved"))
         }

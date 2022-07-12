@@ -2,21 +2,24 @@ package brillembourg.notes.simple.data.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import brillembourg.notes.simple.domain.models.Task
 
-@Entity(primaryKeys = ["id"])
+@Entity(tableName = "taskentity")
 data class TaskEntity(
-    @ColumnInfo(name = "id") val id: String,
+    @PrimaryKey(autoGenerate = true) var id: Long? = null,
     @ColumnInfo(name = "description") val content: String,
     @ColumnInfo(name = "date_created") val dateCreated: String
 )
 
 fun TaskEntity.toDomain(): Task {
-    return Task(id.toLong(), content, dateCreated)
+    if(id == null) throw IllegalArgumentException("id is null")
+    return Task(id!!, content, dateCreated)
 }
 
-fun TaskEntity.fromDomain(task: Task): TaskEntity =
+fun Task.toData(): TaskEntity =
     TaskEntity(
-        task.id.toString(),
-        task.content, task.date
+        id,
+        content,
+        date
     )

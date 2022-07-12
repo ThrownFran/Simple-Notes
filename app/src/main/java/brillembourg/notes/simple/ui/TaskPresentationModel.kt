@@ -6,3 +6,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class TaskPresentationModel (val id: Long, var content: String, val date: String): Parcelable
+
+fun TaskPresentationModel.toDomain (): Task {
+    return Task(id,content,date)
+}
