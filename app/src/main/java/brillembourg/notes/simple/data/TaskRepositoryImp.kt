@@ -13,12 +13,14 @@ import kotlinx.coroutines.flow.flow
 
 class TaskRepositoryImp(
     val cache: TaskCache,
-    val database: TaskDatabase
+    val database: TaskDatabase,
+    val dateProvider: DateProvider
 ) : TaskRepository {
 
     override fun createTask(params: CreateTaskUseCase.Params): Flow<CreateTaskUseCase.Result> {
         return flow {
-            val task = database.createTask(params.content).toDomain()
+            val dateCreated = dateProvider.getCurrentTime()
+            val task = database.createTask(params.content,dateCreated).toDomain()
             emit(CreateTaskUseCase.Result(task, "Task created"))
         }
     }

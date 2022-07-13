@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.CreateTaskUseCase
 import brillembourg.notes.simple.domain.use_cases.SaveTaskUseCase
 import brillembourg.notes.simple.ui.TaskPresentationModel
@@ -17,7 +18,8 @@ import javax.inject.Inject
 class DetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val saveTaskUseCase: SaveTaskUseCase,
-    private val createTaskUseCase: CreateTaskUseCase
+    private val createTaskUseCase: CreateTaskUseCase,
+    private val dateProvider: DateProvider
 ) : ViewModel() {
 
     private var currentTask: TaskPresentationModel? = null
@@ -57,7 +59,7 @@ class DetailViewModel @Inject constructor(
 
     private fun updateTask(task: TaskPresentationModel) {
         task.content = content
-        saveTaskUseCase.execute(SaveTaskUseCase.Params(task.toDomain()))
+        saveTaskUseCase.execute(SaveTaskUseCase.Params(task.toDomain(dateProvider)))
             .onEach { state.value = DetailState.TaskSaved(it.message) }
             .launchIn(viewModelScope)
     }

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.DeleteTaskUseCase
 import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
 import brillembourg.notes.simple.ui.SingleLiveEvent
@@ -17,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getTaskListUseCase: GetTaskListUseCase,
-    private val deleteTaskUseCase: DeleteTaskUseCase
+    private val deleteTaskUseCase: DeleteTaskUseCase,
+    private val dateProvider: DateProvider
 ) : ViewModel() {
 
     private val _state: MutableLiveData<HomeState> = MutableLiveData()
@@ -38,7 +40,7 @@ class HomeViewModel @Inject constructor(
                     TaskPresentationModel(
                         taskModel.id,
                         taskModel.content,
-                        taskModel.date
+                        dateProvider.formatTimeToLocalDate(taskModel.date)
                     )
                 })
             }

@@ -1,9 +1,7 @@
 package brillembourg.notes.simple.di
 
 import android.content.Context
-import brillembourg.notes.simple.data.TaskCache
-import brillembourg.notes.simple.data.TaskDatabase
-import brillembourg.notes.simple.data.TaskRepositoryImp
+import brillembourg.notes.simple.data.*
 import brillembourg.notes.simple.data.room.AppDatabase
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import dagger.Module
@@ -19,12 +17,16 @@ class AppModule {
 
     @Singleton
     @Provides
+    fun dateProvider(): DateProvider = DateProviderImp()
+
+    @Singleton
+    @Provides
     fun taskCache(): TaskCache = TaskCache()
 
     @Singleton
     @Provides
-    fun taskRepo(cache: TaskCache, database: TaskDatabase): TaskRepository =
-        TaskRepositoryImp(cache, database)
+    fun taskRepo(cache: TaskCache, database: TaskDatabase, dateProvider: DateProvider): TaskRepository =
+        TaskRepositoryImp(cache, database,dateProvider)
 
     @Singleton
     @Provides

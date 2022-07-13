@@ -11,8 +11,7 @@ class TaskDatabase(
     val roomDatabase: AppDatabase
 ) {
 
-    suspend fun createTask(content: String): TaskEntity {
-        val dateCreated = ""
+    suspend fun createTask(content: String, dateCreated: String): TaskEntity {
         return TaskEntity(null,content,dateCreated).run {
             id = roomDatabase.taskDao().create(this)
             this
