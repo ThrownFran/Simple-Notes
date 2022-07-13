@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class TaskRepositoryImp(
-    val cache: TaskCache,
     val database: TaskDatabase,
     val dateProvider: DateProvider
 ) : TaskRepository {
@@ -28,7 +27,7 @@ class TaskRepositoryImp(
     override fun deleteTask(params: DeleteTaskUseCase.Params): Flow<DeleteTaskUseCase.Result> {
         return flow {
             database.roomDatabase.taskDao().delete(params.id)
-            emit(DeleteTaskUseCase.Result("task deleted"))
+            emit(DeleteTaskUseCase.Result("Task deleted"))
         }
     }
 
@@ -42,7 +41,7 @@ class TaskRepositoryImp(
     override fun saveTask(params: SaveTaskUseCase.Params): Flow<SaveTaskUseCase.Result> {
         return flow {
             database.saveTask(params.task)
-            emit(SaveTaskUseCase.Result("task updated"))
+            emit(SaveTaskUseCase.Result("Task updated"))
         }
     }
 

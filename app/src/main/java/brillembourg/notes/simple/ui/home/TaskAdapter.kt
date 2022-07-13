@@ -44,6 +44,7 @@ class TaskAdapter(
 
         fun bind(task: TaskPresentationModel) {
             binding.taskTextContent.text = task.content
+            binding.taskTextDate.text = task.dateInLocal
         }
 
     }

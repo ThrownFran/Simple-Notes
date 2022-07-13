@@ -21,12 +21,8 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun taskCache(): TaskCache = TaskCache()
-
-    @Singleton
-    @Provides
-    fun taskRepo(cache: TaskCache, database: TaskDatabase, dateProvider: DateProvider): TaskRepository =
-        TaskRepositoryImp(cache, database,dateProvider)
+    fun taskRepo(database: TaskDatabase, dateProvider: DateProvider): TaskRepository =
+        TaskRepositoryImp(database,dateProvider)
 
     @Singleton
     @Provides

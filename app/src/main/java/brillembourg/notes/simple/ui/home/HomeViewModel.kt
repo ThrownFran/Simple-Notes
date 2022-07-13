@@ -30,7 +30,7 @@ class HomeViewModel @Inject constructor(
     //Observables
     val state : LiveData<HomeState> = _state
     val navigateToDetailEvent: LiveData<TaskPresentationModel> = _navigateToDetailEvent
-    val navigateToCreateEvent: SingleLiveEvent<Any> = _navigateToCreateEvent
+    val navigateToCreateEvent: LiveData<Any> = _navigateToCreateEvent
     val messageEvent: LiveData<String> = _messageEvent
 
     fun getTaskList() {
@@ -45,6 +45,7 @@ class HomeViewModel @Inject constructor(
                 })
             }
             .catch {
+                it.stackTrace
                 _state.value = HomeState.TaskListError("Error loading tasks")
             }
             .launchIn(viewModelScope)
