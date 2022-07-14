@@ -90,6 +90,7 @@ class HomeFragment : Fragment(), MenuProvider {
                 clickStaggeredLayout()
                 return true
             }
+
         }
         return false
     }

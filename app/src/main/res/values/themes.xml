@@ -14,5 +14,6 @@
         <!-- Customize your theme here. -->
         <item name="android:textColorPrimary">@color/black</item>
         <item name="android:textColorSecondary">@color/grey</item>
+        <item name="fontFamily">@font/mali_regular</item>
     </style>
 </resources>

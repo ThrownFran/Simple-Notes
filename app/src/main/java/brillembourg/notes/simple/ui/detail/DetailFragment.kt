@@ -2,13 +2,16 @@ package brillembourg.notes.simple.ui.detail
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.NavigationUI
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import brillembourg.notes.simple.ui.extras.showSoftKeyboard
@@ -25,22 +28,21 @@ class DetailFragment : Fragment() {
     private lateinit var binding: FragmentDetailBinding
     private val viewModel: DetailViewModel by viewModels()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setupBackPhysicalButtonListener()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         binding = FragmentDetailBinding.inflate(inflater,container,false)
         binding.viewmodel = viewModel
+        setHasOptionsMenu(true)
         return binding.root
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val onBackPressedCallback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                // Handle the back button event
-                viewModel.onBackPressed()
-            }
-        }
-        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
+    private fun clickBack() {
+        viewModel.onBackPressed()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -82,6 +84,27 @@ class DetailFragment : Fragment() {
 
     private fun setupContent(task: TaskPresentationModel) {
         binding.detailEdit.setText(task.content)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean
+    {
+        when(item.itemId) {
+            android.R.id.home -> {
+                clickBack()
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun setupBackPhysicalButtonListener() {
+        val onBackPressedCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // Handle the back button event
+                clickBack()
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 
 
