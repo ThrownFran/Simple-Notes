@@ -6,13 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
-import brillembourg.notes.simple.ui.TaskPresentationModel
-import brillembourg.notes.simple.ui.showSoftKeyboard
+import brillembourg.notes.simple.ui.models.TaskPresentationModel
+import brillembourg.notes.simple.ui.extras.showSoftKeyboard
 import dagger.hilt.android.AndroidEntryPoint
 
 

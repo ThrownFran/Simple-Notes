@@ -1,7 +1,7 @@
 package brillembourg.notes.simple.ui.detail
 
 import brillembourg.notes.simple.domain.models.Task
-import brillembourg.notes.simple.ui.TaskPresentationModel
+import brillembourg.notes.simple.ui.models.TaskPresentationModel
 
 sealed class DetailState {
 

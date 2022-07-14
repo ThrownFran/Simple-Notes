@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.ui
+package brillembourg.notes.simple.ui.extras
 
 import androidx.annotation.MainThread
 import androidx.lifecycle.LifecycleOwner

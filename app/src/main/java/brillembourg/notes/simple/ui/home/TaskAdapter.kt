@@ -1,11 +1,13 @@
 package brillembourg.notes.simple.ui.home
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.widget.FrameLayout
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemTaskBinding
-import brillembourg.notes.simple.domain.models.Task
-import brillembourg.notes.simple.ui.TaskPresentationModel
+import brillembourg.notes.simple.ui.models.TaskPresentationModel
 
 class TaskAdapter(
     val taskList: List<TaskPresentationModel>,
@@ -40,11 +42,38 @@ class TaskAdapter(
                 onLongClick.invoke(taskList[adapterPosition])
                 true
             }
+            correctImageHeight()
+        }
+
+        private fun correctImageHeight() {
+            val observer: ViewTreeObserver = binding.taskContraint.getViewTreeObserver()
+            observer.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    binding.taskContraint.viewTreeObserver.removeGlobalOnLayoutListener(this)
+                    //Your code
+                    val height = binding.taskContraint.measuredHeight
+                    binding.taskImageBackground.layoutParams =
+                        FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT, height +
+                                    pxFromDp(binding.taskContraint.context, 4f).toInt()
+                        )
+                }
+            })
         }
 
         fun bind(task: TaskPresentationModel) {
             binding.taskTextContent.text = task.content
             binding.taskTextDate.text = task.dateInLocal
+
+
+        }
+
+        fun dpFromPx(context: Context, px: Float): Float {
+            return px / context.getResources().getDisplayMetrics().density
+        }
+
+        fun pxFromDp(context: Context, dp: Float): Float {
+            return dp * context.getResources().getDisplayMetrics().density
         }
 
     }

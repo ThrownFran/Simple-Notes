@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.ui
+package brillembourg.notes.simple.ui.models
 
 import android.os.Parcelable
 import brillembourg.notes.simple.data.DateProvider

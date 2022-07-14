@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.ui
+package brillembourg.notes.simple.ui.extras
 
 import android.content.Context
 import android.view.View

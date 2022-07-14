@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.CreateTaskUseCase
 import brillembourg.notes.simple.domain.use_cases.SaveTaskUseCase
-import brillembourg.notes.simple.ui.TaskPresentationModel
-import brillembourg.notes.simple.ui.toDomain
+import brillembourg.notes.simple.ui.models.TaskPresentationModel
+import brillembourg.notes.simple.ui.models.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach

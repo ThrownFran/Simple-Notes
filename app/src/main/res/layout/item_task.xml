@@ -1,31 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp"
-    android:theme="@style/Theme.SimpleNotes"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="3dp"
+    android:layout_marginEnd="3dp"
+    android:layout_marginBottom="8dp">
 
-    <TextView
-        android:id="@+id/task_text_content"
-        android:layout_width="0dp"
+
+
+    <androidx.cardview.widget.CardView
+
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:text="Task content"
-        android:textColor="?android:textColorPrimary"
-        android:textSize="16sp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:cardUseCompatPadding="true"
+        app:cardCornerRadius="10dp">
 
-    <TextView
-        android:id="@+id/task_text_date"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textColor="?android:textColorSecondary"
-        android:text="Date created"
-        app:layout_constraintTop_toBottomOf="@id/task_text_content"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        <ImageView
+            android:id="@+id/task_image_background"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/background" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <brillembourg.notes.simple.ui.extras.RoundContraintLayout
+            android:id="@+id/task_contraint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:background="@color/white"
+            android:padding="6dp"
+            android:theme="@style/Theme.SimpleNotes">
+
+            <TextView
+                android:id="@+id/task_text_content"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Task content" />
+
+            <TextView
+                android:id="@+id/task_text_date"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Date created"
+                android:textColor="?android:textColorSecondary"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/task_text_content" />
+
+        </brillembourg.notes.simple.ui.extras.RoundContraintLayout>
+    </androidx.cardview.widget.CardView>
+
+</FrameLayout>
+
+
