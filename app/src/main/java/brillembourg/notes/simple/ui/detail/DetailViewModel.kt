@@ -25,10 +25,12 @@ class DetailViewModel @Inject constructor(
     private var currentTask: TaskPresentationModel? = null
     val state: MutableLiveData<DetailState> = MutableLiveData()
     private var content: String = ""
+    private var title: String? = null
 
     init {
         currentTask = DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).task
         currentTask?.let {
+            title = it.title
             content = it.content
             setupTaskToEdit(it)
         }
@@ -38,13 +40,21 @@ class DetailViewModel @Inject constructor(
         content = s.toString()
     }
 
+    fun onTitleChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+        title = s.toString()
+    }
+
     private fun setupTaskToEdit(taskPresentationModel: TaskPresentationModel) {
         state.value = DetailState.TaskLoaded(taskPresentationModel)
     }
 
     private fun createTask() {
-        createTaskUseCase.execute(CreateTaskUseCase.Params(content))
-            .onEach { state.value = DetailState.TaskSaved(it.message) }
+        createTaskUseCase.execute(
+            CreateTaskUseCase.Params(
+                content = content,
+                title = title
+            )
+        ).onEach { state.value = DetailState.TaskSaved(it.message) }
             .launchIn(viewModelScope)
     }
 
@@ -59,13 +69,14 @@ class DetailViewModel @Inject constructor(
 
     private fun updateTask(task: TaskPresentationModel) {
         task.content = content
+        task.title = title
         saveTaskUseCase.execute(SaveTaskUseCase.Params(task.toDomain(dateProvider)))
             .onEach { state.value = DetailState.TaskSaved(it.message) }
             .launchIn(viewModelScope)
     }
 
     fun onBackPressed() {
-        if (currentTask?.content == content) {
+        if (currentTask?.content == content && currentTask?.title == title) {
             state.value = DetailState.ExitWithoutSaving
             return
         }

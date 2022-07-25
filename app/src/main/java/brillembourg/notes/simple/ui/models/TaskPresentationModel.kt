@@ -6,8 +6,26 @@ import brillembourg.notes.simple.domain.models.Task
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class TaskPresentationModel (val id: Long, var content: String, val dateInLocal: String): Parcelable
+data class TaskPresentationModel(
+    val id: Long,
+    var title: String? = null,
+    var content: String,
+    val dateInLocal: String
+): Parcelable
 
 fun TaskPresentationModel.toDomain (dateProvider: DateProvider): Task {
-    return Task(id,content,dateProvider.formatLocalDateToTime(dateInLocal))
+    return Task(id,
+        title = title,
+        content = content,
+        date = dateProvider.formatLocalDateToTime(dateInLocal)
+    )
+}
+
+fun Task.toPresentation (dateProvider: DateProvider): TaskPresentationModel {
+    return TaskPresentationModel(
+        id = id,
+        title = title,
+        content = content,
+        dateInLocal = dateProvider.formatTimeToLocalDate(date)
+    )
 }

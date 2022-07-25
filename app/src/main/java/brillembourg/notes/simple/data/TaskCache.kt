@@ -11,16 +11,16 @@ import kotlinx.coroutines.flow.flow
 class TaskCache {
 
     val cacheList: MutableList<Task> = arrayListOf(
-        Task(1L, "Andrea Perez", ""),
-        Task(2L, "I love you", ""),
-        Task(3L, "from here to the moon", "")
+        Task(1L, content = "Andrea Perez", date = ""),
+        Task(2L, content = "I love you", date = ""),
+        Task(3L, content = "from here to the moon", date = "")
     )
 
     var cacheIdCounter: Long = 4L
 
     fun createTask(params: CreateTaskUseCase.Params): Flow<CreateTaskUseCase.Result> {
         return flow {
-            val task = Task(cacheIdCounter, params.content,"")
+            val task = Task(cacheIdCounter, content = params.content, date = "")
             cacheList.add(task)
             cacheIdCounter += 1L
             emit(CreateTaskUseCase.Result(task,"Task created"))
@@ -63,7 +63,7 @@ class TaskCache {
 
         //Create Task
         return flow {
-            cacheList.add(Task(cacheIdCounter, params.task.content, ""))
+            cacheList.add(Task(cacheIdCounter, content = params.task.content, date = ""))
             cacheIdCounter += 1L
             emit(SaveTaskUseCase.Result("Task saved"))
         }

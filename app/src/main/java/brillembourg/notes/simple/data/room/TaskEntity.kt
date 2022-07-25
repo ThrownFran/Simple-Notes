@@ -9,17 +9,24 @@ import brillembourg.notes.simple.domain.models.Task
 data class TaskEntity(
     @PrimaryKey(autoGenerate = true) var id: Long? = null,
     @ColumnInfo(name = "description") val content: String,
-    @ColumnInfo(name = "date_created") val dateCreated: String
+    @ColumnInfo(name = "date_created") val dateCreated: String,
+    @ColumnInfo(name = "title") val title: String? = null,
 )
 
 fun TaskEntity.toDomain(): Task {
-    if(id == null) throw IllegalArgumentException("id is null")
-    return Task(id!!, content, dateCreated)
+    if (id == null) throw IllegalArgumentException("id is null")
+    return Task(
+        id = id!!,
+        title = title,
+        content = content,
+        date = dateCreated
+    )
 }
 
 fun Task.toData(): TaskEntity =
     TaskEntity(
-        id,
-        content,
-        date
+        id = id,
+        title = title,
+        content = content,
+        dateCreated = date
     )

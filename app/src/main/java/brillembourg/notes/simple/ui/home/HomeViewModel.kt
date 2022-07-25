@@ -9,6 +9,7 @@ import brillembourg.notes.simple.domain.use_cases.DeleteTaskUseCase
 import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
 import brillembourg.notes.simple.ui.extras.SingleLiveEvent
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
+import brillembourg.notes.simple.ui.models.toPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
@@ -37,11 +38,7 @@ class HomeViewModel @Inject constructor(
         getTaskListUseCase.execute(GetTaskListUseCase.Params())
             .onEach {
                 _state.value = HomeState.TaskListSuccess(it.taskList.map { taskModel ->
-                    TaskPresentationModel(
-                        taskModel.id,
-                        taskModel.content,
-                        dateProvider.formatTimeToLocalDate(taskModel.date)
-                    )
+                    taskModel.toPresentation(dateProvider)
                 })
             }
             .catch {

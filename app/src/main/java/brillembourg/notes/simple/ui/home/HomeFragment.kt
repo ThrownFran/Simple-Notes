@@ -49,13 +49,6 @@ class HomeFragment : Fragment(), MenuProvider {
         viewModel.getTaskList()
     }
 
-//    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-//        super.onCreateOptionsMenu(menu, inflater)
-//        inflater.inflate(R.menu.menu_home,menu)
-//    }
-
-
-
     private fun setupMenu() {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
@@ -64,21 +57,6 @@ class HomeFragment : Fragment(), MenuProvider {
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.menu_home,menu)
     }
-
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        when (item.itemId) {
-//            R.id.menu_home_vertical -> {
-//                clickVerticalLayout()
-//                return true
-//            }
-//            R.id.menu_home_staggered -> {
-//                clickStaggeredLayout()
-//                return true
-//            }
-//        }
-//        return false
-//        return super.onOptionsItemSelected(item)
-//    }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {

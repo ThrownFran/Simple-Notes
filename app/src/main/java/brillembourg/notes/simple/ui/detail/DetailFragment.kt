@@ -9,9 +9,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.NavigationUI
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import brillembourg.notes.simple.ui.extras.showSoftKeyboard
@@ -48,6 +46,7 @@ class DetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupObservers()
+        focusKeyboard()
     }
 
     private fun setupObservers() {
@@ -58,8 +57,10 @@ class DetailFragment : Fragment() {
                 is DetailState.ExitWithoutSaving -> finishView()
             }
         }
+    }
 
-        binding.detailEdit.apply {
+    private fun focusKeyboard() {
+        binding.detailEditContent.apply {
             requestFocus()
             showSoftKeyboard()
         }
@@ -67,6 +68,11 @@ class DetailFragment : Fragment() {
 
     private fun onStateTaskLoaded(it: DetailState.TaskLoaded) {
         setupContent(it.task)
+        setupTitle(it.task.title)
+    }
+
+    private fun setupTitle(title: String?) {
+        binding.detailEditTitle.setText(title)
     }
 
     private fun onStateTaskSaved(it: DetailState.TaskSaved) {
@@ -83,7 +89,7 @@ class DetailFragment : Fragment() {
     }
 
     private fun setupContent(task: TaskPresentationModel) {
-        binding.detailEdit.setText(task.content)
+        binding.detailEditContent.setText(task.content)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean

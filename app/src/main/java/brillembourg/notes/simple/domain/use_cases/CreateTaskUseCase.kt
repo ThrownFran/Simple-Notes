@@ -11,7 +11,7 @@ class CreateTaskUseCase @Inject constructor(private val repository: TaskReposito
         return repository.createTask(params)
     }
 
-    class Params (val content: String)
+    class Params (val content: String, val title: String? = null)
     class Result (val task: Task,
                   val message: String)
 

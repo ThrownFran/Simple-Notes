@@ -35,15 +35,32 @@
             android:theme="@style/Theme.SimpleNotes">
 
             <TextView
+                android:id="@+id/task_text_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:textColor="?android:textColorPrimary"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Title of the Task that is long" />
+
+            <TextView
                 android:id="@+id/task_text_content"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="16sp"
+                android:layout_marginTop="4dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Task content" />
+                app:layout_constraintTop_toBottomOf="@+id/task_text_title"
+                tools:text="Lorem ipsum dolor sit amet. Hic sapiente architecto qui deleniti odio in similique delectus! Et dignissimos iste id corporis atque qui debitis harum.
+
+In nulla voluptas ut voluptatem modi qui consectetur quos. Ut sunt quibusdam non neque fuga aut explicabo recusandae 33 maiores expedita in quibusdam dolores aut laudantium itaque. Est cupiditate similique ut voluptate dolores et maiores doloribus eos internos porro ex quaerat fugit. Qui nobis molestias et soluta dolor aut modi quam 33 maiores rerum rem deserunt delectus et harum quaerat." />
 
             <TextView
                 android:id="@+id/task_text_date"

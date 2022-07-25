@@ -9,21 +9,32 @@
             type="brillembourg.notes.simple.ui.detail.DetailViewModel" />
     </data>
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:orientation="vertical"
         tools:context=".ui.detail.DetailFragment">
 
-
+        <EditText
+            android:id="@+id/detail_edit_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top"
+            android:textStyle="bold"
+            android:onTextChanged="@{viewmodel.onTitleChanged}"
+            android:hint="TITLE (Optional)"
+            android:inputType="textMultiLine" />
 
         <EditText
-            android:id="@+id/detail_edit"
+            android:id="@+id/detail_edit_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="top"
             android:onTextChanged="@{viewmodel.onTextChanged}"
-            tools:text="Hello"
+            tools:text="Typing here a Simple Note"
             android:inputType="textMultiLine" />
 
-    </FrameLayout>
+    </LinearLayout>
 </layout>

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemTaskBinding
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
@@ -37,12 +38,16 @@ class TaskAdapter(
     inner class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
 
         init {
+            setupClickListeners()
+            correctImageHeight()
+        }
+
+        private fun setupClickListeners() {
             binding.root.setOnClickListener { onClick.invoke(taskList[adapterPosition]) }
             binding.root.setOnLongClickListener {
                 onLongClick.invoke(taskList[adapterPosition])
                 true
             }
-            correctImageHeight()
         }
 
         private fun correctImageHeight() {
@@ -62,10 +67,21 @@ class TaskAdapter(
         }
 
         fun bind(task: TaskPresentationModel) {
+
+            bindTitle(task)
+
+
             binding.taskTextContent.text = task.content
             binding.taskTextDate.text = task.dateInLocal
 
 
+        }
+
+        private fun bindTitle(task: TaskPresentationModel) {
+            with(binding.taskTextTitle) {
+                isVisible = !task.title.isNullOrEmpty()
+                text = task.title
+            }
         }
 
         fun dpFromPx(context: Context, px: Float): Float {

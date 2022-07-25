@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 
 @Database(
-    entities = arrayOf(TaskEntity::class), version = 3
+    entities = arrayOf(TaskEntity::class), version = 4
 )
 abstract class AppDatabase : RoomDatabase() {
 

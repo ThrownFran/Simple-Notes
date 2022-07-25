@@ -19,7 +19,11 @@ class TaskRepositoryImp(
     override fun createTask(params: CreateTaskUseCase.Params): Flow<CreateTaskUseCase.Result> {
         return flow {
             val dateCreated = dateProvider.getCurrentTime()
-            val task = database.createTask(params.content,dateCreated).toDomain()
+            val task = database.createTask(
+                title = params.title,
+                content = params.content,
+                dateCreated = dateCreated
+            ).toDomain()
             emit(CreateTaskUseCase.Result(task, "Task created"))
         }
     }
