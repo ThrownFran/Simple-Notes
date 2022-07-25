@@ -58,14 +58,23 @@ class HomeFragment : Fragment(), MenuProvider {
         menuInflater.inflate(R.menu.menu_home,menu)
     }
 
+    override fun onPrepareMenu(menu: Menu) {
+        super.onPrepareMenu(menu)
+        menu.findItem(R.id.menu_home_vertical).apply { isVisible = isStaggered }
+        menu.findItem(R.id.menu_home_staggered).apply { isVisible = !isStaggered }
+    }
+
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        val menuHost = requireActivity()
         when (menuItem.itemId) {
             R.id.menu_home_vertical -> {
                 clickVerticalLayout()
+                menuHost.invalidateMenu()
                 return true
             }
             R.id.menu_home_staggered -> {
                 clickStaggeredLayout()
+                menuHost.invalidateMenu()
                 return true
             }
 

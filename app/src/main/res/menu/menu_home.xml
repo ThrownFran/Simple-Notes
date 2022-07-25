@@ -2,11 +2,11 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/menu_home_vertical"
-        android:icon="@android:drawable/ic_media_pause"
+        android:icon="@drawable/ic_baseline_table_rows_24"
         android:title="Vertical"
         app:showAsAction="ifRoom" />
     <item android:id="@+id/menu_home_staggered"
-        android:icon="@android:drawable/ic_media_play"
+        android:icon="@drawable/ic_baseline_dashboard_24"
         android:title="Staggered"
         app:showAsAction="ifRoom"/>
 </menu>

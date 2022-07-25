@@ -49,6 +49,12 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun createTask() {
+
+        if(title.isNullOrEmpty() && content.isNullOrEmpty()) {
+            state.value = DetailState.ExitWithoutSaving
+            return
+        }
+
         createTaskUseCase.execute(
             CreateTaskUseCase.Params(
                 content = content,

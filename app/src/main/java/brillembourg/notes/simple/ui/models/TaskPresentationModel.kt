@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class TaskPresentationModel(
-    val id: Long,
+    val id: Long = -1L,
     var title: String? = null,
     var content: String,
     val dateInLocal: String
@@ -20,6 +20,8 @@ fun TaskPresentationModel.toDomain (dateProvider: DateProvider): Task {
         date = dateProvider.formatLocalDateToTime(dateInLocal)
     )
 }
+
+fun TaskPresentationModel.isEmptyTask() = title.isNullOrEmpty() && content.isEmpty()
 
 fun Task.toPresentation (dateProvider: DateProvider): TaskPresentationModel {
     return TaskPresentationModel(
