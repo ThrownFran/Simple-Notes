@@ -13,19 +13,20 @@ interface DateProvider {
 
 class DateProviderImp : DateProvider {
 
-    private val PATTERN = "dd-MM-yyyy HH:mm:ss"
+    private val dateFormat = "dd-MM-yyyy HH:mm:ss"
 
     override fun getCurrentTime(): String = Instant.now().toString()
 
     override fun formatTimeToLocalDate(currentTime: String): String {
         val instant = Instant.parse(currentTime)
         val localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
-        return localDateTime.format(DateTimeFormatter.ofPattern(PATTERN))
+        return localDateTime.format(DateTimeFormatter.ofPattern(dateFormat))
     }
 
     override fun formatLocalDateToTime(localDate: String): String {
-        val formatter = DateTimeFormatter.ofPattern(PATTERN)
-        val instant = LocalDateTime.parse(localDate,formatter).atZone(ZoneId.systemDefault()).toInstant()
+        val formatter = DateTimeFormatter.ofPattern(dateFormat)
+        val instant =
+            LocalDateTime.parse(localDate, formatter).atZone(ZoneId.systemDefault()).toInstant()
         return instant.toString()
     }
 
