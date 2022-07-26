@@ -11,18 +11,37 @@ class TaskDatabase(
     val roomDatabase: AppDatabase
 ) {
 
-    suspend fun createTask(content: String, dateCreated: String, title: String? = null): TaskEntity {
-        return TaskEntity(null, content, dateCreated, title).run {
+    suspend fun createTask(
+        content: String,
+        dateCreated: String,
+        title: String? = null
+    ): TaskEntity {
+
+        val lastOrderPosition = calculateLastOrderPosition()
+        val nextOrderPosition = lastOrderPosition + 1
+
+        return TaskEntity(null, content, dateCreated, title, nextOrderPosition).run {
             id = roomDatabase.taskDao().create(this)
             this
         }
     }
 
-    suspend fun saveTask (task: Task) {
+    private suspend fun calculateLastOrderPosition(): Int {
+        val taskList = getTaskList()
+        var lastOrderPosition = 0
+        taskList.forEach {
+            if (it.order > lastOrderPosition) {
+                lastOrderPosition = it.order
+            }
+        }
+        return lastOrderPosition
+    }
+
+    suspend fun saveTask(task: Task) {
         roomDatabase.taskDao().save(task.toData())
     }
 
-    suspend fun getTaskList() : List<TaskEntity> {
+    suspend fun getTaskList(): List<TaskEntity> {
         return roomDatabase.taskDao().getList()
     }
 

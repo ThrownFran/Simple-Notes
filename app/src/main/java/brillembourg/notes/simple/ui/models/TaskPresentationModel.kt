@@ -10,24 +10,26 @@ data class TaskPresentationModel(
     val id: Long = -1L,
     var title: String? = null,
     var content: String,
-    val dateInLocal: String
+    val dateInLocal: String,
+    val order: Int
 ): Parcelable
 
 fun TaskPresentationModel.toDomain (dateProvider: DateProvider): Task {
-    return Task(id,
+    return Task(
+        id,
         title = title,
         content = content,
+        order = order,
         date = dateProvider.formatLocalDateToTime(dateInLocal)
     )
 }
-
-fun TaskPresentationModel.isEmptyTask() = title.isNullOrEmpty() && content.isEmpty()
 
 fun Task.toPresentation (dateProvider: DateProvider): TaskPresentationModel {
     return TaskPresentationModel(
         id = id,
         title = title,
         content = content,
+        order = order,
         dateInLocal = dateProvider.formatTimeToLocalDate(date)
     )
 }

@@ -1,13 +1,11 @@
 package brillembourg.notes.simple.data
 
 import brillembourg.notes.simple.data.room.toDomain
-import brillembourg.notes.simple.domain.models.Task
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import brillembourg.notes.simple.domain.use_cases.CreateTaskUseCase
 import brillembourg.notes.simple.domain.use_cases.DeleteTaskUseCase
 import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
 import brillembourg.notes.simple.domain.use_cases.SaveTaskUseCase
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -30,7 +28,7 @@ class TaskRepositoryImp(
 
     override fun deleteTask(params: DeleteTaskUseCase.Params): Flow<DeleteTaskUseCase.Result> {
         return flow {
-            database.roomDatabase.taskDao().delete(params.id)
+            database.deleteTask(params.id)
             emit(DeleteTaskUseCase.Result("Task deleted"))
         }
     }

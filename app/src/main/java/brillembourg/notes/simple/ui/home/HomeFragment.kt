@@ -55,7 +55,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        menuInflater.inflate(R.menu.menu_home,menu)
+        menuInflater.inflate(R.menu.menu_home, menu)
     }
 
     override fun onPrepareMenu(menu: Menu) {
@@ -77,7 +77,6 @@ class HomeFragment : Fragment(), MenuProvider {
                 menuHost.invalidateMenu()
                 return true
             }
-
         }
         return false
     }
@@ -85,27 +84,11 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun clickStaggeredLayout() {
         viewModel.getTaskList()
         isStaggered = true
-//        binding.homeRecycler.apply {
-//            layoutManager = buildStaggeredManager().also { layoutManager ->
-//                retrieveRecyclerStateIfApplies(layoutManager)
-//            }
-//            adapter?.notifyDataSetChanged()
-//            viewModel.getTaskList()
-//            isStaggered = true
-//        }
     }
 
     private fun clickVerticalLayout() {
         viewModel.getTaskList()
         isStaggered = false
-//        binding.homeRecycler.apply {
-//            layoutManager = buildLinearManager().also { layoutManager ->
-//                retrieveRecyclerStateIfApplies(layoutManager)
-//            }
-//            adapter?.notifyDataSetChanged()
-//            viewModel.getTaskList()
-//            isStaggered = false
-//        }
     }
 
     private fun RecyclerView.buildLinearManager() =
@@ -166,20 +149,20 @@ class HomeFragment : Fragment(), MenuProvider {
             adapter = TaskAdapter(it.taskList,
                 onLongClick = {
                     viewModel.longClick(it)
-                }, onClick = {
+                },
+                onClick = {
                     viewModel.clickItem(it)
                 })
-            layoutManager = if(isStaggered) buildStaggeredManager() else buildLinearManager().also { layoutManager ->
-                retrieveRecyclerStateIfApplies(layoutManager)
-            }
 
-//            layoutManager = LinearLayoutManager(context).also { layoutManager ->
-//                retrieveRecyclerStateIfApplies(layoutManager)
-//            }
+            layoutManager =
+                if (isStaggered) buildStaggeredManager() else buildLinearManager().also { layoutManager ->
+                    retrieveRecyclerStateIfApplies(layoutManager)
+                }
         }
     }
 
-    private fun RecyclerView.buildStaggeredManager() = StaggeredGridLayoutManager(2, RecyclerView.VERTICAL)
+    private fun buildStaggeredManager() =
+        StaggeredGridLayoutManager(2, RecyclerView.VERTICAL)
 
     private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {
         recylerViewState?.let { layoutManager.onRestoreInstanceState(it) }

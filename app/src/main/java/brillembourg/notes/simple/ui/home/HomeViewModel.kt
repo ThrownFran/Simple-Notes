@@ -29,7 +29,7 @@ class HomeViewModel @Inject constructor(
     private val _messageEvent: SingleLiveEvent<String> = SingleLiveEvent()
 
     //Observables
-    val state : LiveData<HomeState> = _state
+    val state: LiveData<HomeState> = _state
     val navigateToDetailEvent: LiveData<TaskPresentationModel> = _navigateToDetailEvent
     val navigateToCreateEvent: LiveData<Any> = _navigateToCreateEvent
     val messageEvent: LiveData<String> = _messageEvent
@@ -37,9 +37,14 @@ class HomeViewModel @Inject constructor(
     fun getTaskList() {
         getTaskListUseCase.execute(GetTaskListUseCase.Params())
             .onEach {
-                _state.value = HomeState.TaskListSuccess(it.taskList.map { taskModel ->
-                    taskModel.toPresentation(dateProvider)
-                })
+                _state.value = HomeState.TaskListSuccess(
+                    it.taskList
+                        .map { taskModel ->
+                            taskModel.toPresentation(dateProvider)
+                        }.sortedBy { taskPresentationModel ->
+                            taskPresentationModel.order
+                        }.asReversed()
+                )
             }
             .catch {
                 it.stackTrace

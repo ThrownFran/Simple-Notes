@@ -11,6 +11,7 @@ data class TaskEntity(
     @ColumnInfo(name = "description") val content: String,
     @ColumnInfo(name = "date_created") val dateCreated: String,
     @ColumnInfo(name = "title") val title: String? = null,
+    @ColumnInfo(name = "order") val order: Int
 )
 
 fun TaskEntity.toDomain(): Task {
@@ -19,6 +20,7 @@ fun TaskEntity.toDomain(): Task {
         id = id!!,
         title = title,
         content = content,
+        order = order,
         date = dateCreated
     )
 }
@@ -28,5 +30,6 @@ fun Task.toData(): TaskEntity =
         id = id,
         title = title,
         content = content,
+        order = order,
         dateCreated = date
     )
