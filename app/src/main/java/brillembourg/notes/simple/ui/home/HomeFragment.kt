@@ -46,7 +46,7 @@ class HomeFragment : Fragment(), MenuProvider {
         super.onViewCreated(view, savedInstanceState)
         setupMenu()
         setupObservers()
-        viewModel.getTaskList()
+//        viewModel.getTaskList()
     }
 
     private fun setupMenu() {
@@ -82,16 +82,20 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun clickStaggeredLayout() {
-        viewModel.getTaskList()
+        binding.homeRecycler.apply {
+            layoutManager = buildStaggeredManager()
+        }
         isStaggered = true
     }
 
     private fun clickVerticalLayout() {
-        viewModel.getTaskList()
+        binding.homeRecycler.apply {
+            layoutManager = buildLinearManager()
+        }
         isStaggered = false
     }
 
-    private fun RecyclerView.buildLinearManager() =
+    private fun buildLinearManager() =
         LinearLayoutManager(context)
 
 
@@ -114,11 +118,8 @@ class HomeFragment : Fragment(), MenuProvider {
                 is HomeState.Loading -> {
 
                 }
-                is HomeState.TaskListError -> {
+                is HomeState.ShowError -> {
                     showMessage(it.message)
-                }
-                is HomeState.TaskListSuccess -> {
-                    setupTaskList(it)
                 }
             }
         }
@@ -126,6 +127,19 @@ class HomeFragment : Fragment(), MenuProvider {
         viewModel.messageEvent.observe(viewLifecycleOwner) {
             showMessage(it)
         }
+
+        viewModel.observeTaskList().observe(viewLifecycleOwner) {
+            setupTaskList(it)
+        }
+
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.observeTaskList().collect {
+//                setupTaskList(it)
+////                it.toString()
+////                val adapter = binding.homeRecycler.adapter as TaskAdapter?
+////                adapter?.submitList(it)
+//            }
+//        }
     }
 
     private fun showMessage(message: String) {
@@ -144,21 +158,31 @@ class HomeFragment : Fragment(), MenuProvider {
         findNavController().navigate(directions)
     }
 
-    private fun setupTaskList(it: HomeState.TaskListSuccess) {
-        binding.homeRecycler.apply {
-            adapter = TaskAdapter(it.taskList,
-                onLongClick = {
-                    viewModel.longClick(it)
-                },
-                onClick = {
-                    viewModel.clickItem(it)
-                })
+    private fun setupTaskList(taskList: List<TaskPresentationModel>) {
+        if (binding.homeRecycler.adapter == null) {
+            binding.homeRecycler.apply {
 
-            layoutManager =
-                if (isStaggered) buildStaggeredManager() else buildLinearManager().also { layoutManager ->
-                    retrieveRecyclerStateIfApplies(layoutManager)
-                }
+                layoutManager =
+                    if (isStaggered) buildStaggeredManager() else buildLinearManager()
+                        .also { layoutManager ->
+                            retrieveRecyclerStateIfApplies(layoutManager)
+                        }
+
+                adapter = TaskAdapter(
+                    onLongClick = {
+                        viewModel.longClick(it)
+                    },
+                    onClick = {
+                        viewModel.clickItem(it)
+                    })
+                    .also {
+                        it.submitList(taskList)
+                    }
+            }
+        } else {
+            (binding.homeRecycler.adapter as TaskAdapter).submitList(taskList)
         }
+
     }
 
     private fun buildStaggeredManager() =

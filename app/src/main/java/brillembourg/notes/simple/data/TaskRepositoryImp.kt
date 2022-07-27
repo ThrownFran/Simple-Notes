@@ -8,6 +8,7 @@ import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
 import brillembourg.notes.simple.domain.use_cases.SaveTaskUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.transform
 
 class TaskRepositoryImp(
     val database: TaskDatabase,
@@ -34,10 +35,16 @@ class TaskRepositoryImp(
     }
 
     override fun getTaskList(params: GetTaskListUseCase.Params): Flow<GetTaskListUseCase.Result> {
-        return flow {
-            val taskList = database.getTaskList().map { it.toDomain() }
-            emit(GetTaskListUseCase.Result(taskList))
-        }
+        return database.getTaskList()
+            .transform {
+                emit(GetTaskListUseCase.Result(
+                    it.map { taskEntity -> taskEntity.toDomain() }
+                ))
+            }
+//        return flow {
+//            val taskList = database.getTaskList().map { it.toDomain() }
+//            emit(GetTaskListUseCase.Result(taskList))
+//        }
     }
 
     override fun saveTask(params: SaveTaskUseCase.Params): Flow<SaveTaskUseCase.Result> {

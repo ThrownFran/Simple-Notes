@@ -5,6 +5,7 @@ import brillembourg.notes.simple.data.room.AppDatabase
 import brillembourg.notes.simple.data.room.TaskEntity
 import brillembourg.notes.simple.data.room.toData
 import brillembourg.notes.simple.domain.models.Task
+import kotlinx.coroutines.flow.Flow
 
 class TaskDatabase(
     val context: Context,
@@ -27,7 +28,7 @@ class TaskDatabase(
     }
 
     private suspend fun calculateLastOrderPosition(): Int {
-        val taskList = getTaskList()
+        val taskList = roomDatabase.taskDao().getListAsSuspend()
         var lastOrderPosition = 0
         taskList.forEach {
             if (it.order > lastOrderPosition) {
@@ -41,7 +42,7 @@ class TaskDatabase(
         roomDatabase.taskDao().save(task.toData())
     }
 
-    suspend fun getTaskList(): List<TaskEntity> {
+    fun getTaskList(): Flow<List<TaskEntity>> {
         return roomDatabase.taskDao().getList()
     }
 
