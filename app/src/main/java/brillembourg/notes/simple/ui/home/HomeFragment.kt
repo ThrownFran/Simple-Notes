@@ -82,17 +82,23 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun clickStaggeredLayout() {
+        isStaggered = true
+//        val taskList = (binding.homeRecycler.adapter as TaskAdapter?)?.currentList
+//        taskList?.let { binding.homeRecycler.buildAdapter(it) }
         binding.homeRecycler.apply {
             layoutManager = buildStaggeredManager()
+            adapter?.notifyDataSetChanged()
         }
-        isStaggered = true
     }
 
     private fun clickVerticalLayout() {
+        isStaggered = false
+//        val taskList = (binding.homeRecycler.adapter as TaskAdapter?)?.currentList
+//        taskList?.let { binding.homeRecycler.buildAdapter(it) }
         binding.homeRecycler.apply {
             layoutManager = buildLinearManager()
+            adapter?.notifyDataSetChanged()
         }
-        isStaggered = false
     }
 
     private fun buildLinearManager() =
@@ -161,28 +167,31 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun setupTaskList(taskList: List<TaskPresentationModel>) {
         if (binding.homeRecycler.adapter == null) {
             binding.homeRecycler.apply {
-
-                layoutManager =
-                    if (isStaggered) buildStaggeredManager() else buildLinearManager()
-                        .also { layoutManager ->
-                            retrieveRecyclerStateIfApplies(layoutManager)
-                        }
-
-                adapter = TaskAdapter(
-                    onLongClick = {
-                        viewModel.longClick(it)
-                    },
-                    onClick = {
-                        viewModel.clickItem(it)
-                    })
-                    .also {
-                        it.submitList(taskList)
-                    }
+                buildAdapter(taskList)
             }
         } else {
             (binding.homeRecycler.adapter as TaskAdapter).submitList(taskList)
         }
 
+    }
+
+    private fun RecyclerView.buildAdapter(taskList: List<TaskPresentationModel>) {
+        layoutManager =
+            if (isStaggered) buildStaggeredManager() else buildLinearManager()
+                .also { layoutManager ->
+                    retrieveRecyclerStateIfApplies(layoutManager)
+                }
+
+        adapter = TaskAdapter(
+            onLongClick = {
+                viewModel.longClick(it)
+            },
+            onClick = {
+                viewModel.clickItem(it)
+            })
+            .also {
+                it.submitList(taskList)
+            }
     }
 
     private fun buildStaggeredManager() =
