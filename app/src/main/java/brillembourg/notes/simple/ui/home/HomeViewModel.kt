@@ -4,8 +4,10 @@ import androidx.lifecycle.*
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.DeleteTaskUseCase
 import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
+import brillembourg.notes.simple.domain.use_cases.SaveTaskListUseCase
 import brillembourg.notes.simple.ui.extras.SingleLiveEvent
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
+import brillembourg.notes.simple.ui.models.toDomain
 import brillembourg.notes.simple.ui.models.toPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
@@ -18,6 +20,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getTaskListUseCase: GetTaskListUseCase,
     private val deleteTaskUseCase: DeleteTaskUseCase,
+    private val saveTaskListUseCase: SaveTaskListUseCase,
     private val dateProvider: DateProvider
 ) : ViewModel() {
 
@@ -39,7 +42,7 @@ class HomeViewModel @Inject constructor(
                 .sortedBy { taskPresentationModel ->
                     taskPresentationModel.order
                 }
-                .asReversed()
+//                .asReversed()
         }
         .catch {
             it.stackTrace
@@ -66,6 +69,15 @@ class HomeViewModel @Inject constructor(
 ////            .launchIn(viewModelScope)
 //    }
 
+    fun reorderList(it: List<TaskPresentationModel>) {
+        saveTaskListUseCase.execute(
+            SaveTaskListUseCase.Params(
+                it.map { taskPresentationModel -> taskPresentationModel.toDomain(dateProvider) }
+            )
+        )
+            .launchIn(viewModelScope)
+    }
+
     fun clickItem(it: TaskPresentationModel) {
         _navigateToDetailEvent.value = it
     }
@@ -90,5 +102,6 @@ class HomeViewModel @Inject constructor(
     private fun showMessage(message: String) {
         _messageEvent.value = message
     }
+
 
 }

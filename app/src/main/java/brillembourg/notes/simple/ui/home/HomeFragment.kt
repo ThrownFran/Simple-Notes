@@ -188,8 +188,12 @@ class HomeFragment : Fragment(), MenuProvider {
             },
             onClick = {
                 viewModel.clickItem(it)
+            },
+            onReorder = {
+                viewModel.reorderList(it)
             })
             .also {
+                it.itemTouchHelper.attachToRecyclerView(this)
                 it.submitList(taskList)
             }
     }

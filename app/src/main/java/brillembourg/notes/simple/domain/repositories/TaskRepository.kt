@@ -1,9 +1,6 @@
 package brillembourg.notes.simple.domain.repositories
 
-import brillembourg.notes.simple.domain.use_cases.CreateTaskUseCase
-import brillembourg.notes.simple.domain.use_cases.DeleteTaskUseCase
-import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
-import brillembourg.notes.simple.domain.use_cases.SaveTaskUseCase
+import brillembourg.notes.simple.domain.use_cases.*
 import kotlinx.coroutines.flow.Flow
 
 interface TaskRepository {
@@ -11,4 +8,5 @@ interface TaskRepository {
     fun deleteTask(params: DeleteTaskUseCase.Params): Flow<DeleteTaskUseCase.Result>
     fun getTaskList(params: GetTaskListUseCase.Params): Flow<GetTaskListUseCase.Result>
     fun saveTask(params: SaveTaskUseCase.Params): Flow<SaveTaskUseCase.Result>
+    fun saveTaskList(params: SaveTaskListUseCase.Params): Flow<SaveTaskListUseCase.Result>
 }

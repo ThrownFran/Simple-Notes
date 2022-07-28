@@ -2,11 +2,9 @@ package brillembourg.notes.simple.data
 
 import brillembourg.notes.simple.data.room.toDomain
 import brillembourg.notes.simple.domain.repositories.TaskRepository
-import brillembourg.notes.simple.domain.use_cases.CreateTaskUseCase
-import brillembourg.notes.simple.domain.use_cases.DeleteTaskUseCase
-import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
-import brillembourg.notes.simple.domain.use_cases.SaveTaskUseCase
+import brillembourg.notes.simple.domain.use_cases.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.transform
 
@@ -36,6 +34,7 @@ class TaskRepositoryImp(
 
     override fun getTaskList(params: GetTaskListUseCase.Params): Flow<GetTaskListUseCase.Result> {
         return database.getTaskList()
+            .debounce(200)
             .transform {
                 emit(GetTaskListUseCase.Result(
                     it.map { taskEntity -> taskEntity.toDomain() }
@@ -54,4 +53,12 @@ class TaskRepositoryImp(
         }
     }
 
+    override fun saveTaskList(params: SaveTaskListUseCase.Params): Flow<SaveTaskListUseCase.Result> {
+        return flow {
+            params.taskList.forEach {
+                database.saveTask(it)
+            }
+            emit(SaveTaskListUseCase.Result("Tasks saved"))
+        }
+    }
 }
