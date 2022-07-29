@@ -6,17 +6,17 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
+import androidx.annotation.Nullable
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.*
 import androidx.recyclerview.widget.ItemTouchHelper.*
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemTaskBinding
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import java.util.*
 
+
 class TaskAdapter(
+    val recyclerView: RecyclerView,
     val onClick: (TaskPresentationModel) -> Unit,
     val onLongClick: (TaskPresentationModel) -> Unit,
     val onReorder: (List<TaskPresentationModel>) -> Unit
@@ -36,6 +36,7 @@ class TaskAdapter(
                     val fromPosition = viewHolder.adapterPosition
                     val toPosition = target.adapterPosition
                     recyclerviewAdapter.moveItem(fromPosition, toPosition)
+//                    submitList(dragAndDrogList)
                     recyclerviewAdapter.notifyItemMoved(fromPosition, toPosition)
                     return true
                 }
@@ -49,18 +50,36 @@ class TaskAdapter(
                     viewHolder: RecyclerView.ViewHolder
                 ) {
                     super.clearView(recyclerView, viewHolder)
-                    val recyclerviewAdapter = recyclerView.adapter as TaskAdapter
+                    if (dragAndDrogList == null) return
                     dragAndDrogList?.forEachIndexed { index, taskPresentationModel ->
                         //            taskPresentationModel.order = size - index
                         taskPresentationModel.order = index + 1
                     }
 
+                    recyclerView.itemAnimator = null
+                    submitList(null)
+                    submitList(dragAndDrogList) {
+                        recyclerView.post {
+                            recyclerView.itemAnimator = DefaultItemAnimator()
+                        }
+                    }
+
                     dragAndDrogList?.let { onReorder.invoke(it) }
-//                    submitList(ArrayList())
-//                    submitList(dragAndDrogList)
-//                    dragAndDrogList = null
-//                    recyclerView.itemAnimator = null
-//                    recyclerviewAdapter.notifyDataSetChanged()
+                    dragAndDrogList = null
+                }
+
+                override fun onSelectedChanged(
+                    @Nullable viewHolder: RecyclerView.ViewHolder?,
+                    actionState: Int
+                ) {
+                    when (actionState) {
+                        ACTION_STATE_DRAG -> {}                // the user is dragging an item and didn't lift their finger off yet
+                        ACTION_STATE_SWIPE -> {}                   // the user is swiping an item and didn't lift their finger off yet
+                        ACTION_STATE_IDLE -> {
+                            // the user just dropped the item (after dragging it), and lift their finger off.
+                            Log.e("ITEM TOUCH HELPER", "IDLE")
+                        }
+                    }
                 }
             }
         ItemTouchHelper(itemTouchCallback)
@@ -104,21 +123,9 @@ class TaskAdapter(
         if (dragAndDrogList == null) {
             dragAndDrogList = currentList.toMutableList()
         }
-//        val list = currentList.toMutableList()
-//        val fromItem = list[fromPosition]
-//        list.removeAt(fromPosition)
-//        list.add(toPosition, fromItem)
-//        if (toPosition < fromPosition) {
-//            list.add(toPosition + 1 , fromItem)
-//        } else {
-//            list.add(toPosition - 1, fromItem)
-//        }
         dragAndDrogList?.let { Collections.swap(it, fromPosition, toPosition) };
         Log.e("ERROR", "SWAPPING $fromPosition to $toPosition")
         Log.e("Current list", dragAndDrogList.toString())
-//        val size = list.size
-
-//        dragAndDrogList = list
     }
 
 
@@ -132,8 +139,16 @@ class TaskAdapter(
         private fun setupClickListeners() {
             binding.root.setOnClickListener { onClick.invoke(getItem(adapterPosition)) }
             binding.root.setOnLongClickListener {
+//                itemTouchHelper.startDrag(this)
+                itemTouchHelper.attachToRecyclerView(null)
+                Log.e("Adapter click position", adapterPosition.toString())
+                onLongClick.invoke(getItem(adapterPosition))
+                true
+            }
+
+            binding.taskTextContent.setOnLongClickListener {
+                itemTouchHelper.attachToRecyclerView(recyclerView)
                 itemTouchHelper.startDrag(this)
-//                onLongClick.invoke(getItem(adapterPosition))
                 true
             }
         }
@@ -158,8 +173,6 @@ class TaskAdapter(
             bindTitle(task)
             binding.taskTextContent.text = "${task.order}. ${task.content}"
             binding.taskTextDate.text = task.dateInLocal
-
-
         }
 
         private fun bindTitle(task: TaskPresentationModel) {

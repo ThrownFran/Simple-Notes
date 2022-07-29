@@ -182,7 +182,7 @@ class HomeFragment : Fragment(), MenuProvider {
                     retrieveRecyclerStateIfApplies(layoutManager)
                 }
 
-        adapter = TaskAdapter(
+        adapter = TaskAdapter(binding.homeRecycler,
             onLongClick = {
                 viewModel.longClick(it)
             },
@@ -193,8 +193,8 @@ class HomeFragment : Fragment(), MenuProvider {
                 viewModel.reorderList(it)
             })
             .also {
-                it.itemTouchHelper.attachToRecyclerView(this)
                 it.submitList(taskList)
+//                it.itemTouchHelper.attachToRecyclerView(this)
             }
     }
 
