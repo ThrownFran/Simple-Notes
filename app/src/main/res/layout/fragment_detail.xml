@@ -15,6 +15,7 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:orientation="vertical"
+        android:background="?colorSurface"
         tools:context=".ui.detail.DetailFragment">
 
         <EditText
