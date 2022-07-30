@@ -11,10 +11,7 @@ import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import brillembourg.notes.simple.ui.models.toDomain
 import brillembourg.notes.simple.ui.models.toPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,40 +33,20 @@ class HomeViewModel @Inject constructor(
     val navigateToCreateEvent: LiveData<Any> get() = _navigateToCreateEvent
     val messageEvent: LiveData<String> get() = _messageEvent
 
-    fun observeTaskList(): LiveData<List<TaskPresentationModel>> = getTaskListUseCase
+    fun observeTaskList(): LiveData<List<TaskPresentationModel>> = handleTaskListObservable()
+
+    private fun handleTaskListObservable() = getTaskListUseCase
         .execute(GetTaskListUseCase.Params())
         .map {
             Log.e("HomeViewModel updated list", it.taskList.toString())
             it.taskList.map { it.toPresentation(dateProvider) }
-                .sortedBy { taskPresentationModel ->
-                    taskPresentationModel.order
-                }
-//                .asReversed()
+                .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+            //                .asReversed()
         }
         .catch {
             it.stackTrace
             _state.value = HomeState.ShowError("Error loading tasks")
         }.asLiveData(viewModelScope.coroutineContext)
-
-//    fun getTaskList() {
-//        _state.value = HomeState.TaskListSuccess(ArrayList())
-////        getTaskListUseCase.execute(GetTaskListUseCase.Params())
-////            .onEach {
-////                _state.value = HomeState.TaskListSuccess(
-////                    it.taskList
-////                        .map { taskModel ->
-////                            taskModel.toPresentation(dateProvider)
-////                        }.sortedBy { taskPresentationModel ->
-////                            taskPresentationModel.order
-////                        }.asReversed()
-////                )
-////            }
-////            .catch {
-////                it.stackTrace
-////                _state.value = HomeState.TaskListError("Error loading tasks")
-////            }
-////            .launchIn(viewModelScope)
-//    }
 
     fun reorderList(it: List<TaskPresentationModel>) {
         saveTaskListUseCase.execute(
@@ -94,8 +71,8 @@ class HomeViewModel @Inject constructor(
 
     private fun deleteTask(it: TaskPresentationModel) {
         deleteTaskUseCase.execute(DeleteTaskUseCase.Params(it.id))
+            .debounce(400)
             .onEach {
-//                getTaskList()
                 showMessage(it.message)
             }
             .launchIn(viewModelScope)

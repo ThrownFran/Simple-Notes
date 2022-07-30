@@ -38,7 +38,6 @@ class HomeFragment : Fragment(), MenuProvider {
     ): View {
         binding = FragmentMainBinding.inflate(inflater, container, false)
         binding.viewmodel = viewModel
-//        setHasOptionsMenu(true)
         return binding.root
     }
 
@@ -46,7 +45,6 @@ class HomeFragment : Fragment(), MenuProvider {
         super.onViewCreated(view, savedInstanceState)
         setupMenu()
         setupObservers()
-//        viewModel.getTaskList()
     }
 
     private fun setupMenu() {

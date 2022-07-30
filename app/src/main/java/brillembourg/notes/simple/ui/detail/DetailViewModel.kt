@@ -50,7 +50,7 @@ class DetailViewModel @Inject constructor(
 
     private fun createTask() {
 
-        if(title.isNullOrEmpty() && content.isNullOrEmpty()) {
+        if (noTitleOrContent()) {
             state.value = DetailState.ExitWithoutSaving
             return
         }
@@ -64,14 +64,18 @@ class DetailViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    private fun noTitleOrContent() = title.isNullOrEmpty() && content.isNullOrEmpty()
+
     private fun saveTask() {
-        currentTask?.let { task ->
-            updateTask(task)
+        if (isEditing()) {
+            currentTask?.let { updateTask(it) }
             return
         }
 
         createTask()
     }
+
+    private fun isEditing(): Boolean = currentTask != null
 
     private fun updateTask(task: TaskPresentationModel) {
         task.content = content
@@ -82,11 +86,13 @@ class DetailViewModel @Inject constructor(
     }
 
     fun onBackPressed() {
-        if (currentTask?.content == content && currentTask?.title == title) {
+        if (hasNoChanges()) {
             state.value = DetailState.ExitWithoutSaving
             return
         }
         saveTask()
     }
+
+    private fun hasNoChanges() = currentTask?.content == content && currentTask?.title == title
 
 }

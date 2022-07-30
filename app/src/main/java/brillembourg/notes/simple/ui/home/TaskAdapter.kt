@@ -24,9 +24,107 @@ class TaskAdapter(
 
     var dragAndDrogList: List<TaskPresentationModel>? = null
 
-    val itemTouchHelper by lazy {
+    val itemTouchHelper by lazy { setupDragAndDropTouchHelper() }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder(
+            ItemTaskBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
+
+    inner class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            setupClickListeners()
+            correctImageHeight()
+        }
+
+        private fun setupClickListeners() {
+            binding.root.setOnClickListener { click() }
+            binding.root.setOnLongClickListener {
+                clickLong()
+                true
+            }
+
+            binding.root.setOnLongClickListener {
+                startDrag()
+                true
+            }
+        }
+
+        private fun click() {
+            onClick.invoke(getItem(adapterPosition))
+        }
+
+        private fun clickLong() {
+            itemTouchHelper.attachToRecyclerView(null)
+            onLongClick.invoke(getItem(adapterPosition))
+        }
+
+        private fun startDrag() {
+            itemTouchHelper.attachToRecyclerView(recyclerView)
+            itemTouchHelper.startDrag(this)
+        }
+
+        private fun correctImageHeight() {
+            val observer: ViewTreeObserver = binding.taskContraint.viewTreeObserver
+            observer.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    binding.taskContraint.viewTreeObserver.removeGlobalOnLayoutListener(this)
+                    //Your code
+                    val height = binding.taskContraint.measuredHeight
+                    binding.taskImageBackground.layoutParams =
+                        FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT, height +
+                                    pxFromDp(binding.taskContraint.context, 4f).toInt()
+                        )
+                }
+            })
+        }
+
+        fun bind(task: TaskPresentationModel) {
+            bindTitle(task)
+            binding.taskTextContent.text = "${task.order}. ${task.content}"
+            binding.taskTextDate.text = task.dateInLocal
+        }
+
+        private fun bindTitle(task: TaskPresentationModel) {
+            with(binding.taskTextTitle) {
+                isVisible = !task.title.isNullOrEmpty()
+                text = task.title
+            }
+        }
+
+        fun dpFromPx(context: Context, px: Float): Float {
+            return px / context.getResources().getDisplayMetrics().density
+        }
+
+        fun pxFromDp(context: Context, dp: Float): Float {
+            return dp * context.getResources().getDisplayMetrics().density
+        }
+
+    }
+
+    fun moveItem(fromPosition: Int, toPosition: Int) {
+        if (dragAndDrogList == null) {
+            dragAndDrogList = currentList.toMutableList()
+        }
+        dragAndDrogList?.let { Collections.swap(it, fromPosition, toPosition) };
+        Log.e("ERROR", "SWAPPING $fromPosition to $toPosition")
+        Log.e("Current list", dragAndDrogList.toString())
+    }
+
+    private fun setupDragAndDropTouchHelper(): ItemTouchHelper {
         val itemTouchCallback =
-            object : ItemTouchHelper.SimpleCallback(UP or DOWN or START or END, 0) {
+            object : SimpleCallback(UP or DOWN or START or END, 0) {
                 override fun onMove(
                     recyclerView: RecyclerView,
                     viewHolder: RecyclerView.ViewHolder,
@@ -36,7 +134,7 @@ class TaskAdapter(
                     val fromPosition = viewHolder.adapterPosition
                     val toPosition = target.adapterPosition
                     recyclerviewAdapter.moveItem(fromPosition, toPosition)
-//                    submitList(dragAndDrogList)
+                    //                    submitList(dragAndDrogList)
                     recyclerviewAdapter.notifyItemMoved(fromPosition, toPosition)
                     return true
                 }
@@ -82,17 +180,18 @@ class TaskAdapter(
                     }
                 }
             }
-        ItemTouchHelper(itemTouchCallback)
+        return ItemTouchHelper(itemTouchCallback)
     }
 
     companion object {
-        private val DiffCallback = object : DiffUtil.ItemCallback<TaskPresentationModel>() {
+        private val DiffCallback = setupDiffCallback()
+
+        private fun setupDiffCallback() = object : DiffUtil.ItemCallback<TaskPresentationModel>() {
             override fun areItemsTheSame(
                 oldItem: TaskPresentationModel,
                 newItem: TaskPresentationModel
             ): Boolean {
                 return oldItem.id == newItem.id
-//                        && oldItem.order == newItem.order
             }
 
             override fun areContentsTheSame(
@@ -104,92 +203,5 @@ class TaskAdapter(
         }
     }
 
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(
-            ItemTaskBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
-        )
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
-    }
-
-    fun moveItem(fromPosition: Int, toPosition: Int) {
-        if (dragAndDrogList == null) {
-            dragAndDrogList = currentList.toMutableList()
-        }
-        dragAndDrogList?.let { Collections.swap(it, fromPosition, toPosition) };
-        Log.e("ERROR", "SWAPPING $fromPosition to $toPosition")
-        Log.e("Current list", dragAndDrogList.toString())
-    }
-
-
-    inner class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
-
-        init {
-            setupClickListeners()
-            correctImageHeight()
-        }
-
-        private fun setupClickListeners() {
-            binding.root.setOnClickListener { onClick.invoke(getItem(adapterPosition)) }
-            binding.root.setOnLongClickListener {
-//                itemTouchHelper.startDrag(this)
-                itemTouchHelper.attachToRecyclerView(null)
-                Log.e("Adapter click position", adapterPosition.toString())
-                onLongClick.invoke(getItem(adapterPosition))
-                true
-            }
-
-            binding.taskTextContent.setOnLongClickListener {
-                itemTouchHelper.attachToRecyclerView(recyclerView)
-                itemTouchHelper.startDrag(this)
-                true
-            }
-        }
-
-        private fun correctImageHeight() {
-            val observer: ViewTreeObserver = binding.taskContraint.viewTreeObserver
-            observer.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    binding.taskContraint.viewTreeObserver.removeGlobalOnLayoutListener(this)
-                    //Your code
-                    val height = binding.taskContraint.measuredHeight
-                    binding.taskImageBackground.layoutParams =
-                        FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.MATCH_PARENT, height +
-                                    pxFromDp(binding.taskContraint.context, 4f).toInt()
-                        )
-                }
-            })
-        }
-
-        fun bind(task: TaskPresentationModel) {
-            bindTitle(task)
-            binding.taskTextContent.text = "${task.order}. ${task.content}"
-            binding.taskTextDate.text = task.dateInLocal
-        }
-
-        private fun bindTitle(task: TaskPresentationModel) {
-            with(binding.taskTextTitle) {
-                isVisible = !task.title.isNullOrEmpty()
-                text = task.title
-            }
-        }
-
-        fun dpFromPx(context: Context, px: Float): Float {
-            return px / context.getResources().getDisplayMetrics().density
-        }
-
-        fun pxFromDp(context: Context, dp: Float): Float {
-            return dp * context.getResources().getDisplayMetrics().density
-        }
-
-    }
 }
 
