@@ -2,20 +2,20 @@ package brillembourg.notes.simple.ui.home
 
 import android.content.Context
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import android.view.ViewTreeObserver
+import android.view.*
 import android.widget.FrameLayout
 import androidx.annotation.Nullable
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.*
 import androidx.recyclerview.widget.ItemTouchHelper.*
+import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.ItemTaskBinding
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import java.util.*
 
 
 class TaskAdapter(
+    val menuInflater: MenuInflater,
     val recyclerView: RecyclerView,
     val onClick: (TaskPresentationModel) -> Unit,
     val onLongClick: (TaskPresentationModel) -> Unit,
@@ -23,6 +23,7 @@ class TaskAdapter(
 ) : ListAdapter<TaskPresentationModel, TaskAdapter.ViewHolder>(DiffCallback) {
 
     var dragAndDrogList: List<TaskPresentationModel>? = null
+    var currentPosition: Int? = null
 
     val itemTouchHelper by lazy { setupDragAndDropTouchHelper() }
 
@@ -40,23 +41,42 @@ class TaskAdapter(
         holder.bind(getItem(position))
     }
 
-    inner class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root),
+        View.OnCreateContextMenuListener {
 
         init {
             setupClickListeners()
             correctImageHeight()
+//            val fragment: Fragment? = itemView.context as? Fragment
+//            fragment?.registerForContextMenu(itemView)
+            itemView.setOnCreateContextMenuListener(this)
+
+
+        }
+
+        override fun onCreateContextMenu(
+            menu: ContextMenu?,
+            p1: View?,
+            p2: ContextMenu.ContextMenuInfo?
+        ) {
+//            menu?.setHeaderTitle("Select The Action");
+//            val inflater: MenuInflater? = (itemView.context as ViewComponentManager.FragmentContextWrapper?)?
+            menuInflater.inflate(R.menu.context_menu, menu)
+//            menu?.add(0, 1, 0, "Call");//groupId, itemId, order, title
+//            menu?.add(0, 2, 1, "SMS");
         }
 
         private fun setupClickListeners() {
             binding.root.setOnClickListener { click() }
-            binding.root.setOnLongClickListener {
-                clickLong()
-                true
-            }
+//            binding.root.setOnLongClickListener {
+//                clickLong()
+//                true
+//            }
 
             binding.root.setOnLongClickListener {
+                currentPosition = adapterPosition
                 startDrag()
-                true
+                false
             }
         }
 

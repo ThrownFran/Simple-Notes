@@ -65,7 +65,7 @@ class HomeViewModel @Inject constructor(
         _navigateToCreateEvent.value = Any()
     }
 
-    fun longClick(it: TaskPresentationModel) {
+    fun clickDeleteTask(it: TaskPresentationModel) {
         deleteTask(it)
     }
 

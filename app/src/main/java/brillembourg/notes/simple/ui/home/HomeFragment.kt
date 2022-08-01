@@ -52,6 +52,33 @@ class HomeFragment : Fragment(), MenuProvider {
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
+//    override fun onCreateContextMenu(
+//        menu: ContextMenu,
+//        v: View,
+//        menuInfo: ContextMenu.ContextMenuInfo?
+//    ) {
+//        super.onCreateContextMenu(menu, v, menuInfo)
+//        val inflater: MenuInflater? = activity?.menuInflater
+//        inflater?.inflate(R.menu.context_menu, menu)
+//    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_context_menu_delete -> {
+                clickDeleteTask()
+                true
+            }
+            else -> super.onContextItemSelected(item)
+        }
+    }
+
+    private fun clickDeleteTask() {
+        val adapter = (binding.homeRecycler.adapter as TaskAdapter)
+        adapter.currentPosition?.let {
+            viewModel.clickDeleteTask(adapter.currentList[it])
+        }
+    }
+
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.menu_home, menu)
     }
@@ -180,9 +207,10 @@ class HomeFragment : Fragment(), MenuProvider {
                     retrieveRecyclerStateIfApplies(layoutManager)
                 }
 
-        adapter = TaskAdapter(binding.homeRecycler,
+        adapter = TaskAdapter(requireActivity().menuInflater,
+            binding.homeRecycler,
             onLongClick = {
-                viewModel.longClick(it)
+                viewModel.clickDeleteTask(it)
             },
             onClick = {
                 viewModel.clickItem(it)
