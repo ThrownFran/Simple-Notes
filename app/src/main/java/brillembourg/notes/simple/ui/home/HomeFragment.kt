@@ -220,7 +220,7 @@ class HomeFragment : Fragment(), MenuProvider {
             })
             .also {
                 it.submitList(taskList)
-//                it.itemTouchHelper.attachToRecyclerView(this)
+                it.itemTouchHelper.attachToRecyclerView(this)
             }
     }
 

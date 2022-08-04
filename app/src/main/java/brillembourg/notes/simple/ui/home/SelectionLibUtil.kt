@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 
+
 fun TaskPresentationModel.bindTracker(
     idItem: Long,
     viewHolder: TaskAdapter.ViewHolder,

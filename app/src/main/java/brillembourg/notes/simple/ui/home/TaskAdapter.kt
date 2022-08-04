@@ -1,18 +1,17 @@
 package brillembourg.notes.simple.ui.home
 
 import android.content.Context
-import android.util.Log
 import android.view.*
 import android.widget.FrameLayout
-import androidx.annotation.Nullable
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.selection.SelectionTracker
-import androidx.recyclerview.widget.*
-import androidx.recyclerview.widget.ItemTouchHelper.*
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.ItemTaskBinding
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
-import java.util.*
 
 
 class TaskAdapter(
@@ -31,11 +30,7 @@ class TaskAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
-            ItemTaskBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
+            ItemTaskBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     }
 
@@ -49,11 +44,7 @@ class TaskAdapter(
         init {
             setupClickListeners()
             correctImageHeight()
-//            val fragment: Fragment? = itemView.context as? Fragment
-//            fragment?.registerForContextMenu(itemView)
-            itemView.setOnCreateContextMenuListener(this)
-
-
+//            itemView.setOnCreateContextMenuListener(this)
         }
 
         override fun onCreateContextMenu(
@@ -61,11 +52,7 @@ class TaskAdapter(
             p1: View?,
             p2: ContextMenu.ContextMenuInfo?
         ) {
-//            menu?.setHeaderTitle("Select The Action");
-//            val inflater: MenuInflater? = (itemView.context as ViewComponentManager.FragmentContextWrapper?)?
             menuInflater.inflate(R.menu.context_menu, menu)
-//            menu?.add(0, 1, 0, "Call");//groupId, itemId, order, title
-//            menu?.add(0, 2, 1, "SMS");
         }
 
         private fun setupClickListeners() {
@@ -77,19 +64,51 @@ class TaskAdapter(
 
             binding.root.setOnLongClickListener {
                 currentPosition = adapterPosition
-                startDrag()
-                false
+
+                if (!isSelectionVisible()) {
+                    startDrag()
+                }
+
+                toggleItem()
+
+                if (!isSelectionVisible()) {
+                    itemTouchHelper.attachToRecyclerView(recyclerView)
+                }
+                true
+            }
+        }
+
+        private fun toggleItem() {
+            getItem(adapterPosition)?.let {
+                it.isSelected = !it.isSelected
+                setSelection(it)
             }
         }
 
         private fun click() {
+
+            if (isSelectionVisible()) {
+                toggleItem()
+
+                if (isSelectionVisible()) {
+                    itemTouchHelper.attachToRecyclerView(null)
+                } else {
+                    itemTouchHelper.attachToRecyclerView(recyclerView)
+                }
+                return
+            }
+
+            itemTouchHelper.attachToRecyclerView(recyclerView)
             onClick.invoke(getItem(adapterPosition))
         }
 
-        private fun clickLong() {
-            itemTouchHelper.attachToRecyclerView(null)
-            onLongClick.invoke(getItem(adapterPosition))
-        }
+        private fun isSelectionVisible(): Boolean =
+            currentList.any { it.isSelected }
+
+//        private fun clickLong() {
+//            itemTouchHelper.attachToRecyclerView(null)
+//            onLongClick.invoke(getItem(adapterPosition))
+//        }
 
         private fun startDrag() {
             itemTouchHelper.attachToRecyclerView(recyclerView)
@@ -116,6 +135,19 @@ class TaskAdapter(
             bindTitle(task)
             binding.taskTextContent.text = "${task.order}. ${task.content}"
             binding.taskTextDate.text = task.dateInLocal
+            setSelection(task)
+        }
+
+        private fun setSelection(task: TaskPresentationModel) {
+            if (task.isSelected) {
+                itemView.setBackgroundColor(
+                    ContextCompat.getColor(itemView.context, R.color.black)
+                )
+            } else {
+                itemView.setBackgroundColor(
+                    ContextCompat.getColor(itemView.context, R.color.white)
+                )
+            }
         }
 
         private fun bindTitle(task: TaskPresentationModel) {
@@ -135,75 +167,6 @@ class TaskAdapter(
 
     }
 
-    fun moveItem(fromPosition: Int, toPosition: Int) {
-        if (dragAndDrogList == null) {
-            dragAndDrogList = currentList.toMutableList()
-        }
-        dragAndDrogList?.let { Collections.swap(it, fromPosition, toPosition) };
-        Log.e("ERROR", "SWAPPING $fromPosition to $toPosition")
-        Log.e("Current list", dragAndDrogList.toString())
-    }
-
-    private fun setupDragAndDropTouchHelper(): ItemTouchHelper {
-        val itemTouchCallback =
-            object : SimpleCallback(UP or DOWN or START or END, 0) {
-                override fun onMove(
-                    recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder,
-                    target: RecyclerView.ViewHolder
-                ): Boolean {
-                    val recyclerviewAdapter = recyclerView.adapter as TaskAdapter
-                    val fromPosition = viewHolder.adapterPosition
-                    val toPosition = target.adapterPosition
-                    recyclerviewAdapter.moveItem(fromPosition, toPosition)
-                    //                    submitList(dragAndDrogList)
-                    recyclerviewAdapter.notifyItemMoved(fromPosition, toPosition)
-                    return true
-                }
-
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-
-                }
-
-                override fun clearView(
-                    recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder
-                ) {
-                    super.clearView(recyclerView, viewHolder)
-                    if (dragAndDrogList == null) return
-                    dragAndDrogList?.forEachIndexed { index, taskPresentationModel ->
-                        //            taskPresentationModel.order = size - index
-                        taskPresentationModel.order = index + 1
-                    }
-
-                    recyclerView.itemAnimator = null
-                    submitList(null)
-                    submitList(dragAndDrogList) {
-                        recyclerView.post {
-                            recyclerView.itemAnimator = DefaultItemAnimator()
-                        }
-                    }
-
-                    dragAndDrogList?.let { onReorder.invoke(it) }
-                    dragAndDrogList = null
-                }
-
-                override fun onSelectedChanged(
-                    @Nullable viewHolder: RecyclerView.ViewHolder?,
-                    actionState: Int
-                ) {
-                    when (actionState) {
-                        ACTION_STATE_DRAG -> {}                // the user is dragging an item and didn't lift their finger off yet
-                        ACTION_STATE_SWIPE -> {}                   // the user is swiping an item and didn't lift their finger off yet
-                        ACTION_STATE_IDLE -> {
-                            // the user just dropped the item (after dragging it), and lift their finger off.
-                            Log.e("ITEM TOUCH HELPER", "IDLE")
-                        }
-                    }
-                }
-            }
-        return ItemTouchHelper(itemTouchCallback)
-    }
 
     companion object {
         private val DiffCallback = setupDiffCallback()

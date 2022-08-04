@@ -11,7 +11,8 @@ data class TaskPresentationModel(
     var title: String? = null,
     var content: String,
     val dateInLocal: String,
-    var order: Int
+    var order: Int,
+    var isSelected: Boolean = false
 ): Parcelable
 
 fun TaskPresentationModel.toDomain (dateProvider: DateProvider): Task {
