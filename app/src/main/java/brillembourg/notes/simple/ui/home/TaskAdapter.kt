@@ -6,6 +6,7 @@ import android.view.*
 import android.widget.FrameLayout
 import androidx.annotation.Nullable
 import androidx.core.view.isVisible
+import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.*
 import androidx.recyclerview.widget.ItemTouchHelper.*
 import brillembourg.notes.simple.R
@@ -23,6 +24,7 @@ class TaskAdapter(
 ) : ListAdapter<TaskPresentationModel, TaskAdapter.ViewHolder>(DiffCallback) {
 
     var dragAndDrogList: List<TaskPresentationModel>? = null
+    var tracker: SelectionTracker<Long>? = null
     var currentPosition: Int? = null
 
     val itemTouchHelper by lazy { setupDragAndDropTouchHelper() }
