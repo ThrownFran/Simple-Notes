@@ -11,7 +11,7 @@ class RoundContraintLayout(context: Context, attrs: AttributeSet) : ConstraintLa
 
     private lateinit var rectF: RectF
     private val path = Path()
-    private var cornerRadius = 25f
+    private var cornerRadius = 10f
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -35,7 +35,12 @@ class RoundContraintLayout(context: Context, attrs: AttributeSet) : ConstraintLa
 
     private fun resetPath() {
         path.reset()
-        path.addRoundRect(rectF, cornerRadius, cornerRadius, Path.Direction.CW)
+        path.addRoundRect(
+            rectF,
+            cornerRadius.fromDpToPixel(context),
+            cornerRadius.fromDpToPixel(context),
+            Path.Direction.CW
+        )
         path.close()
     }
 }

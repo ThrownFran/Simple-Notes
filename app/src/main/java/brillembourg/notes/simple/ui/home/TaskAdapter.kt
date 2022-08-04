@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.ItemTaskBinding
+import brillembourg.notes.simple.ui.extras.fromDpToPixel
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 
 
@@ -57,93 +58,76 @@ class TaskAdapter(
 
         private fun setupClickListeners() {
             binding.root.setOnClickListener { click() }
-//            binding.root.setOnLongClickListener {
-//                clickLong()
-//                true
-//            }
 
             binding.root.setOnLongClickListener {
                 currentPosition = adapterPosition
 
-                if (!isSelectionVisible()) {
-                    startDrag()
-                }
-
-                toggleItem()
-
-                if (!isSelectionVisible()) {
-                    itemTouchHelper.attachToRecyclerView(recyclerView)
+                if (isSelectionNotVisible()) {
+                    longClickInNormalState()
+                } else {
+                    longClickInSelectionVisible()
                 }
                 true
             }
         }
 
-        private fun toggleItem() {
-            getItem(adapterPosition)?.let {
-                it.isSelected = !it.isSelected
-                setSelection(it)
+        private fun longClickInSelectionVisible() {
+            toggleItemSelection()
+            if (isSelectionNotVisible()) {
+                enableDragNDrop()
+            }
+        }
+
+        private fun longClickInNormalState() {
+            startDrag()
+            toggleItemSelection()
+
+            if (isSelectionNotVisible()) {
+                enableDragNDrop()
             }
         }
 
         private fun click() {
-
             if (isSelectionVisible()) {
-                toggleItem()
-
-                if (isSelectionVisible()) {
-                    itemTouchHelper.attachToRecyclerView(null)
-                } else {
-                    itemTouchHelper.attachToRecyclerView(recyclerView)
-                }
+                clickInSelectionVisible()
                 return
             }
+            clickInNormalState()
+        }
 
-            itemTouchHelper.attachToRecyclerView(recyclerView)
+        private fun clickInNormalState() {
+            enableDragNDrop()
             onClick.invoke(getItem(adapterPosition))
         }
 
-        private fun isSelectionVisible(): Boolean =
-            currentList.any { it.isSelected }
-
-//        private fun clickLong() {
-//            itemTouchHelper.attachToRecyclerView(null)
-//            onLongClick.invoke(getItem(adapterPosition))
-//        }
-
-        private fun startDrag() {
-            itemTouchHelper.attachToRecyclerView(recyclerView)
-            itemTouchHelper.startDrag(this)
-        }
-
-        private fun correctImageHeight() {
-            val observer: ViewTreeObserver = binding.taskContraint.viewTreeObserver
-            observer.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    binding.taskContraint.viewTreeObserver.removeGlobalOnLayoutListener(this)
-                    //Your code
-                    val height = binding.taskContraint.measuredHeight
-                    binding.taskImageBackground.layoutParams =
-                        FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.MATCH_PARENT, height +
-                                    pxFromDp(binding.taskContraint.context, 4f).toInt()
-                        )
-                }
-            })
+        private fun clickInSelectionVisible() {
+            toggleItemSelection()
+            if (isSelectionVisible()) disableDragNDrop() else enableDragNDrop()
         }
 
         fun bind(task: TaskPresentationModel) {
             bindTitle(task)
-            binding.taskTextContent.text = "${task.order}. ${task.content}"
-            binding.taskTextDate.text = task.dateInLocal
-            setSelection(task)
+            bindContent(task)
+            bindDate(task)
+            bindSelection(task)
         }
 
-        private fun setSelection(task: TaskPresentationModel) {
+        private fun bindDate(task: TaskPresentationModel) {
+            binding.taskTextDate.text = task.dateInLocal
+        }
+
+        private fun bindContent(task: TaskPresentationModel) {
+            binding.taskTextContent.text = "${task.order}. ${task.content}"
+        }
+
+        private fun bindSelection(task: TaskPresentationModel) {
             if (task.isSelected) {
+//                binding.taskContraintExternal.setBackgroundColor(com.google.android.material.R.attr.colorSecondary)
                 itemView.setBackgroundColor(
-                    ContextCompat.getColor(itemView.context, R.color.black)
+                    ContextCompat.getColor(itemView.context, R.color.teal_200)
                 )
             } else {
+//                binding.taskContraintExternal.setBackgroundColor(0)
                 itemView.setBackgroundColor(
                     ContextCompat.getColor(itemView.context, R.color.white)
                 )
@@ -157,12 +141,51 @@ class TaskAdapter(
             }
         }
 
-        fun dpFromPx(context: Context, px: Float): Float {
-            return px / context.getResources().getDisplayMetrics().density
+        private fun isSelectionNotVisible() = !isSelectionVisible()
+
+        private fun toggleItemSelection() {
+            getItem(adapterPosition)?.let {
+                it.isSelected = !it.isSelected
+                bindSelection(it)
+            }
         }
+
+        private fun disableDragNDrop() {
+            itemTouchHelper.attachToRecyclerView(null)
+        }
+
+        private fun isSelectionVisible(): Boolean =
+            currentList.any { it.isSelected }
+
+        private fun startDrag() {
+            enableDragNDrop()
+            itemTouchHelper.startDrag(this)
+        }
+
+        private fun enableDragNDrop() {
+            itemTouchHelper.attachToRecyclerView(recyclerView)
+        }
+
 
         fun pxFromDp(context: Context, dp: Float): Float {
             return dp * context.getResources().getDisplayMetrics().density
+        }
+
+        private fun correctImageHeight() {
+            val observer: ViewTreeObserver = binding.taskContraint.viewTreeObserver
+            observer.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    binding.taskContraint.viewTreeObserver.removeGlobalOnLayoutListener(this)
+                    //Your code
+                    val height = binding.taskContraint.measuredHeight
+                    binding.taskImageBackground.layoutParams =
+                        FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT, height +
+                                    4f.fromDpToPixel(context = itemView.context).toInt()
+                        )
+                    itemView.invalidate()
+                }
+            })
         }
 
     }

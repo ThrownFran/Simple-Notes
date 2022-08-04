@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<brillembourg.notes.simple.ui.extras.RoundContraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:padding="3dp"
     android:layout_marginStart="8dp"
-    android:layout_marginTop="3dp"
-    android:layout_marginEnd="3dp"
-    android:layout_marginBottom="3dp">
-
+    android:layout_marginTop="4dp"
+    android:layout_marginEnd="4dp"
+    android:layout_marginBottom="4dp">
 
 
     <androidx.cardview.widget.CardView
-
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardUseCompatPadding="true"
+        app:cardElevation="8dp"
         app:cardCornerRadius="10dp">
 
         <ImageView
             android:id="@+id/task_image_background"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            tools:layout_height="310dp"
             android:scaleType="centerCrop"
             android:src="@drawable/background"
             tools:ignore="ContentDescription" />
@@ -82,6 +82,6 @@ In nulla voluptas ut voluptatem modi qui consectetur quos. Ut sunt quibusdam non
         </brillembourg.notes.simple.ui.extras.RoundContraintLayout>
     </androidx.cardview.widget.CardView>
 
-</FrameLayout>
+</brillembourg.notes.simple.ui.extras.RoundContraintLayout>
 
 

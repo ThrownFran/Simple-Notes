@@ -108,8 +108,6 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun clickStaggeredLayout() {
         isStaggered = true
-//        val taskList = (binding.homeRecycler.adapter as TaskAdapter?)?.currentList
-//        taskList?.let { binding.homeRecycler.buildAdapter(it) }
         binding.homeRecycler.apply {
             layoutManager = buildStaggeredManager()
             adapter?.notifyDataSetChanged()
@@ -118,8 +116,6 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun clickVerticalLayout() {
         isStaggered = false
-//        val taskList = (binding.homeRecycler.adapter as TaskAdapter?)?.currentList
-//        taskList?.let { binding.homeRecycler.buildAdapter(it) }
         binding.homeRecycler.apply {
             layoutManager = buildLinearManager()
             adapter?.notifyDataSetChanged()
