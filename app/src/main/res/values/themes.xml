@@ -22,6 +22,18 @@
         <item name="fontFamily">@font/worksan</item>
         <item name="android:navigationBarColor">?attr/colorPrimary</item>
 
+        <item name="android:actionModeBackground">?attr/colorSecondary</item>
+        <item name="android:actionModeCloseDrawable">@drawable/ic_baseline_clear_24</item>
+        <item name="actionModeStyle">@style/Widget.ActionMode</item>
+    </style>
 
+    <style name="Widget.ActionMode" parent="@style/Widget.AppCompat.ActionMode">
+        <item name="titleTextStyle">@style/Widget.ActionMode.TextStyle</item>
+    </style>
+
+    <style name="Widget.ActionMode.TextStyle">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?colorOnSecondary</item>
     </style>
 </resources>

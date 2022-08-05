@@ -53,7 +53,7 @@ class TaskAdapter(
             p1: View?,
             p2: ContextMenu.ContextMenuInfo?
         ) {
-            menuInflater.inflate(R.menu.context_menu, menu)
+            menuInflater.inflate(R.menu.menu_context, menu)
         }
 
         private fun setupClickListeners() {
@@ -150,10 +150,7 @@ class TaskAdapter(
             getItem(adapterPosition)?.let {
                 it.isSelected = !it.isSelected
                 bindSelection(it)
-
-                if (it.isSelected) {
-                    onSelection.invoke()
-                }
+                onSelection.invoke()
             }
         }
 

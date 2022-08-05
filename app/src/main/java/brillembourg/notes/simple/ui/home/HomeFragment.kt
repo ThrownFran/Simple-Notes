@@ -29,6 +29,7 @@ class HomeFragment : Fragment(), MenuProvider {
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var binding: FragmentMainBinding
     private var recylerViewState: Parcelable? = null
+    private var actionMode: ActionMode? = null
 
     private var isStaggered = false
 
@@ -62,22 +63,22 @@ class HomeFragment : Fragment(), MenuProvider {
 //        inflater?.inflate(R.menu.context_menu, menu)
 //    }
 
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_context_menu_delete -> {
-                clickDeleteTask()
-                true
-            }
-            else -> super.onContextItemSelected(item)
-        }
-    }
-
-    private fun clickDeleteTask() {
-        val adapter = (binding.homeRecycler.adapter as TaskAdapter)
-        adapter.currentPosition?.let {
-            viewModel.clickDeleteTask(adapter.currentList[it])
-        }
-    }
+//    override fun onContextItemSelected(item: MenuItem): Boolean {
+//        return when (item.itemId) {
+//            R.id.menu_context_menu_delete -> {
+//                clickDeleteTask()
+//                true
+//            }
+//            else -> super.onContextItemSelected(item)
+//        }
+//    }
+//
+//    private fun clickDeleteTask() {
+//        val adapter = (binding.homeRecycler.adapter as TaskAdapter)
+//        adapter.currentPosition?.let {
+//            viewModel.clickDeleteTask(adapter.currentList[it])
+//        }
+//    }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.menu_home, menu)
@@ -159,14 +160,7 @@ class HomeFragment : Fragment(), MenuProvider {
             setupTaskList(it)
         }
 
-//        lifecycleScope.launchWhenStarted {
-//            viewModel.observeTaskList().collect {
-//                setupTaskList(it)
-////                it.toString()
-////                val adapter = binding.homeRecycler.adapter as TaskAdapter?
-////                adapter?.submitList(it)
-//            }
-//        }
+
     }
 
     private fun showMessage(message: String) {
@@ -187,9 +181,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun setupTaskList(taskList: List<TaskPresentationModel>) {
         if (binding.homeRecycler.adapter == null) {
-            binding.homeRecycler.apply {
-                buildAdapter(taskList)
-            }
+            binding.homeRecycler.apply { buildAdapter(taskList) }
         } else {
             (binding.homeRecycler.adapter as TaskAdapter).submitList(taskList)
         }
@@ -206,21 +198,73 @@ class HomeFragment : Fragment(), MenuProvider {
         adapter = TaskAdapter(requireActivity().menuInflater,
             binding.homeRecycler,
             onSelection = {
-//                          startActionMode(ActionMode.Callback() {
-//
-//                          })
-//                viewModel.clickDeleteTask(it)
+                setupContextualActionBar()
             },
             onClick = {
                 viewModel.clickItem(it)
             },
             onReorder = {
+//                actionMode?.finish()
                 viewModel.reorderList(it)
             })
             .also {
                 it.submitList(taskList)
                 it.itemTouchHelper.attachToRecyclerView(this)
             }
+    }
+
+    private fun RecyclerView.setupContextualActionBar() {
+        val adapter = binding.homeRecycler.adapter as TaskAdapter
+        val taskList = adapter.currentList
+        val selectedList = taskList.filter { it.isSelected }
+
+        if (selectedList.isEmpty()) {
+            actionMode?.finish().also { actionMode = null }
+            return
+        }
+
+        if (actionMode != null) {
+            return
+        }
+
+        actionMode = startActionMode(object : ActionMode.Callback {
+            // Called when the action mode is created; startActionMode() was called
+            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                // Inflate a menu resource providing context menu items
+                val inflater: MenuInflater = mode.menuInflater
+                inflater.inflate(R.menu.menu_context, menu)
+                return true
+            }
+
+            // Called each time the action mode is shown. Always called after onCreateActionMode, but
+            // may be called multiple times if the mode is invalidated.
+            override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+                return false // Return false if nothing is done
+            }
+
+            // Called when the user selects a contextual menu item
+            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                return when (item.itemId) {
+                    R.id.menu_context_menu_delete -> {
+                        viewModel.clickDeleteTask((adapter as TaskAdapter).currentList.first { it.isSelected })
+                        mode.finish() // Action picked, so close the CAB
+                        true
+                    }
+                    else -> false
+                }
+            }
+
+            // Called when the user exits the action mode
+            override fun onDestroyActionMode(mode: ActionMode) {
+                taskList.filter { it.isSelected }.forEach { it.isSelected = false }
+                adapter.submitList(taskList)
+                adapter.notifyDataSetChanged()
+                actionMode = null
+            }
+        })
+
+        val noteString = if (selectedList.size > 1) "notes" else "note"
+        actionMode?.title = "${selectedList.size} $noteString selected"
     }
 
     private fun buildStaggeredManager() =
