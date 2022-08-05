@@ -23,6 +23,8 @@
             android:layout_height="0dp"
             tools:layout_height="310dp"
             android:scaleType="centerCrop"
+            android:visibility="gone"
+            tools:visibility="visible"
             android:src="@drawable/background"
             tools:ignore="ContentDescription" />
 

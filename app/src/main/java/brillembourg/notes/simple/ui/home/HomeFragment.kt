@@ -205,8 +205,11 @@ class HomeFragment : Fragment(), MenuProvider {
 
         adapter = TaskAdapter(requireActivity().menuInflater,
             binding.homeRecycler,
-            onLongClick = {
-                viewModel.clickDeleteTask(it)
+            onSelection = {
+//                          startActionMode(ActionMode.Callback() {
+//
+//                          })
+//                viewModel.clickDeleteTask(it)
             },
             onClick = {
                 viewModel.clickItem(it)
@@ -221,7 +224,9 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun buildStaggeredManager() =
-        StaggeredGridLayoutManager(2, RecyclerView.VERTICAL)
+        StaggeredGridLayoutManager(2, RecyclerView.VERTICAL).also {
+            it.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
+        }
 
     private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {
         recylerViewState?.let { layoutManager.onRestoreInstanceState(it) }

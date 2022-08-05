@@ -25,7 +25,22 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                 if (dragAndDrogList == null) {
                     dragAndDrogList = currentList.toMutableList()
                 }
-                dragAndDrogList?.let { Collections.swap(it, fromPosition, toPosition) };
+                dragAndDrogList?.let {
+                    if (fromPosition < toPosition) {
+                        for (i in fromPosition until toPosition) {
+                            Collections.swap(it, i, i + 1)
+                        }
+                    } else {
+                        for (i in fromPosition downTo toPosition + 1) {
+                            Collections.swap(it, i, i - 1)
+                        }
+                    }
+
+
+//                    Collections.swap(it, fromPosition, toPosition)
+                };
+
+
                 Log.e("Current list", dragAndDrogList.toString())
 
                 //                    submitList(dragAndDrogList)

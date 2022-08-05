@@ -19,7 +19,7 @@ class TaskAdapter(
     val menuInflater: MenuInflater,
     val recyclerView: RecyclerView,
     val onClick: (TaskPresentationModel) -> Unit,
-    val onLongClick: (TaskPresentationModel) -> Unit,
+    val onSelection: () -> Unit,
     val onReorder: (List<TaskPresentationModel>) -> Unit
 ) : ListAdapter<TaskPresentationModel, TaskAdapter.ViewHolder>(DiffCallback) {
 
@@ -44,7 +44,7 @@ class TaskAdapter(
 
         init {
             setupClickListeners()
-            correctImageHeight()
+//            correctImageHeight()
 //            itemView.setOnCreateContextMenuListener(this)
         }
 
@@ -106,10 +106,12 @@ class TaskAdapter(
         }
 
         fun bind(task: TaskPresentationModel) {
+            binding.taskImageBackground.isVisible = false
             bindTitle(task)
             bindContent(task)
             bindDate(task)
             bindSelection(task)
+            correctImageHeight()
         }
 
         private fun bindDate(task: TaskPresentationModel) {
@@ -117,7 +119,8 @@ class TaskAdapter(
         }
 
         private fun bindContent(task: TaskPresentationModel) {
-            binding.taskTextContent.text = "${task.order}. ${task.content}"
+//            binding.taskTextContent.text = "${task.order}. ${task.content}"
+            binding.taskTextContent.text = task.content
         }
 
         private fun bindSelection(task: TaskPresentationModel) {
@@ -147,6 +150,10 @@ class TaskAdapter(
             getItem(adapterPosition)?.let {
                 it.isSelected = !it.isSelected
                 bindSelection(it)
+
+                if (it.isSelected) {
+                    onSelection.invoke()
+                }
             }
         }
 
@@ -183,7 +190,8 @@ class TaskAdapter(
                             FrameLayout.LayoutParams.MATCH_PARENT, height +
                                     4f.fromDpToPixel(context = itemView.context).toInt()
                         )
-                    itemView.invalidate()
+                    binding.taskImageBackground.isVisible = true
+//                    itemView.invalidate()
                 }
             })
         }
