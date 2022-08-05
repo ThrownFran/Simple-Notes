@@ -82,5 +82,9 @@ class HomeViewModel @Inject constructor(
         _messageEvent.value = message
     }
 
+    fun clickDeleteTasks(tasksToDelete: List<TaskPresentationModel>) {
+        tasksToDelete.forEach { clickDeleteTask(it) }
+    }
+
 
 }

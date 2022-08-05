@@ -224,6 +224,7 @@ class HomeFragment : Fragment(), MenuProvider {
         }
 
         if (actionMode != null) {
+            setActionModeTitle(selectedList)
             return
         }
 
@@ -246,7 +247,8 @@ class HomeFragment : Fragment(), MenuProvider {
             override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
                 return when (item.itemId) {
                     R.id.menu_context_menu_delete -> {
-                        viewModel.clickDeleteTask((adapter as TaskAdapter).currentList.first { it.isSelected })
+                        viewModel.clickDeleteTasks(adapter.currentList.filter { it.isSelected })
+//                        viewModel.clickDeleteTask((adapter as TaskAdapter).currentList.first { it.isSelected })
                         mode.finish() // Action picked, so close the CAB
                         true
                     }
@@ -263,6 +265,10 @@ class HomeFragment : Fragment(), MenuProvider {
             }
         })
 
+        setActionModeTitle(selectedList)
+    }
+
+    private fun setActionModeTitle(selectedList: List<TaskPresentationModel>) {
         val noteString = if (selectedList.size > 1) "notes" else "note"
         actionMode?.title = "${selectedList.size} $noteString selected"
     }
