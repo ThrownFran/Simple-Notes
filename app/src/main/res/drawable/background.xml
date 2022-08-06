@@ -6,5 +6,5 @@
 
         </shape>
     </item>
-    <item android:drawable="@drawable/crayon_background_8_1024x755" />
+    <item android:drawable="@drawable/crayon_background_blue" />
 </layer-list>

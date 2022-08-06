@@ -2,7 +2,6 @@ package brillembourg.notes.simple.ui.home
 
 import android.content.Context
 import android.view.*
-import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.selection.SelectionTracker
@@ -11,7 +10,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.ItemTaskBinding
-import brillembourg.notes.simple.ui.extras.fromDpToPixel
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 
 
@@ -111,7 +109,7 @@ class TaskAdapter(
             bindContent(task)
             bindDate(task)
             bindSelection(task)
-            correctImageHeight()
+//            correctImageHeight()
         }
 
         private fun bindDate(task: TaskPresentationModel) {
@@ -175,23 +173,23 @@ class TaskAdapter(
             return dp * context.getResources().getDisplayMetrics().density
         }
 
-        private fun correctImageHeight() {
-            val observer: ViewTreeObserver = binding.taskContraint.viewTreeObserver
-            observer.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    binding.taskContraint.viewTreeObserver.removeGlobalOnLayoutListener(this)
-                    //Your code
-                    val height = binding.taskContraint.measuredHeight
-                    binding.taskImageBackground.layoutParams =
-                        FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.MATCH_PARENT, height +
-                                    4f.fromDpToPixel(context = itemView.context).toInt()
-                        )
-                    binding.taskImageBackground.isVisible = true
-//                    itemView.invalidate()
-                }
-            })
-        }
+//        private fun correctImageHeight() {
+//            val observer: ViewTreeObserver = binding.taskContraint.viewTreeObserver
+//            observer.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+//                override fun onGlobalLayout() {
+//                    binding.taskContraint.viewTreeObserver.removeGlobalOnLayoutListener(this)
+//                    //Your code
+//                    val height = binding.taskContraint.measuredHeight
+//                    binding.taskImageBackground.layoutParams =
+//                        FrameLayout.LayoutParams(
+//                            FrameLayout.LayoutParams.MATCH_PARENT, height +
+//                                    4f.fromDpToPixel(context = itemView.context).toInt()
+//                        )
+//                    binding.taskImageBackground.isVisible = true
+////                    itemView.invalidate()
+//                }
+//            })
+//        }
 
     }
 

@@ -2,13 +2,17 @@ package brillembourg.notes.simple.ui.extras
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 
-class RoundContraintLayout(context: Context, attrs: AttributeSet) : ConstraintLayout(context, attrs) {
 
+open class RoundContraintLayout(context: Context, attrs: AttributeSet) :
+    ConstraintLayout(context, attrs) {
+
+    private lateinit var mShadow: Paint
     private lateinit var rectF: RectF
     private val path = Path()
     private var cornerRadius = 10f
@@ -42,5 +46,29 @@ class RoundContraintLayout(context: Context, attrs: AttributeSet) : ConstraintLa
             Path.Direction.CW
         )
         path.close()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    }
+
+    override fun onDraw(canvas: Canvas) {
+//        super.onDraw(canvas)
+//        val colors = intArrayOf(
+//            Color.BLUE, Color.YELLOW, Color.RED,
+//            Color.GREEN, Color.MAGENTA, Color.WHITE
+//        )
+//
+//        val gradient1 = RadialGradient(
+//            500f,
+//            500f, 400f, colors, null,
+//            Shader.TileMode.MIRROR
+//        )
+//
+//        val radielGradientPaint = Paint()
+//        radielGradientPaint.isDither = true
+//        radielGradientPaint.shader = gradient1
+//
+//        canvas.drawPaint(radielGradientPaint)
     }
 }
