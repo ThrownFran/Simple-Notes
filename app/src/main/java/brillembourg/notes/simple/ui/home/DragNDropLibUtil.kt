@@ -57,7 +57,11 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                 viewHolder: RecyclerView.ViewHolder
             ) {
                 super.clearView(recyclerView, viewHolder)
-                if (dragAndDrogList == null) return
+                if (dragAndDrogList == null) {
+                    onReorderCanceled.invoke()
+                    return
+                }
+
                 dragAndDrogList?.forEachIndexed { index, taskPresentationModel ->
                     //            taskPresentationModel.order = size - index
                     taskPresentationModel.order = index + 1
@@ -71,7 +75,7 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                     }
                 }
 
-                dragAndDrogList?.let { onReorder.invoke(it) }
+                dragAndDrogList?.let { onReorderSuccess.invoke(it) }
                 dragAndDrogList = null
             }
 

@@ -7,6 +7,8 @@ import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
+import brillembourg.notes.simple.R
 
 
 open class RoundContraintLayout(context: Context, attrs: AttributeSet) :
@@ -50,6 +52,7 @@ open class RoundContraintLayout(context: Context, attrs: AttributeSet) :
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        setBackgroundColor(ResourcesCompat.getColor(resources, R.color.transparent, null))
     }
 
     override fun onDraw(canvas: Canvas) {

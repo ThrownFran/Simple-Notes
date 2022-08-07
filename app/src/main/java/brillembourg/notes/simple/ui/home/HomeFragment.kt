@@ -182,9 +182,12 @@ class HomeFragment : Fragment(), MenuProvider {
             onClick = {
                 viewModel.clickItem(it)
             },
-            onReorder = {
+            onReorderSuccess = {
                 actionMode?.finish()
                 viewModel.reorderList(it)
+            },
+            onReorderCanceled = {
+                actionMode?.finish()
             })
             .also {
                 it.submitList(taskList)

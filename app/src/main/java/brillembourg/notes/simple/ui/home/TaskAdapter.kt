@@ -21,7 +21,8 @@ class TaskAdapter(
     val recyclerView: RecyclerView,
     val onClick: (TaskPresentationModel) -> Unit,
     val onSelection: () -> Unit,
-    val onReorder: (List<TaskPresentationModel>) -> Unit
+    val onReorderSuccess: (List<TaskPresentationModel>) -> Unit,
+    val onReorderCanceled: () -> Unit
 ) : ListAdapter<TaskPresentationModel, TaskAdapter.ViewHolder>(DiffCallback) {
 
     var dragAndDrogList: List<TaskPresentationModel>? = null
