@@ -1,7 +1,9 @@
 package brillembourg.notes.simple.ui.home
 
 import android.content.Context
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuInflater
+import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.selection.SelectionTracker
@@ -33,25 +35,18 @@ class TaskAdapter(
         )
     }
 
+//    override fun submitList(list: List<TaskPresentationModel>?) {
+//        super.submitList(list?.let { ArrayList(it) })
+//    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    inner class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root),
-        View.OnCreateContextMenuListener {
+    inner class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
 
         init {
             setupClickListeners()
-//            correctImageHeight()
-//            itemView.setOnCreateContextMenuListener(this)
-        }
-
-        override fun onCreateContextMenu(
-            menu: ContextMenu?,
-            p1: View?,
-            p2: ContextMenu.ContextMenuInfo?
-        ) {
-            menuInflater.inflate(R.menu.menu_context, menu)
         }
 
         private fun setupClickListeners() {
@@ -190,6 +185,7 @@ class TaskAdapter(
 //                }
 //            })
 //        }
+
 
     }
 

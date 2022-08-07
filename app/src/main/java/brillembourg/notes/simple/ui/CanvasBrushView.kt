@@ -25,7 +25,7 @@ class CanvasBrushView(context: Context, attrs: AttributeSet) :
     init {
         // load your brush here
         mBitmapBrush =
-            ContextCompat.getDrawable(context, R.drawable.crayon_background_blue)?.toBitmap()
+            ContextCompat.getDrawable(context, R.drawable.blue_creyon_2)?.toBitmap()
 //        drawable = BitmapDrawable(resources, mBitmapBrush)
 //        mBitmapBrush?.compress(Bitmap.CompressFormat.PNG, 10,mBitmapBr);
 //        mBitmapBrushDimensions = Vector2(
@@ -62,6 +62,10 @@ class CanvasBrushView(context: Context, attrs: AttributeSet) :
             Bitmap.createScaledBitmap(mBitmapBrush!!, measuredWidth, measuredHeight, false)
         drawable = BitmapDrawable(resources, mBitmapBrush)
         background = drawable
+//        val typedValue = TypedValue()
+//        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
+//        val color = typedValue.data
+//        setBackgroundColor(color)
     }
 
 //    override fun onTouchEvent(event: MotionEvent): Boolean {

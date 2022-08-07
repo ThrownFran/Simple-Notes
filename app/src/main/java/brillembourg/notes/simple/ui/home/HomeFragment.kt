@@ -27,6 +27,8 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private val viewModel: HomeViewModel by viewModels()
+
+    private var _binding: FragmentMainBinding? = null
     private lateinit var binding: FragmentMainBinding
     private var recylerViewState: Parcelable? = null
     private var actionMode: ActionMode? = null
@@ -37,10 +39,12 @@ class HomeFragment : Fragment(), MenuProvider {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentMainBinding.inflate(inflater, container, false)
+        if (_binding == null) _binding = FragmentMainBinding.inflate(inflater, container, false)
+        binding = _binding as FragmentMainBinding
         binding.viewmodel = viewModel
         return binding.root
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -52,33 +56,6 @@ class HomeFragment : Fragment(), MenuProvider {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
-
-//    override fun onCreateContextMenu(
-//        menu: ContextMenu,
-//        v: View,
-//        menuInfo: ContextMenu.ContextMenuInfo?
-//    ) {
-//        super.onCreateContextMenu(menu, v, menuInfo)
-//        val inflater: MenuInflater? = activity?.menuInflater
-//        inflater?.inflate(R.menu.context_menu, menu)
-//    }
-
-//    override fun onContextItemSelected(item: MenuItem): Boolean {
-//        return when (item.itemId) {
-//            R.id.menu_context_menu_delete -> {
-//                clickDeleteTask()
-//                true
-//            }
-//            else -> super.onContextItemSelected(item)
-//        }
-//    }
-//
-//    private fun clickDeleteTask() {
-//        val adapter = (binding.homeRecycler.adapter as TaskAdapter)
-//        adapter.currentPosition?.let {
-//            viewModel.clickDeleteTask(adapter.currentList[it])
-//        }
-//    }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.menu_home, menu)
@@ -128,6 +105,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
 
     override fun onDestroyView() {
+//        _binding = null
         saveRecyclerState()
         super.onDestroyView()
     }
@@ -184,6 +162,7 @@ class HomeFragment : Fragment(), MenuProvider {
             binding.homeRecycler.apply { buildAdapter(taskList) }
         } else {
             (binding.homeRecycler.adapter as TaskAdapter).submitList(taskList)
+            binding.homeRecycler.adapter?.notifyDataSetChanged()
         }
 
     }
@@ -204,7 +183,7 @@ class HomeFragment : Fragment(), MenuProvider {
                 viewModel.clickItem(it)
             },
             onReorder = {
-//                actionMode?.finish()
+                actionMode?.finish()
                 viewModel.reorderList(it)
             })
             .also {
@@ -259,7 +238,6 @@ class HomeFragment : Fragment(), MenuProvider {
             // Called when the user exits the action mode
             override fun onDestroyActionMode(mode: ActionMode) {
                 taskList.filter { it.isSelected }.forEach { it.isSelected = false }
-                adapter.submitList(taskList)
                 adapter.notifyDataSetChanged()
                 actionMode = null
             }

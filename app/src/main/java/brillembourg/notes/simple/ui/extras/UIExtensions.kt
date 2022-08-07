@@ -4,6 +4,8 @@ import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.annotation.DrawableRes
+import androidx.appcompat.app.ActionBar
 
 fun Context.showToast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
@@ -22,5 +24,9 @@ fun Float.fromPixelToDp(context: Context): Float {
 
 fun Float.fromDpToPixel(context: Context): Float {
     return this * context.resources.displayMetrics.density
+}
+
+fun ActionBar.setBackgroundDrawable(@DrawableRes resId: Int) {
+    this.setBackgroundDrawable(this.themedContext.resources.getDrawable(resId))
 }
 
