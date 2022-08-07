@@ -1,6 +1,7 @@
 package brillembourg.notes.simple.ui.home
 
 import android.content.Context
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.ViewGroup
@@ -99,7 +100,6 @@ class TaskAdapter(
         }
 
         fun bind(task: TaskPresentationModel) {
-            binding.taskImageBackground.isVisible = false
             bindTitle(task)
             bindContent(task)
             bindDate(task)
@@ -118,10 +118,17 @@ class TaskAdapter(
 
         private fun bindSelection(task: TaskPresentationModel) {
             if (task.isSelected) {
-//                binding.taskContraintExternal.setBackgroundColor(com.google.android.material.R.attr.colorSecondary)
-                itemView.setBackgroundColor(
-                    ContextCompat.getColor(itemView.context, R.color.teal_200)
+                val typedValue = TypedValue()
+                itemView.context.theme.resolveAttribute(
+                    com.google.android.material.R.attr.colorSecondaryVariant,
+                    typedValue,
+                    true
                 )
+                val color = typedValue.data
+                itemView.setBackgroundColor(color)
+//                itemView.setBackgroundColor(
+//                    ContextCompat.getColor(itemView.context, R.color.teal_200)
+//                )
             } else {
 //                binding.taskContraintExternal.setBackgroundColor(0)
                 itemView.setBackgroundColor(

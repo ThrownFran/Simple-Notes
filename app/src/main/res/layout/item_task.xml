@@ -24,16 +24,6 @@
             app:cardElevation="2dp"
             app:cardCornerRadius="10dp">
 
-            <ImageView
-                android:id="@+id/task_image_background"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                tools:layout_height="310dp"
-                android:scaleType="centerCrop"
-                android:visibility="gone"
-                tools:visibility="visible"
-                tools:ignore="ContentDescription" />
-
             <brillembourg.notes.simple.ui.extras.RoundContraintLayout
                 android:id="@+id/task_contraint"
                 android:layout_width="match_parent"

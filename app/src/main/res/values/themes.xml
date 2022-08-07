@@ -8,7 +8,7 @@
         <item name="colorPrimarySurface">?attr/colorPrimary</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/secondaryColor</item>
-        <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
+        <item name="colorSecondaryVariant">@color/secondaryLightColor</item>
         <item name="colorOnSecondary">@color/secondaryTextColor</item>
         <!-- Background color -->
         <item name="colorSurface">@color/white</item>
@@ -22,7 +22,7 @@
         <item name="fontFamily">@font/worksan</item>
         <item name="android:navigationBarColor">?attr/colorPrimary</item>
 
-        <item name="android:actionModeBackground">?attr/colorSecondary</item>
+        <item name="android:actionModeBackground">?attr/colorSecondaryVariant</item>
         <item name="android:actionModeCloseDrawable">@drawable/ic_baseline_clear_24</item>
         <item name="actionModeStyle">@style/Widget.ActionMode</item>
     </style>
