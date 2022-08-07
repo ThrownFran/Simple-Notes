@@ -23,3 +23,4 @@ fun Float.fromPixelToDp(context: Context): Float {
 fun Float.fromDpToPixel(context: Context): Float {
     return this * context.resources.displayMetrics.density
 }
+

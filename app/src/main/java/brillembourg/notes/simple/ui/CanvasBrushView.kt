@@ -14,6 +14,7 @@ import brillembourg.notes.simple.ui.extras.RoundContraintLayout
 
 class CanvasBrushView(context: Context, attrs: AttributeSet) :
     RoundContraintLayout(context, attrs) {
+    private var drawable: Drawable? = null
     private var mBitmapBrush: Bitmap? = null
     private var mBitmapBrushDimensions: Vector2? = null
 
@@ -23,34 +24,43 @@ class CanvasBrushView(context: Context, attrs: AttributeSet) :
 
     init {
         // load your brush here
-//        mBitmapBrush = BitmapFactory.decodeResource(context.getResources(), R.drawable.background)
-        mBitmapBrush = ContextCompat.getDrawable(context, R.drawable.background)?.toBitmap()
-        mBitmapBrushDimensions = Vector2(
-            mBitmapBrush?.width!!.toFloat(),
-            mBitmapBrush?.height!!.toFloat()
-        )
+        mBitmapBrush =
+            ContextCompat.getDrawable(context, R.drawable.crayon_background_blue)?.toBitmap()
+//        drawable = BitmapDrawable(resources, mBitmapBrush)
+//        mBitmapBrush?.compress(Bitmap.CompressFormat.PNG, 10,mBitmapBr);
+//        mBitmapBrushDimensions = Vector2(
+//            mBitmapBrush?.width!!.toFloat(),
+//            mBitmapBrush?.height!!.toFloat()
+//        )
 
-//        val drawable: Drawable = BitmapDrawable(resources, mBitmapBrush)
-//        background = drawable
     }
+
 
 
     //
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-//        canvas.drawBitmap(mBitmapBrush!!, 0f, 0f, null)
-//        canvas.drawBitmap(mBitmapBrush!!, 1000f, 1000f, null)
+//        val paint = Paint()
+//        val rect = Rect(0, 0, width, height)
+//        canvas.drawBitmap(mBitmapBrush!!,rect.centerX().toFloat(),rect.centerY().toFloat(),null)
 //        for (pos in mPositions) {
 //            canvas.drawBitmap(mBitmapBrush!!, pos.x, pos.y, null)
 //        }
+//        if(background == drawable) {
+//            return
+//        }
+
+//        background = drawable
+//        throw IllegalArgumentException("Helloo")
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-//        setBackgroundColor(R.color.teal_200)
-        val drawable: Drawable = BitmapDrawable(resources, mBitmapBrush)
+        mBitmapBrush =
+            Bitmap.createScaledBitmap(mBitmapBrush!!, measuredWidth, measuredHeight, false)
+        drawable = BitmapDrawable(resources, mBitmapBrush)
         background = drawable
     }
 
