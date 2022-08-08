@@ -11,9 +11,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
-import brillembourg.notes.simple.ui.models.TaskPresentationModel
+import brillembourg.notes.simple.ui.extras.hideKeyboard
 import brillembourg.notes.simple.ui.extras.showSoftKeyboard
+import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import dagger.hilt.android.AndroidEntryPoint
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 
 
 @AndroidEntryPoint
@@ -33,9 +36,19 @@ class DetailFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
-        binding = FragmentDetailBinding.inflate(inflater,container,false)
+        binding = FragmentDetailBinding.inflate(inflater, container, false)
         binding.viewmodel = viewModel
         setHasOptionsMenu(true)
+
+
+        setEventListener(
+            activity!!,
+            KeyboardVisibilityEventListener {
+                // Ah... at last. do your thing :)
+                if (!it) {
+                    binding.detailLinear.requestFocus()
+                }
+            })
         return binding.root
     }
 
@@ -46,17 +59,21 @@ class DetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupObservers()
-        focusKeyboard()
     }
 
     private fun setupObservers() {
         viewModel.state.observe(viewLifecycleOwner) {
             when (it) {
+                is DetailState.CreateTask -> onStateNewTask()
                 is DetailState.TaskLoaded -> onStateTaskLoaded(it)
                 is DetailState.TaskSaved -> onStateTaskSaved(it)
                 is DetailState.ExitWithoutSaving -> finishView()
             }
         }
+    }
+
+    private fun onStateNewTask() {
+        focusKeyboard()
     }
 
     private fun focusKeyboard() {
@@ -69,6 +86,8 @@ class DetailFragment : Fragment() {
     private fun onStateTaskLoaded(it: DetailState.TaskLoaded) {
         setupContent(it.task)
         setupTitle(it.task.title)
+        binding.detailLinear.requestFocus()
+        binding.detailEditContent.hideKeyboard()
     }
 
     private fun setupTitle(title: String?) {

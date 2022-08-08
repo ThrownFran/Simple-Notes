@@ -3,25 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="viewmodel"
             type="brillembourg.notes.simple.ui.detail.DetailViewModel" />
     </data>
 
     <LinearLayout
+        android:id="@+id/detail_linear"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:orientation="vertical"
-        android:background="?colorSurface"
-        tools:context=".ui.detail.DetailFragment">
+
+        android:orientation="vertical">
 
         <EditText
             android:id="@+id/detail_edit_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:gravity="top"
             android:textStyle="bold"
             android:onTextChanged="@{viewmodel.onTitleChanged}"
@@ -29,15 +29,37 @@
             android:inputType="textMultiLine"
             android:importantForAutofill="no" />
 
-        <EditText
-            android:id="@+id/detail_edit_content"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="top"
-            android:onTextChanged="@{viewmodel.onTextChanged}"
-            android:hint="@string/note"
-            android:inputType="textMultiLine"
-            android:importantForAutofill="no" />
+            android:layout_height="wrap_content"
+
+            android:orientation="vertical"
+            android:background="?colorSurface"
+
+            tools:context=".ui.detail.DetailFragment">
+
+            <!--        <LinearLayout-->
+            <!--            android:layout_width="match_parent"-->
+            <!--            android:layout_height="wrap_content"-->
+            <!--            android:orientation="vertical">-->
+
+
+            <EditText
+                android:id="@+id/detail_edit_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:padding="4dp"
+                android:gravity="top"
+                android:onTextChanged="@{viewmodel.onTextChanged}"
+                android:hint="@string/note"
+                android:inputType="textMultiLine"
+                android:importantForAutofill="no" />
+        </ScrollView>
+
 
     </LinearLayout>
+
+
+    <!--    </LinearLayout>-->
 </layout>

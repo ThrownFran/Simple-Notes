@@ -34,6 +34,8 @@ class DetailViewModel @Inject constructor(
             content = it.content
             setupTaskToEdit(it)
         }
+
+        if (currentTask == null) state.value = DetailState.CreateTask
     }
 
     fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {

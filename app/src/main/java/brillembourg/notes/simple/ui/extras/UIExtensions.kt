@@ -6,6 +6,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.ActionBar
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 fun Context.showToast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
@@ -29,4 +31,7 @@ fun Float.fromDpToPixel(context: Context): Float {
 fun ActionBar.setBackgroundDrawable(@DrawableRes resId: Int) {
     this.setBackgroundDrawable(this.themedContext.resources.getDrawable(resId))
 }
+
+fun View.hideKeyboard() = ViewCompat.getWindowInsetsController(this)
+    ?.hide(WindowInsetsCompat.Type.ime())
 
