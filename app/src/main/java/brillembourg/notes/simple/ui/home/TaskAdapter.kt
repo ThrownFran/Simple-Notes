@@ -26,6 +26,7 @@ class TaskAdapter(
 ) : ListAdapter<TaskPresentationModel, TaskAdapter.ViewHolder>(DiffCallback) {
 
     var dragAndDrogList: List<TaskPresentationModel>? = null
+    var isDragging = false
     var tracker: SelectionTracker<Long>? = null
     var currentPosition: Int? = null
 

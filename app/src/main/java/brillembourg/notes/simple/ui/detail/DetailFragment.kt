@@ -34,13 +34,18 @@ class DetailFragment : Fragment() {
         setupBackPhysicalButtonListener()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         binding = FragmentDetailBinding.inflate(inflater, container, false)
         binding.viewmodel = viewModel
         setHasOptionsMenu(true)
+        unfocusScreenWhenKeyboardHidden()
+        return binding.root
+    }
 
-
+    private fun unfocusScreenWhenKeyboardHidden() {
         setEventListener(
             activity!!,
             KeyboardVisibilityEventListener {
@@ -49,7 +54,6 @@ class DetailFragment : Fragment() {
                     binding.detailLinear.requestFocus()
                 }
             })
-        return binding.root
     }
 
     private fun clickBack() {

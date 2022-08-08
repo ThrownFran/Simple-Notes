@@ -21,6 +21,7 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                 val recyclerviewAdapter = recyclerView.adapter as TaskAdapter
                 val fromPosition = viewHolder.adapterPosition
                 val toPosition = target.adapterPosition
+                isDragging = true
 
                 if (dragAndDrogList == null) {
                     dragAndDrogList = currentList.toMutableList()
@@ -57,6 +58,11 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                 viewHolder: RecyclerView.ViewHolder
             ) {
                 super.clearView(recyclerView, viewHolder)
+
+                if (!isDragging) {
+                    return
+                }
+
                 if (dragAndDrogList == null) {
                     onReorderCanceled.invoke()
                     return
