@@ -40,7 +40,7 @@ class CanvasBrushView(context: Context, attrs: AttributeSet) :
     //
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
+//        background = drawable
 //        val paint = Paint()
 //        val rect = Rect(0, 0, width, height)
 //        canvas.drawBitmap(mBitmapBrush!!,rect.centerX().toFloat(),rect.centerY().toFloat(),null)

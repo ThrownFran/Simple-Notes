@@ -182,16 +182,18 @@ class HomeFragment : Fragment(), MenuProvider {
             onClick = {
                 viewModel.clickItem(it)
             },
-            onReorderSuccess = {
+            onReorderSuccess = { taskList, viewHolder ->
                 actionMode?.finish()
-                viewModel.reorderList(it)
+                viewModel.reorderList(taskList)
+//                viewHolder.setBackgroundSelected()
+//                adapter?.notifyDataSetChanged()
             },
             onReorderCanceled = {
                 actionMode?.finish()
             })
             .also {
                 it.submitList(taskList)
-                it.itemTouchHelper.attachToRecyclerView(this)
+//                it.itemTouchHelper.attachToRecyclerView(this)
             }
     }
 
@@ -240,8 +242,19 @@ class HomeFragment : Fragment(), MenuProvider {
 
             // Called when the user exits the action mode
             override fun onDestroyActionMode(mode: ActionMode) {
-                taskList.filter { it.isSelected }.forEach { it.isSelected = false }
-                adapter.notifyDataSetChanged()
+                taskList.forEachIndexed { index, taskPresentationModel ->
+                    if (taskPresentationModel.isSelected) {
+                        taskPresentationModel.isSelected = false
+//                        adapter.notifyItemChanged(index)
+                        (findViewHolderForAdapterPosition(index) as TaskAdapter.ViewHolder).setBackgroundTransparent()
+                    }
+                }
+//                taskList.filter { it.isSelected }.forEachIndexed {
+//                    position,task ->
+//                    task.isSelected = false
+//                    adapter.notifyItemChanged(position)
+//                }
+//                adapter.notifyDataSetChanged()
                 actionMode = null
             }
         })

@@ -21,7 +21,7 @@ class TaskAdapter(
     val recyclerView: RecyclerView,
     val onClick: (TaskPresentationModel) -> Unit,
     val onSelection: () -> Unit,
-    val onReorderSuccess: (List<TaskPresentationModel>) -> Unit,
+    val onReorderSuccess: (List<TaskPresentationModel>, viewHolder: TaskAdapter.ViewHolder) -> Unit,
     val onReorderCanceled: () -> Unit
 ) : ListAdapter<TaskPresentationModel, TaskAdapter.ViewHolder>(DiffCallback) {
 
@@ -69,18 +69,18 @@ class TaskAdapter(
 
         private fun longClickInSelectionVisible() {
             toggleItemSelection()
-            if (isSelectionNotVisible()) {
-                enableDragNDrop()
-            }
+//            if (isSelectionNotVisible()) {
+//                enableDragNDrop()
+//            }
         }
 
         private fun longClickInNormalState() {
             startDrag()
             toggleItemSelection()
 
-            if (isSelectionNotVisible()) {
+/*            if (isSelectionNotVisible()) {
                 enableDragNDrop()
-            }
+            }*/
         }
 
         private fun click() {
@@ -92,13 +92,17 @@ class TaskAdapter(
         }
 
         private fun clickInNormalState() {
-            enableDragNDrop()
+//            enableDragNDrop()
             onClick.invoke(getItem(adapterPosition))
         }
 
         private fun clickInSelectionVisible() {
             toggleItemSelection()
-            if (isSelectionVisible()) disableDragNDrop() else enableDragNDrop()
+            if (isSelectionVisible()) {
+                disableDragNDrop()
+            } else {
+//                enableDragNDrop()
+            }
         }
 
         fun bind(task: TaskPresentationModel) {
@@ -118,25 +122,29 @@ class TaskAdapter(
             binding.taskTextContent.text = task.content
         }
 
-        private fun bindSelection(task: TaskPresentationModel) {
+        fun bindSelection(task: TaskPresentationModel) {
             if (task.isSelected) {
-                val typedValue = TypedValue()
-                itemView.context.theme.resolveAttribute(
-                    com.google.android.material.R.attr.colorSecondaryVariant,
-                    typedValue,
-                    true
-                )
-                val color = typedValue.data
-                itemView.setBackgroundColor(color)
-//                itemView.setBackgroundColor(
-//                    ContextCompat.getColor(itemView.context, R.color.teal_200)
-//                )
+                setBackgroundSelected()
             } else {
-//                binding.taskContraintExternal.setBackgroundColor(0)
-                itemView.setBackgroundColor(
-                    ContextCompat.getColor(itemView.context, R.color.white)
-                )
+                setBackgroundTransparent()
             }
+        }
+
+        fun setBackgroundTransparent() {
+            itemView.setBackgroundColor(
+                ContextCompat.getColor(itemView.context, R.color.transparent)
+            )
+        }
+
+        fun setBackgroundSelected() {
+            val typedValue = TypedValue()
+            itemView.context.theme.resolveAttribute(
+                com.google.android.material.R.attr.colorSecondaryVariant,
+                typedValue,
+                true
+            )
+            val color = typedValue.data
+            itemView.setBackgroundColor(color)
         }
 
         private fun bindTitle(task: TaskPresentationModel) {
@@ -156,16 +164,43 @@ class TaskAdapter(
             }
         }
 
-        private fun disableDragNDrop() {
+        fun disableDragNDrop() {
             itemTouchHelper.attachToRecyclerView(null)
+            itemView.setOnTouchListener(null)
         }
 
         private fun isSelectionVisible(): Boolean =
             currentList.any { it.isSelected }
 
         private fun startDrag() {
-            enableDragNDrop()
-            itemTouchHelper.startDrag(this)
+//            enableDragNDrop()
+//            itemTouchHelper.startDrag(this@ViewHolder)
+//            var startX: Float = 0f
+//            var startY: Float = 0f
+//            itemView.setOnTouchListener(object : View.OnTouchListener {
+//                override fun onTouch(view: View, event: MotionEvent): Boolean {
+//
+//                    // Check for drag gestures
+//                    when (event.getAction()) {
+//                        MotionEvent.ACTION_DOWN -> {
+//                            startX = event.getX()
+//                            startY = event.getY()
+//                        }
+//                        MotionEvent.ACTION_UP -> {
+//                        }
+//                        MotionEvent.ACTION_MOVE -> {
+//                            val translateX = event.getX() - startX;
+//                            val translateY = event.getY() - startY;
+//                            if(translateX > 1000 || translateY > 1000) {
+//                                Log.e("Task adapter", translateY.toString())
+//                                enableDragNDrop()
+//                                itemTouchHelper.startDrag(this@ViewHolder)
+//                            }
+//                        }
+//                    }
+//                    return true
+//                }
+//            })
         }
 
         private fun enableDragNDrop() {

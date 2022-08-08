@@ -63,6 +63,7 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                     return
                 }
 
+                isDragging = false
                 if (dragAndDrogList == null) {
                     onReorderCanceled.invoke()
                     return
@@ -81,8 +82,14 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                     }
                 }
 
-                dragAndDrogList?.let { onReorderSuccess.invoke(it) }
+                dragAndDrogList?.let {
+                    onReorderSuccess.invoke(
+                        it,
+                        viewHolder as TaskAdapter.ViewHolder
+                    )
+                }
                 dragAndDrogList = null
+//                (viewHolder as TaskAdapter.ViewHolder).disableDragNDrop()
             }
 
             override fun onSelectedChanged(
