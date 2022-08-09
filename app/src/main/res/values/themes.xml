@@ -26,6 +26,9 @@
         <item name="android:actionModeCloseDrawable">@drawable/ic_baseline_clear_24</item>
         <item name="actionModeStyle">@style/Widget.ActionMode</item>
         <item name="buttonBarStyle">@style/Widget.Material3.Button.TextButton.Dialog.Custom</item>
+
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <style name="Widget.ActionMode" parent="@style/Widget.AppCompat.ActionMode">

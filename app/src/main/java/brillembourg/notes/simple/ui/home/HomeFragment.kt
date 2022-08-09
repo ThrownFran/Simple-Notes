@@ -333,8 +333,9 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun setActionModeTitle(selectedList: List<TaskPresentationModel>) {
-        val noteString = if (selectedList.size > 1) "notes" else "note"
-        actionMode?.title = "${selectedList.size} $noteString selected"
+        val noteString =
+            if (selectedList.size > 1) getString(R.string.notes) else getString(R.string.note)
+        actionMode?.title = "${selectedList.size} ${noteString.lowercase()} selected"
     }
 
     private fun buildStaggeredManager() =

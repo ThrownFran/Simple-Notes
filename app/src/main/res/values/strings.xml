@@ -2,11 +2,12 @@
     <string name="app_name">Simple Notes</string>
     <string name="title">Title</string>
     <string name="note">Note</string>
+    <string name="notes">Notes</string>
     <string name="delete">Delete</string>
-    <string name="all_cancel">Cancel</string>
     <string name="all_delete">Delete</string>
-    <string name="delete_task_confirm">Confirm task(s) deletion?</string>
-    <string name="move_task_to_trash">Move selected task to trash?</string>
-    <string name="move_tasks_to_trash">Move selected tasks to trash?</string>
+    <string name="all_cancel">Cancel</string>
+    <string name="delete_task_confirm">Confirm note(s) deletion?</string>
+    <string name="move_task_to_trash">Move selected note to trash?</string>
+    <string name="move_tasks_to_trash">Move selected notes to trash?</string>
     <string name="all_move_to_trash">Move to trash</string>
 </resources>

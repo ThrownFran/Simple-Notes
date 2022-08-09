@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentById(R.id.container) as NavHostFragment
         navController = navHostFragment.navController
         appBarConfiguration = AppBarConfiguration(navController.graph)
+        setSupportActionBar(findViewById(R.id.toolbar))
         setupActionBarWithNavController(navController, appBarConfiguration)
         supportActionBar?.setBackgroundDrawable(R.drawable.blue_creyon_2)
     }
