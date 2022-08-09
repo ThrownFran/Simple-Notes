@@ -10,4 +10,7 @@
     <string name="move_task_to_trash">Move selected note to trash?</string>
     <string name="move_tasks_to_trash">Move selected notes to trash?</string>
     <string name="all_move_to_trash">Move to trash</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="trash_title">Trash</string>
 </resources>
