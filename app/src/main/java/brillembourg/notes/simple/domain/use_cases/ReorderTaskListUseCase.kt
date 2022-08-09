@@ -5,10 +5,10 @@ import brillembourg.notes.simple.domain.repositories.TaskRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class SaveTaskListUseCase @Inject constructor(private val repository: TaskRepository) {
+class ReorderTaskListUseCase @Inject constructor(private val repository: TaskRepository) {
 
     fun execute(params: Params): Flow<Result> {
-        return repository.saveTaskList(params)
+        return repository.reorderTaskList(params)
     }
 
     class Params(val taskList: List<Task>)

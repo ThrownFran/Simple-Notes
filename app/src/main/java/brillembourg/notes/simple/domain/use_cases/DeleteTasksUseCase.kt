@@ -4,9 +4,9 @@ import brillembourg.notes.simple.domain.repositories.TaskRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class DeleteTaskUseCase @Inject constructor(private val repository: TaskRepository) {
+class DeleteTasksUseCase @Inject constructor(private val repository: TaskRepository) {
 
-    fun execute (params: Params) : Flow<Result> {
+    fun execute(params: Params): Flow<Result> {
         return repository.deleteTask(params)
     }
 

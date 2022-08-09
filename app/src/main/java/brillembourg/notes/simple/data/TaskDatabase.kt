@@ -53,6 +53,12 @@ class TaskDatabase(
         roomDatabase.taskDao().delete(taskId)
     }
 
+    suspend fun saveTasksReordering(taskList: List<TaskEntity>) {
+        taskList.forEach {
+            roomDatabase.taskDao().updateTaskOrder(it.id!!, it.order)
+        }
+    }
+
     suspend fun saveTasks(taskList: List<TaskEntity>) {
         roomDatabase.taskDao().saveTasks(ArrayList(taskList))
     }

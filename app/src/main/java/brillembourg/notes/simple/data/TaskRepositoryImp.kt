@@ -26,11 +26,11 @@ class TaskRepositoryImp(
         }
     }
 
-    override fun deleteTask(params: DeleteTaskUseCase.Params): Flow<DeleteTaskUseCase.Result> {
+    override fun deleteTask(params: DeleteTasksUseCase.Params): Flow<DeleteTasksUseCase.Result> {
         return flow {
             database.deleteTasks(params.ids)
             emit(
-                DeleteTaskUseCase.Result(
+                DeleteTasksUseCase.Result(
                     if (params.ids.size > 1) "Tasks deleted" else "Task deleted"
                 )
             )
@@ -54,10 +54,10 @@ class TaskRepositoryImp(
         }
     }
 
-    override fun saveTaskList(params: SaveTaskListUseCase.Params): Flow<SaveTaskListUseCase.Result> {
+    override fun reorderTaskList(params: ReorderTaskListUseCase.Params): Flow<ReorderTaskListUseCase.Result> {
         return flow {
-            database.saveTasks(params.taskList.map { it.toData() })
-            emit(SaveTaskListUseCase.Result("Tasks saved"))
+            database.saveTasksReordering(params.taskList.map { it.toData() })
+            emit(ReorderTaskListUseCase.Result("Tasks reordered"))
         }
     }
 }
