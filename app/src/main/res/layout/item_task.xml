@@ -22,6 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardElevation="2dp"
+            app:cardBackgroundColor="?attr/colorSurface"
             app:cardCornerRadius="10dp">
 
             <brillembourg.notes.simple.ui.extras.RoundContraintLayout

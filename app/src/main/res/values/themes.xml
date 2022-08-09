@@ -25,6 +25,7 @@
         <item name="android:actionModeBackground">?attr/colorSecondaryVariant</item>
         <item name="android:actionModeCloseDrawable">@drawable/ic_baseline_clear_24</item>
         <item name="actionModeStyle">@style/Widget.ActionMode</item>
+        <item name="buttonBarStyle">@style/Widget.Material3.Button.TextButton.Dialog.Custom</item>
     </style>
 
     <style name="Widget.ActionMode" parent="@style/Widget.AppCompat.ActionMode">
@@ -36,4 +37,15 @@
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?colorOnSecondary</item>
     </style>
+
+    <style name="Widget.Material3.Button.TextButton.Dialog.Custom" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">?colorSecondaryVariant</item>
+    </style>
+
+    <!--    <style name="MaterialAlertDialog.Custom" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">-->
+    <!--        <item name="buttonStyle">@style/MaterialButton.Custom</item>-->
+    <!--    </style>-->
+    <!--    <style name="ShapeAppearanceOverlay.MaterialAlertDialog.Rounded" parent="">-->
+    <!--        <item name="cornerSize">10dp</item>-->
+    <!--    </style>-->
 </resources>

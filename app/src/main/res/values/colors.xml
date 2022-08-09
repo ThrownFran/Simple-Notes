@@ -7,7 +7,7 @@
     <color name="secondaryLightColor">#FF03DAC5</color>
     <color name="secondaryDarkColor">#00867d</color>
     <color name="primaryTextColor">#000000</color>
-    <color name="secondaryTextColor">#000000</color>
+    <color name="secondaryTextColor">#434242</color>
 
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>

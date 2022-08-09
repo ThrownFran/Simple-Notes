@@ -17,6 +17,7 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentMainBinding
 import brillembourg.notes.simple.ui.extras.showToast
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -180,14 +181,15 @@ class HomeFragment : Fragment(), MenuProvider {
                 layoutManager = buildLayoutManager(isStaggered)
             }
         } else {
-            val currentList = (binding.homeRecycler.adapter as TaskAdapter).currentList
-            val isInsertingInList = currentList.size < taskList.size
-            (binding.homeRecycler.adapter as TaskAdapter).submitList(taskList) {
-                if (isInsertingInList) {
-                    binding.homeRecycler.scrollToPosition(0)
+            (binding.homeRecycler.adapter as TaskAdapter).apply {
+                val isInsertingInList = currentList.size < taskList.size
+
+                submitList(taskList) {
+                    if (isInsertingInList) binding.homeRecycler.scrollToPosition(0)
                 }
+
+                notifyDataSetChanged()
             }
-            binding.homeRecycler.adapter?.notifyDataSetChanged()
         }
 
     }
@@ -212,19 +214,31 @@ class HomeFragment : Fragment(), MenuProvider {
                 recyclerView.setupContextualActionBar()
             },
             onClick = {
-                viewModel.clickItem(it)
+                clickItem(it)
             },
             onReorderSuccess = { tasks ->
-                actionMode?.finish()
-                viewModel.reorderList(tasks)
+                clickReorder(tasks)
             },
             onReorderCanceled = {
-                actionMode?.finish()
+                clickReorderCancelled()
             })
             .also {
                 it.submitList(taskList)
                 it.itemTouchHelper.attachToRecyclerView(recyclerView)
             }
+    }
+
+    private fun clickReorder(tasks: List<TaskPresentationModel>) {
+        actionMode?.finish()
+        viewModel.reorderList(tasks)
+    }
+
+    private fun clickReorderCancelled() {
+        actionMode?.finish()
+    }
+
+    private fun clickItem(it: TaskPresentationModel) {
+        viewModel.clickItem(it)
     }
 
     private fun getDragDirs(isStaggered: Boolean) = if (isStaggered) {
@@ -268,8 +282,7 @@ class HomeFragment : Fragment(), MenuProvider {
             override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
                 return when (item.itemId) {
                     R.id.menu_context_menu_delete -> {
-                        viewModel.clickDeleteTasks(adapter.currentList.filter { it.isSelected })
-                        mode.finish() // Action picked, so close the CAB
+                        clickDeleteTasks(adapter.currentList.filter { it.isSelected })
                         true
                     }
                     else -> false
@@ -295,6 +308,28 @@ class HomeFragment : Fragment(), MenuProvider {
         })
 
         setActionModeTitle(selectedList)
+    }
+
+    private fun clickDeleteTasks(taskList: List<TaskPresentationModel>) {
+        if (taskList.isEmpty()) throw IllegalArgumentException("Nothing to delete but trash was pressed")
+
+        val title =
+            if (taskList.size > 1) getString(R.string.move_tasks_to_trash) else getString(R.string.move_task_to_trash)
+
+        MaterialAlertDialogBuilder(
+            requireContext(), com.google.android.material.R.style.MaterialAlertDialog_Material3
+        )
+            .setTitle(title)
+            .setIcon(R.drawable.ic_baseline_delete_24)
+//            .setMessage(resources.getString(R.string.supporting_text))
+            .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
+            }
+            .setPositiveButton(resources.getString(R.string.all_move_to_trash)) { dialog, which ->
+                viewModel.clickDeleteTasks(taskList)
+                actionMode?.finish()
+            }
+            .show()
+
     }
 
     private fun setActionModeTitle(selectedList: List<TaskPresentationModel>) {
