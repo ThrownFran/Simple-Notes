@@ -89,9 +89,6 @@ class TaskAdapter(
 
         private fun clickInSelectionVisible() {
             toggleItemSelection()
-            if (isSelectionVisible()) {
-                disableDragNDrop()
-            }
         }
 
         fun bind(task: TaskPresentationModel) {
