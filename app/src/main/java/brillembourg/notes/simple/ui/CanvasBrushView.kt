@@ -3,6 +3,7 @@ package brillembourg.notes.simple.ui
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -60,10 +61,19 @@ class CanvasBrushView(context: Context, attrs: AttributeSet) :
 //        drawable = BitmapDrawable(resources, mBitmapBrush)
 //        background = drawable
         val typedValue = TypedValue()
-        context.getTheme()
+        context.theme
             .resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
         val color = typedValue.data
-        setBackgroundColor(color)
+        setBackgroundColor(getColorWithAlpha(color, 0.3f))
+    }
+
+    private fun getColorWithAlpha(color: Int, ratio: Float): Int {
+        return Color.argb(
+            Math.round(Color.alpha(color) * ratio),
+            Color.red(color),
+            Color.green(color),
+            Color.blue(color)
+        )
     }
 
 //    override fun onTouchEvent(event: MotionEvent): Boolean {

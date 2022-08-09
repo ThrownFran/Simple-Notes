@@ -85,34 +85,35 @@ class HomeFragment : Fragment(), MenuProvider {
         return false
     }
 
-    private fun clickStaggeredLayout() {
-        isStaggered = true
+    private fun clickChangeLayout(isStaggered: Boolean) {
+        this.isStaggered = isStaggered
         binding.homeRecycler.apply {
-            layoutManager = buildStaggeredManager()
-            (adapter as TaskAdapter).itemTouchHelper =
-                (adapter as TaskAdapter).setupDragAndDropTouchHelper(getDragDirs())
-                    .also { it.attachToRecyclerView(this) }
-            adapter?.notifyDataSetChanged()
+            layoutManager = when {
+                isStaggered -> buildStaggeredManager()
+                else -> buildLinearManager()
+            }
+
+            val taskAdapter = adapter as TaskAdapter
+            taskAdapter.itemTouchHelper =
+                taskAdapter.setupDragAndDropTouchHelper(getDragDirs(isStaggered)).also {
+                    it.attachToRecyclerView(this)
+                }
+            taskAdapter.notifyDataSetChanged()
         }
+    }
+
+    private fun clickStaggeredLayout() {
+        clickChangeLayout(true)
     }
 
     private fun clickVerticalLayout() {
-        isStaggered = false
-        binding.homeRecycler.apply {
-            layoutManager = buildLinearManager()
-            (adapter as TaskAdapter).itemTouchHelper =
-                (adapter as TaskAdapter).setupDragAndDropTouchHelper(getDragDirs())
-                    .also { it.attachToRecyclerView(this) }
-            adapter?.notifyDataSetChanged()
-        }
+        clickChangeLayout(false)
     }
 
-    private fun buildLinearManager() =
-        LinearLayoutManager(context)
+    private fun buildLinearManager() = LinearLayoutManager(context)
 
 
     override fun onDestroyView() {
-//        _binding = null
         saveRecyclerState()
         super.onDestroyView()
     }
@@ -153,11 +154,20 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun navigateToCreateTask() {
+        finishActionIfActive()
+
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         findNavController().navigate(directions)
     }
 
+    private fun finishActionIfActive() {
+        actionMode?.finish()
+        actionMode = null
+    }
+
     private fun navigateToDetail(it: TaskPresentationModel) {
+        finishActionIfActive()
+
         //navigate to detail fragment
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         directions.task = it
@@ -166,7 +176,10 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun setupTaskList(taskList: List<TaskPresentationModel>) {
         if (binding.homeRecycler.adapter == null) {
-            binding.homeRecycler.apply { buildAdapter(taskList) }
+            binding.homeRecycler.apply {
+                adapter = buildTaskAdapter(this, taskList, getDragDirs(isStaggered))
+                layoutManager = buildLayoutManager(isStaggered)
+            }
         } else {
             (binding.homeRecycler.adapter as TaskAdapter).submitList(taskList)
             binding.homeRecycler.adapter?.notifyDataSetChanged()
@@ -174,46 +187,49 @@ class HomeFragment : Fragment(), MenuProvider {
 
     }
 
-    private fun RecyclerView.buildAdapter(taskList: List<TaskPresentationModel>) {
-        layoutManager =
-            if (isStaggered) buildStaggeredManager() else buildLinearManager()
-                .also { layoutManager ->
-                    retrieveRecyclerStateIfApplies(layoutManager)
-                }
+    private fun buildLayoutManager(isStaggered: Boolean): RecyclerView.LayoutManager {
+        return if (isStaggered) buildStaggeredManager() else buildLinearManager()
+            .also { layoutManager ->
+                retrieveRecyclerStateIfApplies(layoutManager)
+            }
+    }
 
+    private fun buildTaskAdapter(
+        recyclerView: RecyclerView,
+        taskList: List<TaskPresentationModel>,
+        dragDirs: Int
+    ): TaskAdapter {
 
-        adapter = TaskAdapter(
-            getDragDirs(),
-            binding.homeRecycler,
+        return TaskAdapter(
+            dragDirs,
+            recyclerView,
             onSelection = {
-                setupContextualActionBar()
+                recyclerView.setupContextualActionBar()
             },
             onClick = {
                 viewModel.clickItem(it)
             },
-            onReorderSuccess = { tasks, viewHolder ->
+            onReorderSuccess = { tasks ->
                 actionMode?.finish()
                 viewModel.reorderList(tasks)
             },
             onReorderCanceled = {
                 actionMode?.finish()
-
-
             })
             .also {
                 it.submitList(taskList)
-                it.itemTouchHelper.attachToRecyclerView(this)
+                it.itemTouchHelper.attachToRecyclerView(recyclerView)
             }
     }
 
-    private fun getDragDirs() = if (isStaggered) {
+    private fun getDragDirs(isStaggered: Boolean) = if (isStaggered) {
         ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END
     } else {
         ItemTouchHelper.UP or ItemTouchHelper.DOWN
     }
 
     private fun RecyclerView.setupContextualActionBar() {
-        val adapter = binding.homeRecycler.adapter as TaskAdapter
+        val adapter = adapter as TaskAdapter
         val taskList = adapter.currentList
         val selectedList = taskList.filter { it.isSelected }
 
@@ -227,7 +243,8 @@ class HomeFragment : Fragment(), MenuProvider {
             return
         }
 
-        actionMode = startActionMode(object : ActionMode.Callback {
+
+        actionMode = this.startActionMode(object : ActionMode.Callback {
             // Called when the action mode is created; startActionMode() was called
             override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
                 // Inflate a menu resource providing context menu items

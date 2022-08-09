@@ -85,7 +85,7 @@ fun TaskAdapter.setupDragAndDropTouchHelper(dragAndDropDirs: Int): ItemTouchHelp
                 recyclerView.layoutManager?.onRestoreInstanceState(state)
 
                 dragAndDrogList?.let {
-                    onReorderSuccess.invoke(it, viewHolder as TaskAdapter.ViewHolder)
+                    onReorderSuccess.invoke(it)
                 }
                 dragAndDrogList = null
             }

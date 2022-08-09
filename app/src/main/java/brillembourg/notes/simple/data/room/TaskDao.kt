@@ -18,6 +18,9 @@ abstract class TaskDao {
     @Query("DELETE FROM taskentity WHERE id = :taskId")
     abstract suspend fun delete(taskId: Long)
 
+    @Query("delete from taskentity where id in (:ids)")
+    abstract suspend fun deleteTasks(ids: List<Long>)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun save(task: TaskEntity)
 

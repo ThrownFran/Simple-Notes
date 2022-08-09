@@ -20,7 +20,7 @@ class TaskAdapter(
     val recyclerView: RecyclerView,
     val onClick: (TaskPresentationModel) -> Unit,
     val onSelection: () -> Unit,
-    val onReorderSuccess: (List<TaskPresentationModel>, viewHolder: TaskAdapter.ViewHolder) -> Unit,
+    val onReorderSuccess: (List<TaskPresentationModel>) -> Unit,
     val onReorderCanceled: () -> Unit
 ) : ListAdapter<TaskPresentationModel, TaskAdapter.ViewHolder>(DiffCallback) {
 
@@ -44,7 +44,8 @@ class TaskAdapter(
         holder.bind(getItem(position))
     }
 
-    inner class ViewHolder(val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(private val binding: ItemTaskBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
         init {
             setupClickListeners()
@@ -98,7 +99,6 @@ class TaskAdapter(
             bindContent(task)
             bindDate(task)
             bindSelection(task)
-//            correctImageHeight()
         }
 
         private fun bindDate(task: TaskPresentationModel) {

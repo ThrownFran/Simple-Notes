@@ -10,7 +10,7 @@ class DeleteTaskUseCase @Inject constructor(private val repository: TaskReposito
         return repository.deleteTask(params)
     }
 
-    class Params (val id: Long)
-    class Result (val message: String)
+    class Params(val ids: List<Long>)
+    class Result(val message: String)
 
 }

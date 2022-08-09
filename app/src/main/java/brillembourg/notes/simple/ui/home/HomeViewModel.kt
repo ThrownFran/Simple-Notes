@@ -64,17 +64,17 @@ class HomeViewModel @Inject constructor(
         _navigateToCreateEvent.value = Any()
     }
 
-    fun clickDeleteTask(it: TaskPresentationModel) {
-        deleteTask(it)
-    }
+//    private fun clickDeleteTask(it: TaskPresentationModel) {
+//        deleteTask(it)
+//    }
 
     private fun deleteTask(it: TaskPresentationModel) {
-        deleteTaskUseCase.execute(DeleteTaskUseCase.Params(it.id))
-            .debounce(400)
-            .onEach {
-                showMessage(it.message)
-            }
-            .launchIn(viewModelScope)
+//        deleteTaskUseCase.execute(DeleteTaskUseCase.Params(it.))
+//            .debounce(400)
+//            .onEach {
+//                showMessage(it.message)
+//            }
+//            .launchIn(viewModelScope)
     }
 
     private fun showMessage(message: String) {
@@ -82,7 +82,13 @@ class HomeViewModel @Inject constructor(
     }
 
     fun clickDeleteTasks(tasksToDelete: List<TaskPresentationModel>) {
-        tasksToDelete.forEach { clickDeleteTask(it) }
+        deleteTaskUseCase.execute(DeleteTaskUseCase.Params(tasksToDelete.map { it.id }))
+            .debounce(400)
+            .onEach {
+                showMessage(it.message)
+            }
+            .launchIn(viewModelScope)
+//        tasksToDelete.forEach { clickDeleteTask(it) }
     }
 
 

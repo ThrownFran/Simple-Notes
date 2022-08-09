@@ -45,6 +45,10 @@ class TaskDatabase(
         return roomDatabase.taskDao().getList()
     }
 
+    suspend fun deleteTasks(ids: List<Long>) {
+        return roomDatabase.taskDao().deleteTasks(ids)
+    }
+
     suspend fun deleteTask(taskId: Long) {
         roomDatabase.taskDao().delete(taskId)
     }

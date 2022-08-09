@@ -28,8 +28,12 @@ class TaskRepositoryImp(
 
     override fun deleteTask(params: DeleteTaskUseCase.Params): Flow<DeleteTaskUseCase.Result> {
         return flow {
-            database.deleteTask(params.id)
-            emit(DeleteTaskUseCase.Result("Task deleted"))
+            database.deleteTasks(params.ids)
+            emit(
+                DeleteTaskUseCase.Result(
+                    if (params.ids.size > 1) "Tasks deleted" else "Task deleted"
+                )
+            )
         }
     }
 
@@ -41,10 +45,6 @@ class TaskRepositoryImp(
                     it.map { taskEntity -> taskEntity.toDomain() }
                 ))
             }
-//        return flow {
-//            val taskList = database.getTaskList().map { it.toDomain() }
-//            emit(GetTaskListUseCase.Result(taskList))
-//        }
     }
 
     override fun saveTask(params: SaveTaskUseCase.Params): Flow<SaveTaskUseCase.Result> {
