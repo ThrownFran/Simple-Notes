@@ -3,8 +3,6 @@ package brillembourg.notes.simple.data
 import android.content.Context
 import brillembourg.notes.simple.data.room.AppDatabase
 import brillembourg.notes.simple.data.room.TaskEntity
-import brillembourg.notes.simple.data.room.toData
-import brillembourg.notes.simple.domain.models.Task
 import kotlinx.coroutines.flow.Flow
 
 class TaskDatabase(
@@ -38,9 +36,10 @@ class TaskDatabase(
         return lastOrderPosition
     }
 
-    suspend fun saveTask(task: Task) {
-        roomDatabase.taskDao().save(task.toData())
+    suspend fun saveTask(task: TaskEntity) {
+        roomDatabase.taskDao().save(task)
     }
+
 
     fun getTaskList(): Flow<List<TaskEntity>> {
         return roomDatabase.taskDao().getList()
@@ -48,6 +47,10 @@ class TaskDatabase(
 
     suspend fun deleteTask(taskId: Long) {
         roomDatabase.taskDao().delete(taskId)
+    }
+
+    suspend fun saveTasks(taskList: List<TaskEntity>) {
+        roomDatabase.taskDao().saveTasks(ArrayList(taskList))
     }
 
 }

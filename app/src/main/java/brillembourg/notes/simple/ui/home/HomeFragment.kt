@@ -2,6 +2,7 @@ package brillembourg.notes.simple.ui.home
 
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -162,6 +163,7 @@ class HomeFragment : Fragment(), MenuProvider {
             binding.homeRecycler.apply { buildAdapter(taskList) }
         } else {
             (binding.homeRecycler.adapter as TaskAdapter).submitList(taskList)
+            Log.e("HomeFragment", "Submit list")
             binding.homeRecycler.adapter?.notifyDataSetChanged()
         }
 
@@ -182,10 +184,10 @@ class HomeFragment : Fragment(), MenuProvider {
             onClick = {
                 viewModel.clickItem(it)
             },
-            onReorderSuccess = { taskList, viewHolder ->
+            onReorderSuccess = { tasks, viewHolder ->
                 actionMode?.finish()
-                viewModel.reorderList(taskList)
-//                viewHolder.setBackgroundSelected()
+//                viewHolder.setBackgroundTransparent()
+                viewModel.reorderList(tasks)
 //                adapter?.notifyDataSetChanged()
             },
             onReorderCanceled = {
@@ -193,7 +195,7 @@ class HomeFragment : Fragment(), MenuProvider {
             })
             .also {
                 it.submitList(taskList)
-//                it.itemTouchHelper.attachToRecyclerView(this)
+                it.itemTouchHelper.attachToRecyclerView(this)
             }
     }
 
@@ -242,11 +244,15 @@ class HomeFragment : Fragment(), MenuProvider {
 
             // Called when the user exits the action mode
             override fun onDestroyActionMode(mode: ActionMode) {
+
                 taskList.forEachIndexed { index, taskPresentationModel ->
                     if (taskPresentationModel.isSelected) {
                         taskPresentationModel.isSelected = false
-//                        adapter.notifyItemChanged(index)
-                        (findViewHolderForAdapterPosition(index) as TaskAdapter.ViewHolder).setBackgroundTransparent()
+                        try {
+                            (findViewHolderForAdapterPosition(index) as TaskAdapter.ViewHolder).setBackgroundTransparent()
+                        } catch (e: Exception) {
+                            adapter.notifyItemChanged(index)
+                        }
                     }
                 }
 //                taskList.filter { it.isSelected }.forEachIndexed {

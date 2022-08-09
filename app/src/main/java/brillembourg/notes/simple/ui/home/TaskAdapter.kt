@@ -32,6 +32,10 @@ class TaskAdapter(
 
     val itemTouchHelper by lazy { setupDragAndDropTouchHelper() }
 
+    override fun submitList(list: List<TaskPresentationModel>?) {
+        super.submitList(list?.let { ArrayList(it) })
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             ItemTaskBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -166,15 +170,15 @@ class TaskAdapter(
 
         fun disableDragNDrop() {
             itemTouchHelper.attachToRecyclerView(null)
-            itemView.setOnTouchListener(null)
+//            itemView.setOnTouchListener(null)
         }
 
         private fun isSelectionVisible(): Boolean =
             currentList.any { it.isSelected }
 
         private fun startDrag() {
-//            enableDragNDrop()
-//            itemTouchHelper.startDrag(this@ViewHolder)
+            enableDragNDrop()
+            itemTouchHelper.startDrag(this@ViewHolder)
 //            var startX: Float = 0f
 //            var startY: Float = 0f
 //            itemView.setOnTouchListener(object : View.OnTouchListener {
@@ -192,9 +196,10 @@ class TaskAdapter(
 //                            val translateX = event.getX() - startX;
 //                            val translateY = event.getY() - startY;
 //                            if(translateX > 1000 || translateY > 1000) {
-//                                Log.e("Task adapter", translateY.toString())
-//                                enableDragNDrop()
-//                                itemTouchHelper.startDrag(this@ViewHolder)
+//                                Log.e("Task adapter: Translate Y", translateY.toString())
+//                                Log.e("Task adapter: Translate X", translateX.toString())
+////                                enableDragNDrop()
+////                                itemTouchHelper.startDrag(this@ViewHolder)
 //                            }
 //                        }
 //                    }

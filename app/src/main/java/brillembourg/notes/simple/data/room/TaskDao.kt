@@ -21,6 +21,9 @@ abstract class TaskDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun save(task: TaskEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun saveTasks(itemList: ArrayList<TaskEntity>)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun create(item: TaskEntity): Long
 

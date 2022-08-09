@@ -1,6 +1,5 @@
 package brillembourg.notes.simple.ui.home
 
-import android.util.Log
 import androidx.lifecycle.*
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.DeleteTaskUseCase
@@ -38,7 +37,7 @@ class HomeViewModel @Inject constructor(
     private fun handleTaskListObservable() = getTaskListUseCase
         .execute(GetTaskListUseCase.Params())
         .map {
-            Log.e("HomeViewModel updated list", it.taskList.toString())
+//            Log.e("HomeViewModel updated list", it.taskList.toString())
             it.taskList.map { it.toPresentation(dateProvider) }
                 .sortedBy { taskPresentationModel -> taskPresentationModel.order }
             //                .asReversed()

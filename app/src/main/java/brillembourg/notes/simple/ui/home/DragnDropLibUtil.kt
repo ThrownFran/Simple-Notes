@@ -1,6 +1,5 @@
 package brillembourg.notes.simple.ui.home
 
-import android.util.Log
 import androidx.annotation.Nullable
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -13,6 +12,12 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
             ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END,
             0
         ) {
+
+
+            override fun isLongPressDragEnabled(): Boolean {
+                return false
+            }
+
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
@@ -42,7 +47,7 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                 };
 
 
-                Log.e("Current list", dragAndDrogList.toString())
+//                Log.e("Current list", dragAndDrogList.toString())
 
                 //                    submitList(dragAndDrogList)
                 recyclerviewAdapter.notifyItemMoved(fromPosition, toPosition)
@@ -64,6 +69,8 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                 }
 
                 isDragging = false
+//                (viewHolder as TaskAdapter.ViewHolder).setBackgroundTransparent()
+
                 if (dragAndDrogList == null) {
                     onReorderCanceled.invoke()
                     return
@@ -89,7 +96,6 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                     )
                 }
                 dragAndDrogList = null
-//                (viewHolder as TaskAdapter.ViewHolder).disableDragNDrop()
             }
 
             override fun onSelectedChanged(
@@ -101,7 +107,7 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                     ItemTouchHelper.ACTION_STATE_SWIPE -> {}                   // the user is swiping an item and didn't lift their finger off yet
                     ItemTouchHelper.ACTION_STATE_IDLE -> {
                         // the user just dropped the item (after dragging it), and lift their finger off.
-                        Log.e("ITEM TOUCH HELPER", "IDLE")
+//                        Log.e("ITEM TOUCH HELPER", "IDLE")
                     }
                 }
             }

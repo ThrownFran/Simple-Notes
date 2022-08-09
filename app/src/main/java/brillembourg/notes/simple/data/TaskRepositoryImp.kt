@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.data
 
+import brillembourg.notes.simple.data.room.toData
 import brillembourg.notes.simple.data.room.toDomain
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import brillembourg.notes.simple.domain.use_cases.*
@@ -48,16 +49,14 @@ class TaskRepositoryImp(
 
     override fun saveTask(params: SaveTaskUseCase.Params): Flow<SaveTaskUseCase.Result> {
         return flow {
-            database.saveTask(params.task)
+            database.saveTask(params.task.toData())
             emit(SaveTaskUseCase.Result("Task updated"))
         }
     }
 
     override fun saveTaskList(params: SaveTaskListUseCase.Params): Flow<SaveTaskListUseCase.Result> {
         return flow {
-            params.taskList.forEach {
-                database.saveTask(it)
-            }
+            database.saveTasks(params.taskList.map { it.toData() })
             emit(SaveTaskListUseCase.Result("Tasks saved"))
         }
     }
