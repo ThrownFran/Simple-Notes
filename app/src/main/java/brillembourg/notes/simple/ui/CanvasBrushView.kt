@@ -3,12 +3,9 @@ package brillembourg.notes.simple.ui
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
-import brillembourg.notes.simple.R
+import android.util.TypedValue
 import brillembourg.notes.simple.ui.extras.RoundContraintLayout
 
 
@@ -24,8 +21,8 @@ class CanvasBrushView(context: Context, attrs: AttributeSet) :
 
     init {
         // load your brush here
-        mBitmapBrush =
-            ContextCompat.getDrawable(context, R.drawable.blue_creyon_2)?.toBitmap()
+//        mBitmapBrush =
+//            ContextCompat.getDrawable(context, R.drawable.blue_creyon_2)?.toBitmap()
 //        drawable = BitmapDrawable(resources, mBitmapBrush)
 //        mBitmapBrush?.compress(Bitmap.CompressFormat.PNG, 10,mBitmapBr);
 //        mBitmapBrushDimensions = Vector2(
@@ -58,14 +55,15 @@ class CanvasBrushView(context: Context, attrs: AttributeSet) :
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        mBitmapBrush =
-            Bitmap.createScaledBitmap(mBitmapBrush!!, measuredWidth, measuredHeight, false)
-        drawable = BitmapDrawable(resources, mBitmapBrush)
-        background = drawable
-//        val typedValue = TypedValue()
-//        context.getTheme().resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
-//        val color = typedValue.data
-//        setBackgroundColor(color)
+//        mBitmapBrush =
+//            Bitmap.createScaledBitmap(mBitmapBrush!!, measuredWidth, measuredHeight, false)
+//        drawable = BitmapDrawable(resources, mBitmapBrush)
+//        background = drawable
+        val typedValue = TypedValue()
+        context.getTheme()
+            .resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
+        val color = typedValue.data
+        setBackgroundColor(color)
     }
 
 //    override fun onTouchEvent(event: MotionEvent): Boolean {

@@ -74,14 +74,16 @@ fun TaskAdapter.setupDragAndDropTouchHelper(dragAndDropDirs: Int): ItemTouchHelp
                 }
 
                 recyclerView.itemAnimator = null
+
+                val state = recyclerView.layoutManager?.onSaveInstanceState()
                 submitList(null)
                 submitList(dragAndDrogList) {
                     recyclerView.post {
                         recyclerView.itemAnimator = DefaultItemAnimator()
                     }
                 }
+                recyclerView.layoutManager?.onRestoreInstanceState(state)
 
-                notifyDataSetChanged()
                 dragAndDrogList?.let {
                     onReorderSuccess.invoke(it, viewHolder as TaskAdapter.ViewHolder)
                 }
