@@ -62,7 +62,7 @@ class DetailViewModel @Inject constructor(
                 content = content,
                 title = title
             )
-        ).onEach { state.value = DetailState.TaskSaved(it.message) }
+        ).onEach { state.value = DetailState.TaskCreated(it.message) }
             .launchIn(viewModelScope)
     }
 

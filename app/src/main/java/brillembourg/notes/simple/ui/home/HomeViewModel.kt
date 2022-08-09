@@ -2,9 +2,9 @@ package brillembourg.notes.simple.ui.home
 
 import androidx.lifecycle.*
 import brillembourg.notes.simple.data.DateProvider
-import brillembourg.notes.simple.domain.use_cases.DeleteTaskUseCase
+import brillembourg.notes.simple.domain.use_cases.DeleteTasksUseCase
 import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
-import brillembourg.notes.simple.domain.use_cases.SaveTaskListUseCase
+import brillembourg.notes.simple.domain.use_cases.ReorderTaskListUseCase
 import brillembourg.notes.simple.ui.extras.SingleLiveEvent
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import brillembourg.notes.simple.ui.models.toDomain
@@ -16,8 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getTaskListUseCase: GetTaskListUseCase,
-    private val deleteTaskUseCase: DeleteTaskUseCase,
-    private val saveTaskListUseCase: SaveTaskListUseCase,
+    private val deleteTasksUseCase: DeleteTasksUseCase,
+    private val reorderTaskListUseCase: ReorderTaskListUseCase,
     private val dateProvider: DateProvider
 ) : ViewModel() {
 
@@ -37,7 +37,6 @@ class HomeViewModel @Inject constructor(
     private fun handleTaskListObservable() = getTaskListUseCase
         .execute(GetTaskListUseCase.Params())
         .map {
-//            Log.e("HomeViewModel updated list", it.taskList.toString())
             it.taskList.map { it.toPresentation(dateProvider) }
                 .sortedBy { taskPresentationModel -> taskPresentationModel.order }
                 .asReversed()
@@ -48,11 +47,13 @@ class HomeViewModel @Inject constructor(
         }.asLiveData(viewModelScope.coroutineContext)
 
     fun reorderList(it: List<TaskPresentationModel>) {
-        saveTaskListUseCase.execute(
-            SaveTaskListUseCase.Params(
+        reorderTaskListUseCase.execute(
+            ReorderTaskListUseCase.Params(
                 it.map { taskPresentationModel -> taskPresentationModel.toDomain(dateProvider) }
             )
-        )
+        ).onEach {
+            showMessage(it.message)
+        }
             .launchIn(viewModelScope)
     }
 
@@ -64,25 +65,13 @@ class HomeViewModel @Inject constructor(
         _navigateToCreateEvent.value = Any()
     }
 
-//    private fun clickDeleteTask(it: TaskPresentationModel) {
-//        deleteTask(it)
-//    }
-
-    private fun deleteTask(it: TaskPresentationModel) {
-//        deleteTaskUseCase.execute(DeleteTaskUseCase.Params(it.))
-//            .debounce(400)
-//            .onEach {
-//                showMessage(it.message)
-//            }
-//            .launchIn(viewModelScope)
-    }
 
     private fun showMessage(message: String) {
         _messageEvent.value = message
     }
 
     fun clickDeleteTasks(tasksToDelete: List<TaskPresentationModel>) {
-        deleteTaskUseCase.execute(DeleteTaskUseCase.Params(tasksToDelete.map { it.id }))
+        deleteTasksUseCase.execute(DeleteTasksUseCase.Params(tasksToDelete.map { it.id }))
             .debounce(400)
             .onEach {
                 showMessage(it.message)

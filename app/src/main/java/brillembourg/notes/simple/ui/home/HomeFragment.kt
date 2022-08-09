@@ -46,7 +46,6 @@ class HomeFragment : Fragment(), MenuProvider {
         return binding.root
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupMenu()
@@ -181,7 +180,13 @@ class HomeFragment : Fragment(), MenuProvider {
                 layoutManager = buildLayoutManager(isStaggered)
             }
         } else {
-            (binding.homeRecycler.adapter as TaskAdapter).submitList(taskList)
+            val currentList = (binding.homeRecycler.adapter as TaskAdapter).currentList
+            val isInsertingInList = currentList.size < taskList.size
+            (binding.homeRecycler.adapter as TaskAdapter).submitList(taskList) {
+                if (isInsertingInList) {
+                    binding.homeRecycler.scrollToPosition(0)
+                }
+            }
             binding.homeRecycler.adapter?.notifyDataSetChanged()
         }
 

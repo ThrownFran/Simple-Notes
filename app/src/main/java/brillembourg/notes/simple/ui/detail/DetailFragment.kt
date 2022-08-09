@@ -18,7 +18,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 
-
 @AndroidEntryPoint
 class DetailFragment : Fragment() {
 
@@ -70,10 +69,16 @@ class DetailFragment : Fragment() {
             when (it) {
                 is DetailState.CreateTask -> onStateNewTask()
                 is DetailState.TaskLoaded -> onStateTaskLoaded(it)
+                is DetailState.TaskCreated -> onStateTaskCreated(it)
                 is DetailState.TaskSaved -> onStateTaskSaved(it)
                 is DetailState.ExitWithoutSaving -> finishView()
             }
         }
+    }
+
+    private fun onStateTaskCreated(it: DetailState.TaskCreated) {
+        showToast(it.message)
+        finishView()
     }
 
     private fun onStateNewTask() {
