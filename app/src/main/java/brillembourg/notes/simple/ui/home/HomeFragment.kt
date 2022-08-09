@@ -2,7 +2,6 @@ package brillembourg.notes.simple.ui.home
 
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -10,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -89,6 +89,9 @@ class HomeFragment : Fragment(), MenuProvider {
         isStaggered = true
         binding.homeRecycler.apply {
             layoutManager = buildStaggeredManager()
+            (adapter as TaskAdapter).itemTouchHelper =
+                (adapter as TaskAdapter).setupDragAndDropTouchHelper(getDragDirs())
+                    .also { it.attachToRecyclerView(this) }
             adapter?.notifyDataSetChanged()
         }
     }
@@ -97,6 +100,9 @@ class HomeFragment : Fragment(), MenuProvider {
         isStaggered = false
         binding.homeRecycler.apply {
             layoutManager = buildLinearManager()
+            (adapter as TaskAdapter).itemTouchHelper =
+                (adapter as TaskAdapter).setupDragAndDropTouchHelper(getDragDirs())
+                    .also { it.attachToRecyclerView(this) }
             adapter?.notifyDataSetChanged()
         }
     }
@@ -163,7 +169,6 @@ class HomeFragment : Fragment(), MenuProvider {
             binding.homeRecycler.apply { buildAdapter(taskList) }
         } else {
             (binding.homeRecycler.adapter as TaskAdapter).submitList(taskList)
-            Log.e("HomeFragment", "Submit list")
             binding.homeRecycler.adapter?.notifyDataSetChanged()
         }
 
@@ -176,7 +181,9 @@ class HomeFragment : Fragment(), MenuProvider {
                     retrieveRecyclerStateIfApplies(layoutManager)
                 }
 
-        adapter = TaskAdapter(requireActivity().menuInflater,
+
+        adapter = TaskAdapter(
+            getDragDirs(),
             binding.homeRecycler,
             onSelection = {
                 setupContextualActionBar()
@@ -186,17 +193,23 @@ class HomeFragment : Fragment(), MenuProvider {
             },
             onReorderSuccess = { tasks, viewHolder ->
                 actionMode?.finish()
-//                viewHolder.setBackgroundTransparent()
                 viewModel.reorderList(tasks)
-//                adapter?.notifyDataSetChanged()
             },
             onReorderCanceled = {
                 actionMode?.finish()
+
+
             })
             .also {
                 it.submitList(taskList)
                 it.itemTouchHelper.attachToRecyclerView(this)
             }
+    }
+
+    private fun getDragDirs() = if (isStaggered) {
+        ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END
+    } else {
+        ItemTouchHelper.UP or ItemTouchHelper.DOWN
     }
 
     private fun RecyclerView.setupContextualActionBar() {
@@ -234,7 +247,6 @@ class HomeFragment : Fragment(), MenuProvider {
                 return when (item.itemId) {
                     R.id.menu_context_menu_delete -> {
                         viewModel.clickDeleteTasks(adapter.currentList.filter { it.isSelected })
-//                        viewModel.clickDeleteTask((adapter as TaskAdapter).currentList.first { it.isSelected })
                         mode.finish() // Action picked, so close the CAB
                         true
                     }
@@ -255,12 +267,7 @@ class HomeFragment : Fragment(), MenuProvider {
                         }
                     }
                 }
-//                taskList.filter { it.isSelected }.forEachIndexed {
-//                    position,task ->
-//                    task.isSelected = false
-//                    adapter.notifyItemChanged(position)
-//                }
-//                adapter.notifyDataSetChanged()
+
                 actionMode = null
             }
         })

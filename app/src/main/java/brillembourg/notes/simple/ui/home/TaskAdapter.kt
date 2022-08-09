@@ -3,7 +3,6 @@ package brillembourg.notes.simple.ui.home
 import android.content.Context
 import android.util.TypedValue
 import android.view.LayoutInflater
-import android.view.MenuInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -17,7 +16,7 @@ import brillembourg.notes.simple.ui.models.TaskPresentationModel
 
 
 class TaskAdapter(
-    val menuInflater: MenuInflater,
+    dragAndDropDirs: Int,
     val recyclerView: RecyclerView,
     val onClick: (TaskPresentationModel) -> Unit,
     val onSelection: () -> Unit,
@@ -30,7 +29,7 @@ class TaskAdapter(
     var tracker: SelectionTracker<Long>? = null
     var currentPosition: Int? = null
 
-    val itemTouchHelper by lazy { setupDragAndDropTouchHelper() }
+    var itemTouchHelper = setupDragAndDropTouchHelper(dragAndDropDirs)
 
     override fun submitList(list: List<TaskPresentationModel>?) {
         super.submitList(list?.let { ArrayList(it) })
@@ -41,11 +40,6 @@ class TaskAdapter(
             ItemTaskBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     }
-
-//    override fun submitList(list: List<TaskPresentationModel>?) {
-//        super.submitList(list?.let { ArrayList(it) })
-//    }
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
@@ -73,18 +67,11 @@ class TaskAdapter(
 
         private fun longClickInSelectionVisible() {
             toggleItemSelection()
-//            if (isSelectionNotVisible()) {
-//                enableDragNDrop()
-//            }
         }
 
         private fun longClickInNormalState() {
             startDrag()
             toggleItemSelection()
-
-/*            if (isSelectionNotVisible()) {
-                enableDragNDrop()
-            }*/
         }
 
         private fun click() {
@@ -96,7 +83,6 @@ class TaskAdapter(
         }
 
         private fun clickInNormalState() {
-//            enableDragNDrop()
             onClick.invoke(getItem(adapterPosition))
         }
 
@@ -104,8 +90,6 @@ class TaskAdapter(
             toggleItemSelection()
             if (isSelectionVisible()) {
                 disableDragNDrop()
-            } else {
-//                enableDragNDrop()
             }
         }
 

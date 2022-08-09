@@ -1,18 +1,16 @@
 package brillembourg.notes.simple.ui.home
 
-import androidx.annotation.Nullable
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
 
-fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
+fun TaskAdapter.setupDragAndDropTouchHelper(dragAndDropDirs: Int): ItemTouchHelper {
     val itemTouchCallback =
         object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END,
+            dragAndDropDirs,
             0
         ) {
-
 
             override fun isLongPressDragEnabled(): Boolean {
                 return false
@@ -41,15 +39,9 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                             Collections.swap(it, i, i - 1)
                         }
                     }
+                }
 
 
-//                    Collections.swap(it, fromPosition, toPosition)
-                };
-
-
-//                Log.e("Current list", dragAndDrogList.toString())
-
-                //                    submitList(dragAndDrogList)
                 recyclerviewAdapter.notifyItemMoved(fromPosition, toPosition)
                 return true
             }
@@ -69,7 +61,6 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                 }
 
                 isDragging = false
-//                (viewHolder as TaskAdapter.ViewHolder).setBackgroundTransparent()
 
                 if (dragAndDrogList == null) {
                     onReorderCanceled.invoke()
@@ -79,6 +70,7 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                 dragAndDrogList?.forEachIndexed { index, taskPresentationModel ->
                     //            taskPresentationModel.order = size - index
                     taskPresentationModel.order = index + 1
+                    taskPresentationModel.isSelected = false
                 }
 
                 recyclerView.itemAnimator = null
@@ -89,28 +81,13 @@ fun TaskAdapter.setupDragAndDropTouchHelper(): ItemTouchHelper {
                     }
                 }
 
+                notifyDataSetChanged()
                 dragAndDrogList?.let {
-                    onReorderSuccess.invoke(
-                        it,
-                        viewHolder as TaskAdapter.ViewHolder
-                    )
+                    onReorderSuccess.invoke(it, viewHolder as TaskAdapter.ViewHolder)
                 }
                 dragAndDrogList = null
             }
-
-            override fun onSelectedChanged(
-                @Nullable viewHolder: RecyclerView.ViewHolder?,
-                actionState: Int
-            ) {
-                when (actionState) {
-                    ItemTouchHelper.ACTION_STATE_DRAG -> {}                // the user is dragging an item and didn't lift their finger off yet
-                    ItemTouchHelper.ACTION_STATE_SWIPE -> {}                   // the user is swiping an item and didn't lift their finger off yet
-                    ItemTouchHelper.ACTION_STATE_IDLE -> {
-                        // the user just dropped the item (after dragging it), and lift their finger off.
-//                        Log.e("ITEM TOUCH HELPER", "IDLE")
-                    }
-                }
-            }
         }
+
     return ItemTouchHelper(itemTouchCallback)
 }
