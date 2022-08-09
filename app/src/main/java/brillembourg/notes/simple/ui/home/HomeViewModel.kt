@@ -40,7 +40,7 @@ class HomeViewModel @Inject constructor(
 //            Log.e("HomeViewModel updated list", it.taskList.toString())
             it.taskList.map { it.toPresentation(dateProvider) }
                 .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-            //                .asReversed()
+                .asReversed()
         }
         .catch {
             it.stackTrace

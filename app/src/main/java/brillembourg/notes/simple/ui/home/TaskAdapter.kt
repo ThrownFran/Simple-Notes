@@ -14,7 +14,6 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.ItemTaskBinding
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 
-
 class TaskAdapter(
     dragAndDropDirs: Int,
     val recyclerView: RecyclerView,
@@ -149,10 +148,10 @@ class TaskAdapter(
             }
         }
 
-        fun disableDragNDrop() {
-            itemTouchHelper.attachToRecyclerView(null)
-//            itemView.setOnTouchListener(null)
-        }
+//        fun disableDragNDrop() {
+//            itemTouchHelper.attachToRecyclerView(null)
+////            itemView.setOnTouchListener(null)
+//        }
 
         private fun isSelectionVisible(): Boolean =
             currentList.any { it.isSelected }
@@ -160,33 +159,6 @@ class TaskAdapter(
         private fun startDrag() {
             enableDragNDrop()
             itemTouchHelper.startDrag(this@ViewHolder)
-//            var startX: Float = 0f
-//            var startY: Float = 0f
-//            itemView.setOnTouchListener(object : View.OnTouchListener {
-//                override fun onTouch(view: View, event: MotionEvent): Boolean {
-//
-//                    // Check for drag gestures
-//                    when (event.getAction()) {
-//                        MotionEvent.ACTION_DOWN -> {
-//                            startX = event.getX()
-//                            startY = event.getY()
-//                        }
-//                        MotionEvent.ACTION_UP -> {
-//                        }
-//                        MotionEvent.ACTION_MOVE -> {
-//                            val translateX = event.getX() - startX;
-//                            val translateY = event.getY() - startY;
-//                            if(translateX > 1000 || translateY > 1000) {
-//                                Log.e("Task adapter: Translate Y", translateY.toString())
-//                                Log.e("Task adapter: Translate X", translateX.toString())
-////                                enableDragNDrop()
-////                                itemTouchHelper.startDrag(this@ViewHolder)
-//                            }
-//                        }
-//                    }
-//                    return true
-//                }
-//            })
         }
 
         private fun enableDragNDrop() {
@@ -197,25 +169,6 @@ class TaskAdapter(
         fun pxFromDp(context: Context, dp: Float): Float {
             return dp * context.getResources().getDisplayMetrics().density
         }
-
-//        private fun correctImageHeight() {
-//            val observer: ViewTreeObserver = binding.taskContraint.viewTreeObserver
-//            observer.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-//                override fun onGlobalLayout() {
-//                    binding.taskContraint.viewTreeObserver.removeGlobalOnLayoutListener(this)
-//                    //Your code
-//                    val height = binding.taskContraint.measuredHeight
-//                    binding.taskImageBackground.layoutParams =
-//                        FrameLayout.LayoutParams(
-//                            FrameLayout.LayoutParams.MATCH_PARENT, height +
-//                                    4f.fromDpToPixel(context = itemView.context).toInt()
-//                        )
-//                    binding.taskImageBackground.isVisible = true
-////                    itemView.invalidate()
-//                }
-//            })
-//        }
-
 
     }
 

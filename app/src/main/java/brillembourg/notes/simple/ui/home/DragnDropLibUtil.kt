@@ -68,8 +68,8 @@ fun TaskAdapter.setupDragAndDropTouchHelper(dragAndDropDirs: Int): ItemTouchHelp
                 }
 
                 dragAndDrogList?.forEachIndexed { index, taskPresentationModel ->
-                    //            taskPresentationModel.order = size - index
-                    taskPresentationModel.order = index + 1
+                    taskPresentationModel.order = dragAndDrogList!!.size - index - 1
+//                    taskPresentationModel.order = index + 1
                     taskPresentationModel.isSelected = false
                 }
 
