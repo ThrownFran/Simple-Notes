@@ -3,10 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/menu_home_vertical"
         android:icon="@drawable/ic_baseline_stack_24px"
-        android:title="Vertical"
+        android:title="@string/vertical"
         app:showAsAction="ifRoom" />
     <item android:id="@+id/menu_home_staggered"
         android:icon="@drawable/ic_baseline_dashboard_24"
-        android:title="Staggered"
+        android:title="@string/all_staggered"
         app:showAsAction="ifRoom"/>
 </menu>

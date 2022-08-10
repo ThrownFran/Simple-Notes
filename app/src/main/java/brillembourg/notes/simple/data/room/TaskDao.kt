@@ -32,7 +32,4 @@ abstract class TaskDao {
 
     @Query("UPDATE taskentity SET `order` = :order WHERE id = :id")
     abstract suspend fun updateTaskOrder(id: Long, order: Int)
-
-//    @Query("UPDATE taskentity SET `order` = :orders WHERE id = :ids")
-//    abstract suspend fun updateTasksOrder(orders: ArrayList<Int>, ids: ArrayList<Long>)
 }

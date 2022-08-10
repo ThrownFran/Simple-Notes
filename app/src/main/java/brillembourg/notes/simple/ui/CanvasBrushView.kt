@@ -61,8 +61,11 @@ class CanvasBrushView(context: Context, attrs: AttributeSet) :
 //        drawable = BitmapDrawable(resources, mBitmapBrush)
 //        background = drawable
         val typedValue = TypedValue()
-        context.theme
-            .resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
+        context.theme.resolveAttribute(
+            com.google.android.material.R.attr.colorPrimary,
+            typedValue,
+            true
+        )
         val color = typedValue.data
         setBackgroundColor(getColorWithAlpha(color, 0.3f))
     }
