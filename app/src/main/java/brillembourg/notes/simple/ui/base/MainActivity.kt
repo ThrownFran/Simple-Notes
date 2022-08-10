@@ -1,6 +1,7 @@
 package brillembourg.notes.simple.ui.base
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.navigation.NavController
@@ -11,7 +12,9 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.ActivityMainBinding
+import brillembourg.notes.simple.domain.ContextDomain
 import brillembourg.notes.simple.ui.extras.setBackgroundDrawable
+import brillembourg.notes.simple.ui.extras.showToast
 import brillembourg.notes.simple.ui.home.HomeFragmentDirections
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,11 +27,21 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupToolbar()
+        setupObservers()
+        viewModel.prepareBackupNotes(ContextDomain(this))
+    }
+
+    private fun setupObservers() {
+        viewModel.messageEvent.observe(this) {
+            showToast(it)
+        }
     }
 
     private fun setupToolbar() {
@@ -63,9 +76,11 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.menu_backup -> {
+                    viewModel.backupNotes()
                     true
                 }
                 R.id.menu_restore -> {
+                    viewModel.restoreNotes()
                     true
                 }
                 R.id.menu_settings -> {

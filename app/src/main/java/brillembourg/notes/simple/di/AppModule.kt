@@ -3,6 +3,9 @@ package brillembourg.notes.simple.di
 import android.content.Context
 import brillembourg.notes.simple.data.*
 import brillembourg.notes.simple.data.room.AppDatabase
+import brillembourg.notes.simple.data.room.BackupAndRestoreProvider
+import brillembourg.notes.simple.data.room.RoomBackupLib
+import brillembourg.notes.simple.domain.repositories.DataRepository
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import dagger.Module
 import dagger.Provides
@@ -22,7 +25,18 @@ class AppModule {
     @Singleton
     @Provides
     fun taskRepo(database: TaskDatabase, dateProvider: DateProvider): TaskRepository =
-        TaskRepositoryImp(database,dateProvider)
+        TaskRepositoryImp(database, dateProvider)
+
+    @Singleton
+    @Provides
+    fun dataRepo(backupAndRestoreProvider: BackupAndRestoreProvider): DataRepository =
+        DataRepositoryImp(backupAndRestoreProvider)
+
+    @Singleton
+    @Provides
+    fun backupAndRestore(@ApplicationContext context: Context): BackupAndRestoreProvider {
+        return RoomBackupLib(context)
+    }
 
     @Singleton
     @Provides
@@ -30,7 +44,7 @@ class AppModule {
         @ApplicationContext appContext: Context,
         roomDatabase: AppDatabase
     ): TaskDatabase =
-        TaskDatabase(appContext,roomDatabase)
+        TaskDatabase(appContext, roomDatabase)
 
     @Singleton
     @Provides
