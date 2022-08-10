@@ -283,17 +283,18 @@ class HomeFragment : Fragment(), MenuProvider {
         }
 
 
-        actionMode = this.startActionMode(object : ActionMode.Callback {
-            // Called when the action mode is created; startActionMode() was called
-            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-                // Inflate a menu resource providing context menu items
-                val inflater: MenuInflater = mode.menuInflater
-                inflater.inflate(R.menu.menu_context, menu)
-                return true
-            }
+        actionMode = requireActivity().findViewById<Toolbar>(R.id.toolbar)
+            ?.startActionMode(object : ActionMode.Callback {
+                // Called when the action mode is created; startActionMode() was called
+                override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                    // Inflate a menu resource providing context menu items
+                    val inflater: MenuInflater = mode.menuInflater
+                    inflater.inflate(R.menu.menu_context, menu)
+                    return true
+                }
 
-            // Called each time the action mode is shown. Always called after onCreateActionMode, but
-            // may be called multiple times if the mode is invalidated.
+                // Called each time the action mode is shown. Always called after onCreateActionMode, but
+                // may be called multiple times if the mode is invalidated.
             override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
                 return false // Return false if nothing is done
             }

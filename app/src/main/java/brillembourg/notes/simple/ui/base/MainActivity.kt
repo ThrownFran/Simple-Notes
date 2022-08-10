@@ -2,6 +2,7 @@ package brillembourg.notes.simple.ui.base
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -11,6 +12,7 @@ import androidx.navigation.ui.setupWithNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.ActivityMainBinding
 import brillembourg.notes.simple.ui.extras.setBackgroundDrawable
+import brillembourg.notes.simple.ui.home.HomeFragmentDirections
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -52,6 +54,35 @@ class MainActivity : AppCompatActivity() {
 
         binding.navView.setupWithNavController(navController)
         supportActionBar?.setBackgroundDrawable(R.drawable.blue_creyon_2)
+
+        binding.navView.setNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.trashFragment -> {
+                    navController.navigate(HomeFragmentDirections.actionHomeFragmentToTrashFragment())
+                    closeDrawer()
+                    true
+                }
+                R.id.menu_backup -> {
+                    true
+                }
+                R.id.menu_restore -> {
+                    true
+                }
+                R.id.menu_settings -> {
+                    true
+                }
+                R.id.menu_privacy -> {
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    public fun closeDrawer() {
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START);
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
