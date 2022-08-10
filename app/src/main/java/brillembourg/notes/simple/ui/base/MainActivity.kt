@@ -33,23 +33,16 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.container) as NavHostFragment
         navController = navHostFragment.navController
-//        appBarConfiguration = AppBarConfiguration.Builder(
-//            R.id.homeFragment,
-//            R.id.trashFragment,
+
+        //top level configuration
+//        appBarConfiguration = AppBarConfiguration(
+//            setOf(R.id.homeFragment, R.id.trashFragment), binding.drawerLayout
 //        )
-//            .setDrawerLayout(binding.drawerLayout)
-//            .build()
 
         appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.homeFragment, R.id.trashFragment
-            ), binding.drawerLayout
+            navGraph = navController.graph,
+            drawerLayout = binding.drawerLayout
         )
-
-//        appBarConfiguration = AppBarConfiguration(
-//            navGraph = navController.graph,
-//            drawerLayout = binding.drawerLayout
-//        )
         setSupportActionBar(binding.toolbar)
 
         setupActionBarWithNavController(

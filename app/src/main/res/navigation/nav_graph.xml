@@ -28,7 +28,7 @@
     </fragment>
     <fragment
         android:id="@+id/trashFragment"
-        android:name="brillembourg.notes.simple.TrashFragment"
+        android:name="brillembourg.notes.simple.ui.trash.TrashFragment"
         android:label="fragment_trash"
         tools:layout="@layout/fragment_trash" />
 </navigation>

@@ -3,6 +3,7 @@ package brillembourg.notes.simple.ui.home
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.*
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -17,6 +18,7 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentMainBinding
 import brillembourg.notes.simple.ui.extras.showToast
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -51,6 +53,7 @@ class HomeFragment : Fragment(), MenuProvider {
         super.onViewCreated(view, savedInstanceState)
         setupMenu()
         setupObservers()
+        unlockToolbar()
     }
 
     private fun setupMenu() {
@@ -154,10 +157,26 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun navigateToCreateTask() {
+        lockToolbar()
         finishActionIfActive()
 
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         findNavController().navigate(directions)
+    }
+
+    private fun unlockToolbar() {
+        val toolbar: Toolbar? =
+            activity?.findViewById(R.id.toolbar) // or however you need to do it for your code
+        val params: AppBarLayout.LayoutParams = toolbar?.layoutParams as AppBarLayout.LayoutParams
+        params.scrollFlags =
+            AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+    }
+
+    private fun lockToolbar() {
+        val toolbar: Toolbar? =
+            activity?.findViewById(R.id.toolbar) // or however you need to do it for your code
+        val params: AppBarLayout.LayoutParams = toolbar?.layoutParams as AppBarLayout.LayoutParams
+        params.scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
     }
 
     private fun finishActionIfActive() {
@@ -166,6 +185,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun navigateToDetail(it: TaskPresentationModel) {
+        lockToolbar()
         finishActionIfActive()
 
         //navigate to detail fragment
