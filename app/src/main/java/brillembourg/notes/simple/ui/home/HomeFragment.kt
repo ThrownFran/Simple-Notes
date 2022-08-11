@@ -130,7 +130,7 @@ class HomeFragment : Fragment(), MenuProvider {
             navigateToDetail(it)
         }
 
-        viewModel.navigateToCreateEvent.observe(viewLifecycleOwner) {
+        activityViewModel.createTaskEvent.observe(viewLifecycleOwner) {
             navigateToCreateTask()
         }
 

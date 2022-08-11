@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -32,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        binding.viewmodel = viewModel
         setContentView(binding.root)
         setupToolbar()
         setupObservers()
@@ -68,6 +70,10 @@ class MainActivity : AppCompatActivity() {
         binding.navView.setupWithNavController(navController)
         supportActionBar?.setBackgroundDrawable(R.drawable.blue_creyon_2)
 
+        navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            binding.homeFab.isVisible = destination.id == R.id.homeFragment
+        }
+
         binding.navView.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.trashFragment -> {
@@ -78,12 +84,12 @@ class MainActivity : AppCompatActivity() {
                 R.id.menu_backup -> {
                     viewModel.backupNotes()
                     closeDrawer()
-                    true
+                    false
                 }
                 R.id.menu_restore -> {
                     viewModel.restoreNotes()
                     closeDrawer()
-                    true
+                    false
                 }
                 R.id.menu_settings -> {
                     true

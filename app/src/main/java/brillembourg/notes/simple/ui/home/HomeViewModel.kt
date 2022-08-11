@@ -23,13 +23,11 @@ class HomeViewModel @Inject constructor(
 
     private val _state: MutableLiveData<HomeState> = MutableLiveData()
     private val _navigateToDetailEvent: SingleLiveEvent<TaskPresentationModel> = SingleLiveEvent()
-    private val _navigateToCreateEvent: SingleLiveEvent<Any> = SingleLiveEvent()
     private val _messageEvent: SingleLiveEvent<String> = SingleLiveEvent()
 
     //Observables
     val state: LiveData<HomeState> get() = _state
     val navigateToDetailEvent: LiveData<TaskPresentationModel> get() = _navigateToDetailEvent
-    val navigateToCreateEvent: LiveData<Any> get() = _navigateToCreateEvent
     val messageEvent: LiveData<String> get() = _messageEvent
 
     fun observeTaskList(): LiveData<List<TaskPresentationModel>> = handleTaskListObservable()
@@ -60,11 +58,6 @@ class HomeViewModel @Inject constructor(
     fun clickItem(it: TaskPresentationModel) {
         _navigateToDetailEvent.value = it
     }
-
-    fun createTask() {
-        _navigateToCreateEvent.value = Any()
-    }
-
 
     private fun showMessage(message: String) {
         _messageEvent.value = message

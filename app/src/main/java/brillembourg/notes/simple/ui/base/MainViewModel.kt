@@ -24,8 +24,15 @@ class MainViewModel @Inject constructor(
     private val _backupSuccessEvent: SingleLiveEvent<String> = SingleLiveEvent()
     val backupSuccessEvent: LiveData<String> get() = _backupSuccessEvent
 
+    private val _createTaskEvent: SingleLiveEvent<Any> = SingleLiveEvent()
+    val createTaskEvent: LiveData<Any> get() = _createTaskEvent
+
     //Observables
     val messageEvent: LiveData<String> get() = _messageEvent
+
+    fun createTask() {
+        _createTaskEvent.call()
+    }
 
     fun prepareBackupNotes(screen: Screen) {
         backupNotesUseCase.prepareBackup(BackupNotesUseCase.PrepareBackupParams(screen))
