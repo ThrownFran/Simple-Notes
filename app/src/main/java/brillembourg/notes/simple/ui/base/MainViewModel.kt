@@ -21,6 +21,9 @@ class MainViewModel @Inject constructor(
     private val _restoreSuccessEvent: SingleLiveEvent<String> = SingleLiveEvent()
     val restoreSuccessEvent: LiveData<String> get() = _restoreSuccessEvent
 
+    private val _backupSuccessEvent: SingleLiveEvent<String> = SingleLiveEvent()
+    val backupSuccessEvent: LiveData<String> get() = _backupSuccessEvent
+
     //Observables
     val messageEvent: LiveData<String> get() = _messageEvent
 
@@ -42,6 +45,7 @@ class MainViewModel @Inject constructor(
         backupNotesUseCase.backup()
             .onEach {
                 showMessage(it.message)
+                _backupSuccessEvent.value = it.message
             }
             .launchIn(viewModelScope)
     }

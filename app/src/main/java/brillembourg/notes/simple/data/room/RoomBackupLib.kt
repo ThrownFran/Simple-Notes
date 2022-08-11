@@ -31,7 +31,7 @@ class RoomBackupLib(val context: Context) : BackupAndRestoreProvider {
             backup?.apply {
                 onCompleteListener { success, message, exitCode ->
                     it.resume(BackupAndRestoreProvider.BackupResult(success, message))
-                    backup = null
+//                    backup = null
                 }
             }?.backup()
         }

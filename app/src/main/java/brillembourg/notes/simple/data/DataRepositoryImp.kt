@@ -16,7 +16,6 @@ class DataRepositoryImp(
             if (result.success) {
                 emit(BackupNotesUseCase.Result("Restore success"))
             } else {
-
                 throw Exception("Restore error ${result.message}")
             }
         }

@@ -157,6 +157,10 @@ class HomeFragment : Fragment(), MenuProvider {
             restartApp()
         }
 
+        activityViewModel.backupSuccessEvent.observe(viewLifecycleOwner) {
+            restartApp()
+        }
+
     }
 
     private fun restartApp() {

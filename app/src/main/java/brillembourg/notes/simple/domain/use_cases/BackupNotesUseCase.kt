@@ -7,11 +7,11 @@ import javax.inject.Inject
 
 class BackupNotesUseCase @Inject constructor(private val repository: DataRepository) {
 
-    fun backup(): Flow<BackupNotesUseCase.Result> {
+    fun backup(): Flow<Result> {
         return repository.backup()
     }
 
-    fun restore(): Flow<BackupNotesUseCase.Result> {
+    fun restore(): Flow<Result> {
         return repository.restore()
     }
 
