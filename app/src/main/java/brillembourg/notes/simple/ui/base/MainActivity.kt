@@ -77,10 +77,12 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.menu_backup -> {
                     viewModel.backupNotes()
+                    closeDrawer()
                     true
                 }
                 R.id.menu_restore -> {
                     viewModel.restoreNotes()
+                    closeDrawer()
                     true
                 }
                 R.id.menu_settings -> {

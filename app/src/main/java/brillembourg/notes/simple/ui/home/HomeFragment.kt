@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.*
@@ -7,6 +8,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
@@ -16,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentMainBinding
+import brillembourg.notes.simple.ui.base.MainViewModel
 import brillembourg.notes.simple.ui.extras.showToast
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import com.google.android.material.appbar.AppBarLayout
@@ -31,6 +34,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private val viewModel: HomeViewModel by viewModels()
+    private val activityViewModel: MainViewModel by activityViewModels()
 
     private var _binding: FragmentMainBinding? = null
     private lateinit var binding: FragmentMainBinding
@@ -149,7 +153,27 @@ class HomeFragment : Fragment(), MenuProvider {
             setupTaskList(it)
         }
 
+        activityViewModel.restoreSuccessEvent.observe(viewLifecycleOwner) {
+            restartApp()
+        }
 
+    }
+
+    private fun restartApp() {
+        val packageManager = context!!.packageManager
+        val intent = packageManager.getLaunchIntentForPackage(context!!.packageName)
+        val componentName = intent!!.component
+        val mainIntent = Intent.makeRestartActivityTask(componentName)
+        context!!.startActivity(mainIntent)
+        Runtime.getRuntime().exit(0)
+
+//        val intent = Intent(activity, MainActivity::class.java)
+//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//        context?.startActivity(intent)
+//        if (context is Activity) {
+//            (context as Activity).finish()
+//        }
+//        Runtime.getRuntime().exit(0)
     }
 
     private fun showMessage(message: String) {
