@@ -13,12 +13,13 @@
     <brillembourg.notes.simple.ui.CanvasBrushView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:checkable="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:padding="2dp">
 
 
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardElevation="2dp"
@@ -34,7 +35,7 @@
                 android:padding="6dp"
                 android:theme="@style/Theme.SimpleNotes">
 
-                <TextView
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/task_text_title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -49,7 +50,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="Title of the Task that is long" />
 
-                <TextView
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/task_text_content"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -68,7 +69,7 @@
 
 In nulla voluptas ut voluptatem modi qui consectetur quos. Ut sunt quibusdam non neque fuga aut explicabo recusandae 33 maiores expedita in quibusdam dolores aut laudantium itaque. Est cupiditate similique ut voluptate dolores et maiores doloribus eos internos porro ex quaerat fugit. Qui nobis molestias et soluta dolor aut modi quam 33 maiores rerum rem deserunt delectus et harum quaerat." />
 
-                <TextView
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/task_text_date"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -81,7 +82,7 @@ In nulla voluptas ut voluptatem modi qui consectetur quos. Ut sunt quibusdam non
                     app:layout_constraintTop_toBottomOf="@id/task_text_content" />
 
             </brillembourg.notes.simple.ui.extras.RoundContraintLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </brillembourg.notes.simple.ui.CanvasBrushView>
 </brillembourg.notes.simple.ui.extras.RoundContraintLayout>

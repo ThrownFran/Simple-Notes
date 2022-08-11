@@ -366,7 +366,7 @@ class HomeFragment : Fragment(), MenuProvider {
             if (taskList.size > 1) getString(R.string.move_tasks_to_trash) else getString(R.string.move_task_to_trash)
 
         MaterialAlertDialogBuilder(
-            requireContext(), com.google.android.material.R.style.MaterialAlertDialog_Material3
+            requireContext()
         )
             .setTitle(title)
             .setIcon(R.drawable.ic_baseline_delete_24)

@@ -16,7 +16,6 @@ import brillembourg.notes.simple.databinding.ActivityMainBinding
 import brillembourg.notes.simple.domain.ContextDomain
 import brillembourg.notes.simple.ui.extras.setBackgroundDrawable
 import brillembourg.notes.simple.ui.extras.showToast
-import brillembourg.notes.simple.ui.home.HomeFragmentDirections
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -52,14 +51,14 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
 
         //top level configuration
-//        appBarConfiguration = AppBarConfiguration(
-//            setOf(R.id.homeFragment, R.id.trashFragment), binding.drawerLayout
-//        )
-
         appBarConfiguration = AppBarConfiguration(
-            navGraph = navController.graph,
-            drawerLayout = binding.drawerLayout
+            setOf(R.id.homeFragment, R.id.trashFragment), binding.drawerLayout
         )
+
+//        appBarConfiguration = AppBarConfiguration(
+//            navGraph = navController.graph,
+//            drawerLayout = binding.drawerLayout
+//        )
         setSupportActionBar(binding.toolbar)
 
         setupActionBarWithNavController(
@@ -76,11 +75,21 @@ class MainActivity : AppCompatActivity() {
 
         binding.navView.setNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.trashFragment -> {
-                    navController.navigate(HomeFragmentDirections.actionHomeFragmentToTrashFragment())
+                R.id.homeFragment -> {
+                    navController.navigate(R.id.homeFragment)
                     closeDrawer()
                     true
                 }
+                R.id.trashFragment -> {
+                    navController.navigate(R.id.trashFragment)
+                    closeDrawer()
+                    true
+                }
+//                R.id.trashFragment -> {
+//                    navController.navigate(HomeFragmentDirections.actionHomeFragmentToTrashFragment())
+//                    closeDrawer()
+//                    true
+//                }
                 R.id.menu_backup -> {
                     viewModel.backupNotes()
                     closeDrawer()

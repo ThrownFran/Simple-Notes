@@ -10,6 +10,10 @@
             android:icon="@drawable/ic_baseline_notes_24"
             android:title="@string/notes" />
 
+        <item
+            android:id="@+id/trashFragment"
+            android:icon="@drawable/ic_outline_delete_24"
+            android:title="@string/trash_title" />
 
     </group>
 
@@ -17,10 +21,6 @@
         android:id="@+id/menu_group_options"
         android:checkableBehavior="none">
 
-        <item
-            android:id="@+id/trashFragment"
-            android:icon="@drawable/ic_outline_delete_24"
-            android:title="@string/trash_title" />
 
         <item
             android:id="@+id/menu_backup"
