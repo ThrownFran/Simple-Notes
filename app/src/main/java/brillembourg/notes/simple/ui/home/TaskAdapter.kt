@@ -117,27 +117,12 @@ class TaskAdapter(
             binding.taskCardview.isChecked = false
             binding.taskCardview.strokeWidth =
                 1f.fromDpToPixel(binding.taskCardview.context).toInt()
-//            itemView.setBackgroundColor(
-//                0
-//                //TODO
-////                ContextCompat.getColor(itemView.context, R.color.transparent)
-//            )
         }
 
         fun setBackgroundSelected() {
             binding.taskCardview.isChecked = true
             binding.taskCardview.strokeWidth =
                 3f.fromDpToPixel(binding.taskCardview.context).toInt()
-
-
-//            val typedValue = TypedValue()
-//            itemView.context.theme.resolveAttribute(
-//                com.google.android.material.R.attr.colorSecondaryVariant,
-//                typedValue,
-//                true
-//            )
-//            val color = typedValue.data
-//            itemView.setBackgroundColor(color)
         }
 
         private fun bindTitle(task: TaskPresentationModel) {

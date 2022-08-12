@@ -27,8 +27,6 @@ fun Context.showToast(message: String) {
 
 fun MainActivity.showMessage(message: String) {
     Snackbar.make(binding.mainCoordinator, message, Snackbar.LENGTH_SHORT).apply {
-        setTextColor(resolveAttribute(com.google.android.material.R.attr.colorOnPrimaryContainer))
-        setBackgroundTint(resolveAttribute(com.google.android.material.R.attr.colorPrimaryContainer))
         show()
     }
 }
@@ -40,8 +38,7 @@ fun Context.resolveAttribute(@AttrRes attribute: Int): Int {
         typedValue,
         true
     )
-    val color = typedValue.data
-    return color
+    return typedValue.data
 }
 
 fun HomeFragment.showMessage(message: String) {

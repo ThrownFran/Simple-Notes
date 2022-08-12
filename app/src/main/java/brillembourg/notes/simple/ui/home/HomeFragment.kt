@@ -353,7 +353,7 @@ class HomeFragment : Fragment(), MenuProvider {
             requireContext()
         )
             .setTitle(title)
-            .setIcon(R.drawable.ic_baseline_delete_24)
+            .setIcon(R.drawable.ic_baseline_delete_dark_24)
 //            .setMessage(resources.getString(R.string.supporting_text))
             .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
             }

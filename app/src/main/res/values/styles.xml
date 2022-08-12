@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ActionMode -->
+    <style name="Widget.SimpleNotes.ActionMode" parent="@style/Widget.Material3.ActionMode">
+        <item name="background">?colorSecondary</item>
+        <item name="titleTextStyle">@style/Widget.SimpleNotes.ActionMode.TextStyle</item>
+    </style>
+
+    <style name="Widget.SimpleNotes.ActionMode.TextStyle" parent="TextAppearance.Material3.ActionBar.Title">
+        <item name="android:textColor">?colorOnSecondary</item>
+    </style>
+
+    <!-- Cardview   -->
+    <style name="Widget.SimpleNotes.CardView" parent="Widget.Material3.CardView.Outlined">
+        <item name="shapeAppearance">@style/ShapeAppearance.SimpleNotes.MediumComponent</item>
+        <item name="strokeWidth">1.5dp</item>
+    </style>
+
+    <style name="ShapeAppearance.SimpleNotes.MediumComponent" parent="ShapeAppearance.Material3.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
+    <!-- FAB   -->
+    <style name="Widget.SimpleNotes.ExtendedFloatingActionButton" parent="Widget.Material3.ExtendedFloatingActionButton.Icon.Primary">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.SimpleNotes.FloatingActionButton
+        </item>
+    </style>
+
+    <style name="Widget.SimpleNotes.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.SimpleNotes.FloatingActionButton
+        </item>
+    </style>
+
+    <style name="ThemeOverlay.SimpleNotes.FloatingActionButton" parent="">
+        <item name="colorContainer">?colorSecondary</item>
+        <item name="colorOnContainer">?colorOnSecondary</item>
+    </style>
+
+    <!-- Snackbar  -->
+    <style name="Widget.SimpleNotes.Snackbar" parent="Widget.MaterialComponents.Snackbar">
+        <item name="actionTextColorAlpha">1</item>
+        <item name="backgroundTint">?colorPrimaryContainer</item>
+    </style>
+
+    <style name="Widget.SimpleNotes.SnackbarButton" parent="Widget.MaterialComponents.Button.TextButton.Snackbar">
+        <item name="android:textColor">?colorOnPrimaryContainer</item>
+    </style>
+
+    <!--  Dialog  -->
+    <style name="ThemeOverlay.SimpleNotes.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorPrimary">?colorSecondary</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.SimpleNotes.Button</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.SimpleNotes.Button</item>
+    </style>
+
+    <style name="Widget.SimpleNotes.Button" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/md_theme_light_primary</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+</resources>
