@@ -12,12 +12,11 @@
 
         <color name="seed">#92AAE2</color>
         <color name="md_theme_light_primary">#1976D2</color>
-        <color name="md_theme_light_primary_transparent">#511976D2</color>
+        <color name="md_theme_light_primary_transparent">#561976D2</color>
         <color name="md_theme_light_onPrimary">#EBF6FF</color>
         <color name="md_theme_light_primaryContainer">#528ECA</color>
         <color name="md_theme_light_onPrimaryContainer">#F6F6F6</color>
-
-        <color name="md_theme_light_secondary">#4db6ac</color>
+        <color name="md_theme_light_secondary">#4AAEA5</color>
         <color name="md_theme_light_onSecondary">#FFFFFF</color>
         <color name="md_theme_light_secondaryContainer">#ABDED9</color>
         <color name="md_theme_light_onSecondaryContainer">#261628</color>

@@ -1,7 +1,6 @@
 package brillembourg.notes.simple.ui.home
 
 import android.content.Context
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
@@ -10,6 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemTaskBinding
+import brillembourg.notes.simple.ui.extras.fromDpToPixel
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 
 class TaskAdapter(
@@ -49,9 +49,9 @@ class TaskAdapter(
         }
 
         private fun setupClickListeners() {
-            binding.root.setOnClickListener { click() }
+            binding.taskCardview.setOnClickListener { click() }
 
-            binding.root.setOnLongClickListener {
+            binding.taskCardview.setOnLongClickListener {
                 currentPosition = adapterPosition
 
                 if (isSelectionNotVisible()) {
@@ -105,6 +105,7 @@ class TaskAdapter(
         }
 
         fun bindSelection(task: TaskPresentationModel) {
+//            binding.taskCardview.isChecked = task.isSelected
             if (task.isSelected) {
                 setBackgroundSelected()
             } else {
@@ -113,22 +114,30 @@ class TaskAdapter(
         }
 
         fun setBackgroundTransparent() {
-            itemView.setBackgroundColor(
-                0
-                //TODO
-//                ContextCompat.getColor(itemView.context, R.color.transparent)
-            )
+            binding.taskCardview.isChecked = false
+            binding.taskCardview.strokeWidth =
+                1f.fromDpToPixel(binding.taskCardview.context).toInt()
+//            itemView.setBackgroundColor(
+//                0
+//                //TODO
+////                ContextCompat.getColor(itemView.context, R.color.transparent)
+//            )
         }
 
         fun setBackgroundSelected() {
-            val typedValue = TypedValue()
-            itemView.context.theme.resolveAttribute(
-                com.google.android.material.R.attr.colorSecondaryVariant,
-                typedValue,
-                true
-            )
-            val color = typedValue.data
-            itemView.setBackgroundColor(color)
+            binding.taskCardview.isChecked = true
+            binding.taskCardview.strokeWidth =
+                3f.fromDpToPixel(binding.taskCardview.context).toInt()
+
+
+//            val typedValue = TypedValue()
+//            itemView.context.theme.resolveAttribute(
+//                com.google.android.material.R.attr.colorSecondaryVariant,
+//                typedValue,
+//                true
+//            )
+//            val color = typedValue.data
+//            itemView.setBackgroundColor(color)
         }
 
         private fun bindTitle(task: TaskPresentationModel) {

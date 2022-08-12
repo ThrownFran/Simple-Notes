@@ -20,8 +20,13 @@
 
 
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/task_cardview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:checkable="true"
+        app:strokeColor="@drawable/selector_cardview_stroke_color"
+        app:rippleColor="?colorSecondaryContainer"
+        app:cardForegroundColor="@drawable/selector_cardview_foreground_color"
         app:cardElevation="2dp">
 
         <brillembourg.notes.simple.ui.extras.RoundContraintLayout
