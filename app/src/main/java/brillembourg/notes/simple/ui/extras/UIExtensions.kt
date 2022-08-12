@@ -19,6 +19,7 @@ import brillembourg.notes.simple.ui.detail.DetailFragment
 import brillembourg.notes.simple.ui.home.HomeFragment
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
 fun Context.showToast(message: String) {
@@ -27,6 +28,23 @@ fun Context.showToast(message: String) {
 
 fun MainActivity.showMessage(message: String) {
     Snackbar.make(binding.mainCoordinator, message, Snackbar.LENGTH_SHORT).apply {
+
+        //Snackbar still not styleable in Material3 (Could not style text color)
+        setTextColor(resolveAttribute(com.google.android.material.R.attr.colorOnSecondaryContainer))
+        setBackgroundTint(resolveAttribute(com.google.android.material.R.attr.colorSecondaryContainer))
+
+        addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+            override fun onShown(transientBottomBar: Snackbar?) {
+                super.onShown(transientBottomBar)
+                binding.homeFab.shrink()
+            }
+
+            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                super.onDismissed(transientBottomBar, event)
+                binding.homeFab.extend()
+            }
+        })
+
         show()
     }
 }
@@ -65,7 +83,11 @@ fun Float.fromDpToPixel(context: Context): Float {
 }
 
 fun ActionBar.setBackgroundDrawable(@DrawableRes resId: Int) {
-    this.setBackgroundDrawable(this.themedContext.resources.getDrawable(resId))
+    val drawable = themedContext.resources.getDrawable(resId)
+//    val color = themedContext.resolveAttribute(com.google.android.material.R.attr.colorPrimary)
+//    drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
+//    DrawableCompat.setTint(drawable, themedContext.resolveAttribute(com.google.android.material.R.attr.colorPrimary));
+    this.setBackgroundDrawable(drawable)
 }
 
 fun View.hideKeyboard() = ViewCompat.getWindowInsetsController(this)

@@ -24,27 +24,39 @@
 
     <!-- FAB   -->
     <style name="Widget.SimpleNotes.ExtendedFloatingActionButton" parent="Widget.Material3.ExtendedFloatingActionButton.Icon.Primary">
-        <item name="materialThemeOverlay">@style/ThemeOverlay.SimpleNotes.FloatingActionButton
+        <item name="materialThemeOverlay">
+            @style/ThemeOverlay.SimpleNotes.ExtendedFloatingActionButton
         </item>
     </style>
 
-    <style name="Widget.SimpleNotes.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
-        <item name="materialThemeOverlay">@style/ThemeOverlay.SimpleNotes.FloatingActionButton
-        </item>
-    </style>
-
-    <style name="ThemeOverlay.SimpleNotes.FloatingActionButton" parent="">
+    <style name="ThemeOverlay.SimpleNotes.ExtendedFloatingActionButton" parent="ThemeOverlay.Material3.FloatingActionButton.Primary">
         <item name="colorContainer">?colorSecondary</item>
         <item name="colorOnContainer">?colorOnSecondary</item>
     </style>
 
-    <!-- Snackbar  -->
-    <style name="Widget.SimpleNotes.Snackbar" parent="Widget.MaterialComponents.Snackbar">
-        <item name="actionTextColorAlpha">1</item>
-        <item name="backgroundTint">?colorPrimaryContainer</item>
-    </style>
+    <!--    &lt;!&ndash; Snackbar  &ndash;&gt;-->
+    <!--    <style name="Widget.SimpleNotes.Snackbar" parent="Widget.MaterialComponents.Snackbar">-->
+    <!--        <item name="backgroundTint">?colorPrimaryContainer</item>-->
+    <!--&lt;!&ndash;        <item name="android:textColor">?colorOnPrimaryContainer</item>&ndash;&gt;-->
+    <!--&lt;!&ndash;        <item name="materialThemeOverlay">@style/ThemeOverlay.SimpleNotes.Snackbar</item>&ndash;&gt;-->
+    <!--    </style>-->
 
-    <style name="Widget.SimpleNotes.SnackbarButton" parent="Widget.MaterialComponents.Button.TextButton.Snackbar">
+    <!--    <style name="ThemeOverlay.SimpleNotes.Snackbar" parent="">-->
+    <!--        &lt;!&ndash; text color &ndash;&gt;-->
+    <!--&lt;!&ndash;        <item name="colorSurface">?colorOnSurface</item>&ndash;&gt;-->
+    <!--        <item name="android:textColorPrimary">@color/md_theme_light_onPrimary</item>-->
+    <!--        <item name="android:textColor">@color/md_theme_light_onPrimary</item>-->
+    <!--        <item name="colorOnContainer">@color/md_theme_light_onPrimary</item>-->
+    <!--        <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>-->
+    <!--        <item name="colorOnPrimaryContainer">@color/md_theme_light_onPrimary</item>-->
+    <!--        <item name="colorPrimaryContainer">@color/md_theme_light_onPrimary</item>-->
+    <!--        <item name="colorOnSecondary">@color/md_theme_light_onPrimary</item>-->
+    <!--        <item name="colorOnSecondaryContainer">@color/md_theme_light_onPrimary</item>-->
+    <!--        <item name="colorOnBackground">@color/md_theme_light_onPrimary</item>-->
+
+    <!--    </style>-->
+
+    <style name="Widget.SimpleNotes.SnackbarButton" parent="Widget.Material3.Button.TextButton.Snackbar">
         <item name="android:textColor">?colorOnPrimaryContainer</item>
     </style>
 

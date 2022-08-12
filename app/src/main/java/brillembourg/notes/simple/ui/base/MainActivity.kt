@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.navView.setupWithNavController(navController)
         //TODO
-        supportActionBar?.setBackgroundDrawable(R.drawable.blue_creyon_2)
+        supportActionBar?.setBackgroundDrawable(R.drawable.toolbar_shape)
 
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             binding.homeFab.apply {
