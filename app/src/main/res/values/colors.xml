@@ -1,14 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primaryColor">#1976D2</color>
-    <color name="primaryColorContainer">#91BEEC</color>
-    <color name="primaryLightColor">#63ccff</color>
-    <color name="primaryDarkColor">#0D47A1</color>
+    <color name="primary">#1976D2</color>
+    <color name="primary_container">#91BEEC</color>
+    <color name="on_primary">#0D47A1</color>
+    <color name="on_primary_container">#63ccff</color>
+
+    <color name="secondary">#4db6ac</color>
+    <color name="secondary_container">#00867d</color>
+    <color name="on_secondary">#00867d</color>
+    <color name="on_secondary_container">#FF03DAC5</color>
+
+    <color name="background">#FFFFFF</color>
+    <color name="on_background">#000000</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="on_surface">#000000</color>
+
+    <color name="surface_variant">#FFFFFF</color>
+    <color name="on_surface_variant">#000000</color>
+    <color name="outline_variant">#FFFFFF</color>
+    <color name="on_outline_variant">#000000</color>
 
 
-    <color name="secondaryColor">#4db6ac</color>
-    <color name="secondaryLightColor">#FF03DAC5</color>
-    <color name="secondaryDarkColor">#00867d</color>
     <color name="primaryTextColor">#000000</color>
     <color name="secondaryTextColor">#434242</color>
 

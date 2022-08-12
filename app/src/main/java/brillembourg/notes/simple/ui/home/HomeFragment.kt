@@ -1,6 +1,5 @@
 package brillembourg.notes.simple.ui.home
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.*
@@ -20,9 +19,8 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentMainBinding
 import brillembourg.notes.simple.ui.base.MainActivity
 import brillembourg.notes.simple.ui.base.MainViewModel
-import brillembourg.notes.simple.ui.extras.showToast
+import brillembourg.notes.simple.ui.extras.*
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -58,41 +56,13 @@ class HomeFragment : Fragment(), MenuProvider {
         super.onViewCreated(view, savedInstanceState)
         setupMenu()
         setupObservers()
-        unlockToolbar()
+        unlockToolbarScrolling()
+        animateFabWithRecycler()
+    }
 
-        val activityBinding = (activity as MainActivity).binding
-
-        binding.homeRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (dy > 0) {
-                    // Scroll Down
-                    if (activityBinding.homeFab.isExtended) {
-                        activityBinding.homeFab.shrink()
-                    }
-                } else if (dy < 0) {
-                    // Scroll Up
-                    if (!activityBinding.homeFab.isExtended) {
-                        activityBinding.homeFab.extend()
-                    }
-                }
-            }
-        })
-
-//        binding.homeRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-//            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-//                if (dy > 0 || dy < 0 && activityBinding.homeFab.isShown) {
-//                    activityBinding.homeFab.shrink()
-//                }
-//            }
-//
-//            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-//                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-//                    activityBinding.homeFab.extend()
-//                }
-//                super.onScrollStateChanged(recyclerView, newState)
-//            }
-//        })
+    private fun animateFabWithRecycler() {
+        val activityBinding = (activity as MainActivity?)?.binding
+        activityBinding?.homeFab?.animateWithRecycler(binding.homeRecycler)
     }
 
     private fun setupMenu() {
@@ -198,40 +168,26 @@ class HomeFragment : Fragment(), MenuProvider {
 
     }
 
-    private fun restartApp() {
-        val packageManager = context!!.packageManager
-        val intent = packageManager.getLaunchIntentForPackage(context!!.packageName)
-        val componentName = intent!!.component
-        val mainIntent = Intent.makeRestartActivityTask(componentName)
-        context!!.startActivity(mainIntent)
-        Runtime.getRuntime().exit(0)
-    }
-
     private fun showMessage(message: String) {
         context?.showToast(message)
     }
 
     private fun navigateToCreateTask() {
-        lockToolbar()
+        lockToolbarScrolling()
         finishActionIfActive()
 
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         findNavController().navigate(directions)
     }
 
-    private fun unlockToolbar() {
-        val toolbar: Toolbar? =
-            activity?.findViewById(R.id.toolbar) // or however you need to do it for your code
-        val params: AppBarLayout.LayoutParams = toolbar?.layoutParams as AppBarLayout.LayoutParams
-        params.scrollFlags =
-            AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+    private fun unlockToolbarScrolling() {
+        val activityBinding = (activity as MainActivity?)?.binding
+        activityBinding?.toolbar?.unLockScroll()
     }
 
-    private fun lockToolbar() {
-        val toolbar: Toolbar? =
-            activity?.findViewById(R.id.toolbar) // or however you need to do it for your code
-        val params: AppBarLayout.LayoutParams = toolbar?.layoutParams as AppBarLayout.LayoutParams
-        params.scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
+    private fun lockToolbarScrolling() {
+        val activityBinding = (activity as MainActivity?)?.binding
+        activityBinding?.toolbar?.lockScroll()
     }
 
     private fun finishActionIfActive() {
@@ -240,7 +196,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun navigateToDetail(it: TaskPresentationModel) {
-        lockToolbar()
+        lockToolbarScrolling()
         finishActionIfActive()
 
         //navigate to detail fragment
@@ -286,7 +242,7 @@ class HomeFragment : Fragment(), MenuProvider {
             dragDirs,
             recyclerView,
             onSelection = {
-                recyclerView.setupContextualActionBar()
+                setupContextualActionBar(recyclerView, recyclerView.adapter as TaskAdapter)
             },
             onClick = {
                 clickItem(it)
@@ -322,8 +278,8 @@ class HomeFragment : Fragment(), MenuProvider {
         ItemTouchHelper.UP or ItemTouchHelper.DOWN
     }
 
-    private fun RecyclerView.setupContextualActionBar() {
-        val adapter = adapter as TaskAdapter
+    private fun setupContextualActionBar(recyclerView: RecyclerView, adapter: TaskAdapter) {
+//        val adapter = adapter as TaskAdapter
         val taskList = adapter.currentList
         val selectedList = taskList.filter { it.isSelected }
 
@@ -372,7 +328,7 @@ class HomeFragment : Fragment(), MenuProvider {
                     if (taskPresentationModel.isSelected) {
                         taskPresentationModel.isSelected = false
                         try {
-                            (findViewHolderForAdapterPosition(index) as TaskAdapter.ViewHolder).setBackgroundTransparent()
+                            (recyclerView.findViewHolderForAdapterPosition(index) as TaskAdapter.ViewHolder).setBackgroundTransparent()
                         } catch (e: Exception) {
                             adapter.notifyItemChanged(index)
                         }
