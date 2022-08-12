@@ -2,9 +2,11 @@ package brillembourg.notes.simple.ui.extras
 
 import android.content.Context
 import android.content.Intent
+import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.annotation.AttrRes
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.widget.Toolbar
@@ -12,11 +14,42 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
+import brillembourg.notes.simple.ui.base.MainActivity
+import brillembourg.notes.simple.ui.detail.DetailFragment
+import brillembourg.notes.simple.ui.home.HomeFragment
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 
 fun Context.showToast(message: String) {
     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+}
+
+fun MainActivity.showMessage(message: String) {
+    Snackbar.make(binding.mainCoordinator, message, Snackbar.LENGTH_SHORT).apply {
+        setTextColor(resolveAttribute(com.google.android.material.R.attr.colorOnPrimaryContainer))
+        setBackgroundTint(resolveAttribute(com.google.android.material.R.attr.colorPrimaryContainer))
+        show()
+    }
+}
+
+fun Context.resolveAttribute(@AttrRes attribute: Int): Int {
+    val typedValue = TypedValue()
+    theme.resolveAttribute(
+        attribute,
+        typedValue,
+        true
+    )
+    val color = typedValue.data
+    return color
+}
+
+fun HomeFragment.showMessage(message: String) {
+    (activity as MainActivity).showMessage(message)
+}
+
+fun DetailFragment.showMessage(message: String) {
+    (activity as MainActivity).showMessage(message)
 }
 
 fun View.showSoftKeyboard() {

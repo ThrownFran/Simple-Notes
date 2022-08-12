@@ -5,13 +5,13 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
 import brillembourg.notes.simple.ui.extras.hideKeyboard
+import brillembourg.notes.simple.ui.extras.showMessage
 import brillembourg.notes.simple.ui.extras.showSoftKeyboard
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -77,7 +77,7 @@ class DetailFragment : Fragment() {
     }
 
     private fun onStateTaskCreated(it: DetailState.TaskCreated) {
-        showToast(it.message)
+        showMessage(it.message)
         finishView()
     }
 
@@ -104,16 +104,12 @@ class DetailFragment : Fragment() {
     }
 
     private fun onStateTaskSaved(it: DetailState.TaskSaved) {
-        showToast(it.message)
+        showMessage(it.message)
         finishView()
     }
 
     private fun finishView() {
         findNavController().popBackStack()
-    }
-
-    private fun showToast(message: String) {
-        Toast.makeText(context,message,Toast.LENGTH_SHORT).show()
     }
 
     private fun setupContent(task: TaskPresentationModel) {

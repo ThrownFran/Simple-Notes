@@ -157,11 +157,6 @@ class TaskAdapter(
             }
         }
 
-//        fun disableDragNDrop() {
-//            itemTouchHelper.attachToRecyclerView(null)
-////            itemView.setOnTouchListener(null)
-//        }
-
         private fun isSelectionVisible(): Boolean =
             currentList.any { it.isSelected }
 

@@ -168,9 +168,10 @@ class HomeFragment : Fragment(), MenuProvider {
 
     }
 
-    private fun showMessage(message: String) {
-        context?.showToast(message)
-    }
+//    private fun showMessage(message: String) {
+//        context?.showToast(message)
+//        Snackbar.make()
+//    }
 
     private fun navigateToCreateTask() {
         lockToolbarScrolling()
