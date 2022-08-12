@@ -6,6 +6,7 @@
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryVariant">@color/primaryDarkColor</item>
         <item name="colorPrimaryContainer">@color/primaryColorContainer</item>
+        <item name="colorOnPrimaryContainer">@color/black</item>
         <item name="colorOnPrimary">@color/white</item>
 
         <item name="colorPrimarySurface">?attr/colorPrimary</item>
@@ -44,13 +45,14 @@
         <item name="windowActionModeOverlay">true</item>
 
         <item name="materialCardViewStyle">@style/Widget.App.CardView</item>
+
+        <item name="extendedFloatingActionButtonStyle">
+            @style/Widget.App.ExtendedFloatingActionButton
+        </item>
         <item name="floatingActionButtonStyle">@style/Widget.App.FloatingActionButton</item>
-
     </style>
 
-    <style name="Widget.App.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
-        <item name="backgroundTint">@color/secondaryColor</item>
-    </style>
+
 
     <style name="Widget.ActionMode" parent="@style/Widget.AppCompat.ActionMode">
         <item name="titleTextStyle">@style/Widget.ActionMode.TextStyle</item>
@@ -77,22 +79,25 @@
         <item name="colorOnSurfaceVariant">@color/white</item>
     </style>
 
+    <!-- Cardview   -->
     <style name="ShapeAppearance.App.MediumComponent" parent="ShapeAppearance.Material3.MediumComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>
     </style>
 
-    <!--    <style name="Widget.Custom.NavigationView" parent="Widget.MaterialComponents.CardView">-->
-    <!--        <item name="itemIconTint">?attr/colorNavigationItem</item>-->
-    <!--        <item name="itemTextColor">?attr/colorNavigationItem</item>-->
-    <!--        <item name="itemBackground">?attr/drawableNavigationItemBackground</item>-->
-    <!--    </style>-->
+
+    <style name="Widget.App.ExtendedFloatingActionButton" parent="Widget.Material3.ExtendedFloatingActionButton.Icon.Primary">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.FloatingActionButton</item>
+    </style>
+
+    <style name="Widget.App.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.FloatingActionButton</item>
+    </style>
+
+    <style name="ThemeOverlay.App.FloatingActionButton" parent="">
+        <item name="colorContainer">?colorSecondary</item>
+        <item name="colorOnContainer">?colorOnSecondary</item>
+    </style>
 
 
-    <!--    <style name="MaterialAlertDialog.Custom" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">-->
-    <!--        <item name="buttonStyle">@style/MaterialButton.Custom</item>-->
-    <!--    </style>-->
-    <!--    <style name="ShapeAppearanceOverlay.MaterialAlertDialog.Rounded" parent="">-->
-    <!--        <item name="cornerSize">10dp</item>-->
-    <!--    </style>-->
 </resources>

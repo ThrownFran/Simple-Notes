@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentMainBinding
+import brillembourg.notes.simple.ui.base.MainActivity
 import brillembourg.notes.simple.ui.base.MainViewModel
 import brillembourg.notes.simple.ui.extras.showToast
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
@@ -58,6 +59,40 @@ class HomeFragment : Fragment(), MenuProvider {
         setupMenu()
         setupObservers()
         unlockToolbar()
+
+        val activityBinding = (activity as MainActivity).binding
+
+        binding.homeRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (dy > 0) {
+                    // Scroll Down
+                    if (activityBinding.homeFab.isExtended) {
+                        activityBinding.homeFab.shrink()
+                    }
+                } else if (dy < 0) {
+                    // Scroll Up
+                    if (!activityBinding.homeFab.isExtended) {
+                        activityBinding.homeFab.extend()
+                    }
+                }
+            }
+        })
+
+//        binding.homeRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+//            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+//                if (dy > 0 || dy < 0 && activityBinding.homeFab.isShown) {
+//                    activityBinding.homeFab.shrink()
+//                }
+//            }
+//
+//            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+//                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+//                    activityBinding.homeFab.extend()
+//                }
+//                super.onScrollStateChanged(recyclerView, newState)
+//            }
+//        })
     }
 
     private fun setupMenu() {
@@ -170,14 +205,6 @@ class HomeFragment : Fragment(), MenuProvider {
         val mainIntent = Intent.makeRestartActivityTask(componentName)
         context!!.startActivity(mainIntent)
         Runtime.getRuntime().exit(0)
-
-//        val intent = Intent(activity, MainActivity::class.java)
-//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//        context?.startActivity(intent)
-//        if (context is Activity) {
-//            (context as Activity).finish()
-//        }
-//        Runtime.getRuntime().exit(0)
     }
 
     private fun showMessage(message: String) {

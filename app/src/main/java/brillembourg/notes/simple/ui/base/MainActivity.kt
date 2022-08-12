@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
-import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -25,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var navController: NavController
 
-    private lateinit var binding: ActivityMainBinding
+     lateinit var binding: ActivityMainBinding
 
     private val viewModel: MainViewModel by viewModels()
 
@@ -70,7 +69,13 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.setBackgroundDrawable(R.drawable.blue_creyon_2)
 
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
-            binding.homeFab.isVisible = destination.id == R.id.homeFragment
+            binding.homeFab.apply {
+                if (destination.id == R.id.homeFragment) {
+                    show()
+                } else {
+                    hide()
+                }
+            }
         }
 
         binding.navView.setNavigationItemSelectedListener {
@@ -109,6 +114,8 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+
+
     }
 
     private fun closeDrawer() {
