@@ -6,7 +6,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import android.util.TypedValue
 import brillembourg.notes.simple.ui.extras.RoundContraintLayout
 
 
@@ -60,14 +59,16 @@ class CanvasBrushView(context: Context, attrs: AttributeSet) :
 //            Bitmap.createScaledBitmap(mBitmapBrush!!, measuredWidth, measuredHeight, false)
 //        drawable = BitmapDrawable(resources, mBitmapBrush)
 //        background = drawable
-        val typedValue = TypedValue()
+
+        //TODO
+/*        val typedValue = TypedValue()
         context.theme.resolveAttribute(
             com.google.android.material.R.attr.colorPrimary,
             typedValue,
             true
         )
         val color = typedValue.data
-        setBackgroundColor(getColorWithAlpha(color, 0.3f))
+        setBackgroundColor(getColorWithAlpha(color, 0.3f))*/
     }
 
     private fun getColorWithAlpha(color: Int, ratio: Float): Int {

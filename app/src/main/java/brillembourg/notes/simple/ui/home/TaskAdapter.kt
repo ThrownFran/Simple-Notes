@@ -4,13 +4,11 @@ import android.content.Context
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.selection.SelectionTracker
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.ItemTaskBinding
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 
@@ -116,7 +114,9 @@ class TaskAdapter(
 
         fun setBackgroundTransparent() {
             itemView.setBackgroundColor(
-                ContextCompat.getColor(itemView.context, R.color.transparent)
+                0
+                //TODO
+//                ContextCompat.getColor(itemView.context, R.color.transparent)
             )
         }
 

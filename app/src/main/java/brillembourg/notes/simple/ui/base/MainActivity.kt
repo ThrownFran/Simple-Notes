@@ -66,6 +66,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         binding.navView.setupWithNavController(navController)
+        //TODO
         supportActionBar?.setBackgroundDrawable(R.drawable.blue_creyon_2)
 
         navController.addOnDestinationChangedListener { controller, destination, arguments ->

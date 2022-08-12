@@ -1,10 +1,8 @@
 package brillembourg.notes.simple.ui.home
 
 import android.view.MotionEvent
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.selection.*
 import androidx.recyclerview.widget.RecyclerView
-import brillembourg.notes.simple.R
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 
 
@@ -15,7 +13,8 @@ fun TaskPresentationModel.bindTracker(
 ) {
     if (tracker.isSelected(idItem)) {
         viewHolder.itemView.setBackgroundColor(
-            ContextCompat.getColor(viewHolder.itemView.context, R.color.black)
+            0
+//            ContextCompat.getColor(viewHolder.itemView.context, R.color.black)
         )
     } else {
         viewHolder.itemView.setBackgroundColor(0)

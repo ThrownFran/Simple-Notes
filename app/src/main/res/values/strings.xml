@@ -15,4 +15,5 @@
     <string name="trash_title">Trash</string>
     <string name="all_staggered">Staggered</string>
     <string name="vertical">Vertical</string>
+    <string name="add_note">Add note</string>
 </resources>

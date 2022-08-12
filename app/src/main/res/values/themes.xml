@@ -1,82 +1,82 @@
 <resources>
     <!-- Base application theme. -->
-    <style name="Theme.SimpleNotes" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.SimpleNotes" parent="Theme.Material3.Light.NoActionBar">
 
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryVariant">@color/on_primary</item>
-        <item name="colorPrimaryContainer">@color/primary_container</item>
-        <item name="colorOnPrimaryContainer">@color/black</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimary">@color/md_theme_light_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/md_theme_light_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/md_theme_light_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/md_theme_light_secondary</item>
+        <item name="colorOnSecondary">@color/md_theme_light_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/md_theme_light_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/md_theme_light_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/md_theme_light_tertiary</item>
+        <item name="colorOnTertiary">@color/md_theme_light_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/md_theme_light_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/md_theme_light_onTertiaryContainer</item>
+        <item name="colorError">@color/md_theme_light_error</item>
+        <item name="colorOnError">@color/md_theme_light_onError</item>
+        <item name="colorErrorContainer">@color/md_theme_light_errorContainer</item>
+        <item name="colorOnErrorContainer">@color/md_theme_light_onErrorContainer</item>
+        <item name="android:colorBackground">@color/md_theme_light_background</item>
+        <item name="colorOnBackground">@color/md_theme_light_onBackground</item>
+        <item name="colorSurface">@color/md_theme_light_surface</item>
+        <item name="colorOnSurface">@color/md_theme_light_onSurface</item>
+        <item name="colorSurfaceVariant">@color/md_theme_light_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/md_theme_light_onSurfaceVariant</item>
+        <item name="colorOutline">@color/md_theme_light_outline</item>
+        <item name="colorSurfaceInverse">@color/md_theme_light_inverseSurface</item>
+        <item name="colorOnSurfaceInverse">@color/md_theme_light_inverseOnSurface</item>
+        <item name="colorPrimaryInverse">@color/md_theme_light_inversePrimary</item>
 
-        <item name="colorPrimarySurface">?attr/colorPrimary</item>
-        <item name="colorPrimaryDark">?attr/colorPrimaryVariant</item>
-
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/secondary</item>
-        <item name="colorSecondaryContainer">@color/secondary</item>
-        <item name="colorSecondaryVariant">@color/on_secondary_container</item>
-        <item name="colorOnSecondary">@color/secondaryTextColor</item>
-
-        <!-- Ternary brand color -->
-        <item name="colorTertiary">@color/black</item>
-        <item name="colorTertiaryContainer">@color/black</item>
-        <item name="colorOnTertiary">@color/black</item>
-
-        <!-- Background color -->
-        <item name="colorSurface">@color/white</item>
-        <item name="colorSurfaceVariant">@color/white</item>
-        <item name="colorOnSurface">@color/black</item>
-        <item name="colorOnSurfaceVariant">@color/teal_700</item>
-        <item name="android:colorBackground">?attr/colorSurfaceVariant</item>
-        <item name="colorBackgroundFloating">?attr/colorSecondary</item>
-        <item name="itemBackground">?attr/colorSecondary</item>
-
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!--        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>-->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
         <item name="fontFamily">@font/worksan</item>
-        <item name="android:navigationBarColor">?attr/colorPrimary</item>
+        <!--        <item name="android:navigationBarColor">?attr/colorPrimary</item>-->
 
-        <item name="android:actionModeBackground">?attr/colorSecondaryVariant</item>
+        <!--        <item name="android:actionModeBackground">?attr/colorSecondaryVariant</item>-->
         <item name="android:actionModeCloseDrawable">@drawable/ic_baseline_clear_24</item>
         <item name="actionModeStyle">@style/Widget.ActionMode</item>
         <item name="windowActionModeOverlay">true</item>
+        <!--        <item name="actionBarTheme">@style/ThemeOverlay.Material3.ActionBar</item>-->
 
         <item name="materialCardViewStyle">@style/Widget.App.CardView</item>
 
         <item name="extendedFloatingActionButtonStyle">
             @style/Widget.App.ExtendedFloatingActionButton
         </item>
-        <item name="floatingActionButtonStyle">@style/Widget.App.FloatingActionButton</item>
+        <!--        <item name="floatingActionButtonStyle">@style/Widget.App.FloatingActionButton</item>-->
     </style>
 
 
-
-    <style name="Widget.ActionMode" parent="@style/Widget.AppCompat.ActionMode">
+    <style name="Widget.ActionMode" parent="@style/Widget.Material3.ActionMode">
+        <item name="background">?colorSecondary</item>
         <item name="titleTextStyle">@style/Widget.ActionMode.TextStyle</item>
     </style>
 
-    <style name="Widget.ActionMode.TextStyle">
-        <item name="android:textSize">16sp</item>
-        <item name="android:textStyle">bold</item>
+    <style name="Widget.ActionMode.TextStyle" parent="TextAppearance.Material3.ActionBar.Title">
+        <!--        <item name="android:textSize">16sp</item>-->
+        <!--        <item name="android:textStyle">bold</item>-->
         <item name="android:textColor">?colorOnSecondary</item>
     </style>
 
-    <style name="Widget.App.CardView" parent="Widget.Material3.CardView.Elevated">
+    <style name="Widget.App.CardView" parent="Widget.Material3.CardView.Outlined">
         <item name="materialThemeOverlay">@style/ThemeOverlay.App.Card</item>
         <item name="shapeAppearance">@style/ShapeAppearance.App.MediumComponent</item>
+        <item name="strokeWidth">1.5dp</item>
     </style>
 
     <style name="ThemeOverlay.App.Card" parent="">
-        <item name="colorPrimary">@color/white</item>
+        <item name="colorOutline">@color/md_theme_light_primary_transparent</item>
     </style>
 
     <!-- Cardview   -->
     <style name="ShapeAppearance.App.MediumComponent" parent="ShapeAppearance.Material3.MediumComponent">
         <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">8dp</item>
+        <item name="cornerSize">12dp</item>
     </style>
 
 
