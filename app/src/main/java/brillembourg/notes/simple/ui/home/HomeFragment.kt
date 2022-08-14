@@ -10,7 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -42,6 +41,8 @@ class HomeFragment : Fragment(), MenuProvider {
     private var actionMode: ActionMode? = null
 
     private var isStaggered = false
+
+    private var isAnimatingTaskPosition = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -170,18 +171,14 @@ class HomeFragment : Fragment(), MenuProvider {
 
     }
 
-//    private fun showMessage(message: String) {
-//        context?.showToast(message)
-//        Snackbar.make()
-//    }
-
     private fun navigateToCreateTask() {
         lockToolbarScrolling()
-        finishActionIfActive()
-
+        finishSelectionActionModeIfActive()
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
+        setTransitionToCreateNote()
         findNavController().navigate(directions)
     }
+
 
     private fun unlockToolbarScrolling() {
         val activityBinding = (activity as MainActivity?)?.binding
@@ -193,55 +190,88 @@ class HomeFragment : Fragment(), MenuProvider {
         activityBinding?.toolbar?.lockScroll()
     }
 
-    private fun finishActionIfActive() {
+    private fun finishSelectionActionModeIfActive() {
         actionMode?.finish()
         actionMode = null
     }
 
     private fun navigateToDetail(it: TaskPresentationModel, view: View) {
         lockToolbarScrolling()
-        finishActionIfActive()
+        finishSelectionActionModeIfActive()
 
         //navigate to detail fragment
-        val extras = FragmentNavigatorExtras(
-            view.findViewById<View>(R.id.task_roundcontraint) to getString(R.string.home_shared_detail_container),
-//            view.findViewById<TextView>(R.id.task_text_title) to getString(R.string.home_shared_detail_title),
-//            view.findViewById<TextView>(R.id.task_text_content) to getString(R.string.home_shared_detail_content)
-        )
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         directions.task = it
 
-//        exitTransition = MaterialElevationScale(false).apply {
-//            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-//        }
-//        reenterTransition = MaterialElevationScale(true).apply {
-//            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-//        }
 
-        findNavController().navigate(directions, extras)
+        isAnimatingTaskPosition = (binding.homeRecycler.adapter as TaskAdapter)
+            .currentList.indexOf(it)
+
+        setTransitionToEditNote()
+        findNavController().navigate(directions, setupExtrasToDetail(view))
     }
 
     private fun setupTaskList(taskList: List<TaskPresentationModel>) {
         if (binding.homeRecycler.adapter == null) {
-            binding.homeRecycler.apply {
-                adapter = buildTaskAdapter(this, taskList, getDragDirs(isStaggered))
-                layoutManager = buildLayoutManager(isStaggered)
-            }
+            setupTaskRecycler(taskList)
         } else {
-            (binding.homeRecycler.adapter as TaskAdapter).apply {
-                val isInsertingInList = currentList.size < taskList.size
-
-                submitList(taskList) {
-                    if (isInsertingInList) scrollToTop()
-                }
-
-                notifyDataSetChanged()
-            }
+            updateListAndNotify(binding.homeRecycler.adapter as TaskAdapter, taskList)
         }
-
-
 //        binding.homeMessage.text = getString(R.string.total_notes,taskList.size.toString())
     }
+
+    private fun setupTaskRecycler(taskList: List<TaskPresentationModel>) {
+        binding.homeRecycler.apply {
+            adapter = buildTaskAdapter(this, taskList, getDragDirs(isStaggered))
+            layoutManager = buildLayoutManager(isStaggered)
+        }
+    }
+
+    private fun updateListAndNotify(
+        taskAdapter: TaskAdapter,
+        taskList: List<TaskPresentationModel>
+    ) = with(taskAdapter) {
+
+        submitListAndScrollIfApplies(taskAdapter, currentList, taskList)
+
+        //Notify or update possible changes
+        if (isExitingFromDetailScreen()) {
+            val taskModel = currentList[isAnimatingTaskPosition]
+            bindDetailTask(taskModel)
+            exitFromDetailFinished()
+        } else {
+            notifyDataSetChanged()
+        }
+    }
+
+    private fun submitListAndScrollIfApplies(
+        taskAdapter: TaskAdapter,
+        currentList: List<TaskPresentationModel>,
+        taskList: List<TaskPresentationModel>
+    ) {
+        val isInsertingInList = currentList.size < taskList.size
+        taskAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
+    }
+
+    /**
+     * Manual binding to avoid animation flickering from adapter.notifyItemChanged
+     */
+    private fun bindDetailTask(taskModel: TaskPresentationModel) {
+        val viewHolder =
+            binding.homeRecycler.findViewHolderForAdapterPosition(isAnimatingTaskPosition)
+        (viewHolder as TaskAdapter.ViewHolder).apply {
+            bindTitle(taskModel)
+            bindContent(taskModel)
+        }
+    }
+
+
+    private fun isExitingFromDetailScreen() = isAnimatingTaskPosition != -1
+
+    private fun exitFromDetailFinished() {
+        isAnimatingTaskPosition = -1
+    }
+
 
     private fun scrollToTop() {
         binding.homeRecycler.scrollToPosition(0)

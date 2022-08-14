@@ -8,60 +8,64 @@
             type="brillembourg.notes.simple.ui.detail.DetailViewModel" />
     </data>
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/detail_linear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:transitionName="@{@string/home_shared_detail_container}"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:transitionName="@{@string/home_shared_detail_container}">
 
-        android:orientation="vertical">
-
-        <EditText
-            android:id="@+id/detail_edit_title"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:transitionName="@{@string/home_shared_detail_title}"
-            android:layout_marginTop="4dp"
-            android:gravity="top"
-            android:textStyle="bold"
-            android:onTextChanged="@{viewmodel.onTitleChanged}"
-            android:hint="@string/title"
-            android:inputType="textMultiLine"
-            android:importantForAutofill="no" />
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-
-            android:orientation="vertical"
-            android:background="?colorSurface"
-
-            tools:context=".ui.detail.DetailFragment">
-
-            <!--        <LinearLayout-->
-            <!--            android:layout_width="match_parent"-->
-            <!--            android:layout_height="wrap_content"-->
-            <!--            android:orientation="vertical">-->
-
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:orientation="vertical">
 
             <EditText
-                android:id="@+id/detail_edit_content"
+                android:id="@+id/detail_edit_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:transitionName="@{@string/home_shared_detail_content}"
-                android:background="@null"
-                android:padding="4dp"
+                android:layout_marginTop="4dp"
                 android:gravity="top"
-                android:onTextChanged="@{viewmodel.onTextChanged}"
-                android:hint="@string/note"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:onTextChanged="@{viewmodel.onTitleChanged}"
+                android:hint="@string/title"
                 android:inputType="textMultiLine"
                 android:importantForAutofill="no" />
-        </ScrollView>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:orientation="vertical"
+                android:background="?colorSurface"
+
+                tools:context=".ui.detail.DetailFragment">
+
+                <!--        <LinearLayout-->
+                <!--            android:layout_width="match_parent"-->
+                <!--            android:layout_height="wrap_content"-->
+                <!--            android:orientation="vertical">-->
 
 
-    </LinearLayout>
+                <EditText
+                    android:id="@+id/detail_edit_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:padding="4dp"
+                    android:gravity="top"
+                    android:textSize="16sp"
+                    android:onTextChanged="@{viewmodel.onTextChanged}"
+                    android:hint="@string/note"
+                    android:inputType="textMultiLine"
+                    android:importantForAutofill="no" />
+            </ScrollView>
+
+
+        </LinearLayout>
+    </FrameLayout>
 
 
     <!--    </LinearLayout>-->

@@ -101,7 +101,7 @@ class TaskAdapter(
             binding.taskTextDate.text = task.dateInLocal
         }
 
-        private fun bindContent(task: TaskPresentationModel) {
+        fun bindContent(task: TaskPresentationModel) {
 //            binding.taskTextContent.text = "${task.order}. ${task.content}"
             binding.taskTextContent.text = task.content
         }
@@ -127,7 +127,7 @@ class TaskAdapter(
                 3f.fromDpToPixel(binding.taskCardview.context).toInt()
         }
 
-        private fun bindTitle(task: TaskPresentationModel) {
+        fun bindTitle(task: TaskPresentationModel) {
             with(binding.taskTextTitle) {
                 isVisible = !task.title.isNullOrEmpty()
                 text = task.title

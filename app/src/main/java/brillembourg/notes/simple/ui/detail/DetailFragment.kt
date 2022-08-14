@@ -1,24 +1,18 @@
 package brillembourg.notes.simple.ui.detail
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
-import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
-import brillembourg.notes.simple.ui.extras.hideKeyboard
-import brillembourg.notes.simple.ui.extras.showMessage
-import brillembourg.notes.simple.ui.extras.showSoftKeyboard
-import brillembourg.notes.simple.ui.extras.themeColor
+import brillembourg.notes.simple.ui.extras.*
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
-import com.google.android.material.transition.platform.MaterialContainerTransform
 import dagger.hilt.android.AndroidEntryPoint
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
@@ -35,17 +29,7 @@ class DetailFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        sharedElementEnterTransition = MaterialContainerTransform().apply {
-            // Scope the transition to a view in the hierarchy so we know it will be added under
-            // the bottom app bar but over the elevation scale of the exiting HomeFragment.
-            drawingViewId = R.id.fragment_container_view
-            duration = 300
-            scrimColor = Color.TRANSPARENT
-            setAllContainerColors(requireContext().themeColor(com.google.android.material.R.attr.colorSurface))
-        }
-
-
+        setEditNoteEnterTransition()
         setupBackPhysicalButtonListener()
     }
 
@@ -53,9 +37,6 @@ class DetailFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-//        postponeEnterTransition()
-//        view?.doOnPreDraw { startPostponedEnterTransition() }
 
 
         binding = FragmentDetailBinding.inflate(inflater, container, false)
@@ -72,7 +53,9 @@ class DetailFragment : Fragment() {
             KeyboardVisibilityEventListener {
                 // Ah... at last. do your thing :)
                 if (!it) {
-                    binding.detailLinear.requestFocus()
+                    binding.detailEditTitle.clearFocus()
+                    binding.detailEditContent.clearFocus()
+                    binding.detailLinear.clearFocus()
                 }
             })
     }
@@ -83,8 +66,16 @@ class DetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        postponeEnterTransition()
-        view.doOnPreDraw { startPostponedEnterTransition() }
+        prepareTransition(view)
+        setCreateNoteEnterTransition(
+            myStartView = requireActivity().findViewById(R.id.home_fab),
+            myEndView = binding.detailLinear
+        )
+//        returnTransition = Slide().apply {
+//            duration = resources.getInteger(R.integer.reply_motion_duration_medium).toLong()
+//            addTarget(R.id.home_fab)
+//        }
+
         setupObservers()
     }
 
@@ -119,8 +110,7 @@ class DetailFragment : Fragment() {
     private fun onStateTaskLoaded(it: DetailState.TaskLoaded) {
         setupContent(it.task)
         setupTitle(it.task.title)
-        //TODO unfocus title
-        binding.detailLinear.requestFocus()
+        binding.detailLinear.clearFocus()
         binding.detailEditContent.hideKeyboard()
     }
 
@@ -141,9 +131,8 @@ class DetailFragment : Fragment() {
         binding.detailEditContent.setText(task.content)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean
-    {
-        when(item.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
             android.R.id.home -> {
                 clickBack()
                 return true

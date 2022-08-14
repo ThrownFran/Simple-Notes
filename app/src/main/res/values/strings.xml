@@ -17,10 +17,5 @@
     <string name="total_notes">Total notes (%1$s)</string>
 
     <string name="home_shared_item_container">task_animation_container%1$s</string>
-    <string name="home_shared_item_title">task_animation_title%1$s</string>
-    <string name="home_shared_item_content">task_animation_content%1$s</string>
-
     <string name="home_shared_detail_container">task_animation_detail_container</string>
-    <string name="home_shared_detail_title">task_animation_detail_title</string>
-    <string name="home_shared_detail_content">task_animation_detail_content</string>
 </resources>
