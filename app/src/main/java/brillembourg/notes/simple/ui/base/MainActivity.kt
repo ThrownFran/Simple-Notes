@@ -35,6 +35,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setupToolbar()
         setupObservers()
+        prepareBackup()
+    }
+
+    private fun prepareBackup() {
         viewModel.prepareBackupNotes(ContextDomain(this))
     }
 
@@ -46,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupToolbar() {
         val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.container) as NavHostFragment
+            supportFragmentManager.findFragmentById(R.id.fragment_container_view) as NavHostFragment
         navController = navHostFragment.navController
 
         //top level configuration
@@ -71,38 +75,30 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             binding.homeFab.apply {
-                if (destination.id == R.id.homeFragment) {
-                    show()
-                } else {
-                    hide()
-                }
+                if (destination.id == R.id.homeFragment) show() else hide()
             }
         }
 
         binding.navView.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.homeFragment -> {
-                    navController.navigate(R.id.homeFragment)
+                    navigateToHome()
                     closeDrawer()
                     true
                 }
                 R.id.trashFragment -> {
-                    navController.navigate(R.id.trashFragment)
+                    navigateToTrash()
                     closeDrawer()
                     true
                 }
-//                R.id.trashFragment -> {
-//                    navController.navigate(HomeFragmentDirections.actionHomeFragmentToTrashFragment())
-//                    closeDrawer()
-//                    true
-//                }
+
                 R.id.menu_backup -> {
-                    viewModel.backupNotes()
+                    backupNotes()
                     closeDrawer()
                     false
                 }
                 R.id.menu_restore -> {
-                    viewModel.restoreNotes()
+                    restoreNotes()
                     closeDrawer()
                     false
                 }
@@ -117,6 +113,22 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+    }
+
+    private fun restoreNotes() {
+        viewModel.restoreNotes()
+    }
+
+    private fun navigateToTrash() {
+        navController.navigate(R.id.trashFragment)
+    }
+
+    private fun navigateToHome() {
+        navController.navigate(R.id.homeFragment)
+    }
+
+    private fun backupNotes() {
+        viewModel.backupNotes()
     }
 
     private fun closeDrawer() {

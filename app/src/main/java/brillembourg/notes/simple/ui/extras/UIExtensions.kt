@@ -1,15 +1,19 @@
 package brillembourg.notes.simple.ui.extras
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.res.use
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -46,6 +50,21 @@ fun MainActivity.showMessage(message: String) {
         })
 
         show()
+    }
+}
+
+/**
+ * Retrieve a color from the current [android.content.res.Resources.Theme].
+ */
+@ColorInt
+@SuppressLint("Recycle")
+fun Context.themeColor(
+    @AttrRes themeAttrId: Int
+): Int {
+    return obtainStyledAttributes(
+        intArrayOf(themeAttrId)
+    ).use {
+        it.getColor(0, Color.MAGENTA)
     }
 }
 
@@ -87,6 +106,16 @@ fun ActionBar.setBackgroundDrawable(@DrawableRes resId: Int) {
 //    val color = themedContext.resolveAttribute(com.google.android.material.R.attr.colorPrimary)
 //    drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
 //    DrawableCompat.setTint(drawable, themedContext.resolveAttribute(com.google.android.material.R.attr.colorPrimary));
+
+//    val backgroundShapeModel: ShapeAppearanceModel = ShapeAppearanceModel.builder()
+//        .setTopLeftCorner(CornerFamily.ROUNDED, 16F.toPx)
+//        .setTopRightCorner(CornerFamily.ROUNDED, 16F.toPx)
+//        .build()
+//    this.setBackgroundDrawable(MaterialShapeDrawable(backgroundShapeModel).apply {
+//        fillColor = ColorStateList.valueOf(Color.GREEN)
+//    })
+
+
     this.setBackgroundDrawable(drawable)
 }
 

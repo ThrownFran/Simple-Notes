@@ -2,6 +2,7 @@ package brillembourg.notes.simple.ui.home
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.selection.SelectionTracker
@@ -15,7 +16,7 @@ import brillembourg.notes.simple.ui.models.TaskPresentationModel
 class TaskAdapter(
     dragAndDropDirs: Int,
     val recyclerView: RecyclerView,
-    val onClick: (TaskPresentationModel) -> Unit,
+    val onClick: (TaskPresentationModel, View) -> Unit,
     val onSelection: () -> Unit,
     val onReorderSuccess: (List<TaskPresentationModel>) -> Unit,
     val onReorderCanceled: () -> Unit
@@ -81,7 +82,7 @@ class TaskAdapter(
         }
 
         private fun clickInNormalState() {
-            onClick.invoke(getItem(adapterPosition))
+            onClick.invoke(getItem(adapterPosition), binding.root)
         }
 
         private fun clickInSelectionVisible() {
@@ -89,6 +90,7 @@ class TaskAdapter(
         }
 
         fun bind(task: TaskPresentationModel) {
+            binding.task = task
             bindTitle(task)
             bindContent(task)
             bindDate(task)

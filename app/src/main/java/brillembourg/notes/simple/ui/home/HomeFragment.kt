@@ -10,13 +10,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import brillembourg.notes.simple.R
-import brillembourg.notes.simple.databinding.FragmentMainBinding
+import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.ui.base.MainActivity
 import brillembourg.notes.simple.ui.base.MainViewModel
 import brillembourg.notes.simple.ui.extras.*
@@ -35,8 +36,8 @@ class HomeFragment : Fragment(), MenuProvider {
     private val viewModel: HomeViewModel by viewModels()
     private val activityViewModel: MainViewModel by activityViewModels()
 
-    private var _binding: FragmentMainBinding? = null
-    private lateinit var binding: FragmentMainBinding
+    private var _binding: FragmentHomeBinding? = null
+    private lateinit var binding: FragmentHomeBinding
     private var recylerViewState: Parcelable? = null
     private var actionMode: ActionMode? = null
 
@@ -46,8 +47,8 @@ class HomeFragment : Fragment(), MenuProvider {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        if (_binding == null) _binding = FragmentMainBinding.inflate(inflater, container, false)
-        binding = _binding as FragmentMainBinding
+        if (_binding == null) _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        binding = _binding as FragmentHomeBinding
         binding.viewmodel = viewModel
         return binding.root
     }
@@ -132,7 +133,8 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun setupObservers() {
         viewModel.navigateToDetailEvent.observe(viewLifecycleOwner) {
-            navigateToDetail(it)
+//            navigateToDetail(it)
+            //TODO
         }
 
         activityViewModel.createTaskEvent.observe(viewLifecycleOwner) {
@@ -196,14 +198,27 @@ class HomeFragment : Fragment(), MenuProvider {
         actionMode = null
     }
 
-    private fun navigateToDetail(it: TaskPresentationModel) {
+    private fun navigateToDetail(it: TaskPresentationModel, view: View) {
         lockToolbarScrolling()
         finishActionIfActive()
 
         //navigate to detail fragment
+        val extras = FragmentNavigatorExtras(
+            view.findViewById<View>(R.id.task_roundcontraint) to getString(R.string.home_shared_detail_container),
+//            view.findViewById<TextView>(R.id.task_text_title) to getString(R.string.home_shared_detail_title),
+//            view.findViewById<TextView>(R.id.task_text_content) to getString(R.string.home_shared_detail_content)
+        )
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         directions.task = it
-        findNavController().navigate(directions)
+
+//        exitTransition = MaterialElevationScale(false).apply {
+//            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+//        }
+//        reenterTransition = MaterialElevationScale(true).apply {
+//            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+//        }
+
+        findNavController().navigate(directions, extras)
     }
 
     private fun setupTaskList(taskList: List<TaskPresentationModel>) {
@@ -217,13 +232,19 @@ class HomeFragment : Fragment(), MenuProvider {
                 val isInsertingInList = currentList.size < taskList.size
 
                 submitList(taskList) {
-                    if (isInsertingInList) binding.homeRecycler.scrollToPosition(0)
+                    if (isInsertingInList) scrollToTop()
                 }
 
                 notifyDataSetChanged()
             }
         }
 
+
+//        binding.homeMessage.text = getString(R.string.total_notes,taskList.size.toString())
+    }
+
+    private fun scrollToTop() {
+        binding.homeRecycler.scrollToPosition(0)
     }
 
     private fun buildLayoutManager(isStaggered: Boolean): RecyclerView.LayoutManager {
@@ -245,8 +266,8 @@ class HomeFragment : Fragment(), MenuProvider {
             onSelection = {
                 setupContextualActionBar(recyclerView, recyclerView.adapter as TaskAdapter)
             },
-            onClick = {
-                clickItem(it)
+            onClick = { task, view ->
+                clickItem(task, view)
             },
             onReorderSuccess = { tasks ->
                 clickReorder(tasks)
@@ -269,8 +290,9 @@ class HomeFragment : Fragment(), MenuProvider {
         actionMode?.finish()
     }
 
-    private fun clickItem(it: TaskPresentationModel) {
-        viewModel.clickItem(it)
+    private fun clickItem(it: TaskPresentationModel, view: View) {
+//        viewModel.clickItem(it)
+        navigateToDetail(it, view)
     }
 
     private fun getDragDirs(isStaggered: Boolean) = if (isStaggered) {
@@ -307,38 +329,38 @@ class HomeFragment : Fragment(), MenuProvider {
 
                 // Called each time the action mode is shown. Always called after onCreateActionMode, but
                 // may be called multiple times if the mode is invalidated.
-            override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-                return false // Return false if nothing is done
-            }
-
-            // Called when the user selects a contextual menu item
-            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-                return when (item.itemId) {
-                    R.id.menu_context_menu_delete -> {
-                        clickDeleteTasks(adapter.currentList.filter { it.isSelected })
-                        true
-                    }
-                    else -> false
+                override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+                    return false // Return false if nothing is done
                 }
-            }
 
-            // Called when the user exits the action mode
-            override fun onDestroyActionMode(mode: ActionMode) {
+                // Called when the user selects a contextual menu item
+                override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                    return when (item.itemId) {
+                        R.id.menu_context_menu_delete -> {
+                            clickDeleteTasks(adapter.currentList.filter { it.isSelected })
+                            true
+                        }
+                        else -> false
+                    }
+                }
 
-                taskList.forEachIndexed { index, taskPresentationModel ->
-                    if (taskPresentationModel.isSelected) {
-                        taskPresentationModel.isSelected = false
-                        try {
-                            (recyclerView.findViewHolderForAdapterPosition(index) as TaskAdapter.ViewHolder).setBackgroundTransparent()
-                        } catch (e: Exception) {
-                            adapter.notifyItemChanged(index)
+                // Called when the user exits the action mode
+                override fun onDestroyActionMode(mode: ActionMode) {
+
+                    taskList.forEachIndexed { index, taskPresentationModel ->
+                        if (taskPresentationModel.isSelected) {
+                            taskPresentationModel.isSelected = false
+                            try {
+                                (recyclerView.findViewHolderForAdapterPosition(index) as TaskAdapter.ViewHolder).setBackgroundTransparent()
+                            } catch (e: Exception) {
+                                adapter.notifyItemChanged(index)
+                            }
                         }
                     }
-                }
 
-                actionMode = null
-            }
-        })
+                    actionMode = null
+                }
+            })
 
         setActionModeTitle(selectedList)
     }

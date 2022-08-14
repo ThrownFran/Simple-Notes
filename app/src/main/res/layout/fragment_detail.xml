@@ -12,6 +12,7 @@
         android:id="@+id/detail_linear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:transitionName="@{@string/home_shared_detail_container}"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
 
@@ -21,6 +22,7 @@
             android:id="@+id/detail_edit_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:transitionName="@{@string/home_shared_detail_title}"
             android:layout_marginTop="4dp"
             android:gravity="top"
             android:textStyle="bold"
@@ -48,6 +50,7 @@
                 android:id="@+id/detail_edit_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:transitionName="@{@string/home_shared_detail_content}"
                 android:background="@null"
                 android:padding="4dp"
                 android:gravity="top"

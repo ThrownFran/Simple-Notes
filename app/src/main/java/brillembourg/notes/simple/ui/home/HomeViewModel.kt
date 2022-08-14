@@ -32,6 +32,8 @@ class HomeViewModel @Inject constructor(
 
     fun observeTaskList(): LiveData<List<TaskPresentationModel>> = handleTaskListObservable()
 
+    fun totalNotes() = 14
+
     private fun handleTaskListObservable() = getTaskListUseCase
         .execute(GetTaskListUseCase.Params())
         .map {

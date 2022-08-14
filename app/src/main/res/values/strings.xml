@@ -10,10 +10,17 @@
     <string name="move_task_to_trash">Move selected note to trash?</string>
     <string name="move_tasks_to_trash">Move selected notes to trash?</string>
     <string name="all_move_to_trash">Move to trash</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="trash_title">Trash</string>
     <string name="all_staggered">Staggered</string>
     <string name="vertical">Vertical</string>
     <string name="add_note">Add note</string>
+    <string name="total_notes">Total notes (%1$s)</string>
+
+    <string name="home_shared_item_container">task_animation_container%1$s</string>
+    <string name="home_shared_item_title">task_animation_title%1$s</string>
+    <string name="home_shared_item_content">task_animation_content%1$s</string>
+
+    <string name="home_shared_detail_container">task_animation_detail_container</string>
+    <string name="home_shared_detail_title">task_animation_detail_title</string>
+    <string name="home_shared_detail_content">task_animation_detail_content</string>
 </resources>

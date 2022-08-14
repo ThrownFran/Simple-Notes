@@ -9,7 +9,7 @@
         android:id="@+id/homeFragment"
         android:name="brillembourg.notes.simple.ui.home.HomeFragment"
         android:label="Simple Notes"
-        tools:layout="@layout/fragment_main">
+        tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_homeFragment_to_detailFragment"
             app:destination="@id/detailFragment"
