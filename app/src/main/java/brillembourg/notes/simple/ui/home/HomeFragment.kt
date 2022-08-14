@@ -12,7 +12,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import brillembourg.notes.simple.R
@@ -41,7 +40,6 @@ class HomeFragment : Fragment(), MenuProvider {
     private var actionMode: ActionMode? = null
 
     private var isStaggered = false
-
     private var isAnimatingTaskPosition = -1
 
     override fun onCreateView(
@@ -102,17 +100,23 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun clickChangeLayout(isStaggered: Boolean) {
         this.isStaggered = isStaggered
         binding.homeRecycler.apply {
-            layoutManager = when {
-                isStaggered -> buildStaggeredManager()
-                else -> buildLinearManager()
+            val spanCount = when {
+                isStaggered -> 2
+                else -> 1
             }
+
+            (layoutManager as StaggeredGridLayoutManager).setSpanCount(spanCount)
+            adapter?.notifyItemRangeChanged(
+                0, adapter?.itemCount ?: 0,
+                (adapter as TaskAdapter).currentList
+            )
 
             val taskAdapter = adapter as TaskAdapter
             taskAdapter.itemTouchHelper =
                 taskAdapter.setupDragAndDropTouchHelper(getDragDirs(isStaggered)).also {
                     it.attachToRecyclerView(this)
                 }
-            taskAdapter.notifyDataSetChanged()
+//            taskAdapter.notifyDataSetChanged()
         }
     }
 
@@ -124,7 +128,9 @@ class HomeFragment : Fragment(), MenuProvider {
         clickChangeLayout(false)
     }
 
-    private fun buildLinearManager() = LinearLayoutManager(context)
+    private fun buildLinearManager() = StaggeredGridLayoutManager(1, RecyclerView.VERTICAL).also {
+        it.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
+    }
 
 
     override fun onDestroyView() {
@@ -237,7 +243,8 @@ class HomeFragment : Fragment(), MenuProvider {
         //Notify or update possible changes
         if (isExitingFromDetailScreen()) {
             val taskModel = currentList[isAnimatingTaskPosition]
-            bindDetailTask(taskModel)
+            notifyItemChanged(isAnimatingTaskPosition, taskModel)
+//            bindDetailTask(taskModel)
             exitFromDetailFinished()
         } else {
             notifyDataSetChanged()
@@ -380,11 +387,12 @@ class HomeFragment : Fragment(), MenuProvider {
                     taskList.forEachIndexed { index, taskPresentationModel ->
                         if (taskPresentationModel.isSelected) {
                             taskPresentationModel.isSelected = false
-                            try {
-                                (recyclerView.findViewHolderForAdapterPosition(index) as TaskAdapter.ViewHolder).setBackgroundTransparent()
-                            } catch (e: Exception) {
-                                adapter.notifyItemChanged(index)
-                            }
+                            adapter.notifyItemChanged(index, taskPresentationModel)
+//                            try {
+//                                (recyclerView.findViewHolderForAdapterPosition(index) as TaskAdapter.ViewHolder).setBackgroundTransparent()
+//                            } catch (e: Exception) {
+//                                adapter.notifyItemChanged(index)
+//                            }
                         }
                     }
 

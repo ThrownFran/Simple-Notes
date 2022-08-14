@@ -38,8 +38,13 @@ class TaskAdapter(
             ItemTaskBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(getItem(position))
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+        super.onBindViewHolder(holder, position, payloads)
     }
 
     inner class ViewHolder(private val binding: ItemTaskBinding) :
@@ -180,6 +185,13 @@ class TaskAdapter(
                 newItem: TaskPresentationModel
             ): Boolean {
                 return oldItem == newItem
+            }
+
+            override fun getChangePayload(
+                oldItem: TaskPresentationModel,
+                newItem: TaskPresentationModel
+            ): Any? {
+                return super.getChangePayload(oldItem, newItem)
             }
         }
     }
