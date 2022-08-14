@@ -1,17 +1,16 @@
 package brillembourg.notes.simple.ui.detail
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.CreateTaskUseCase
 import brillembourg.notes.simple.domain.use_cases.SaveTaskUseCase
+import brillembourg.notes.simple.ui.extras.SingleLiveEvent
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import brillembourg.notes.simple.ui.models.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -26,6 +25,9 @@ class DetailViewModel @Inject constructor(
     val state: MutableLiveData<DetailState> = MutableLiveData()
     private var content: String = ""
     private var title: String? = null
+
+    val messageEvent: LiveData<String> get() = _messageEvent
+    private val _messageEvent: SingleLiveEvent<String> = SingleLiveEvent()
 
     init {
         currentTask = DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).task
@@ -57,13 +59,19 @@ class DetailViewModel @Inject constructor(
             return
         }
 
-        createTaskUseCase.execute(
-            CreateTaskUseCase.Params(
-                content = content,
-                title = title
-            )
-        ).onEach { state.value = DetailState.TaskCreated(it.message) }
-            .launchIn(viewModelScope)
+        viewModelScope.launch {
+            try {
+                val result = createTaskUseCase.execute(
+                    CreateTaskUseCase.Params(
+                        content = content,
+                        title = title
+                    )
+                )
+                state.value = DetailState.TaskCreated(result.message)
+            } catch (e: Exception) {
+                _messageEvent.value = "Error creating task"
+            }
+        }
     }
 
     private fun noTitleOrContent() = title.isNullOrEmpty() && content.isNullOrEmpty()

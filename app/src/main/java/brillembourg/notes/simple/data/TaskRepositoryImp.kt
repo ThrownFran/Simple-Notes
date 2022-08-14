@@ -14,16 +14,16 @@ class TaskRepositoryImp(
     val dateProvider: DateProvider
 ) : TaskRepository {
 
-    override fun createTask(params: CreateTaskUseCase.Params): Flow<CreateTaskUseCase.Result> {
-        return flow {
-            val dateCreated = dateProvider.getCurrentTime()
-            val task = database.createTask(
-                title = params.title,
-                content = params.content,
-                dateCreated = dateCreated
-            ).toDomain()
-            emit(CreateTaskUseCase.Result(task, "Task created"))
-        }
+    override suspend fun createTask(params: CreateTaskUseCase.Params): CreateTaskUseCase.Result {
+
+        val dateCreated = dateProvider.getCurrentTime()
+        val task = database.createTask(
+            title = params.title,
+            content = params.content,
+            dateCreated = dateCreated
+        ).toDomain()
+        return CreateTaskUseCase.Result(task, "Note created")
+
     }
 
     override fun deleteTask(params: DeleteTasksUseCase.Params): Flow<DeleteTasksUseCase.Result> {
@@ -31,7 +31,7 @@ class TaskRepositoryImp(
             database.deleteTasks(params.ids)
             emit(
                 DeleteTasksUseCase.Result(
-                    if (params.ids.size > 1) "Tasks deleted" else "Task deleted"
+                    if (params.ids.size > 1) "Notes deleted" else "Note deleted"
                 )
             )
         }
@@ -50,14 +50,14 @@ class TaskRepositoryImp(
     override fun saveTask(params: SaveTaskUseCase.Params): Flow<SaveTaskUseCase.Result> {
         return flow {
             database.saveTask(params.task.toData())
-            emit(SaveTaskUseCase.Result("Task updated"))
+            emit(SaveTaskUseCase.Result("Note updated"))
         }
     }
 
     override fun reorderTaskList(params: ReorderTaskListUseCase.Params): Flow<ReorderTaskListUseCase.Result> {
         return flow {
             database.saveTasksReordering(params.taskList.map { it.toData() })
-            emit(ReorderTaskListUseCase.Result("Tasks reordered"))
+            emit(ReorderTaskListUseCase.Result("Notes reordered"))
         }
     }
 }
