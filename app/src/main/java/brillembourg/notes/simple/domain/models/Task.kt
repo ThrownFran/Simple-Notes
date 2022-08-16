@@ -5,5 +5,6 @@ data class Task(
     var title: String? = null,
     var content: String,
     val date: String,
-    val order: Int
+    val order: Int,
+    val isArchived: Boolean = false
 )

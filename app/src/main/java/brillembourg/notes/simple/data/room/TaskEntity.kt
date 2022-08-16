@@ -11,7 +11,8 @@ data class TaskEntity(
     @ColumnInfo(name = "description") val content: String,
     @ColumnInfo(name = "date_created") val dateCreated: String,
     @ColumnInfo(name = "title") val title: String? = null,
-    @ColumnInfo(name = "order") val order: Int
+    @ColumnInfo(name = "order") val order: Int,
+    @ColumnInfo(name = "is_archived") val isArchived: Boolean = false
 )
 
 fun TaskEntity.toDomain(): Task {
@@ -21,7 +22,8 @@ fun TaskEntity.toDomain(): Task {
         title = title,
         content = content,
         order = order,
-        date = dateCreated
+        date = dateCreated,
+        isArchived = isArchived
     )
 }
 
@@ -31,5 +33,6 @@ fun Task.toData(): TaskEntity =
         title = title,
         content = content,
         order = order,
-        dateCreated = date
+        dateCreated = date,
+        isArchived = isArchived
     )

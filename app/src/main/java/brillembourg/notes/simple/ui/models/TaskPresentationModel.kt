@@ -12,6 +12,7 @@ data class TaskPresentationModel(
     var content: String,
     val dateInLocal: String,
     var order: Int,
+    var isArchived: Boolean = false,
     var isSelected: Boolean = false
 ): Parcelable
 
@@ -21,7 +22,8 @@ fun TaskPresentationModel.toDomain (dateProvider: DateProvider): Task {
         title = title,
         content = content,
         order = order,
-        date = dateProvider.formatLocalDateToTime(dateInLocal)
+        date = dateProvider.formatLocalDateToTime(dateInLocal),
+        isArchived = isArchived
     )
 }
 
@@ -31,6 +33,7 @@ fun Task.toPresentation (dateProvider: DateProvider): TaskPresentationModel {
         title = title,
         content = content,
         order = order,
-        dateInLocal = dateProvider.formatTimeToLocalDate(date)
+        dateInLocal = dateProvider.formatTimeToLocalDate(date),
+        isArchived = isArchived
     )
 }
