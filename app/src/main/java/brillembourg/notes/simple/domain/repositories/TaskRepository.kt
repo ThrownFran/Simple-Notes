@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 interface TaskRepository {
     suspend fun createTask(params: CreateTaskUseCase.Params): CreateTaskUseCase.Result
     suspend fun archiveTasks(params: ArchiveTasksUseCase.Params): ArchiveTasksUseCase.Result
+    suspend fun unArchiveTasks(params: UnArchiveTasksUseCase.Params): UnArchiveTasksUseCase.Result
+
     fun deleteTask(params: DeleteTasksUseCase.Params): Flow<DeleteTasksUseCase.Result>
     fun getTaskList(params: GetTaskListUseCase.Params): Flow<GetTaskListUseCase.Result>
     fun getArchivedTasks(params: GetArchivedTasksUseCase.Params): Flow<GetArchivedTasksUseCase.Result>

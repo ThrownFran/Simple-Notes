@@ -14,6 +14,13 @@ class TaskRepositoryImp(
     val dateProvider: DateProvider
 ) : TaskRepository {
 
+    override suspend fun unArchiveTasks(params: UnArchiveTasksUseCase.Params): UnArchiveTasksUseCase.Result {
+        database.unArchiveTasks(params.ids)
+        return UnArchiveTasksUseCase.Result(
+            if (params.ids.size > 1) "Notes unarchived" else "Note archived"
+        )
+    }
+
     override suspend fun archiveTasks(params: ArchiveTasksUseCase.Params): ArchiveTasksUseCase.Result {
         database.archiveTasks(params.ids)
         return ArchiveTasksUseCase.Result(
@@ -45,7 +52,7 @@ class TaskRepositoryImp(
     }
 
     override fun getArchivedTasks(params: GetArchivedTasksUseCase.Params): Flow<GetArchivedTasksUseCase.Result> {
-        return database.getTaskList()
+        return database.getArchivedTasks()
             .debounce(200)
             .transform {
                 emit(GetArchivedTasksUseCase.Result(

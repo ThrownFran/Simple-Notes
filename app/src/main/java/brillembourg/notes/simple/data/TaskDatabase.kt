@@ -26,7 +26,7 @@ class TaskDatabase(
     private suspend fun calculateLastOrderPosition(): Int {
         val taskList = roomDatabase.taskDao().getListAsSuspend()
         var lastOrderPosition = 0
-        taskList.forEach {
+        taskList.filter { !it.isArchived }.forEach {
             if (it.order > lastOrderPosition) {
                 lastOrderPosition = it.order
             }
@@ -52,6 +52,18 @@ class TaskDatabase(
 
     suspend fun archiveTasks(ids: List<Long>) {
         return roomDatabase.taskDao().archive(ids)
+    }
+
+    suspend fun unArchiveTasks(ids: List<Long>) {
+        val lastOrderPosition = calculateLastOrderPosition()
+        val nextOrderPosition = lastOrderPosition + 1
+
+        //New order for each task
+        ids.forEachIndexed { index, id ->
+            roomDatabase.taskDao().updateOrder(id, nextOrderPosition + index)
+        }
+
+        return roomDatabase.taskDao().unarchive(ids)
     }
 
     suspend fun deleteTask(taskId: Long) {

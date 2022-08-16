@@ -2,10 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <item
+        android:id="@+id/menu_context_menu_unarchive"
+        android:icon="@drawable/ic_baseline_unarchive_24"
+        android:title="@string/archive"
+        app:showAsAction="always" />
 
     <item
-        android:id="@+id/menu_context_menu_archive"
+        android:id="@+id/menu_context_menu_delete"
         android:icon="@drawable/ic_baseline_delete_light_24"
         android:title="@string/archive"
         app:showAsAction="always" />
+
+
 </menu>

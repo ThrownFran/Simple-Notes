@@ -14,7 +14,10 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentTrashBinding
 import brillembourg.notes.simple.ui.base.MainActivity
 import brillembourg.notes.simple.ui.extras.*
-import brillembourg.notes.simple.ui.home.*
+import brillembourg.notes.simple.ui.home.HomeFragment
+import brillembourg.notes.simple.ui.home.LayoutType
+import brillembourg.notes.simple.ui.home.buildLayoutManager
+import brillembourg.notes.simple.ui.home.changeLayout
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import brillembourg.notes.simple.ui.utils.getNoteSelectedTitle
 import brillembourg.notes.simple.ui.utils.setupContextualActionBar
@@ -101,7 +104,7 @@ class TrashFragment : Fragment(), MenuProvider {
         layoutType: LayoutType
     ) {
         this.layoutType = layoutType
-        val taskAdapter = recyclerView.adapter as TaskAdapter
+        val taskAdapter = recyclerView.adapter as ArchivedTaskAdapter
 
         changeLayout(
             recyclerView,
@@ -175,7 +178,7 @@ class TrashFragment : Fragment(), MenuProvider {
         directions.task = it
 
 
-        isAnimatingTaskPosition = (binding.trashRecycler.adapter as TaskAdapter)
+        isAnimatingTaskPosition = (binding.trashRecycler.adapter as ArchivedTaskAdapter)
             .currentList.indexOf(it)
 
         setTransitionToEditNote()
@@ -186,7 +189,7 @@ class TrashFragment : Fragment(), MenuProvider {
         if (binding.trashRecycler.adapter == null) {
             setupTaskRecycler(taskList)
         } else {
-            updateListAndNotify(binding.trashRecycler.adapter as TaskAdapter, taskList)
+            updateListAndNotify(binding.trashRecycler.adapter as ArchivedTaskAdapter, taskList)
         }
     }
 
@@ -200,7 +203,7 @@ class TrashFragment : Fragment(), MenuProvider {
     }
 
     private fun updateListAndNotify(
-        taskAdapter: TaskAdapter,
+        taskAdapter: ArchivedTaskAdapter,
         taskList: List<TaskPresentationModel>
     ) = with(taskAdapter) {
 
@@ -217,7 +220,7 @@ class TrashFragment : Fragment(), MenuProvider {
     }
 
     private fun submitListAndScrollIfApplies(
-        taskAdapter: TaskAdapter,
+        taskAdapter: ArchivedTaskAdapter,
         currentList: List<TaskPresentationModel>,
         taskList: List<TaskPresentationModel>
     ) {
@@ -273,13 +276,24 @@ class TrashFragment : Fragment(), MenuProvider {
     }
 
     private fun onContextualActionItem(menuId: Int) = when (menuId) {
-        R.id.menu_context_menu_archive -> {
-            clickDeleteTasks((binding.trashRecycler
-                .adapter as TaskAdapter).currentList.filter { it.isSelected })
+        R.id.menu_context_menu_delete -> {
+            clickDeleteTasks(getSelectedItems())
+            true
+        }
+        R.id.menu_context_menu_unarchive -> {
+            clickUnarchiveTasks(getSelectedItems())
             true
         }
         else -> false
     }
+
+    private fun clickUnarchiveTasks(selectedItems: List<TaskPresentationModel>) {
+        viewModel.unarchiveTasks(selectedItems)
+        actionMode?.finish()
+    }
+
+    private fun getSelectedItems() = (binding.trashRecycler
+        .adapter as ArchivedTaskAdapter).currentList.filter { it.isSelected }
 
 
     private fun clickItem(it: TaskPresentationModel, view: View) {
@@ -291,7 +305,7 @@ class TrashFragment : Fragment(), MenuProvider {
         if (taskList.isEmpty()) throw IllegalArgumentException("Nothing to delete but trash was pressed")
 
         val title =
-            if (taskList.size > 1) getString(R.string.delete_task_permanently) else getString(R.string.delete_tasks_permanently)
+            if (taskList.size <= 1) getString(R.string.delete_task_permanently) else getString(R.string.delete_tasks_permanently)
 
         MaterialAlertDialogBuilder(
             requireContext()

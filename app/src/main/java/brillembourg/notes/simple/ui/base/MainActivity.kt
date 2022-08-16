@@ -15,6 +15,7 @@ import brillembourg.notes.simple.databinding.ActivityMainBinding
 import brillembourg.notes.simple.domain.ContextDomain
 import brillembourg.notes.simple.ui.extras.setBackgroundDrawable
 import brillembourg.notes.simple.ui.extras.showToast
+import brillembourg.notes.simple.ui.home.HomeFragmentDirections
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -117,11 +118,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun navigateToTrash() {
-        navController.navigate(R.id.trashFragment)
+        if (navController.currentDestination?.id == R.id.trashFragment) return
+        navController.navigate(HomeFragmentDirections.actionHomeFragmentToTrashFragment())
+//        navController.navigate(brillembourg.notes.simple.R.id.trashFragment,navBuilder.build())
     }
 
     private fun navigateToHome() {
-        navController.navigate(R.id.homeFragment)
+        if (navController.currentDestination?.id == R.id.homeFragment) return
+        navController.popBackStack()
+//        navController.navigate(brillembourg.notes.simple.R.id.homeFragment)
     }
 
     private fun backupNotes() {

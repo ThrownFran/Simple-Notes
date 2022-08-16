@@ -16,7 +16,7 @@ abstract class TaskDao {
 
     //GET
 
-    @Query("SELECT * FROM taskentity")
+    @Query("SELECT * FROM taskentity WHERE is_archived = 0")
     abstract fun getList(): Flow<List<TaskEntity>>
 
     @Query("SELECT * FROM taskentity WHERE is_archived = 1")
@@ -48,7 +48,7 @@ abstract class TaskDao {
     abstract suspend fun archive(ids: List<Long>)
 
     @Query("UPDATE taskentity SET `is_archived` = 0 WHERE id in (:ids)")
-    abstract suspend fun restore(ids: List<Long>)
+    abstract suspend fun unarchive(ids: List<Long>)
 
 
 }
