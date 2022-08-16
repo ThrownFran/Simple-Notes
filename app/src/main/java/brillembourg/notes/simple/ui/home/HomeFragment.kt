@@ -23,7 +23,6 @@ import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
-
 @AndroidEntryPoint
 class HomeFragment : Fragment(), MenuProvider {
 
@@ -36,6 +35,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private var _binding: FragmentHomeBinding? = null
     private lateinit var binding: FragmentHomeBinding
+
     private var recylerViewState: Parcelable? = null
     private var actionMode: ActionMode? = null
 
