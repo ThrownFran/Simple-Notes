@@ -10,7 +10,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
@@ -18,6 +17,9 @@ import brillembourg.notes.simple.ui.base.MainActivity
 import brillembourg.notes.simple.ui.base.MainViewModel
 import brillembourg.notes.simple.ui.extras.*
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
+import brillembourg.notes.simple.ui.utils.getNoteSelectedTitle
+import brillembourg.notes.simple.ui.utils.setupContextualActionBar
+import brillembourg.notes.simple.ui.utils.setupDragAndDropTouchHelper
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -235,7 +237,6 @@ class HomeFragment : Fragment(), MenuProvider {
         if (isExitingFromDetailScreen()) {
             val taskModel = currentList[isAnimatingTaskPosition]
             notifyItemChanged(isAnimatingTaskPosition, taskModel)
-//            bindDetailTask(taskModel)
             exitFromDetailFinished()
         } else {
             notifyDataSetChanged()
@@ -262,13 +263,6 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun scrollToTop() {
         binding.homeRecycler.scrollToPosition(0)
     }
-
-//    private fun buildLayoutManager(isStaggered: Boolean): RecyclerView.LayoutManager {
-//        return if (isStaggered) buildStaggeredManager() else buildVerticalManager()
-//            .also { layoutManager ->
-//                retrieveRecyclerStateIfApplies(layoutManager)
-//            }
-//    }
 
     private fun buildTaskAdapter(
         recyclerView: RecyclerView,
@@ -304,18 +298,18 @@ class HomeFragment : Fragment(), MenuProvider {
             currentActionMode = actionMode,
             adapter = binding.homeRecycler.adapter as TaskAdapter,
             onActionClick = { onContextualActionItem(menuId = it) },
-            onDestroyMyActionMode = { actionMode = null },
-            onSetTitle = { setActionModeTitle(selectedSize = it) }
+            onSetTitle = { selectedSize: Int ->
+                getNoteSelectedTitle(
+                    resources = resources,
+                    selectedSize = selectedSize
+                )
+            },
+            onDestroyMyActionMode = { actionMode = null }
         )
     }
 
     private fun onContextualActionItem(menuId: Int) = when (menuId) {
         R.id.menu_context_menu_delete -> {
-            clickDeleteTasks((binding.homeRecycler
-                .adapter as TaskAdapter).currentList.filter { it.isSelected })
-            true
-        }
-        R.id.menu_context_menu_archive -> {
             clickDeleteTasks((binding.homeRecycler
                 .adapter as TaskAdapter).currentList.filter { it.isSelected })
             true
@@ -337,16 +331,6 @@ class HomeFragment : Fragment(), MenuProvider {
         navigateToDetail(it, view)
     }
 
-    private fun getDragDirs(layoutType: LayoutType) = when (layoutType) {
-        LayoutType.Grid -> {
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END
-        }
-        LayoutType.Vertical -> {
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN
-        }
-    }
-
-
     private fun clickDeleteTasks(taskList: List<TaskPresentationModel>) {
         if (taskList.isEmpty()) throw IllegalArgumentException("Nothing to delete but trash was pressed")
 
@@ -367,12 +351,6 @@ class HomeFragment : Fragment(), MenuProvider {
             }
             .show()
 
-    }
-
-    private fun setActionModeTitle(selectedSize: Int): String {
-        val noteString =
-            if (selectedSize > 1) getString(R.string.notes) else getString(R.string.note)
-        return "$selectedSize ${noteString.lowercase()} ${getString(R.string.selected).lowercase()})"
     }
 
 

@@ -1,5 +1,6 @@
-package brillembourg.notes.simple.ui.home
+package brillembourg.notes.simple.ui.utils
 
+import android.content.res.Resources
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuInflater
@@ -7,6 +8,8 @@ import android.view.MenuItem
 import androidx.annotation.MenuRes
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.ListAdapter
+import brillembourg.notes.simple.R
+import brillembourg.notes.simple.ui.home.NoteViewHolder
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
 
 fun setupContextualActionBar(
@@ -68,4 +71,12 @@ fun setupContextualActionBar(
     })
     actionMode.title = onSetTitle.invoke(selectedList.size)
     return actionMode
+}
+
+fun getNoteSelectedTitle(resources: Resources, selectedSize: Int): String {
+    val noteString =
+        if (selectedSize > 1) resources.getString(R.string.notes) else resources.getString(R.string.note)
+    return "$selectedSize ${noteString.lowercase()} ${
+        resources.getString(R.string.selected).lowercase()
+    })"
 }

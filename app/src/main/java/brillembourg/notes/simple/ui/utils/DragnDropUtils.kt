@@ -1,8 +1,9 @@
-package brillembourg.notes.simple.ui.home
+package brillembourg.notes.simple.ui.utils
 
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import brillembourg.notes.simple.ui.home.TaskAdapter
 import java.util.*
 
 fun TaskAdapter.setupDragAndDropTouchHelper(dragAndDropDirs: Int): ItemTouchHelper {

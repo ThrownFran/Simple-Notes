@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemTaskBinding
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
+import brillembourg.notes.simple.ui.utils.setupDragAndDropTouchHelper
+import brillembourg.notes.simple.ui.utils.setupTaskDiffCallback
 
 class TaskAdapter(
     dragAndDropDirs: Int,

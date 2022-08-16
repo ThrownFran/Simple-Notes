@@ -19,8 +19,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.ui.base.MainActivity
-import brillembourg.notes.simple.ui.detail.DetailFragment
-import brillembourg.notes.simple.ui.home.HomeFragment
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -78,11 +76,7 @@ fun Context.resolveAttribute(@AttrRes attribute: Int): Int {
     return typedValue.data
 }
 
-fun HomeFragment.showMessage(message: String) {
-    (activity as MainActivity).showMessage(message)
-}
-
-fun DetailFragment.showMessage(message: String) {
+fun Fragment.showMessage(message: String) {
     (activity as MainActivity).showMessage(message)
 }
 

@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="brillembourg.notes.simple.ui.home.HomeFragment"
-        android:label="Simple Notes"
+        android:label="@string/app_name"
         tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_homeFragment_to_detailFragment"
@@ -21,7 +21,7 @@
     <fragment
         android:id="@+id/detailFragment"
         android:name="brillembourg.notes.simple.ui.detail.DetailFragment"
-        android:label="Edit note"
+        android:label="@string/edit_note"
         tools:layout="@layout/fragment_detail">
         <argument
             android:name="Task"
@@ -32,6 +32,11 @@
     <fragment
         android:id="@+id/trashFragment"
         android:name="brillembourg.notes.simple.ui.trash.TrashFragment"
-        android:label="fragment_trash"
-        tools:layout="@layout/fragment_trash" />
+        android:label="@string/trash_title"
+        tools:layout="@layout/fragment_trash">
+        <action
+            android:id="@+id/action_trashFragment_to_detailFragment"
+            app:destination="@id/detailFragment"
+            app:popUpTo="@id/trashFragment" />
+    </fragment>
 </navigation>

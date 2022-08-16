@@ -2,7 +2,7 @@ package brillembourg.notes.simple.ui.home
 
 import androidx.lifecycle.*
 import brillembourg.notes.simple.data.DateProvider
-import brillembourg.notes.simple.domain.use_cases.DeleteTasksUseCase
+import brillembourg.notes.simple.domain.use_cases.ArchiveTasksUseCase
 import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
 import brillembourg.notes.simple.domain.use_cases.ReorderTaskListUseCase
 import brillembourg.notes.simple.ui.extras.SingleLiveEvent
@@ -10,13 +10,17 @@ import brillembourg.notes.simple.ui.models.TaskPresentationModel
 import brillembourg.notes.simple.ui.models.toDomain
 import brillembourg.notes.simple.ui.models.toPresentation
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getTaskListUseCase: GetTaskListUseCase,
-    private val deleteTasksUseCase: DeleteTasksUseCase,
+    private val archiveTasksUseCase: ArchiveTasksUseCase,
     private val reorderTaskListUseCase: ReorderTaskListUseCase,
     private val dateProvider: DateProvider
 ) : ViewModel() {
@@ -31,8 +35,6 @@ class HomeViewModel @Inject constructor(
     val messageEvent: LiveData<String> get() = _messageEvent
 
     fun observeTaskList(): LiveData<List<TaskPresentationModel>> = handleTaskListObservable()
-
-    fun totalNotes() = 14
 
     private fun handleTaskListObservable() = getTaskListUseCase
         .execute(GetTaskListUseCase.Params())
@@ -66,13 +68,16 @@ class HomeViewModel @Inject constructor(
     }
 
     fun clickDeleteTasks(tasksToDelete: List<TaskPresentationModel>) {
-        deleteTasksUseCase.execute(DeleteTasksUseCase.Params(tasksToDelete.map { it.id }))
-            .debounce(400)
-            .onEach {
-                showMessage(it.message)
+        viewModelScope.launch {
+            try {
+                val result = archiveTasksUseCase.execute(
+                    ArchiveTasksUseCase.Params(tasksToDelete.map { it.id })
+                )
+                showMessage(result.message)
+            } catch (e: Exception) {
+                _messageEvent.value = "Error deleting tasks"
             }
-            .launchIn(viewModelScope)
-//        tasksToDelete.forEach { clickDeleteTask(it) }
+        }
     }
 
 

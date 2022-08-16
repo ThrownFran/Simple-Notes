@@ -43,7 +43,7 @@ fun DetailFragment.setCreateNoteEnterTransition(myStartView: View, myEndView: Vi
     }
 }
 
-fun HomeFragment.setTransitionToEditNote() {
+fun Fragment.setTransitionToEditNote() {
     exitTransition = MaterialElevationScale(false).apply {
         duration = resources.getInteger(R.integer.reply_motion_duration_medium).toLong()
     }
@@ -61,7 +61,7 @@ fun HomeFragment.setTransitionToCreateNote() {
     }
 }
 
-fun HomeFragment.setupExtrasToDetail(sharedView: View): FragmentNavigator.Extras {
+fun setupExtrasToDetail(sharedView: View): FragmentNavigator.Extras {
     return FragmentNavigatorExtras(
         sharedView.findViewById<View>(R.id.task_roundcontraint) to sharedView.context.getString(R.string.home_shared_detail_container),
     )

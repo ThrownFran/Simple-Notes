@@ -1,60 +1,320 @@
 package brillembourg.notes.simple.ui.trash
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.os.Parcelable
+import android.view.*
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.R
+import brillembourg.notes.simple.databinding.FragmentTrashBinding
+import brillembourg.notes.simple.ui.base.MainActivity
+import brillembourg.notes.simple.ui.extras.*
+import brillembourg.notes.simple.ui.home.*
+import brillembourg.notes.simple.ui.models.TaskPresentationModel
+import brillembourg.notes.simple.ui.utils.getNoteSelectedTitle
+import brillembourg.notes.simple.ui.utils.setupContextualActionBar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dagger.hilt.android.AndroidEntryPoint
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [TrashFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class TrashFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+@AndroidEntryPoint
+class TrashFragment : Fragment(), MenuProvider {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+    companion object TrashFragment {
+        fun newInstance() = HomeFragment()
     }
+
+    private val viewModel: TrashViewModel by viewModels()
+
+    private var _binding: FragmentTrashBinding? = null
+    private lateinit var binding: FragmentTrashBinding
+
+    private var recylerViewState: Parcelable? = null
+    private var actionMode: ActionMode? = null
+
+    private var layoutType = LayoutType.Vertical
+    private var isAnimatingTaskPosition = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_trash, container, false)
+    ): View {
+        if (_binding == null) _binding = FragmentTrashBinding.inflate(inflater, container, false)
+        binding = _binding as FragmentTrashBinding
+        binding.viewmodel = viewModel
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment TrashFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            TrashFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setupMenu()
+        setupObservers()
+        unlockToolbarScrolling()
+        animateFabWithRecycler()
+    }
+
+    private fun animateFabWithRecycler() {
+        val activityBinding = (activity as MainActivity?)?.binding
+        activityBinding?.homeFab?.animateWithRecycler(binding.trashRecycler)
+    }
+
+    private fun setupMenu() {
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_home, menu)
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
+        super.onPrepareMenu(menu)
+        menu.findItem(R.id.menu_home_vertical).apply { isVisible = layoutType == LayoutType.Grid }
+        menu.findItem(R.id.menu_home_staggered)
+            .apply { isVisible = layoutType == LayoutType.Vertical }
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        val menuHost = requireActivity()
+        when (menuItem.itemId) {
+            R.id.menu_home_vertical -> {
+                clickVerticalLayout()
+                menuHost.invalidateMenu()
+                return true
+            }
+            R.id.menu_home_staggered -> {
+                clickStaggeredLayout()
+                menuHost.invalidateMenu()
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun clickChangeLayout(
+        recyclerView: RecyclerView,
+        layoutType: LayoutType
+    ) {
+        this.layoutType = layoutType
+        val taskAdapter = recyclerView.adapter as TaskAdapter
+
+        changeLayout(
+            recyclerView,
+            layoutType,
+            taskAdapter.currentList
+        )
+    }
+
+    private fun clickStaggeredLayout() {
+        clickChangeLayout(binding.trashRecycler, LayoutType.Grid)
+    }
+
+    private fun clickVerticalLayout() {
+        clickChangeLayout(binding.trashRecycler, LayoutType.Vertical)
+    }
+
+    override fun onDestroyView() {
+        saveRecyclerState()
+        super.onDestroyView()
+    }
+
+    private fun setupObservers() {
+        viewModel.navigateToDetailEvent.observe(viewLifecycleOwner) {
+//            navigateToDetail(it)
+            //TODO
+        }
+
+        viewModel.state.observe(viewLifecycleOwner) {
+            when (it) {
+                is TrashState.Loading -> {
+
+                }
+                is TrashState.ShowError -> {
+                    showMessage(it.message)
                 }
             }
+        }
+
+        viewModel.messageEvent.observe(viewLifecycleOwner) {
+            showMessage(it)
+        }
+
+        viewModel.observeTaskList().observe(viewLifecycleOwner) {
+            setupTaskList(it)
+        }
+
+    }
+
+
+    private fun unlockToolbarScrolling() {
+        val activityBinding = (activity as MainActivity?)?.binding
+        activityBinding?.toolbar?.unLockScroll()
+    }
+
+    private fun lockToolbarScrolling() {
+        val activityBinding = (activity as MainActivity?)?.binding
+        activityBinding?.toolbar?.lockScroll()
+    }
+
+    private fun finishSelectionActionModeIfActive() {
+        actionMode?.finish()
+        actionMode = null
+    }
+
+    private fun navigateToDetail(it: TaskPresentationModel, view: View) {
+        lockToolbarScrolling()
+        finishSelectionActionModeIfActive()
+
+        //navigate to detail fragment
+        val directions = TrashFragmentDirections.actionTrashFragmentToDetailFragment()
+        directions.task = it
+
+
+        isAnimatingTaskPosition = (binding.trashRecycler.adapter as TaskAdapter)
+            .currentList.indexOf(it)
+
+        setTransitionToEditNote()
+        findNavController().navigate(directions, setupExtrasToDetail(view))
+    }
+
+    private fun setupTaskList(taskList: List<TaskPresentationModel>) {
+        if (binding.trashRecycler.adapter == null) {
+            setupTaskRecycler(taskList)
+        } else {
+            updateListAndNotify(binding.trashRecycler.adapter as TaskAdapter, taskList)
+        }
+    }
+
+    private fun setupTaskRecycler(taskList: List<TaskPresentationModel>) {
+        binding.trashRecycler.apply {
+            adapter = buildTaskAdapter(this, taskList)
+            layoutManager = buildLayoutManager(layoutType).also { layoutManager ->
+                retrieveRecyclerStateIfApplies(layoutManager)
+            }
+        }
+    }
+
+    private fun updateListAndNotify(
+        taskAdapter: TaskAdapter,
+        taskList: List<TaskPresentationModel>
+    ) = with(taskAdapter) {
+
+        submitListAndScrollIfApplies(taskAdapter, currentList, taskList)
+
+        //Notify or update possible changes
+        if (isExitingFromDetailScreen()) {
+            val taskModel = currentList[isAnimatingTaskPosition]
+            notifyItemChanged(isAnimatingTaskPosition, taskModel)
+            exitFromDetailFinished()
+        } else {
+            notifyDataSetChanged()
+        }
+    }
+
+    private fun submitListAndScrollIfApplies(
+        taskAdapter: TaskAdapter,
+        currentList: List<TaskPresentationModel>,
+        taskList: List<TaskPresentationModel>
+    ) {
+        val isInsertingInList = currentList.size < taskList.size
+        taskAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
+    }
+
+
+    private fun isExitingFromDetailScreen() = isAnimatingTaskPosition != -1
+
+    private fun exitFromDetailFinished() {
+        isAnimatingTaskPosition = -1
+    }
+
+
+    private fun scrollToTop() {
+        binding.trashRecycler.scrollToPosition(0)
+    }
+
+    private fun buildTaskAdapter(
+        recyclerView: RecyclerView,
+        taskList: List<TaskPresentationModel>
+    ): ArchivedTaskAdapter {
+
+        return ArchivedTaskAdapter(
+            recyclerView,
+            onSelection = {
+                launchContextualActionBar()
+            },
+            onClick = { task, clickedView ->
+                clickItem(task, clickedView)
+            })
+            .also {
+                it.submitList(taskList)
+            }
+    }
+
+    private fun launchContextualActionBar() {
+        actionMode = setupContextualActionBar(
+            toolbar = requireActivity().findViewById(R.id.toolbar),
+            menuId = R.menu.menu_context_trash,
+            currentActionMode = actionMode,
+            adapter = binding.trashRecycler.adapter as ArchivedTaskAdapter,
+            onActionClick = { onContextualActionItem(menuId = it) },
+            onSetTitle = { selectedSize: Int ->
+                getNoteSelectedTitle(
+                    resources = resources,
+                    selectedSize = selectedSize
+                )
+            },
+            onDestroyMyActionMode = { actionMode = null }
+        )
+    }
+
+    private fun onContextualActionItem(menuId: Int) = when (menuId) {
+        R.id.menu_context_menu_archive -> {
+            clickDeleteTasks((binding.trashRecycler
+                .adapter as TaskAdapter).currentList.filter { it.isSelected })
+            true
+        }
+        else -> false
+    }
+
+
+    private fun clickItem(it: TaskPresentationModel, view: View) {
+//        viewModel.clickItem(it)
+        navigateToDetail(it, view)
+    }
+
+    private fun clickDeleteTasks(taskList: List<TaskPresentationModel>) {
+        if (taskList.isEmpty()) throw IllegalArgumentException("Nothing to delete but trash was pressed")
+
+        val title =
+            if (taskList.size > 1) getString(R.string.delete_task_permanently) else getString(R.string.delete_tasks_permanently)
+
+        MaterialAlertDialogBuilder(
+            requireContext()
+        )
+            .setTitle(title)
+            .setIcon(R.drawable.ic_baseline_delete_dark_24)
+//            .setMessage(resources.getString(R.string.supporting_text))
+            .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
+            }
+            .setPositiveButton(resources.getString(R.string.all_delete)) { dialog, which ->
+                viewModel.clickDeleteTasks(taskList)
+                actionMode?.finish()
+            }
+            .show()
+
+    }
+
+
+    private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {
+        recylerViewState?.let { layoutManager.onRestoreInstanceState(it) }
+    }
+
+    private fun saveRecyclerState() {
+        recylerViewState = binding.trashRecycler.layoutManager?.onSaveInstanceState()
     }
 }

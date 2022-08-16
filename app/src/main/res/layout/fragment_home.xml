@@ -31,28 +31,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
 
-        <TextView
-            android:id="@+id/home_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="36sp"
-            android:visibility="gone"
-            android:text="@{@string/total_notes(viewmodel.totalNotes)}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <!--        <com.google.android.material.floatingactionbutton.FloatingActionButton-->
-        <!--            android:id="@+id/home_fab"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:src="@drawable/ic_baseline_add_24"-->
-        <!--            android:onClick="@{() -> viewmodel.createTask()}"-->
-        <!--            android:layout_margin="8dp"-->
-        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--            app:layout_constraintEnd_toEndOf="parent" />-->
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

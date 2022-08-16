@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.ui.home
+package brillembourg.notes.simple.ui.utils
 
 import androidx.recyclerview.widget.DiffUtil
 import brillembourg.notes.simple.ui.models.TaskPresentationModel

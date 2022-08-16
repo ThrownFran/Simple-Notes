@@ -7,8 +7,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemTaskBinding
 import brillembourg.notes.simple.ui.home.NoteViewHolder
-import brillembourg.notes.simple.ui.home.setupTaskDiffCallback
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
+import brillembourg.notes.simple.ui.utils.setupTaskDiffCallback
 
 class ArchivedTaskAdapter(
     val recyclerView: RecyclerView,

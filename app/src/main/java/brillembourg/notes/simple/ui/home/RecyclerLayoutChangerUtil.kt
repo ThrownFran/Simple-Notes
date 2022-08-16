@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.ui.home
 
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import brillembourg.notes.simple.ui.models.TaskPresentationModel
@@ -37,5 +38,14 @@ fun changeLayout(
             0, adapter?.itemCount ?: 0,
             currentList
         )
+    }
+}
+
+fun getDragDirs(layoutType: LayoutType) = when (layoutType) {
+    LayoutType.Grid -> {
+        ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END
+    }
+    LayoutType.Vertical -> {
+        ItemTouchHelper.UP or ItemTouchHelper.DOWN
     }
 }

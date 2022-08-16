@@ -20,4 +20,7 @@
     <string name="home_shared_detail_container">task_animation_detail_container</string>
     <string name="selected">Selected</string>
     <string name="archive">Archive</string>
+    <string name="edit_note">Edit note</string>
+    <string name="delete_task_permanently">Delete note permanently?</string>
+    <string name="delete_tasks_permanently">Delete notes permanently?</string>
 </resources>
