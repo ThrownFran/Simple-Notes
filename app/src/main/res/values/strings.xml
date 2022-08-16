@@ -18,4 +18,6 @@
 
     <string name="home_shared_item_container">task_animation_container%1$s</string>
     <string name="home_shared_detail_container">task_animation_detail_container</string>
+    <string name="selected">Selected</string>
+    <string name="archive">Archive</string>
 </resources>

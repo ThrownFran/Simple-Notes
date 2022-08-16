@@ -1,13 +1,11 @@
 package brillembourg.notes.simple.data
 
-import android.content.Context
 import brillembourg.notes.simple.data.room.AppDatabase
 import brillembourg.notes.simple.data.room.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
 class TaskDatabase(
-    val context: Context,
-    val roomDatabase: AppDatabase
+    private val roomDatabase: AppDatabase
 ) {
 
     suspend fun createTask(
@@ -40,6 +38,9 @@ class TaskDatabase(
         roomDatabase.taskDao().save(task)
     }
 
+    fun getArchivedTasks(): Flow<List<TaskEntity>> {
+        return roomDatabase.taskDao().getArchivedList()
+    }
 
     fun getTaskList(): Flow<List<TaskEntity>> {
         return roomDatabase.taskDao().getList()
@@ -49,13 +50,17 @@ class TaskDatabase(
         return roomDatabase.taskDao().deleteTasks(ids)
     }
 
+    suspend fun archiveTasks(ids: List<Long>) {
+        return roomDatabase.taskDao().archive(ids)
+    }
+
     suspend fun deleteTask(taskId: Long) {
         roomDatabase.taskDao().delete(taskId)
     }
 
     suspend fun saveTasksReordering(taskList: List<TaskEntity>) {
         taskList.forEach {
-            roomDatabase.taskDao().updateTaskOrder(it.id!!, it.order)
+            roomDatabase.taskDao().updateOrder(it.id!!, it.order)
         }
     }
 

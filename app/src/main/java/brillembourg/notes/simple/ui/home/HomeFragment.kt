@@ -3,7 +3,6 @@ package brillembourg.notes.simple.ui.home
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.*
-import androidx.appcompat.widget.Toolbar
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -13,7 +12,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.ui.base.MainActivity
@@ -39,7 +37,7 @@ class HomeFragment : Fragment(), MenuProvider {
     private var recylerViewState: Parcelable? = null
     private var actionMode: ActionMode? = null
 
-    private var isStaggered = false
+    private var layoutType = LayoutType.Vertical
     private var isAnimatingTaskPosition = -1
 
     override fun onCreateView(
@@ -76,8 +74,9 @@ class HomeFragment : Fragment(), MenuProvider {
 
     override fun onPrepareMenu(menu: Menu) {
         super.onPrepareMenu(menu)
-        menu.findItem(R.id.menu_home_vertical).apply { isVisible = isStaggered }
-        menu.findItem(R.id.menu_home_staggered).apply { isVisible = !isStaggered }
+        menu.findItem(R.id.menu_home_vertical).apply { isVisible = layoutType == LayoutType.Grid }
+        menu.findItem(R.id.menu_home_staggered)
+            .apply { isVisible = layoutType == LayoutType.Vertical }
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -97,41 +96,32 @@ class HomeFragment : Fragment(), MenuProvider {
         return false
     }
 
-    private fun clickChangeLayout(isStaggered: Boolean) {
-        this.isStaggered = isStaggered
-        binding.homeRecycler.apply {
-            val spanCount = when {
-                isStaggered -> 2
-                else -> 1
+    private fun clickChangeLayout(
+        recyclerView: RecyclerView,
+        layoutType: LayoutType
+    ) {
+        this.layoutType = layoutType
+        val taskAdapter = recyclerView.adapter as TaskAdapter
+
+        changeLayout(
+            recyclerView,
+            layoutType,
+            taskAdapter.currentList
+        )
+
+        taskAdapter.itemTouchHelper =
+            taskAdapter.setupDragAndDropTouchHelper(getDragDirs(layoutType)).also {
+                it.attachToRecyclerView(recyclerView)
             }
-
-            (layoutManager as StaggeredGridLayoutManager).setSpanCount(spanCount)
-            adapter?.notifyItemRangeChanged(
-                0, adapter?.itemCount ?: 0,
-                (adapter as TaskAdapter).currentList
-            )
-
-            val taskAdapter = adapter as TaskAdapter
-            taskAdapter.itemTouchHelper =
-                taskAdapter.setupDragAndDropTouchHelper(getDragDirs(isStaggered)).also {
-                    it.attachToRecyclerView(this)
-                }
-//            taskAdapter.notifyDataSetChanged()
-        }
     }
 
     private fun clickStaggeredLayout() {
-        clickChangeLayout(true)
+        clickChangeLayout(binding.homeRecycler, LayoutType.Grid)
     }
 
     private fun clickVerticalLayout() {
-        clickChangeLayout(false)
+        clickChangeLayout(binding.homeRecycler, LayoutType.Vertical)
     }
-
-    private fun buildLinearManager() = StaggeredGridLayoutManager(1, RecyclerView.VERTICAL).also {
-        it.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
-    }
-
 
     override fun onDestroyView() {
         saveRecyclerState()
@@ -223,13 +213,14 @@ class HomeFragment : Fragment(), MenuProvider {
         } else {
             updateListAndNotify(binding.homeRecycler.adapter as TaskAdapter, taskList)
         }
-//        binding.homeMessage.text = getString(R.string.total_notes,taskList.size.toString())
     }
 
     private fun setupTaskRecycler(taskList: List<TaskPresentationModel>) {
         binding.homeRecycler.apply {
-            adapter = buildTaskAdapter(this, taskList, getDragDirs(isStaggered))
-            layoutManager = buildLayoutManager(isStaggered)
+            adapter = buildTaskAdapter(this, taskList, getDragDirs(layoutType))
+            layoutManager = buildLayoutManager(layoutType).also { layoutManager ->
+                retrieveRecyclerStateIfApplies(layoutManager)
+            }
         }
     }
 
@@ -260,18 +251,6 @@ class HomeFragment : Fragment(), MenuProvider {
         taskAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
     }
 
-    /**
-     * Manual binding to avoid animation flickering from adapter.notifyItemChanged
-     */
-    private fun bindDetailTask(taskModel: TaskPresentationModel) {
-        val viewHolder =
-            binding.homeRecycler.findViewHolderForAdapterPosition(isAnimatingTaskPosition)
-        (viewHolder as TaskAdapter.ViewHolder).apply {
-            bindTitle(taskModel)
-            bindContent(taskModel)
-        }
-    }
-
 
     private fun isExitingFromDetailScreen() = isAnimatingTaskPosition != -1
 
@@ -284,12 +263,12 @@ class HomeFragment : Fragment(), MenuProvider {
         binding.homeRecycler.scrollToPosition(0)
     }
 
-    private fun buildLayoutManager(isStaggered: Boolean): RecyclerView.LayoutManager {
-        return if (isStaggered) buildStaggeredManager() else buildLinearManager()
-            .also { layoutManager ->
-                retrieveRecyclerStateIfApplies(layoutManager)
-            }
-    }
+//    private fun buildLayoutManager(isStaggered: Boolean): RecyclerView.LayoutManager {
+//        return if (isStaggered) buildStaggeredManager() else buildVerticalManager()
+//            .also { layoutManager ->
+//                retrieveRecyclerStateIfApplies(layoutManager)
+//            }
+//    }
 
     private fun buildTaskAdapter(
         recyclerView: RecyclerView,
@@ -301,10 +280,10 @@ class HomeFragment : Fragment(), MenuProvider {
             dragDirs,
             recyclerView,
             onSelection = {
-                setupContextualActionBar(recyclerView, recyclerView.adapter as TaskAdapter)
+                launchContextualActionBar()
             },
-            onClick = { task, view ->
-                clickItem(task, view)
+            onClick = { task, clickedView ->
+                clickItem(task, clickedView)
             },
             onReorderSuccess = { tasks ->
                 clickReorder(tasks)
@@ -316,6 +295,32 @@ class HomeFragment : Fragment(), MenuProvider {
                 it.submitList(taskList)
                 it.itemTouchHelper.attachToRecyclerView(recyclerView)
             }
+    }
+
+    private fun launchContextualActionBar() {
+        actionMode = setupContextualActionBar(
+            toolbar = requireActivity().findViewById(R.id.toolbar),
+            menuId = R.menu.menu_context_home,
+            currentActionMode = actionMode,
+            adapter = binding.homeRecycler.adapter as TaskAdapter,
+            onActionClick = { onContextualActionItem(menuId = it) },
+            onDestroyMyActionMode = { actionMode = null },
+            onSetTitle = { setActionModeTitle(selectedSize = it) }
+        )
+    }
+
+    private fun onContextualActionItem(menuId: Int) = when (menuId) {
+        R.id.menu_context_menu_delete -> {
+            clickDeleteTasks((binding.homeRecycler
+                .adapter as TaskAdapter).currentList.filter { it.isSelected })
+            true
+        }
+        R.id.menu_context_menu_archive -> {
+            clickDeleteTasks((binding.homeRecycler
+                .adapter as TaskAdapter).currentList.filter { it.isSelected })
+            true
+        }
+        else -> false
     }
 
     private fun clickReorder(tasks: List<TaskPresentationModel>) {
@@ -332,76 +337,15 @@ class HomeFragment : Fragment(), MenuProvider {
         navigateToDetail(it, view)
     }
 
-    private fun getDragDirs(isStaggered: Boolean) = if (isStaggered) {
-        ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END
-    } else {
-        ItemTouchHelper.UP or ItemTouchHelper.DOWN
+    private fun getDragDirs(layoutType: LayoutType) = when (layoutType) {
+        LayoutType.Grid -> {
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END
+        }
+        LayoutType.Vertical -> {
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN
+        }
     }
 
-    private fun setupContextualActionBar(recyclerView: RecyclerView, adapter: TaskAdapter) {
-//        val adapter = adapter as TaskAdapter
-        val taskList = adapter.currentList
-        val selectedList = taskList.filter { it.isSelected }
-
-        if (selectedList.isEmpty()) {
-            actionMode?.finish().also { actionMode = null }
-            return
-        }
-
-        if (actionMode != null) {
-            setActionModeTitle(selectedList)
-            return
-        }
-
-
-        actionMode = requireActivity().findViewById<Toolbar>(R.id.toolbar)
-            ?.startActionMode(object : ActionMode.Callback {
-                // Called when the action mode is created; startActionMode() was called
-                override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-                    // Inflate a menu resource providing context menu items
-                    val inflater: MenuInflater = mode.menuInflater
-                    inflater.inflate(R.menu.menu_context, menu)
-                    return true
-                }
-
-                // Called each time the action mode is shown. Always called after onCreateActionMode, but
-                // may be called multiple times if the mode is invalidated.
-                override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-                    return false // Return false if nothing is done
-                }
-
-                // Called when the user selects a contextual menu item
-                override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-                    return when (item.itemId) {
-                        R.id.menu_context_menu_delete -> {
-                            clickDeleteTasks(adapter.currentList.filter { it.isSelected })
-                            true
-                        }
-                        else -> false
-                    }
-                }
-
-                // Called when the user exits the action mode
-                override fun onDestroyActionMode(mode: ActionMode) {
-
-                    taskList.forEachIndexed { index, taskPresentationModel ->
-                        if (taskPresentationModel.isSelected) {
-                            taskPresentationModel.isSelected = false
-                            adapter.notifyItemChanged(index, taskPresentationModel)
-//                            try {
-//                                (recyclerView.findViewHolderForAdapterPosition(index) as TaskAdapter.ViewHolder).setBackgroundTransparent()
-//                            } catch (e: Exception) {
-//                                adapter.notifyItemChanged(index)
-//                            }
-                        }
-                    }
-
-                    actionMode = null
-                }
-            })
-
-        setActionModeTitle(selectedList)
-    }
 
     private fun clickDeleteTasks(taskList: List<TaskPresentationModel>) {
         if (taskList.isEmpty()) throw IllegalArgumentException("Nothing to delete but trash was pressed")
@@ -425,16 +369,12 @@ class HomeFragment : Fragment(), MenuProvider {
 
     }
 
-    private fun setActionModeTitle(selectedList: List<TaskPresentationModel>) {
+    private fun setActionModeTitle(selectedSize: Int): String {
         val noteString =
-            if (selectedList.size > 1) getString(R.string.notes) else getString(R.string.note)
-        actionMode?.title = "${selectedList.size} ${noteString.lowercase()} selected"
+            if (selectedSize > 1) getString(R.string.notes) else getString(R.string.note)
+        return "$selectedSize ${noteString.lowercase()} ${getString(R.string.selected).lowercase()})"
     }
 
-    private fun buildStaggeredManager() =
-        StaggeredGridLayoutManager(2, RecyclerView.VERTICAL).also {
-            it.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE
-        }
 
     private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {
         recylerViewState?.let { layoutManager.onRestoreInstanceState(it) }

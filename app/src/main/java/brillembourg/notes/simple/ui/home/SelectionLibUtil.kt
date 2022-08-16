@@ -8,7 +8,7 @@ import brillembourg.notes.simple.ui.models.TaskPresentationModel
 
 fun TaskPresentationModel.bindTracker(
     idItem: Long,
-    viewHolder: TaskAdapter.ViewHolder,
+    viewHolder: NoteViewHolder,
     tracker: SelectionTracker<Long>
 ) {
     if (tracker.isSelected(idItem)) {
@@ -24,7 +24,8 @@ fun TaskPresentationModel.bindTracker(
 
 
 fun TaskAdapter.buildTracker(recyclerView: RecyclerView, onSelectionChange: () -> Unit) {
-    tracker = SelectionTracker.Builder<Long>(
+    //Tracker in Adapter
+    SelectionTracker.Builder<Long>(
         "mySelection",
         recyclerView,
         ItemsKeyProvider(this),
@@ -59,14 +60,14 @@ class MyItemDetailsLookup(
     override fun getItemDetails(event: MotionEvent): ItemDetails<Long>? {
         val view = recyclerView.findChildViewUnder(event.x, event.y)
         if (view != null) {
-            return (recyclerView.getChildViewHolder(view) as TaskAdapter.ViewHolder)
+            return (recyclerView.getChildViewHolder(view) as NoteViewHolder)
                 .getItemDetails(adapter = adapter)
         }
         return null
     }
 }
 
-fun TaskAdapter.ViewHolder.getItemDetails(adapter: TaskAdapter): ItemDetailsLookup.ItemDetails<Long> =
+fun NoteViewHolder.getItemDetails(adapter: TaskAdapter): ItemDetailsLookup.ItemDetails<Long> =
     object : ItemDetailsLookup.ItemDetails<Long>() {
         override fun getPosition(): Int = adapterPosition
         override fun getSelectionKey(): Long = adapter.currentList[adapterPosition].id

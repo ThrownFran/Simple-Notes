@@ -14,6 +14,13 @@ class TaskRepositoryImp(
     val dateProvider: DateProvider
 ) : TaskRepository {
 
+    override suspend fun archiveTasks(params: ArchiveTasksUseCase.Params): ArchiveTasksUseCase.Result {
+        database.archiveTasks(params.ids)
+        return ArchiveTasksUseCase.Result(
+            if (params.ids.size > 1) "Notes archived" else "Note archived"
+        )
+    }
+
     override suspend fun createTask(params: CreateTaskUseCase.Params): CreateTaskUseCase.Result {
 
         val dateCreated = dateProvider.getCurrentTime()
@@ -35,6 +42,16 @@ class TaskRepositoryImp(
                 )
             )
         }
+    }
+
+    override fun getArchivedTasks(params: GetArchivedTasksUseCase.Params): Flow<GetArchivedTasksUseCase.Result> {
+        return database.getTaskList()
+            .debounce(200)
+            .transform {
+                emit(GetArchivedTasksUseCase.Result(
+                    it.map { taskEntity -> taskEntity.toDomain() }
+                ))
+            }
     }
 
     override fun getTaskList(params: GetTaskListUseCase.Params): Flow<GetTaskListUseCase.Result> {

@@ -9,11 +9,23 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 abstract class TaskDao {
 
+    //CREATE
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract suspend fun create(item: TaskEntity): Long
+
+    //GET
+
     @Query("SELECT * FROM taskentity")
     abstract fun getList(): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM taskentity WHERE is_archived = 1")
+    abstract fun getArchivedList(): Flow<List<TaskEntity>>
+
     @Query("SELECT * FROM taskentity")
     abstract suspend fun getListAsSuspend(): List<TaskEntity>
+
+    //DELETE
 
     @Query("DELETE FROM taskentity WHERE id = :taskId")
     abstract suspend fun delete(taskId: Long)
@@ -21,15 +33,22 @@ abstract class TaskDao {
     @Query("delete from taskentity where id in (:ids)")
     abstract suspend fun deleteTasks(ids: List<Long>)
 
+    //UPDATE
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun save(task: TaskEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun saveTasks(itemList: ArrayList<TaskEntity>)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    abstract suspend fun create(item: TaskEntity): Long
-
     @Query("UPDATE taskentity SET `order` = :order WHERE id = :id")
-    abstract suspend fun updateTaskOrder(id: Long, order: Int)
+    abstract suspend fun updateOrder(id: Long, order: Int)
+
+    @Query("UPDATE taskentity SET `is_archived` = 1 WHERE id in (:ids)")
+    abstract suspend fun archive(ids: List<Long>)
+
+    @Query("UPDATE taskentity SET `is_archived` = 0 WHERE id in (:ids)")
+    abstract suspend fun restore(ids: List<Long>)
+
+
 }

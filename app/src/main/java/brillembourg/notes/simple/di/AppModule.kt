@@ -41,10 +41,9 @@ class AppModule {
     @Singleton
     @Provides
     fun taskDatabase(
-        @ApplicationContext appContext: Context,
         roomDatabase: AppDatabase
     ): TaskDatabase =
-        TaskDatabase(appContext, roomDatabase)
+        TaskDatabase(roomDatabase)
 
     @Singleton
     @Provides

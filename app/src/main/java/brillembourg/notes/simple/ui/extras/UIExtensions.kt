@@ -103,19 +103,6 @@ fun Float.fromDpToPixel(context: Context): Float {
 
 fun ActionBar.setBackgroundDrawable(@DrawableRes resId: Int) {
     val drawable = themedContext.resources.getDrawable(resId)
-//    val color = themedContext.resolveAttribute(com.google.android.material.R.attr.colorPrimary)
-//    drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN)
-//    DrawableCompat.setTint(drawable, themedContext.resolveAttribute(com.google.android.material.R.attr.colorPrimary));
-
-//    val backgroundShapeModel: ShapeAppearanceModel = ShapeAppearanceModel.builder()
-//        .setTopLeftCorner(CornerFamily.ROUNDED, 16F.toPx)
-//        .setTopRightCorner(CornerFamily.ROUNDED, 16F.toPx)
-//        .build()
-//    this.setBackgroundDrawable(MaterialShapeDrawable(backgroundShapeModel).apply {
-//        fillColor = ColorStateList.valueOf(Color.GREEN)
-//    })
-
-
     this.setBackgroundDrawable(drawable)
 }
 
