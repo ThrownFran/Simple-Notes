@@ -31,7 +31,7 @@
         <argument
             android:name="Task"
             android:defaultValue="@null"
-            app:argType="brillembourg.notes.simple.ui.models.TaskPresentationModel"
+            app:argType="brillembourg.notes.simple.presentation.models.TaskPresentationModel"
             app:nullable="true" />
     </fragment>
     <fragment

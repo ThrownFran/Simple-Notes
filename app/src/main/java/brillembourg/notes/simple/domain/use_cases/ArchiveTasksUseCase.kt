@@ -1,11 +1,12 @@
 package brillembourg.notes.simple.domain.use_cases
 
 import brillembourg.notes.simple.domain.repositories.TaskRepository
+import brillembourg.notes.simple.util.Resource
 import javax.inject.Inject
 
 class ArchiveTasksUseCase @Inject constructor(private val repository: TaskRepository) {
 
-    suspend fun execute(params: Params): Result {
+    suspend operator fun invoke(params: Params): Resource<Result> {
         return repository.archiveTasks(params)
     }
 

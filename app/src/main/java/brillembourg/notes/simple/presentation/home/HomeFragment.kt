@@ -9,6 +9,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.R
@@ -22,6 +24,7 @@ import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
 import brillembourg.notes.simple.presentation.ui_utils.setupDragAndDropTouchHelper
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(), MenuProvider {
@@ -155,8 +158,16 @@ class HomeFragment : Fragment(), MenuProvider {
             showMessage(it)
         }
 
-        viewModel.observeTaskList().observe(viewLifecycleOwner) {
-            setupTaskList(it)
+//        viewModel.observeTaskList().observe(viewLifecycleOwner) {
+//            setupTaskList(it)
+//        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.taskListState.collect {
+                    setupTaskList(it)
+                }
+            }
         }
 
         activityViewModel.restoreSuccessEvent.observe(viewLifecycleOwner) {

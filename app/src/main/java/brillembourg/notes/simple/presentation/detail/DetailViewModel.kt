@@ -4,12 +4,12 @@ import androidx.lifecycle.*
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.CreateTaskUseCase
 import brillembourg.notes.simple.domain.use_cases.SaveTaskUseCase
+import brillembourg.notes.simple.presentation.base.getMessageFromError
 import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
+import brillembourg.notes.simple.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -60,18 +60,26 @@ class DetailViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            try {
-                val result = createTaskUseCase.execute(
-                    CreateTaskUseCase.Params(
-                        content = content,
-                        title = title
-                    )
+
+            val result = createTaskUseCase(
+                CreateTaskUseCase.Params(
+                    content = content,
+                    title = title
                 )
-                state.value = DetailState.TaskCreated(result.message)
-            } catch (e: Exception) {
-                _messageEvent.value = "Error creating task"
+            )
+
+            when (result) {
+                is Resource.Success -> state.value = DetailState.TaskCreated(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
             }
+
+
         }
+    }
+
+    private fun showErrorMessage(e: Exception) {
+        _messageEvent.value = getMessageFromError(e)
     }
 
     private fun noTitleOrContent() = title.isNullOrEmpty() && content.isNullOrEmpty()
@@ -90,9 +98,17 @@ class DetailViewModel @Inject constructor(
     private fun updateTask(task: TaskPresentationModel) {
         task.content = content
         task.title = title
-        saveTaskUseCase.execute(SaveTaskUseCase.Params(task.toDomain(dateProvider)))
-            .onEach { state.value = DetailState.TaskSaved(it.message) }
-            .launchIn(viewModelScope)
+
+        viewModelScope.launch {
+
+            val params = SaveTaskUseCase.Params(task.toDomain(dateProvider))
+
+            when (val result = saveTaskUseCase(params)) {
+                is Resource.Success -> state.value = DetailState.TaskSaved(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
     }
 
     fun onBackPressed() {

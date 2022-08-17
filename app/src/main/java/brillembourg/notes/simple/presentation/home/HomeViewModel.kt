@@ -1,17 +1,23 @@
 package brillembourg.notes.simple.presentation.home
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.ArchiveTasksUseCase
 import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
 import brillembourg.notes.simple.domain.use_cases.ReorderTaskListUseCase
+import brillembourg.notes.simple.presentation.base.getMessageFromError
 import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.presentation.models.toPresentation
+import brillembourg.notes.simple.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,32 +38,57 @@ class HomeViewModel @Inject constructor(
     val navigateToDetailEvent: LiveData<TaskPresentationModel> get() = _navigateToDetailEvent
     val messageEvent: LiveData<String> get() = _messageEvent
 
-    fun observeTaskList(): LiveData<List<TaskPresentationModel>> = handleTaskListObservable()
+    private val _taskListState: MutableStateFlow<List<TaskPresentationModel>> =
+        MutableStateFlow(ArrayList())
+    var taskListState: StateFlow<List<TaskPresentationModel>> = _taskListState.asStateFlow()
 
-    private fun handleTaskListObservable() = getTaskListUseCase
-        .execute(GetTaskListUseCase.Params())
-        .map {
-            it.taskList.map { it.toPresentation(dateProvider) }
-                .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                .asReversed()
+//    fun observeTaskList(): LiveData<List<TaskPresentationModel>> = handleTaskListObservable()
+
+    init {
+        getTaskList()
+    }
+
+    private fun getTaskList() {
+        viewModelScope.launch {
+            getTaskListUseCase(GetTaskListUseCase.Params())
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            _taskListState.value =
+                                result.data.taskList
+                                    .map { it.toPresentation(dateProvider) }
+                                    .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+                                    .asReversed()
+                        }
+                        is Resource.Error -> _state.value =
+                            HomeState.ShowError("Error loading tasks")
+                        is Resource.Loading -> Unit
+                    }
+
+                }
+//                .catch {
+//                    it.stackTrace
+//                    _state.value = HomeState.ShowError("Error loading tasks")
+//                }.asLiveData(viewModelScope.coroutineContext)
         }
-        .catch {
-            it.stackTrace
-            _state.value = HomeState.ShowError("Error loading tasks")
-        }.asLiveData(viewModelScope.coroutineContext)
+    }
 
     fun reorderList(reorderedTaskList: List<TaskPresentationModel>) {
         viewModelScope.launch {
-            try {
-                val result =
-                    reorderTaskListUseCase.execute(ReorderTaskListUseCase.Params(reorderedTaskList.map {
-                        it.toDomain(dateProvider)
-                    }))
-                showMessage(result.message)
-            } catch (e: Exception) {
-                _messageEvent.value = "Error reordering"
+            val params = ReorderTaskListUseCase.Params(reorderedTaskList.map {
+                it.toDomain(dateProvider)
+            })
+
+            when (val result = reorderTaskListUseCase(params)) {
+                is Resource.Success -> showMessage(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
             }
         }
+    }
+
+    private fun showErrorMessage(exception: Exception) {
+        _messageEvent.value = getMessageFromError(exception)
     }
 
     fun clickItem(it: TaskPresentationModel) {
@@ -70,14 +101,14 @@ class HomeViewModel @Inject constructor(
 
     fun clickDeleteTasks(tasksToDelete: List<TaskPresentationModel>) {
         viewModelScope.launch {
-            try {
-                val result = archiveTasksUseCase.execute(
-                    ArchiveTasksUseCase.Params(tasksToDelete.map { it.id })
-                )
-                showMessage(result.message)
-            } catch (e: Exception) {
-                _messageEvent.value = "Error deleting tasks"
+            val params = ArchiveTasksUseCase.Params(tasksToDelete.map { it.id })
+
+            when (val result = archiveTasksUseCase(params)) {
+                is Resource.Success -> showMessage(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
             }
+
         }
     }
 

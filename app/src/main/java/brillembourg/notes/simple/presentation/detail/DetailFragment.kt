@@ -89,6 +89,10 @@ class DetailFragment : Fragment() {
                 is DetailState.ExitWithoutSaving -> finishView()
             }
         }
+
+        viewModel.messageEvent.observe(viewLifecycleOwner) {
+            showMessage(it)
+        }
     }
 
     private fun onStateTaskCreated(it: DetailState.TaskCreated) {

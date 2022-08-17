@@ -4,6 +4,7 @@ import brillembourg.notes.simple.data.room.toData
 import brillembourg.notes.simple.data.room.toDomain
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import brillembourg.notes.simple.domain.use_cases.*
+import brillembourg.notes.simple.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
@@ -21,23 +22,36 @@ class TaskRepositoryImp(
         )
     }
 
-    override suspend fun archiveTasks(params: ArchiveTasksUseCase.Params): ArchiveTasksUseCase.Result {
-        database.archiveTasks(params.ids)
-        return ArchiveTasksUseCase.Result(
-            if (params.ids.size > 1) "Notes archived" else "Note archived"
-        )
+    override suspend fun archiveTasks(params: ArchiveTasksUseCase.Params): Resource<ArchiveTasksUseCase.Result> {
+        return safeCall {
+            database.archiveTasks(params.ids)
+            Resource.Success(
+                ArchiveTasksUseCase.Result(
+                    if (params.ids.size > 1) "Notes archived" else "Note archived"
+                )
+            )
+        }
     }
 
-    override suspend fun createTask(params: CreateTaskUseCase.Params): CreateTaskUseCase.Result {
+    private suspend fun <T> safeCall(block: suspend () -> Resource<T>): Resource<T> {
+        return try {
+            block.invoke()
+        } catch (e: Exception) {
+            Resource.Error(e)
+        }
+    }
 
-        val dateCreated = dateProvider.getCurrentTime()
-        val task = database.createTask(
-            title = params.title,
-            content = params.content,
-            dateCreated = dateCreated
-        ).toDomain()
-        return CreateTaskUseCase.Result(task, "Note created")
+    override suspend fun createTask(params: CreateTaskUseCase.Params): Resource<CreateTaskUseCase.Result> {
 
+        return safeCall {
+            val dateCreated = dateProvider.getCurrentTime()
+            val task = database.createTask(
+                title = params.title,
+                content = params.content,
+                dateCreated = dateCreated
+            ).toDomain()
+            Resource.Success(CreateTaskUseCase.Result(task, "Note created"))
+        }
     }
 
     override fun deleteTask(params: DeleteTasksUseCase.Params): Flow<DeleteTasksUseCase.Result> {
@@ -61,26 +75,32 @@ class TaskRepositoryImp(
             }
     }
 
-    override fun getTaskList(params: GetTaskListUseCase.Params): Flow<GetTaskListUseCase.Result> {
+    override fun getTaskList(params: GetTaskListUseCase.Params): Flow<Resource<GetTaskListUseCase.Result>> {
         return database.getTaskList()
             .debounce(200)
             .transform {
-                emit(GetTaskListUseCase.Result(
-                    it.map { taskEntity -> taskEntity.toDomain() }
-                ))
+                try {
+                    val taskListDomain = it.map { taskEntity -> taskEntity.toDomain() }
+                    val result = GetTaskListUseCase.Result(taskListDomain)
+                    emit(Resource.Success(result))
+                } catch (e: Exception) {
+                    emit(Resource.Error(e))
+                }
             }
     }
 
-    override fun saveTask(params: SaveTaskUseCase.Params): Flow<SaveTaskUseCase.Result> {
-        return flow {
+    override suspend fun saveTask(params: SaveTaskUseCase.Params): Resource<SaveTaskUseCase.Result> {
+        return safeCall {
             database.saveTask(params.task.toData())
-            emit(SaveTaskUseCase.Result("Note updated"))
+            Resource.Success(SaveTaskUseCase.Result("Note updated"))
         }
     }
 
-    override suspend fun reorderTaskList(params: ReorderTaskListUseCase.Params): ReorderTaskListUseCase.Result {
-        database.saveTasksReordering(params.taskList.map { it.toData() })
-        return ReorderTaskListUseCase.Result("Notes reordered")
+    override suspend fun reorderTaskList(params: ReorderTaskListUseCase.Params): Resource<ReorderTaskListUseCase.Result> {
+        return safeCall {
+            database.saveTasksReordering(params.taskList.map { it.toData() })
+            Resource.Success(ReorderTaskListUseCase.Result("Notes reordered"))
+        }
     }
 
 }
