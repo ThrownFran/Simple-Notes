@@ -8,11 +8,11 @@ import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.DeleteTasksUseCase
 import brillembourg.notes.simple.domain.use_cases.GetArchivedTasksUseCase
 import brillembourg.notes.simple.domain.use_cases.UnArchiveTasksUseCase
-import brillembourg.notes.simple.presentation.base.getMessageFromError
 import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toPresentation
 import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

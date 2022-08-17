@@ -4,11 +4,11 @@ import androidx.lifecycle.*
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.CreateTaskUseCase
 import brillembourg.notes.simple.domain.use_cases.SaveTaskUseCase
-import brillembourg.notes.simple.presentation.base.getMessageFromError
 import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

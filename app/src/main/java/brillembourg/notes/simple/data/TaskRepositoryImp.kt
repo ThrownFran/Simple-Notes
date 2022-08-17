@@ -5,6 +5,7 @@ import brillembourg.notes.simple.data.room.toDomain
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.safeCall
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.transform
@@ -33,13 +34,6 @@ class TaskRepositoryImp(
         }
     }
 
-    private suspend fun <T> safeCall(block: suspend () -> Resource<T>): Resource<T> {
-        return try {
-            block.invoke()
-        } catch (e: Exception) {
-            Resource.Error(e)
-        }
-    }
 
     override suspend fun createTask(params: CreateTaskUseCase.Params): Resource<CreateTaskUseCase.Result> {
 

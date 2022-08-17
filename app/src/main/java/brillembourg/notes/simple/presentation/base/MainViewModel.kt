@@ -6,9 +6,10 @@ import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.domain.Screen
 import brillembourg.notes.simple.domain.use_cases.BackupNotesUseCase
 import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
+import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,26 +36,40 @@ class MainViewModel @Inject constructor(
     }
 
     fun prepareBackupNotes(screen: Screen) {
-        backupNotesUseCase.prepareBackup(BackupNotesUseCase.PrepareBackupParams(screen))
-            .launchIn(viewModelScope)
+        viewModelScope.launch {
+            val params = BackupNotesUseCase.PrepareBackupParams(screen)
+            backupNotesUseCase.prepareBackup(params)
+        }
     }
 
     fun restoreNotes() {
-        backupNotesUseCase.restore()
-            .onEach {
-                showMessage(it.message)
-                _restoreSuccessEvent.value = it.message
+        viewModelScope.launch {
+            when (val result = backupNotesUseCase.restore()) {
+                is Resource.Success -> {
+                    showMessage(result.data.message)
+                    _restoreSuccessEvent.value = result.data.message
+                }
+                is Resource.Loading -> Unit
+                is Resource.Error -> showErrorMessage(result.exception)
             }
-            .launchIn(viewModelScope)
+        }
+    }
+
+    private fun showErrorMessage(exception: Exception) {
+        _messageEvent.value = getMessageFromError(exception)
     }
 
     fun backupNotes() {
-        backupNotesUseCase.backup()
-            .onEach {
-                showMessage(it.message)
-                _backupSuccessEvent.value = it.message
+        viewModelScope.launch {
+            when (val result = backupNotesUseCase.backup()) {
+                is Resource.Success -> {
+                    showMessage(result.data.message)
+                    _backupSuccessEvent.value = result.data.message
+                }
+                is Resource.Loading -> Unit
+                is Resource.Error -> showErrorMessage(result.exception)
             }
-            .launchIn(viewModelScope)
+        }
     }
 
     private fun showMessage(message: String) {

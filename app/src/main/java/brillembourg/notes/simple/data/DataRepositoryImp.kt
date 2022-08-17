@@ -3,40 +3,41 @@ package brillembourg.notes.simple.data
 import brillembourg.notes.simple.data.room.BackupAndRestoreProvider
 import brillembourg.notes.simple.domain.repositories.DataRepository
 import brillembourg.notes.simple.domain.use_cases.BackupNotesUseCase
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import brillembourg.notes.simple.util.BackupException
+import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.RestoreException
+import brillembourg.notes.simple.util.safeCall
 
 class DataRepositoryImp(
     private val backupAndRestoreProvider: BackupAndRestoreProvider
 ) : DataRepository {
 
-    override fun restore(): Flow<BackupNotesUseCase.Result> {
-        return flow {
+    override suspend fun restore(): Resource<BackupNotesUseCase.Result> {
+        return safeCall {
             val result = backupAndRestoreProvider.restoreInLocalStorage()
             if (result.success) {
-                emit(BackupNotesUseCase.Result("Restore success"))
+                Resource.Success(BackupNotesUseCase.Result("Restore success"))
             } else {
-                throw Exception("Restore error ${result.message}")
+                Resource.Error(RestoreException("Restore error ${result.message}"))
             }
         }
     }
 
-    override fun backup(): Flow<BackupNotesUseCase.Result> {
-        return flow {
+    override suspend fun backup(): Resource<BackupNotesUseCase.Result> {
+        return safeCall {
             val result = backupAndRestoreProvider.backupInLocalStorage()
             if (result.success) {
-                emit(BackupNotesUseCase.Result("Backup success"))
+                Resource.Success(BackupNotesUseCase.Result("Backup success"))
             } else {
-
-                throw Exception("Backup error ${result.message}")
+                Resource.Error(BackupException("Backup error ${result.message}"))
             }
         }
     }
 
-    override fun prepareBackupNotes(params: BackupNotesUseCase.PrepareBackupParams): Flow<BackupNotesUseCase.PrepareBackupResult> {
-        return flow {
-            val result = backupAndRestoreProvider.prepareBackupInLocalStorage(params.screen)
-            emit(BackupNotesUseCase.PrepareBackupResult("Backup success"))
+    override suspend fun prepareBackupNotes(params: BackupNotesUseCase.PrepareBackupParams): Resource<BackupNotesUseCase.PrepareBackupResult> {
+        return safeCall {
+            backupAndRestoreProvider.prepareBackupInLocalStorage(params.screen)
+            Resource.Success(BackupNotesUseCase.PrepareBackupResult("Backup success"))
         }
     }
 }

@@ -11,5 +11,12 @@ sealed class Resource<T>() {
     class Success<T>(val data: T) : Resource<T>()
     class Error<T>(val exception: Exception, val data: T? = null) : Resource<T>()
     class Loading<T>(val isLoading: Boolean = true) : Resource<T>()
+}
 
+suspend fun <T> safeCall(block: suspend () -> Resource<T>): Resource<T> {
+    return try {
+        block.invoke()
+    } catch (e: Exception) {
+        Resource.Error(e)
+    }
 }

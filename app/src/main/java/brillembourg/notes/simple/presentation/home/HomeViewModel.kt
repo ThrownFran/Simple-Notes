@@ -8,12 +8,12 @@ import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.ArchiveTasksUseCase
 import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
 import brillembourg.notes.simple.domain.use_cases.ReorderTaskListUseCase
-import brillembourg.notes.simple.presentation.base.getMessageFromError
 import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.presentation.models.toPresentation
 import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

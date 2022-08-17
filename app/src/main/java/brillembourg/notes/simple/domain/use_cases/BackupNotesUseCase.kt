@@ -2,22 +2,22 @@ package brillembourg.notes.simple.domain.use_cases
 
 import brillembourg.notes.simple.domain.Screen
 import brillembourg.notes.simple.domain.repositories.DataRepository
-import kotlinx.coroutines.flow.Flow
+import brillembourg.notes.simple.util.Resource
 import javax.inject.Inject
 
 class BackupNotesUseCase @Inject constructor(private val repository: DataRepository) {
 
-    fun backup(): Flow<Result> {
+    suspend fun backup(): Resource<Result> {
         return repository.backup()
     }
 
-    fun restore(): Flow<Result> {
+    suspend fun restore(): Resource<Result> {
         return repository.restore()
     }
 
     class Result(val message: String)
 
-    fun prepareBackup(params: PrepareBackupParams): Flow<PrepareBackupResult> {
+    suspend fun prepareBackup(params: PrepareBackupParams): Resource<PrepareBackupResult> {
         return repository.prepareBackupNotes(params)
     }
 
