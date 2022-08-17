@@ -5,6 +5,8 @@ import brillembourg.notes.simple.data.*
 import brillembourg.notes.simple.data.room.AppDatabase
 import brillembourg.notes.simple.data.room.BackupAndRestoreProvider
 import brillembourg.notes.simple.data.room.RoomBackupLib
+import brillembourg.notes.simple.domain.Schedulers
+import brillembourg.notes.simple.domain.SchedulersImp
 import brillembourg.notes.simple.domain.repositories.DataRepository
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import dagger.Module
@@ -49,6 +51,12 @@ class AppModule {
     @Provides
     fun getAppDatabase(@ApplicationContext context: Context): AppDatabase {
         return AppDatabase.invoke(context)
+    }
+
+    @Singleton
+    @Provides
+    fun dispatchers(): Schedulers {
+        return SchedulersImp()
     }
 
 }

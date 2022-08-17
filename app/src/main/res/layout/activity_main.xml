@@ -7,7 +7,7 @@
 
         <variable
             name="viewmodel"
-            type="brillembourg.notes.simple.ui.base.MainViewModel" />
+            type="brillembourg.notes.simple.presentation.base.MainViewModel" />
     </data>
 
     <androidx.drawerlayout.widget.DrawerLayout
@@ -48,7 +48,7 @@
                 app:defaultNavHost="true"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 app:navGraph="@navigation/nav_graph"
-                tools:context=".ui.base.MainActivity" />
+                tools:context=".presentation.base.MainActivity" />
 
             <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
                 android:id="@+id/home_fab"

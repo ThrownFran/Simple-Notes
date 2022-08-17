@@ -1,14 +1,18 @@
 package brillembourg.notes.simple.domain.use_cases
 
+import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.models.Task
 import brillembourg.notes.simple.domain.repositories.TaskRepository
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class ReorderTaskListUseCase @Inject constructor(private val repository: TaskRepository) {
+class ReorderTaskListUseCase @Inject constructor(
+    private val repository: TaskRepository,
+    private val schedulers: Schedulers
+) {
 
-    fun execute(params: Params): Flow<Result> {
-        return repository.reorderTaskList(params)
+    suspend fun execute(params: Params): Result = withContext(schedulers.defaultDispatcher()) {
+        repository.reorderTaskList(params)
     }
 
     class Params(val taskList: List<Task>)

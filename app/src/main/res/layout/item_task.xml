@@ -7,10 +7,10 @@
 
         <variable
             name="task"
-            type="brillembourg.notes.simple.ui.models.TaskPresentationModel" />
+            type="brillembourg.notes.simple.presentation.models.TaskPresentationModel" />
     </data>
 
-    <brillembourg.notes.simple.ui.extras.RoundContraintLayout
+    <brillembourg.notes.simple.presentation.extras.RoundContraintLayout
         android:id="@+id/task_roundcontraint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -40,7 +40,7 @@
             app:rippleColor="?colorSecondaryContainer"
             app:strokeColor="@drawable/selector_cardview_stroke_color">
 
-            <brillembourg.notes.simple.ui.extras.RoundContraintLayout
+            <brillembourg.notes.simple.presentation.extras.RoundContraintLayout
                 android:id="@+id/task_contraint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -95,11 +95,11 @@ In nulla voluptas ut voluptatem modi qui consectetur quos. Ut sunt quibusdam non
                     tools:text="Date created"
                     tools:visibility="visible" />
 
-            </brillembourg.notes.simple.ui.extras.RoundContraintLayout>
+            </brillembourg.notes.simple.presentation.extras.RoundContraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!--    </brillembourg.notes.simple.ui.CanvasBrushView>-->
-    </brillembourg.notes.simple.ui.extras.RoundContraintLayout>
+    </brillembourg.notes.simple.presentation.extras.RoundContraintLayout>
 </layout>
 
 

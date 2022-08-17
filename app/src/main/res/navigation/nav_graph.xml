@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="brillembourg.notes.simple.ui.home.HomeFragment"
+        android:name="brillembourg.notes.simple.presentation.home.HomeFragment"
         android:label="@string/app_name"
         tools:layout="@layout/fragment_home">
         <action
@@ -25,7 +25,7 @@
     </fragment>
     <fragment
         android:id="@+id/detailFragment"
-        android:name="brillembourg.notes.simple.ui.detail.DetailFragment"
+        android:name="brillembourg.notes.simple.presentation.detail.DetailFragment"
         android:label="@string/edit_note"
         tools:layout="@layout/fragment_detail">
         <argument
@@ -36,7 +36,7 @@
     </fragment>
     <fragment
         android:id="@+id/trashFragment"
-        android:name="brillembourg.notes.simple.ui.trash.TrashFragment"
+        android:name="brillembourg.notes.simple.presentation.trash.TrashFragment"
         android:label="@string/trash_title"
         tools:layout="@layout/fragment_trash">
         <action

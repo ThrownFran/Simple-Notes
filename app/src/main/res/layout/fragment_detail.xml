@@ -5,7 +5,7 @@
     <data>
         <variable
             name="viewmodel"
-            type="brillembourg.notes.simple.ui.detail.DetailViewModel" />
+            type="brillembourg.notes.simple.presentation.detail.DetailViewModel" />
     </data>
 
     <FrameLayout
@@ -41,7 +41,7 @@
                 android:orientation="vertical"
                 android:background="?colorSurface"
 
-                tools:context=".ui.detail.DetailFragment">
+                tools:context=".presentation.detail.DetailFragment">
 
                 <!--        <LinearLayout-->
                 <!--            android:layout_width="match_parent"-->

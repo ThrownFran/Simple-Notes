@@ -78,10 +78,9 @@ class TaskRepositoryImp(
         }
     }
 
-    override fun reorderTaskList(params: ReorderTaskListUseCase.Params): Flow<ReorderTaskListUseCase.Result> {
-        return flow {
-            database.saveTasksReordering(params.taskList.map { it.toData() })
-            emit(ReorderTaskListUseCase.Result("Notes reordered"))
-        }
+    override suspend fun reorderTaskList(params: ReorderTaskListUseCase.Params): ReorderTaskListUseCase.Result {
+        database.saveTasksReordering(params.taskList.map { it.toData() })
+        return ReorderTaskListUseCase.Result("Notes reordered")
     }
+
 }
