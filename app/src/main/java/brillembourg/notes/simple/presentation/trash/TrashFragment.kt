@@ -8,6 +8,8 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.R
@@ -23,6 +25,7 @@ import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
 import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -147,8 +150,16 @@ class TrashFragment : Fragment(), MenuProvider {
             showMessage(it)
         }
 
-        viewModel.observeTaskList().observe(viewLifecycleOwner) {
-            setupTaskList(it)
+//        viewModel.observeTaskList().observe(viewLifecycleOwner) {
+//            setupTaskList(it)
+//        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.taskList.collect {
+                    setupTaskList(it)
+                }
+            }
         }
 
     }

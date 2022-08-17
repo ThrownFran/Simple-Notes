@@ -1,14 +1,20 @@
 package brillembourg.notes.simple.domain.use_cases
 
+import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.repositories.TaskRepository
-import kotlinx.coroutines.flow.Flow
+import brillembourg.notes.simple.util.Resource
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class DeleteTasksUseCase @Inject constructor(private val repository: TaskRepository) {
+class DeleteTasksUseCase @Inject constructor(
+    private val repository: TaskRepository,
+    private val schedulers: Schedulers
+) {
 
-    fun execute(params: Params): Flow<Result> {
-        return repository.deleteTask(params)
-    }
+    suspend operator fun invoke(params: Params): Resource<Result> =
+        withContext(schedulers.defaultDispatcher()) {
+            repository.deleteTask(params)
+        }
 
     class Params(val ids: List<Long>)
     class Result(val message: String)

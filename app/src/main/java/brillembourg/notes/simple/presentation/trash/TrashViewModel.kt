@@ -1,15 +1,21 @@
 package brillembourg.notes.simple.presentation.trash
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.DeleteTasksUseCase
 import brillembourg.notes.simple.domain.use_cases.GetArchivedTasksUseCase
 import brillembourg.notes.simple.domain.use_cases.UnArchiveTasksUseCase
+import brillembourg.notes.simple.presentation.base.getMessageFromError
 import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toPresentation
+import brillembourg.notes.simple.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,22 +36,32 @@ class TrashViewModel @Inject constructor(
     val navigateToDetailEvent: LiveData<TaskPresentationModel> get() = _navigateToDetailEvent
     val messageEvent: LiveData<String> get() = _messageEvent
 
-    fun observeTaskList(): LiveData<List<TaskPresentationModel>> = handleTaskListObservable()
+    private val _taskList: MutableStateFlow<List<TaskPresentationModel>> =
+        MutableStateFlow(ArrayList())
+    val taskList = _taskList.asStateFlow()
 
-    fun totalNotes() = 14
+    init {
+        getArchivedTasksAndObserve()
+    }
 
-    private fun handleTaskListObservable() = getArchivedTasksUseCase
-        .execute(GetArchivedTasksUseCase.Params())
-        .map {
-            it.taskList.map { it.toPresentation(dateProvider) }
-                .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                .asReversed()
+    private fun getArchivedTasksAndObserve() {
+        viewModelScope.launch {
+            getArchivedTasksUseCase(GetArchivedTasksUseCase.Params())
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            _taskList.value =
+                                result.data.taskList.map { it.toPresentation(dateProvider) }
+                                    .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+                                    .asReversed()
+                        }
+                        is Resource.Error -> _state.value =
+                            TrashState.ShowError("Error loading tasks")
+                        is Resource.Loading -> Unit
+                    }
+                }
         }
-        .catch {
-            it.stackTrace
-            _state.value = TrashState.ShowError("Error loading tasks")
-        }.asLiveData(viewModelScope.coroutineContext)
-
+    }
 
     fun clickItem(it: TaskPresentationModel) {
         _navigateToDetailEvent.value = it
@@ -57,25 +73,28 @@ class TrashViewModel @Inject constructor(
 
     fun unarchiveTasks(taskToUnarchive: List<TaskPresentationModel>) {
         viewModelScope.launch {
-            try {
-                val result = unArchiveTasksUseCase.execute(
-                    UnArchiveTasksUseCase.Params(taskToUnarchive.map { it.id })
-                )
-                showMessage(result.message)
-            } catch (e: Exception) {
-                _messageEvent.value = "Error unarchiving tasks"
+            val params = UnArchiveTasksUseCase.Params(taskToUnarchive.map { it.id })
+            when (val result = unArchiveTasksUseCase(params)) {
+                is Resource.Success -> showMessage(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
             }
         }
     }
 
+    private fun showErrorMessage(exception: Exception) {
+        _messageEvent.value = getMessageFromError(exception)
+    }
+
     fun clickDeleteTasks(tasksToDelete: List<TaskPresentationModel>) {
-        deleteTasksUseCase.execute(DeleteTasksUseCase.Params(tasksToDelete.map { it.id }))
-            .debounce(400)
-            .onEach {
-                showMessage(it.message)
+        viewModelScope.launch {
+            val params = DeleteTasksUseCase.Params(tasksToDelete.map { it.id })
+            when (val result = deleteTasksUseCase(params)) {
+                is Resource.Success -> showMessage(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
             }
-            .launchIn(viewModelScope)
-//        tasksToDelete.forEach { clickDeleteTask(it) }
+        }
     }
 
 

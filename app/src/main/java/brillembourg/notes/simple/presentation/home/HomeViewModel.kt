@@ -66,10 +66,6 @@ class HomeViewModel @Inject constructor(
                     }
 
                 }
-//                .catch {
-//                    it.stackTrace
-//                    _state.value = HomeState.ShowError("Error loading tasks")
-//                }.asLiveData(viewModelScope.coroutineContext)
         }
     }
 

@@ -7,7 +7,6 @@ import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.transform
 
 class TaskRepositoryImp(
@@ -15,11 +14,12 @@ class TaskRepositoryImp(
     val dateProvider: DateProvider
 ) : TaskRepository {
 
-    override suspend fun unArchiveTasks(params: UnArchiveTasksUseCase.Params): UnArchiveTasksUseCase.Result {
-        database.unArchiveTasks(params.ids)
-        return UnArchiveTasksUseCase.Result(
-            if (params.ids.size > 1) "Notes unarchived" else "Note archived"
-        )
+    override suspend fun unArchiveTasks(params: UnArchiveTasksUseCase.Params): Resource<UnArchiveTasksUseCase.Result> {
+        return safeCall {
+            database.unArchiveTasks(params.ids)
+            val message = if (params.ids.size > 1) "Notes unarchived" else "Note archived"
+            Resource.Success(UnArchiveTasksUseCase.Result(message))
+        }
     }
 
     override suspend fun archiveTasks(params: ArchiveTasksUseCase.Params): Resource<ArchiveTasksUseCase.Result> {
@@ -54,24 +54,22 @@ class TaskRepositoryImp(
         }
     }
 
-    override fun deleteTask(params: DeleteTasksUseCase.Params): Flow<DeleteTasksUseCase.Result> {
-        return flow {
+    override suspend fun deleteTask(params: DeleteTasksUseCase.Params): Resource<DeleteTasksUseCase.Result> {
+        return safeCall {
             database.deleteTasks(params.ids)
-            emit(
-                DeleteTasksUseCase.Result(
-                    if (params.ids.size > 1) "Notes deleted" else "Note deleted"
-                )
-            )
+            val message = if (params.ids.size > 1) "Notes deleted" else "Note deleted"
+            Resource.Success(DeleteTasksUseCase.Result(message))
         }
     }
 
-    override fun getArchivedTasks(params: GetArchivedTasksUseCase.Params): Flow<GetArchivedTasksUseCase.Result> {
+    override fun getArchivedTasks(params: GetArchivedTasksUseCase.Params): Flow<Resource<GetArchivedTasksUseCase.Result>> {
         return database.getArchivedTasks()
             .debounce(200)
             .transform {
-                emit(GetArchivedTasksUseCase.Result(
+                val result = GetArchivedTasksUseCase.Result(
                     it.map { taskEntity -> taskEntity.toDomain() }
-                ))
+                )
+                emit(Resource.Success(result))
             }
     }
 
