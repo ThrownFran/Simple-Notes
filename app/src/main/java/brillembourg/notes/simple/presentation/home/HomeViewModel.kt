@@ -1,6 +1,5 @@
 package brillembourg.notes.simple.presentation.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
@@ -38,11 +37,6 @@ class HomeViewModel @Inject constructor(
         observeTaskList()
     }
 
-    override fun onCleared() {
-        Log.e("HomeViewmodel", "OnCleared")
-        super.onCleared()
-    }
-
     private fun observeTaskList() {
         viewModelScope.launch {
             getTaskListUseCase(GetTaskListUseCase.Params())
@@ -55,9 +49,6 @@ class HomeViewModel @Inject constructor(
                                 }
                                 .sortedBy { taskPresentationModel -> taskPresentationModel.order }
                                 .asReversed()
-
-
-                            Log.e("HomeViewmodel", "tasklist update")
                         }
                         is Resource.Error -> {
                             showMessage(UiText.DynamicString("Error loading tasks"))
@@ -95,9 +86,9 @@ class HomeViewModel @Inject constructor(
                 mustConsume = true,
                 taskIndex = taskListState.value.indexOf(it),
                 taskPresentationModel = it
-            )
+            ),
+            selectionMode = SelectionMode()
         )
-//        _navigateToDetailEvent.value = it
     }
 
     private fun showMessage(message: UiText) {
@@ -122,10 +113,29 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onNavigateToDetailCompleted() {
-        _homeUiState.value.navigateToDetail =
-            _homeUiState.value.navigateToDetail.copy(
-                mustConsume = false,
+
+        val navState =
+            _homeUiState.value.navigateToDetail.copy(mustConsume = false)
+
+        _homeUiState.value = _homeUiState.value.copy(
+            navigateToDetail = navState,
+        )
+    }
+
+    fun onSelection() {
+        val sizeSelected = _taskListState.value.filter { it.isSelected }.size
+        _homeUiState.value = _homeUiState.value.copy(
+            selectionMode = SelectionMode(
+                isActive = true, size = sizeSelected
             )
+        )
+    }
+
+    fun onSelectionDismissed() {
+        _homeUiState.value = _homeUiState.value.copy(
+            selectionMode = SelectionMode()
+        )
+
     }
 
 

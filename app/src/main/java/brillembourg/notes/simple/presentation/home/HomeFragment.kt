@@ -144,7 +144,7 @@ class HomeFragment : Fragment(), MenuProvider {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 activityViewModel.mainUiState.collect { mainUiState ->
-                    setupNavigateToCreateTask(mainUiState)
+                    navigateToCreateTaskObserver(mainUiState)
                 }
             }
         }
@@ -152,8 +152,9 @@ class HomeFragment : Fragment(), MenuProvider {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.homeUiState.collect { homeUiState: HomeUiState ->
-                    setupMessageObserver(homeUiState.userMessage)
-                    setupNavigateToDetailObserver(homeUiState.navigateToDetail)
+                    selectionModeObserver(homeUiState.selectionMode)
+                    userMessageObserver(homeUiState.userMessage)
+                    navigateToDetailObserver(homeUiState.navigateToDetail)
                 }
             }
         }
@@ -169,14 +170,24 @@ class HomeFragment : Fragment(), MenuProvider {
 
     }
 
-    private fun setupNavigateToCreateTask(mainUiState: MainUiState) {
+    private fun selectionModeObserver(selectionMode: SelectionMode) {
+        if (!selectionMode.isActive) {
+            actionMode?.finish()
+            actionMode = null
+            return
+        }
+
+        launchContextualActionBar(selectionMode.size)
+    }
+
+    private fun navigateToCreateTaskObserver(mainUiState: MainUiState) {
         if (mainUiState.navigateToCreateTask) {
             navigateToCreateTask()
             activityViewModel.onNavigateToCreateTaskCompleted()
         }
     }
 
-    private fun setupMessageObserver(userMessage: UiText?) {
+    private fun userMessageObserver(userMessage: UiText?) {
         userMessage?.let {
             showMessage(it) {
                 viewModel.onMessageShown()
@@ -184,7 +195,7 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun setupNavigateToDetailObserver(navigateToDetail: NavigateToTaskDetailEvent) {
+    private fun navigateToDetailObserver(navigateToDetail: NavigateToTaskDetailEvent) {
         if (navigateToDetail.mustConsume) {
             val view =
                 binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
@@ -195,7 +206,9 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun navigateToCreateTask() {
         lockToolbarScrolling()
-        finishSelectionActionModeIfActive()
+        //TODO
+        selectionModeObserver(SelectionMode())
+
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         setTransitionToCreateNote()
         findNavController().navigate(directions)
@@ -212,15 +225,8 @@ class HomeFragment : Fragment(), MenuProvider {
         activityBinding?.toolbar?.lockScroll()
     }
 
-    private fun finishSelectionActionModeIfActive() {
-        actionMode?.finish()
-        actionMode = null
-    }
-
     private fun navigateToDetail(it: TaskPresentationModel, view: View) {
         lockToolbarScrolling()
-        finishSelectionActionModeIfActive()
-
         //navigate to detail fragment
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         directions.task = it
@@ -277,7 +283,7 @@ class HomeFragment : Fragment(), MenuProvider {
             dragDirs,
             recyclerView,
             onSelection = {
-                launchContextualActionBar()
+                clickSelection()
             },
             onClick = { task, clickedView ->
                 clickItem(task, clickedView)
@@ -294,7 +300,12 @@ class HomeFragment : Fragment(), MenuProvider {
             }
     }
 
-    private fun launchContextualActionBar() {
+
+    private fun clickSelection() {
+        viewModel.onSelection()
+    }
+
+    private fun launchContextualActionBar(sizeSelected: Int) {
         actionMode = setupContextualActionBar(
             toolbar = requireActivity().findViewById(R.id.toolbar),
             menuId = R.menu.menu_context_home,
@@ -307,7 +318,9 @@ class HomeFragment : Fragment(), MenuProvider {
                     selectedSize = selectedSize
                 )
             },
-            onDestroyMyActionMode = { actionMode = null }
+            onDestroyMyActionMode = {
+                viewModel.onSelectionDismissed()
+            }
         )
     }
 

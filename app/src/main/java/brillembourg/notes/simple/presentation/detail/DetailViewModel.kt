@@ -35,20 +35,37 @@ class DetailViewModel @Inject constructor(
     init {
         currentTask =
             DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).task?.copy() //copy to avoid reference in home
+
         currentTask?.let {
-            _uiDetailState.value = _uiDetailState.value.copy(
-                userInput = UserInput(it.title, it.content),
-                unFocusInput = true,
-                isNewTask = false
-            )
+            editTaskState(it)
         }
 
         if (currentTask == null) {
-            _uiDetailState.value = _uiDetailState.value.copy(
-                focusInput = true,
-                isNewTask = true
-            )
+            newTaskState()
         }
+    }
+
+    private fun newTaskState() {
+        _uiDetailState.value = _uiDetailState.value.copy(
+            isNewTask = true,
+            focusInput = true
+        )
+    }
+
+    private fun editTaskState(it: TaskPresentationModel) {
+        _uiDetailState.value = _uiDetailState.value.copy(
+            userInput = UserInput(it.title, it.content),
+            unFocusInput = true,
+            isNewTask = false
+        )
+    }
+
+    fun onBackPressed() {
+        if (hasNoChangesWithOriginalTask()) {
+            _uiDetailState.value = _uiDetailState.value.copy(navigateBack = true)
+            return
+        }
+        saveTask()
     }
 
     fun onFocusCompleted() {
@@ -64,7 +81,7 @@ class DetailViewModel @Inject constructor(
     }
 
     @OptIn(FlowPreview::class)
-    fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
+    fun onContentChanged(s: CharSequence, start: Int, before: Int, count: Int) {
         viewModelScope.launch {
             flow { emit(s.toString()) }
                 .debounce(100)
@@ -153,14 +170,6 @@ class DetailViewModel @Inject constructor(
                 is Resource.Loading -> Unit
             }
         }
-    }
-
-    fun onBackPressed() {
-        if (hasNoChangesWithOriginalTask()) {
-            _uiDetailState.value = _uiDetailState.value.copy(navigateBack = true)
-            return
-        }
-        saveTask()
     }
 
     private fun hasNoChangesWithOriginalTask() =

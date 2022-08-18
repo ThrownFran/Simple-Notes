@@ -15,6 +15,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
+import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.extras.*
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -83,23 +84,19 @@ class DetailFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiDetailUiState.collect { uiState ->
 
-                    if (uiState.userInput.isNotEmpty()) {
-                        setupTitle(uiState.userInput.title)
-                        setupContent(uiState.userInput.content)
-                    }
+                    setupTitleAndContent(uiState.userInput)
 
-                    if (uiState.isNewTask) {
-                        //Create or Edit title
-                    }
+                    setToolbarTitle(uiState.isNewTask)
 
                     if (uiState.unFocusInput) {
                         unFocus()
-                        viewModel.onFocusCompleted()
+                        viewModel.onUnFocusCompleted()
+
                     }
 
                     if (uiState.focusInput) {
                         focus()
-                        viewModel.onUnFocusCompleted()
+                        viewModel.onFocusCompleted()
                     }
 
                     if (uiState.userMessage != null) {
@@ -114,6 +111,24 @@ class DetailFragment : Fragment() {
 
                 }
             }
+        }
+    }
+
+    private fun setToolbarTitle(isNewTask: Boolean) {
+        if (isNewTask) {
+            //Create or Edit title
+            val activityBinding = (activity as MainActivity?)?.binding
+            activityBinding?.toolbar?.title = "Add note"
+        } else {
+            val activityBinding = (activity as MainActivity?)?.binding
+            activityBinding?.toolbar?.title = "Edit note"
+        }
+    }
+
+    private fun setupTitleAndContent(userInput: UserInput) {
+        if (userInput.isNotEmpty()) {
+            setupTitle(userInput.title)
+            setupContent(userInput.content)
         }
     }
 
