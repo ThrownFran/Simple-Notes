@@ -1,6 +1,7 @@
 package brillembourg.notes.simple.presentation.detail
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -38,7 +39,7 @@ class DetailFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
-
+        Log.e("DetailFragment", "OnCreateView")
         binding = FragmentDetailBinding.inflate(inflater, container, false)
         binding.viewmodel = viewModel
         setHasOptionsMenu(true)

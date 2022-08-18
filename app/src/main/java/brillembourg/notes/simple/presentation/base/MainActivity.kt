@@ -126,7 +126,6 @@ class MainActivity : AppCompatActivity() {
     private fun navigateToHome() {
         if (navController.currentDestination?.id == R.id.homeFragment) return
         navController.popBackStack()
-//        navController.navigate(brillembourg.notes.simple.R.id.homeFragment)
     }
 
     private fun backupNotes() {

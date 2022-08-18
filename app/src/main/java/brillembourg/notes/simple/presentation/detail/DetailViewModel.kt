@@ -31,7 +31,7 @@ class DetailViewModel @Inject constructor(
     private val _messageEvent: SingleLiveEvent<UiText> = SingleLiveEvent()
 
     init {
-        currentTask = DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).task
+        currentTask = DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).task?.copy()
         currentTask?.let {
             title = it.title
             content = it.content
@@ -105,11 +105,17 @@ class DetailViewModel @Inject constructor(
             val params = SaveTaskUseCase.Params(task.toDomain(dateProvider))
 
             when (val result = saveTaskUseCase(params)) {
-                is Resource.Success -> state.value = DetailState.TaskSaved(result.data.message)
+                is Resource.Success -> {
+                    test(result)
+                }
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
             }
         }
+    }
+
+    private fun test(result: Resource.Success<SaveTaskUseCase.Result>) {
+        state.value = DetailState.TaskSaved(result.data.message)
     }
 
     fun onBackPressed() {

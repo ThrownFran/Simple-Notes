@@ -2,6 +2,7 @@ package brillembourg.notes.simple.presentation.home
 
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -13,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
@@ -44,7 +46,6 @@ class HomeFragment : Fragment(), MenuProvider {
     private var actionMode: ActionMode? = null
 
     private var layoutType = LayoutType.Vertical
-    private var isAnimatingTaskPosition = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,6 +54,7 @@ class HomeFragment : Fragment(), MenuProvider {
         if (_binding == null) _binding = FragmentHomeBinding.inflate(inflater, container, false)
         binding = _binding as FragmentHomeBinding
         binding.viewmodel = viewModel
+        Log.e("HomeFragment", "OnCreateView")
         return binding.root
     }
 
@@ -62,6 +64,7 @@ class HomeFragment : Fragment(), MenuProvider {
         setupObservers()
         unlockToolbarScrolling()
         animateFabWithRecycler()
+        Log.e("HomeFragment", "OnViewCreated")
     }
 
     private fun animateFabWithRecycler() {
@@ -131,6 +134,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
     override fun onDestroyView() {
         saveRecyclerState()
+        Log.e("HomeFragment", "OnDestroyView")
         super.onDestroyView()
     }
 
@@ -216,10 +220,6 @@ class HomeFragment : Fragment(), MenuProvider {
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         directions.task = it
 
-
-        isAnimatingTaskPosition = (binding.homeRecycler.adapter as TaskAdapter)
-            .currentList.indexOf(it)
-
         setTransitionToEditNote()
         findNavController().navigate(directions, setupExtrasToDetail(view))
     }
@@ -238,6 +238,7 @@ class HomeFragment : Fragment(), MenuProvider {
             layoutManager = buildLayoutManager(layoutType).also { layoutManager ->
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
+            (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
     }
 
@@ -248,21 +249,11 @@ class HomeFragment : Fragment(), MenuProvider {
 
         submitListAndScrollIfApplies(taskAdapter, currentList, taskList)
 
-        if (viewModel.homeUiState.value.navigateToDetail.isCurrentlyInDetailScreen) {
-            val taskModel = viewModel.homeUiState.value.navigateToDetail.taskPresentationModel
-            notifyItemChanged(viewModel.homeUiState.value.navigateToDetail.taskIndex!!, taskModel)
-            viewModel.onPopFromDetailScreen()
-        } else {
-            notifyDataSetChanged()
-        }
-
-//        //Notify or update possible changes
-//        if (isExitingFromDetailScreen()) {
-//            val taskModel = currentList[isAnimatingTaskPosition]
-//            notifyItemChanged(isAnimatingTaskPosition, taskModel)
-//            exitFromDetailFinished()
-//        } else {
-//            notifyDataSetChanged()
+//        val navigateToDetail = viewModel.homeUiState.value.navigateToDetail
+//
+//        navigateToDetail.taskIndex?.let {
+//            notifyItemChanged(it,navigateToDetail.taskPresentationModel)
+//            viewModel.onPopTransitionFromDetailScreenCompleted()
 //        }
     }
 
@@ -274,14 +265,6 @@ class HomeFragment : Fragment(), MenuProvider {
         val isInsertingInList = currentList.size < taskList.size
         taskAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
     }
-
-
-    private fun isExitingFromDetailScreen() = isAnimatingTaskPosition != -1
-
-    private fun exitFromDetailFinished() {
-        isAnimatingTaskPosition = -1
-    }
-
 
     private fun scrollToTop() {
         binding.homeRecycler.scrollToPosition(0)

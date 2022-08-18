@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.presentation.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
@@ -38,6 +39,11 @@ class HomeViewModel @Inject constructor(
         observeTaskList()
     }
 
+    override fun onCleared() {
+        Log.e("HomeViewmodel", "OnCleared")
+        super.onCleared()
+    }
+
     private fun observeTaskList() {
         viewModelScope.launch {
             getTaskListUseCase(GetTaskListUseCase.Params())
@@ -50,6 +56,9 @@ class HomeViewModel @Inject constructor(
                                 }
                                 .sortedBy { taskPresentationModel -> taskPresentationModel.order }
                                 .asReversed()
+
+
+                            Log.e("HomeViewmodel", "tasklist update")
                         }
                         is Resource.Error -> {
                             showMessage(UiText.DynamicString("Error loading tasks"))
@@ -117,13 +126,14 @@ class HomeViewModel @Inject constructor(
         _homeUiState.value.navigateToDetail =
             _homeUiState.value.navigateToDetail.copy(
                 mustConsume = false,
-                isCurrentlyInDetailScreen = true
             )
     }
 
-    fun onPopFromDetailScreen() {
+    fun onPopTransitionFromDetailScreenCompleted() {
         _homeUiState.value.navigateToDetail = _homeUiState.value.navigateToDetail.copy(
-            isCurrentlyInDetailScreen = false
+            taskIndex = null,
+            taskPresentationModel = null,
+            mustConsume = false
         )
     }
 

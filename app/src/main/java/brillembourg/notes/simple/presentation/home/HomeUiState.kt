@@ -12,5 +12,4 @@ data class NavigateToDetailEvent(
     val mustConsume: Boolean,
     val taskIndex: Int? = null,
     val taskPresentationModel: TaskPresentationModel? = null,
-    val isCurrentlyInDetailScreen: Boolean = false
 )
