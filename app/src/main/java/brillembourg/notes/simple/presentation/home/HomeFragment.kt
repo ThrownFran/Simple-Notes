@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
-import brillembourg.notes.simple.presentation.base.MainUiState
 import brillembourg.notes.simple.presentation.base.MainViewModel
 import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
@@ -55,8 +54,15 @@ class HomeFragment : Fragment(), MenuProvider {
         if (_binding == null) _binding = FragmentHomeBinding.inflate(inflater, container, false)
         binding = _binding as FragmentHomeBinding
         binding.viewmodel = viewModel
-        Log.e("HomeFragment", "OnCreateView")
+        setupListeners()
         return binding.root
+    }
+
+    private fun setupListeners() {
+        val activityBinding = (activity as MainActivity?)?.binding
+        activityBinding?.homeFab?.setOnClickListener {
+            viewModel.onAddNoteClick()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -65,7 +71,6 @@ class HomeFragment : Fragment(), MenuProvider {
         setupObservers()
         unlockToolbarScrolling()
         animateFabWithRecycler()
-        Log.e("HomeFragment", "OnViewCreated")
     }
 
     private fun animateFabWithRecycler() {
@@ -143,18 +148,11 @@ class HomeFragment : Fragment(), MenuProvider {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                activityViewModel.mainUiState.collect { mainUiState ->
-                    navigateToCreateTaskObserver(mainUiState)
-                }
-            }
-        }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.homeUiState.collect { homeUiState: HomeUiState ->
-                    selectionModeObserver(homeUiState.selectionMode)
+                    selectionModeObserver(homeUiState.selectionModeState)
                     userMessageObserver(homeUiState.userMessage)
                     navigateToDetailObserver(homeUiState.navigateToDetail)
+                    navigateToAddNoteObserver(homeUiState.navigateToAddNote)
                 }
             }
         }
@@ -170,21 +168,21 @@ class HomeFragment : Fragment(), MenuProvider {
 
     }
 
-    private fun selectionModeObserver(selectionMode: SelectionMode) {
-        if (!selectionMode.isActive) {
+    private fun navigateToAddNoteObserver(navigateToAddNote: Boolean) {
+        if (navigateToAddNote) {
+            navigateToCreateTask()
+            viewModel.onNavigateToAddNoteCompleted()
+        }
+    }
+
+    private fun selectionModeObserver(selectionModeState: SelectionModeState) {
+        if (!selectionModeState.isActive) {
             actionMode?.finish()
             actionMode = null
             return
         }
 
-        launchContextualActionBar(selectionMode.size)
-    }
-
-    private fun navigateToCreateTaskObserver(mainUiState: MainUiState) {
-        if (mainUiState.navigateToCreateTask) {
-            navigateToCreateTask()
-            activityViewModel.onNavigateToCreateTaskCompleted()
-        }
+        launchContextualActionBar(selectionModeState.size)
     }
 
     private fun userMessageObserver(userMessage: UiText?) {
@@ -195,7 +193,7 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun navigateToDetailObserver(navigateToDetail: NavigateToTaskDetailEvent) {
+    private fun navigateToDetailObserver(navigateToDetail: NavigateToTaskDetail) {
         if (navigateToDetail.mustConsume) {
             val view =
                 binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
@@ -207,7 +205,7 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun navigateToCreateTask() {
         lockToolbarScrolling()
         //TODO
-        selectionModeObserver(SelectionMode())
+        selectionModeObserver(SelectionModeState())
 
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         setTransitionToCreateNote()

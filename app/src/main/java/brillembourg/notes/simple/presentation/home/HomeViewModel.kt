@@ -82,12 +82,12 @@ class HomeViewModel @Inject constructor(
 
     fun onTaskClick(it: TaskPresentationModel) {
         _homeUiState.value = _homeUiState.value.copy(
-            navigateToDetail = NavigateToTaskDetailEvent(
+            navigateToDetail = NavigateToTaskDetail(
                 mustConsume = true,
                 taskIndex = taskListState.value.indexOf(it),
                 taskPresentationModel = it
             ),
-            selectionMode = SelectionMode()
+            selectionModeState = SelectionModeState()
         )
     }
 
@@ -125,7 +125,7 @@ class HomeViewModel @Inject constructor(
     fun onSelection() {
         val sizeSelected = _taskListState.value.filter { it.isSelected }.size
         _homeUiState.value = _homeUiState.value.copy(
-            selectionMode = SelectionMode(
+            selectionModeState = SelectionModeState(
                 isActive = true, size = sizeSelected
             )
         )
@@ -133,9 +133,17 @@ class HomeViewModel @Inject constructor(
 
     fun onSelectionDismissed() {
         _homeUiState.value = _homeUiState.value.copy(
-            selectionMode = SelectionMode()
+            selectionModeState = SelectionModeState()
         )
 
+    }
+
+    fun onAddNoteClick() {
+        _homeUiState.value = _homeUiState.value.copy(navigateToAddNote = true)
+    }
+
+    fun onNavigateToAddNoteCompleted() {
+        _homeUiState.value = _homeUiState.value.copy(navigateToAddNote = false)
     }
 
 

@@ -20,13 +20,6 @@ class MainViewModel @Inject constructor(
     private val _mainUiState = MutableStateFlow(MainUiState())
     val mainUiState = _mainUiState.asStateFlow()
 
-    fun onCreateTaskClick() {
-        _mainUiState.value = _mainUiState.value.copy(navigateToCreateTask = true)
-    }
-
-    fun onNavigateToCreateTaskCompleted() {
-        _mainUiState.value = _mainUiState.value.copy(navigateToCreateTask = false)
-    }
 
     fun prepareBackupNotes(screen: Screen) {
         viewModelScope.launch {
