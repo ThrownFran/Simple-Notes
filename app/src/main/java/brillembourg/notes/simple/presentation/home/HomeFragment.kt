@@ -141,7 +141,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun setupObservers() {
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 activityViewModel.mainUiState.collect { mainUiState ->
                     setupNavigateToCreateTask(mainUiState)
@@ -149,7 +149,7 @@ class HomeFragment : Fragment(), MenuProvider {
             }
         }
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.homeUiState.collect { homeUiState: HomeUiState ->
                     setupMessageObserver(homeUiState.userMessage)
@@ -158,7 +158,7 @@ class HomeFragment : Fragment(), MenuProvider {
             }
         }
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 viewModel.taskListState.collect {
                     setupTaskList(it)

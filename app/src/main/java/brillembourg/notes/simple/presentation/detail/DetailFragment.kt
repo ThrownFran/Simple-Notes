@@ -9,12 +9,15 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
 import brillembourg.notes.simple.presentation.extras.*
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 
@@ -72,68 +75,74 @@ class DetailFragment : Fragment() {
             myStartView = requireActivity().findViewById(R.id.home_fab),
             myEndView = binding.detailLinear
         )
-//        returnTransition = Slide().apply {
-//            duration = resources.getInteger(R.integer.reply_motion_duration_medium).toLong()
-//            addTarget(R.id.home_fab)
-//        }
-
         setupObservers()
     }
 
     private fun setupObservers() {
-        viewModel.state.observe(viewLifecycleOwner) {
-            when (it) {
-                is DetailState.CreateTask -> onStateNewTask()
-                is DetailState.TaskLoaded -> onStateTaskLoaded(it)
-                is DetailState.TaskCreated -> onStateTaskCreated(it)
-                is DetailState.TaskSaved -> onStateTaskSaved(it)
-                is DetailState.ExitWithoutSaving -> finishView()
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiDetailUiState.collect { uiState ->
+
+                    if (uiState.userInput.isNotEmpty()) {
+                        setupTitle(uiState.userInput.title)
+                        setupContent(uiState.userInput.content)
+                    }
+
+                    if (uiState.isNewTask) {
+                        //Create or Edit title
+                    }
+
+                    if (uiState.unFocusInput) {
+                        unFocus()
+                        viewModel.onFocusCompleted()
+                    }
+
+                    if (uiState.focusInput) {
+                        focus()
+                        viewModel.onUnFocusCompleted()
+                    }
+
+                    if (uiState.userMessage != null) {
+                        showMessage(uiState.userMessage) {
+                            viewModel.onMessageShown()
+                        }
+                    }
+
+                    if (uiState.navigateBack) {
+                        finishView()
+                    }
+
+                }
             }
         }
-
-        viewModel.messageEvent.observe(viewLifecycleOwner) {
-            showMessage(it)
-        }
     }
 
-    private fun onStateTaskCreated(it: DetailState.TaskCreated) {
-        showMessage(it.message)
-        finishView()
-    }
-
-    private fun onStateNewTask() {
-        focusKeyboard()
-    }
-
-    private fun focusKeyboard() {
+    private fun focus() {
         binding.detailEditContent.apply {
             requestFocus()
             showSoftKeyboard()
         }
     }
 
-    private fun onStateTaskLoaded(it: DetailState.TaskLoaded) {
-        setupContent(it.task)
-        setupTitle(it.task.title)
+    private fun unFocus() {
         binding.detailLinear.clearFocus()
         binding.detailEditContent.hideKeyboard()
     }
 
     private fun setupTitle(title: String?) {
+        if (title == binding.detailEditTitle.toString()) return
+
         binding.detailEditTitle.setText(title)
     }
 
-    private fun onStateTaskSaved(it: DetailState.TaskSaved) {
-        showMessage(it.message)
-        finishView()
+    private fun setupContent(content: String?) {
+        if (content == binding.detailEditContent.toString()) return
+
+        binding.detailEditContent.setText(content)
     }
 
     private fun finishView() {
         findNavController().popBackStack()
-    }
-
-    private fun setupContent(task: TaskPresentationModel) {
-        binding.detailEditContent.setText(task.content)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
