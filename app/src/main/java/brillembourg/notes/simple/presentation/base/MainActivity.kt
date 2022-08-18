@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -13,10 +16,12 @@ import androidx.navigation.ui.setupWithNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.ActivityMainBinding
 import brillembourg.notes.simple.domain.ContextDomain
+import brillembourg.notes.simple.presentation.extras.restartApp
 import brillembourg.notes.simple.presentation.extras.setBackgroundDrawable
 import brillembourg.notes.simple.presentation.extras.showToast
 import brillembourg.notes.simple.presentation.home.HomeFragmentDirections
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -41,8 +46,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.messageEvent.observe(this) {
-            showToast(it)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.mainUiState.collect { uiState ->
+                    observeMessage(uiState)
+                    observeNeedsRestart(uiState)
+                }
+            }
+        }
+    }
+
+    private fun observeMessage(uiState: MainUiState) {
+        if (uiState.userToastMessage != null) {
+            showToast(uiState.userToastMessage)
+            viewModel.onMessageShown()
+        }
+    }
+
+    private fun observeNeedsRestart(uiState: MainUiState) {
+        if (uiState.needsRestartApp) {
+            restartApp()
         }
     }
 

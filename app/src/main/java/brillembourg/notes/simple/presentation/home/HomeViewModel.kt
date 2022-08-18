@@ -70,7 +70,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun reorderList(reorderedTaskList: List<TaskPresentationModel>) {
+    fun onReorderedTaskList(reorderedTaskList: List<TaskPresentationModel>) {
         if (reorderedTaskList == taskListState.value) return
 
         viewModelScope.launch {
@@ -90,9 +90,9 @@ class HomeViewModel @Inject constructor(
         _homeUiState.value = homeUiState.value.copy(userMessage = getMessageFromError(exception))
     }
 
-    fun clickItem(it: TaskPresentationModel) {
+    fun onTaskClick(it: TaskPresentationModel) {
         _homeUiState.value = _homeUiState.value.copy(
-            navigateToDetail = NavigateToDetailEvent(
+            navigateToDetail = NavigateToTaskDetailEvent(
                 mustConsume = true,
                 taskIndex = taskListState.value.indexOf(it),
                 taskPresentationModel = it
@@ -105,7 +105,7 @@ class HomeViewModel @Inject constructor(
         _homeUiState.value = homeUiState.value.copy(userMessage = message)
     }
 
-    fun clickDeleteTasks(tasksToDelete: List<TaskPresentationModel>) {
+    fun deleteTasks(tasksToDelete: List<TaskPresentationModel>) {
         viewModelScope.launch {
             val params = ArchiveTasksUseCase.Params(tasksToDelete.map { it.id })
 
@@ -127,14 +127,6 @@ class HomeViewModel @Inject constructor(
             _homeUiState.value.navigateToDetail.copy(
                 mustConsume = false,
             )
-    }
-
-    fun onPopTransitionFromDetailScreenCompleted() {
-        _homeUiState.value.navigateToDetail = _homeUiState.value.navigateToDetail.copy(
-            taskIndex = null,
-            taskPresentationModel = null,
-            mustConsume = false
-        )
     }
 
 

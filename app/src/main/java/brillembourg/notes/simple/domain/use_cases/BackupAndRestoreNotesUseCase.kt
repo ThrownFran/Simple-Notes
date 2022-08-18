@@ -6,7 +6,7 @@ import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import javax.inject.Inject
 
-class BackupNotesUseCase @Inject constructor(private val repository: DataRepository) {
+class BackupAndRestoreNotesUseCase @Inject constructor(private val repository: DataRepository) {
 
     suspend fun backup(): Resource<Result> {
         return repository.backup()

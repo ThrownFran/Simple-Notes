@@ -5,11 +5,11 @@ import brillembourg.notes.simple.util.UiText
 
 data class HomeUiState(
     val userMessage: UiText? = null,
-    var navigateToDetail: NavigateToDetailEvent = NavigateToDetailEvent(false)
+    var navigateToDetail: NavigateToTaskDetailEvent = NavigateToTaskDetailEvent(false)
 )
 
-data class NavigateToDetailEvent(
-    val mustConsume: Boolean,
+data class NavigateToTaskDetailEvent(
+    val mustConsume: Boolean = false,
     val taskIndex: Int? = null,
     val taskPresentationModel: TaskPresentationModel? = null,
 )

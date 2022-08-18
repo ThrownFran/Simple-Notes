@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
+import brillembourg.notes.simple.presentation.base.MainUiState
 import brillembourg.notes.simple.presentation.base.MainViewModel
 import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
@@ -140,8 +141,12 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun setupObservers() {
 
-        activityViewModel.createTaskEvent.observe(viewLifecycleOwner) {
-            navigateToCreateTask()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                activityViewModel.mainUiState.collect { mainUiState ->
+                    setupNavigateToCreateTask(mainUiState)
+                }
+            }
         }
 
         lifecycleScope.launch {
@@ -161,14 +166,14 @@ class HomeFragment : Fragment(), MenuProvider {
             }
         }
 
-        activityViewModel.restoreSuccessEvent.observe(viewLifecycleOwner) {
-            restartApp()
-        }
 
-        activityViewModel.backupSuccessEvent.observe(viewLifecycleOwner) {
-            restartApp()
-        }
+    }
 
+    private fun setupNavigateToCreateTask(mainUiState: MainUiState) {
+        if (mainUiState.navigateToCreateTask) {
+            navigateToCreateTask()
+            activityViewModel.onNavigateToCreateTaskCompleted()
+        }
     }
 
     private fun setupMessageObserver(userMessage: UiText?) {
@@ -179,7 +184,7 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun setupNavigateToDetailObserver(navigateToDetail: NavigateToDetailEvent) {
+    private fun setupNavigateToDetailObserver(navigateToDetail: NavigateToTaskDetailEvent) {
         if (navigateToDetail.mustConsume) {
             val view =
                 binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
@@ -238,23 +243,15 @@ class HomeFragment : Fragment(), MenuProvider {
             layoutManager = buildLayoutManager(layoutType).also { layoutManager ->
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
-            (this.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
     }
 
     private fun updateListAndNotify(
         taskAdapter: TaskAdapter,
         taskList: List<TaskPresentationModel>
-    ) = with(taskAdapter) {
-
-        submitListAndScrollIfApplies(taskAdapter, currentList, taskList)
-
-//        val navigateToDetail = viewModel.homeUiState.value.navigateToDetail
-//
-//        navigateToDetail.taskIndex?.let {
-//            notifyItemChanged(it,navigateToDetail.taskPresentationModel)
-//            viewModel.onPopTransitionFromDetailScreenCompleted()
-//        }
+    ) {
+        submitListAndScrollIfApplies(taskAdapter, taskAdapter.currentList, taskList)
     }
 
     private fun submitListAndScrollIfApplies(
@@ -325,7 +322,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun clickReorder(tasks: List<TaskPresentationModel>) {
         actionMode?.finish()
-        viewModel.reorderList(tasks)
+        viewModel.onReorderedTaskList(tasks)
     }
 
     private fun clickReorderCancelled() {
@@ -333,8 +330,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun clickItem(it: TaskPresentationModel, view: View) {
-        viewModel.clickItem(it)
-//        navigateToDetail(it, view)
+        viewModel.onTaskClick(it)
     }
 
     private fun clickDeleteTasks(taskList: List<TaskPresentationModel>) {
@@ -352,7 +348,7 @@ class HomeFragment : Fragment(), MenuProvider {
             .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
             }
             .setPositiveButton(resources.getString(R.string.all_move_to_trash)) { dialog, which ->
-                viewModel.clickDeleteTasks(taskList)
+                viewModel.deleteTasks(taskList)
                 actionMode?.finish()
             }
             .show()

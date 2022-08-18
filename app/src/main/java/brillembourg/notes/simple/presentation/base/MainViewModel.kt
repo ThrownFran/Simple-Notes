@@ -1,54 +1,63 @@
 package brillembourg.notes.simple.presentation.base
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.domain.Screen
-import brillembourg.notes.simple.domain.use_cases.BackupNotesUseCase
-import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
+import brillembourg.notes.simple.domain.use_cases.BackupAndRestoreNotesUseCase
 import brillembourg.notes.simple.util.Resource
-import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val backupNotesUseCase: BackupNotesUseCase
+    private val backupAndRestoreNotesUseCase: BackupAndRestoreNotesUseCase
 ) : ViewModel() {
 
-    private val _messageEvent: SingleLiveEvent<UiText> = SingleLiveEvent()
+    private val _mainUiState = MutableStateFlow(MainUiState())
+    val mainUiState = _mainUiState.asStateFlow()
 
-    private val _restoreSuccessEvent: SingleLiveEvent<UiText> = SingleLiveEvent()
-    val restoreSuccessEvent: LiveData<UiText> get() = _restoreSuccessEvent
+    fun onCreateTaskClick() {
+        _mainUiState.value = _mainUiState.value.copy(navigateToCreateTask = true)
+    }
 
-    private val _backupSuccessEvent: SingleLiveEvent<UiText> = SingleLiveEvent()
-    val backupSuccessEvent: LiveData<UiText> get() = _backupSuccessEvent
-
-    private val _createTaskEvent: SingleLiveEvent<Any> = SingleLiveEvent()
-    val createTaskEvent: LiveData<Any> get() = _createTaskEvent
-
-    //Observables
-    val messageEvent: LiveData<UiText> get() = _messageEvent
-
-    fun createTask() {
-        _createTaskEvent.call()
+    fun onNavigateToCreateTaskCompleted() {
+        _mainUiState.value = _mainUiState.value.copy(navigateToCreateTask = false)
     }
 
     fun prepareBackupNotes(screen: Screen) {
         viewModelScope.launch {
-            val params = BackupNotesUseCase.PrepareBackupParams(screen)
-            backupNotesUseCase.prepareBackup(params)
+            val params = BackupAndRestoreNotesUseCase.PrepareBackupParams(screen)
+            backupAndRestoreNotesUseCase.prepareBackup(params)
         }
     }
 
     fun restoreNotes() {
         viewModelScope.launch {
-            when (val result = backupNotesUseCase.restore()) {
+            when (val result = backupAndRestoreNotesUseCase.restore()) {
                 is Resource.Success -> {
-                    showMessage(result.data.message)
-                    _restoreSuccessEvent.value = result.data.message
+                    _mainUiState.value = _mainUiState.value.copy(
+                        needsRestartApp = true,
+                        userToastMessage = result.data.message
+                    )
+                }
+                is Resource.Loading -> Unit
+                is Resource.Error -> showErrorMessage(result.exception)
+            }
+        }
+    }
+
+    fun backupNotes() {
+        viewModelScope.launch {
+            when (val result = backupAndRestoreNotesUseCase.backup()) {
+                is Resource.Success -> {
+                    _mainUiState.value = _mainUiState.value.copy(
+                        needsRestartApp = true,
+                        userToastMessage = result.data.message
+                    )
                 }
                 is Resource.Loading -> Unit
                 is Resource.Error -> showErrorMessage(result.exception)
@@ -57,24 +66,12 @@ class MainViewModel @Inject constructor(
     }
 
     private fun showErrorMessage(exception: Exception) {
-        _messageEvent.value = getMessageFromError(exception)
+        _mainUiState.value =
+            _mainUiState.value.copy(userToastMessage = getMessageFromError(exception))
     }
 
-    fun backupNotes() {
-        viewModelScope.launch {
-            when (val result = backupNotesUseCase.backup()) {
-                is Resource.Success -> {
-                    showMessage(result.data.message)
-                    _backupSuccessEvent.value = result.data.message
-                }
-                is Resource.Loading -> Unit
-                is Resource.Error -> showErrorMessage(result.exception)
-            }
-        }
-    }
-
-    private fun showMessage(message: UiText) {
-        _messageEvent.value = message
+    fun onMessageShown() {
+        _mainUiState.value = _mainUiState.value.copy(userToastMessage = null)
     }
 
 

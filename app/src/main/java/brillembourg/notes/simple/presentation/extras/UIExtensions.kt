@@ -1,6 +1,7 @@
 package brillembourg.notes.simple.presentation.extras
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -144,9 +145,8 @@ fun Toolbar.unLockScroll() {
         AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
 }
 
-fun Fragment.restartApp() {
-    val packageManager = requireContext().packageManager
-    val intent = packageManager.getLaunchIntentForPackage(requireContext().packageName)
+fun Activity.restartApp() {
+    val intent = packageManager.getLaunchIntentForPackage(packageName)
     val componentName = intent!!.component
     val mainIntent = Intent.makeRestartActivityTask(componentName)
     startActivity(mainIntent)
