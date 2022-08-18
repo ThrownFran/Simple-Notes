@@ -1,14 +1,11 @@
 package brillembourg.notes.simple.presentation.home
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.ArchiveTasksUseCase
 import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
 import brillembourg.notes.simple.domain.use_cases.ReorderTaskListUseCase
-import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.presentation.models.toPresentation
@@ -30,39 +27,33 @@ class HomeViewModel @Inject constructor(
     private val dateProvider: DateProvider
 ) : ViewModel() {
 
-    private val _state: MutableLiveData<HomeState> = MutableLiveData()
-    private val _navigateToDetailEvent: SingleLiveEvent<TaskPresentationModel> = SingleLiveEvent()
-    private val _messageEvent: SingleLiveEvent<UiText> = SingleLiveEvent()
-
-    //Observables
-    val state: LiveData<HomeState> get() = _state
-    val navigateToDetailEvent: LiveData<TaskPresentationModel> get() = _navigateToDetailEvent
-    val messageEvent: LiveData<UiText> get() = _messageEvent
-
     private val _taskListState: MutableStateFlow<List<TaskPresentationModel>> =
         MutableStateFlow(ArrayList())
     var taskListState: StateFlow<List<TaskPresentationModel>> = _taskListState.asStateFlow()
 
-//    fun observeTaskList(): LiveData<List<TaskPresentationModel>> = handleTaskListObservable()
+    private val _homeUiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
+    val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
 
     init {
-        getTaskList()
+        observeTaskList()
     }
 
-    private fun getTaskList() {
+    private fun observeTaskList() {
         viewModelScope.launch {
             getTaskListUseCase(GetTaskListUseCase.Params())
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
-                            _taskListState.value =
-                                result.data.taskList
-                                    .map { it.toPresentation(dateProvider) }
-                                    .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                                    .asReversed()
+                            _taskListState.value = result.data.taskList
+                                .map { it.toPresentation(dateProvider) }
+                                .onEach { //TODO navigation
+                                }
+                                .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+                                .asReversed()
                         }
-                        is Resource.Error -> _state.value =
-                            HomeState.ShowError(UiText.DynamicString("Error loading tasks"))
+                        is Resource.Error -> {
+                            showMessage(UiText.DynamicString("Error loading tasks"))
+                        }
                         is Resource.Loading -> Unit
                     }
 
@@ -71,6 +62,8 @@ class HomeViewModel @Inject constructor(
     }
 
     fun reorderList(reorderedTaskList: List<TaskPresentationModel>) {
+        if (reorderedTaskList == taskListState.value) return
+
         viewModelScope.launch {
             val params = ReorderTaskListUseCase.Params(reorderedTaskList.map {
                 it.toDomain(dateProvider)
@@ -85,15 +78,22 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun showErrorMessage(exception: Exception) {
-        _messageEvent.value = getMessageFromError(exception)
+        _homeUiState.value = homeUiState.value.copy(userMessage = getMessageFromError(exception))
     }
 
     fun clickItem(it: TaskPresentationModel) {
-        _navigateToDetailEvent.value = it
+        _homeUiState.value = _homeUiState.value.copy(
+            navigateToDetail = NavigateToDetailEvent(
+                mustConsume = true,
+                taskIndex = taskListState.value.indexOf(it),
+                taskPresentationModel = it
+            )
+        )
+//        _navigateToDetailEvent.value = it
     }
 
     private fun showMessage(message: UiText) {
-        _messageEvent.value = message
+        _homeUiState.value = homeUiState.value.copy(userMessage = message)
     }
 
     fun clickDeleteTasks(tasksToDelete: List<TaskPresentationModel>) {
@@ -107,6 +107,24 @@ class HomeViewModel @Inject constructor(
             }
 
         }
+    }
+
+    fun onMessageShown() {
+        _homeUiState.value = _homeUiState.value.copy(userMessage = null)
+    }
+
+    fun onNavigateToDetailCompleted() {
+        _homeUiState.value.navigateToDetail =
+            _homeUiState.value.navigateToDetail.copy(
+                mustConsume = false,
+                isCurrentlyInDetailScreen = true
+            )
+    }
+
+    fun onPopFromDetailScreen() {
+        _homeUiState.value.navigateToDetail = _homeUiState.value.navigateToDetail.copy(
+            isCurrentlyInDetailScreen = false
+        )
     }
 
 

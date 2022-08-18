@@ -22,6 +22,7 @@ import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
 import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
 import brillembourg.notes.simple.presentation.ui_utils.setupDragAndDropTouchHelper
+import brillembourg.notes.simple.util.UiText
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -134,36 +135,22 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun setupObservers() {
-        viewModel.navigateToDetailEvent.observe(viewLifecycleOwner) {
-//            navigateToDetail(it)
-            //TODO
-        }
 
         activityViewModel.createTaskEvent.observe(viewLifecycleOwner) {
             navigateToCreateTask()
         }
 
-        viewModel.state.observe(viewLifecycleOwner) {
-            when (it) {
-                is HomeState.Loading -> {
-
-                }
-                is HomeState.ShowError -> {
-                    showMessage(it.message)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.homeUiState.collect { homeUiState: HomeUiState ->
+                    setupMessageObserver(homeUiState.userMessage)
+                    setupNavigateToDetailObserver(homeUiState.navigateToDetail)
                 }
             }
         }
 
-        viewModel.messageEvent.observe(viewLifecycleOwner) {
-            showMessage(it)
-        }
-
-//        viewModel.observeTaskList().observe(viewLifecycleOwner) {
-//            setupTaskList(it)
-//        }
-
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
                 viewModel.taskListState.collect {
                     setupTaskList(it)
                 }
@@ -178,6 +165,23 @@ class HomeFragment : Fragment(), MenuProvider {
             restartApp()
         }
 
+    }
+
+    private fun setupMessageObserver(userMessage: UiText?) {
+        userMessage?.let {
+            showMessage(it) {
+                viewModel.onMessageShown()
+            }
+        }
+    }
+
+    private fun setupNavigateToDetailObserver(navigateToDetail: NavigateToDetailEvent) {
+        if (navigateToDetail.mustConsume) {
+            val view =
+                binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
+            navigateToDetail(navigateToDetail.taskPresentationModel!!, view)
+            viewModel.onNavigateToDetailCompleted()
+        }
     }
 
     private fun navigateToCreateTask() {
@@ -244,14 +248,22 @@ class HomeFragment : Fragment(), MenuProvider {
 
         submitListAndScrollIfApplies(taskAdapter, currentList, taskList)
 
-        //Notify or update possible changes
-        if (isExitingFromDetailScreen()) {
-            val taskModel = currentList[isAnimatingTaskPosition]
-            notifyItemChanged(isAnimatingTaskPosition, taskModel)
-            exitFromDetailFinished()
+        if (viewModel.homeUiState.value.navigateToDetail.isCurrentlyInDetailScreen) {
+            val taskModel = viewModel.homeUiState.value.navigateToDetail.taskPresentationModel
+            notifyItemChanged(viewModel.homeUiState.value.navigateToDetail.taskIndex!!, taskModel)
+            viewModel.onPopFromDetailScreen()
         } else {
             notifyDataSetChanged()
         }
+
+//        //Notify or update possible changes
+//        if (isExitingFromDetailScreen()) {
+//            val taskModel = currentList[isAnimatingTaskPosition]
+//            notifyItemChanged(isAnimatingTaskPosition, taskModel)
+//            exitFromDetailFinished()
+//        } else {
+//            notifyDataSetChanged()
+//        }
     }
 
     private fun submitListAndScrollIfApplies(
@@ -338,8 +350,8 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun clickItem(it: TaskPresentationModel, view: View) {
-//        viewModel.clickItem(it)
-        navigateToDetail(it, view)
+        viewModel.clickItem(it)
+//        navigateToDetail(it, view)
     }
 
     private fun clickDeleteTasks(taskList: List<TaskPresentationModel>) {

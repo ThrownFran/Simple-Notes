@@ -34,7 +34,7 @@ fun Context.showToast(message: UiText) {
     Toast.makeText(this, message.asString(this), Toast.LENGTH_LONG).show()
 }
 
-fun MainActivity.showMessage(message: String) {
+fun MainActivity.showMessage(message: String, onMessageShown: (() -> Unit)? = null) {
     Snackbar.make(binding.mainCoordinator, message, Snackbar.LENGTH_SHORT).apply {
 
         //Snackbar still not styleable in Material3 (Could not style text color)
@@ -50,6 +50,7 @@ fun MainActivity.showMessage(message: String) {
             override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                 super.onDismissed(transientBottomBar, event)
                 binding.homeFab.extend()
+                onMessageShown?.invoke()
             }
         })
 
@@ -82,8 +83,8 @@ fun Context.resolveAttribute(@AttrRes attribute: Int): Int {
     return typedValue.data
 }
 
-fun Fragment.showMessage(message: UiText) {
-    (activity as MainActivity).showMessage(message.asString(requireContext()))
+fun Fragment.showMessage(message: UiText, onMessageShown: (() -> Unit)? = null) {
+    (activity as MainActivity).showMessage(message.asString(requireContext()), onMessageShown)
 }
 
 //fun Fragment.showMessage(message: String) {
