@@ -15,7 +15,6 @@ import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,10 +29,10 @@ class HomeViewModel @Inject constructor(
 
     private val _taskListState: MutableStateFlow<List<TaskPresentationModel>> =
         MutableStateFlow(ArrayList())
-    var taskListState: StateFlow<List<TaskPresentationModel>> = _taskListState.asStateFlow()
+    var taskListState = _taskListState.asStateFlow()
 
-    private val _homeUiState: MutableStateFlow<HomeUiState> = MutableStateFlow(HomeUiState())
-    val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
+    private val _homeUiState = MutableStateFlow(HomeUiState())
+    val homeUiState = _homeUiState.asStateFlow()
 
     init {
         observeTaskList()
