@@ -4,6 +4,7 @@ import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.models.Task
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.UiText
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -18,6 +19,6 @@ class ReorderTaskListUseCase @Inject constructor(
         }
 
     class Params(val taskList: List<Task>)
-    class Result(val message: String)
+    class Result(val message: UiText)
 
 }

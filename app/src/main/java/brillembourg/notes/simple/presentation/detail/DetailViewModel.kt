@@ -8,6 +8,7 @@ import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -26,8 +27,8 @@ class DetailViewModel @Inject constructor(
     private var content: String = ""
     private var title: String? = null
 
-    val messageEvent: LiveData<String> get() = _messageEvent
-    private val _messageEvent: SingleLiveEvent<String> = SingleLiveEvent()
+    val messageEvent: LiveData<UiText> get() = _messageEvent
+    private val _messageEvent: SingleLiveEvent<UiText> = SingleLiveEvent()
 
     init {
         currentTask = DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).task

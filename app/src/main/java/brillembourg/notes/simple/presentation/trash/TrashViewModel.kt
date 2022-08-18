@@ -12,6 +12,7 @@ import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toPresentation
 import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,12 +30,12 @@ class TrashViewModel @Inject constructor(
 
     private val _state: MutableLiveData<TrashState> = MutableLiveData()
     private val _navigateToDetailEvent: SingleLiveEvent<TaskPresentationModel> = SingleLiveEvent()
-    private val _messageEvent: SingleLiveEvent<String> = SingleLiveEvent()
+    private val _messageEvent: SingleLiveEvent<UiText> = SingleLiveEvent()
 
     //Observables
     val state: LiveData<TrashState> get() = _state
     val navigateToDetailEvent: LiveData<TaskPresentationModel> get() = _navigateToDetailEvent
-    val messageEvent: LiveData<String> get() = _messageEvent
+    val messageEvent: LiveData<UiText> get() = _messageEvent
 
     private val _taskList: MutableStateFlow<List<TaskPresentationModel>> =
         MutableStateFlow(ArrayList())
@@ -56,7 +57,7 @@ class TrashViewModel @Inject constructor(
                                     .asReversed()
                         }
                         is Resource.Error -> _state.value =
-                            TrashState.ShowError("Error loading tasks")
+                            TrashState.ShowError(UiText.DynamicString("Error loading tasks"))
                         is Resource.Loading -> Unit
                     }
                 }
@@ -67,7 +68,7 @@ class TrashViewModel @Inject constructor(
         _navigateToDetailEvent.value = it
     }
 
-    private fun showMessage(message: String) {
+    private fun showMessage(message: UiText) {
         _messageEvent.value = message
     }
 

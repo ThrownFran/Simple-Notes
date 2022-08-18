@@ -4,6 +4,7 @@ import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.models.Task
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.UiText
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -21,7 +22,7 @@ class CreateTaskUseCase @Inject constructor(
 
     class Result(
         val task: Task,
-        val message: String
+        val message: UiText
     )
 
 }

@@ -1,10 +1,10 @@
 package brillembourg.notes.simple.util
 
-fun getMessageFromError(e: Exception): String {
+fun getMessageFromError(e: Exception): UiText {
     return when (e) {
-        is BackupException -> "Backup failed"
-        is RestoreException -> "Restore failed"
-        else -> "We are sorry, we got an error!"
+        is BackupException -> UiText.BackupFailed
+        is RestoreException -> UiText.RestoreFailed
+        else -> UiText.UnknownError
     }
 }
 

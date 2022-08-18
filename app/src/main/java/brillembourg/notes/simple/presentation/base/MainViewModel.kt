@@ -7,6 +7,7 @@ import brillembourg.notes.simple.domain.Screen
 import brillembourg.notes.simple.domain.use_cases.BackupNotesUseCase
 import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
 import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -17,19 +18,19 @@ class MainViewModel @Inject constructor(
     private val backupNotesUseCase: BackupNotesUseCase
 ) : ViewModel() {
 
-    private val _messageEvent: SingleLiveEvent<String> = SingleLiveEvent()
+    private val _messageEvent: SingleLiveEvent<UiText> = SingleLiveEvent()
 
-    private val _restoreSuccessEvent: SingleLiveEvent<String> = SingleLiveEvent()
-    val restoreSuccessEvent: LiveData<String> get() = _restoreSuccessEvent
+    private val _restoreSuccessEvent: SingleLiveEvent<UiText> = SingleLiveEvent()
+    val restoreSuccessEvent: LiveData<UiText> get() = _restoreSuccessEvent
 
-    private val _backupSuccessEvent: SingleLiveEvent<String> = SingleLiveEvent()
-    val backupSuccessEvent: LiveData<String> get() = _backupSuccessEvent
+    private val _backupSuccessEvent: SingleLiveEvent<UiText> = SingleLiveEvent()
+    val backupSuccessEvent: LiveData<UiText> get() = _backupSuccessEvent
 
     private val _createTaskEvent: SingleLiveEvent<Any> = SingleLiveEvent()
     val createTaskEvent: LiveData<Any> get() = _createTaskEvent
 
     //Observables
-    val messageEvent: LiveData<String> get() = _messageEvent
+    val messageEvent: LiveData<UiText> get() = _messageEvent
 
     fun createTask() {
         _createTaskEvent.call()
@@ -72,7 +73,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun showMessage(message: String) {
+    private fun showMessage(message: UiText) {
         _messageEvent.value = message
     }
 

@@ -3,10 +3,7 @@ package brillembourg.notes.simple.data
 import brillembourg.notes.simple.data.room.BackupAndRestoreProvider
 import brillembourg.notes.simple.domain.repositories.DataRepository
 import brillembourg.notes.simple.domain.use_cases.BackupNotesUseCase
-import brillembourg.notes.simple.util.BackupException
-import brillembourg.notes.simple.util.Resource
-import brillembourg.notes.simple.util.RestoreException
-import brillembourg.notes.simple.util.safeCall
+import brillembourg.notes.simple.util.*
 
 class DataRepositoryImp(
     private val backupAndRestoreProvider: BackupAndRestoreProvider
@@ -16,7 +13,7 @@ class DataRepositoryImp(
         return safeCall {
             val result = backupAndRestoreProvider.restoreInLocalStorage()
             if (result.success) {
-                Resource.Success(BackupNotesUseCase.Result("Restore success"))
+                Resource.Success(BackupNotesUseCase.Result(UiText.RestoreSuccess))
             } else {
                 Resource.Error(RestoreException("Restore error ${result.message}"))
             }
@@ -27,7 +24,7 @@ class DataRepositoryImp(
         return safeCall {
             val result = backupAndRestoreProvider.backupInLocalStorage()
             if (result.success) {
-                Resource.Success(BackupNotesUseCase.Result("Backup success"))
+                Resource.Success(BackupNotesUseCase.Result(UiText.BackupSuccess))
             } else {
                 Resource.Error(BackupException("Backup error ${result.message}"))
             }
@@ -37,7 +34,8 @@ class DataRepositoryImp(
     override suspend fun prepareBackupNotes(params: BackupNotesUseCase.PrepareBackupParams): Resource<BackupNotesUseCase.PrepareBackupResult> {
         return safeCall {
             backupAndRestoreProvider.prepareBackupInLocalStorage(params.screen)
-            Resource.Success(BackupNotesUseCase.PrepareBackupResult("Backup success"))
+            val message = UiText.DynamicString("")
+            Resource.Success(BackupNotesUseCase.PrepareBackupResult(message))
         }
     }
 }

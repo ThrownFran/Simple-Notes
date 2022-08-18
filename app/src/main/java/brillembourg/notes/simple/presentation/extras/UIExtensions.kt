@@ -19,13 +19,19 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.presentation.base.MainActivity
+import brillembourg.notes.simple.util.UiText
+import brillembourg.notes.simple.util.asString
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
-fun Context.showToast(message: String) {
-    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+//fun Context.showToast(message: String) {
+//    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+//}
+
+fun Context.showToast(message: UiText) {
+    Toast.makeText(this, message.asString(this), Toast.LENGTH_LONG).show()
 }
 
 fun MainActivity.showMessage(message: String) {
@@ -76,9 +82,13 @@ fun Context.resolveAttribute(@AttrRes attribute: Int): Int {
     return typedValue.data
 }
 
-fun Fragment.showMessage(message: String) {
-    (activity as MainActivity).showMessage(message)
+fun Fragment.showMessage(message: UiText) {
+    (activity as MainActivity).showMessage(message.asString(requireContext()))
 }
+
+//fun Fragment.showMessage(message: String) {
+//    (activity as MainActivity).showMessage(message)
+//}
 
 fun View.showSoftKeyboard() {
     if (requestFocus()) {

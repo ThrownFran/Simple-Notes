@@ -5,20 +5,21 @@ import brillembourg.notes.simple.data.room.toDomain
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.safeCall
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.transform
 
 class TaskRepositoryImp(
-    val database: TaskDatabase,
-    val dateProvider: DateProvider
+    private val database: TaskDatabase,
+    private val dateProvider: DateProvider
 ) : TaskRepository {
 
     override suspend fun unArchiveTasks(params: UnArchiveTasksUseCase.Params): Resource<UnArchiveTasksUseCase.Result> {
         return safeCall {
             database.unArchiveTasks(params.ids)
-            val message = if (params.ids.size > 1) "Notes unarchived" else "Note archived"
+            val message = if (params.ids.size > 1) UiText.NotesUnarchived else UiText.NoteUnarchived
             Resource.Success(UnArchiveTasksUseCase.Result(message))
         }
     }
@@ -28,7 +29,7 @@ class TaskRepositoryImp(
             database.archiveTasks(params.ids)
             Resource.Success(
                 ArchiveTasksUseCase.Result(
-                    if (params.ids.size > 1) "Notes archived" else "Note archived"
+                    if (params.ids.size > 1) UiText.NotesArchived else UiText.NoteArchived
                 )
             )
         }
@@ -44,14 +45,14 @@ class TaskRepositoryImp(
                 content = params.content,
                 dateCreated = dateCreated
             ).toDomain()
-            Resource.Success(CreateTaskUseCase.Result(task, "Note created"))
+            Resource.Success(CreateTaskUseCase.Result(task, UiText.NoteCreated))
         }
     }
 
     override suspend fun deleteTask(params: DeleteTasksUseCase.Params): Resource<DeleteTasksUseCase.Result> {
         return safeCall {
             database.deleteTasks(params.ids)
-            val message = if (params.ids.size > 1) "Notes deleted" else "Note deleted"
+            val message = if (params.ids.size > 1) UiText.NotesDeleted else UiText.NoteDeleted
             Resource.Success(DeleteTasksUseCase.Result(message))
         }
     }
@@ -84,14 +85,14 @@ class TaskRepositoryImp(
     override suspend fun saveTask(params: SaveTaskUseCase.Params): Resource<SaveTaskUseCase.Result> {
         return safeCall {
             database.saveTask(params.task.toData())
-            Resource.Success(SaveTaskUseCase.Result("Note updated"))
+            Resource.Success(SaveTaskUseCase.Result(UiText.NoteUpdated))
         }
     }
 
     override suspend fun reorderTaskList(params: ReorderTaskListUseCase.Params): Resource<ReorderTaskListUseCase.Result> {
         return safeCall {
             database.saveTasksReordering(params.taskList.map { it.toData() })
-            Resource.Success(ReorderTaskListUseCase.Result("Notes reordered"))
+            Resource.Success(ReorderTaskListUseCase.Result(UiText.NotesReordered))
         }
     }
 
