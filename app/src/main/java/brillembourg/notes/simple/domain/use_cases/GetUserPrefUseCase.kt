@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-class GetUserPreferencesUseCase @Inject constructor(
+class GetUserPrefUseCase @Inject constructor(
     private val repository: UserPrefRepository,
     private val schedulers: Schedulers
 ) {

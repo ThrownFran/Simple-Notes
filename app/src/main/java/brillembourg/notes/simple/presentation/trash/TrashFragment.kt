@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentTrashBinding
+import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.extras.animateWithRecycler
 import brillembourg.notes.simple.presentation.extras.setTransitionToEditNote
@@ -44,7 +45,6 @@ class TrashFragment : Fragment(), MenuProvider {
     private var recylerViewState: Parcelable? = null
     private var actionMode: ActionMode? = null
 
-    private var layoutType = LayoutType.LinearVertical
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -79,6 +79,7 @@ class TrashFragment : Fragment(), MenuProvider {
 
     override fun onPrepareMenu(menu: Menu) {
         super.onPrepareMenu(menu)
+        val layoutType = viewModel.trashUiState.value.noteLayout.toLayoutType()
         menu.findItem(R.id.menu_home_vertical)
             .apply { isVisible = layoutType == LayoutType.Staggered }
         menu.findItem(R.id.menu_home_staggered)
@@ -106,22 +107,21 @@ class TrashFragment : Fragment(), MenuProvider {
         recyclerView: RecyclerView,
         layoutType: LayoutType
     ) {
-        this.layoutType = layoutType
-        val taskAdapter = recyclerView.adapter as ArchivedTaskAdapter
+        val taskAdapter: ArchivedTaskAdapter? = recyclerView.adapter as ArchivedTaskAdapter?
 
         changeLayout(
             recyclerView,
             layoutType,
-            taskAdapter.currentList
+            taskAdapter?.currentList
         )
     }
 
     private fun clickStaggeredLayout() {
-        clickChangeLayout(binding.trashRecycler, LayoutType.Staggered)
+        viewModel.onLayoutChange(NoteLayout.Grid)
     }
 
     private fun clickVerticalLayout() {
-        clickChangeLayout(binding.trashRecycler, LayoutType.LinearVertical)
+        viewModel.onLayoutChange(NoteLayout.Vertical)
     }
 
     override fun onDestroyView() {
@@ -134,16 +134,30 @@ class TrashFragment : Fragment(), MenuProvider {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.trashUiState.collectLatest {
+
+                    setupNoteList(it.taskList)
+
                     selectionModeObserver(it.selectionModeState)
+
                     userMessageObserver(it.userMessage)
+
                     navigateToDetailObserver(it.navigateToEditNote)
+
                     showArchiveConfirmationObserver(it.showArchiveNotesConfirmation)
 
-                    setupTaskList(it.taskList)
+                    noteLayoutPreferenceObserver(it.noteLayout)
+
                 }
             }
         }
 
+    }
+
+    private fun noteLayoutPreferenceObserver(noteLayout: NoteLayout) {
+        clickChangeLayout(
+            binding.trashRecycler,
+            noteLayout.toLayoutType()
+        )
     }
 
     private fun showArchiveConfirmationObserver(showDeleteConfirmationState: ShowDeleteNotesConfirmationState) {
@@ -191,7 +205,7 @@ class TrashFragment : Fragment(), MenuProvider {
         findNavController().navigate(directions, setupExtrasToDetail(view))
     }
 
-    private fun setupTaskList(taskList: List<TaskPresentationModel>) {
+    private fun setupNoteList(taskList: List<TaskPresentationModel>) {
         if (binding.trashRecycler.adapter == null) {
             setupTaskRecycler(taskList)
         } else {
@@ -202,6 +216,8 @@ class TrashFragment : Fragment(), MenuProvider {
     private fun setupTaskRecycler(taskList: List<TaskPresentationModel>) {
         binding.trashRecycler.apply {
             adapter = buildTaskAdapter(this, taskList)
+
+            val layoutType = viewModel.trashUiState.value.noteLayout.toLayoutType()
             layoutManager = buildLayoutManager(context, layoutType).also { layoutManager ->
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
@@ -326,4 +342,6 @@ class TrashFragment : Fragment(), MenuProvider {
     private fun saveRecyclerState() {
         recylerViewState = binding.trashRecycler.layoutManager?.onSaveInstanceState()
     }
+
+
 }

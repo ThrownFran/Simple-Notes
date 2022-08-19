@@ -3,9 +3,9 @@ package brillembourg.notes.simple.presentation.trash
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
-import brillembourg.notes.simple.domain.use_cases.DeleteTasksUseCase
-import brillembourg.notes.simple.domain.use_cases.GetArchivedTasksUseCase
-import brillembourg.notes.simple.domain.use_cases.UnArchiveTasksUseCase
+import brillembourg.notes.simple.domain.models.NoteLayout
+import brillembourg.notes.simple.domain.models.UserPreferences
+import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toPresentation
 import brillembourg.notes.simple.util.Resource
@@ -22,6 +22,8 @@ class TrashViewModel @Inject constructor(
     private val getArchivedTasksUseCase: GetArchivedTasksUseCase,
     private val unArchiveTasksUseCase: UnArchiveTasksUseCase,
     private val deleteTasksUseCase: DeleteTasksUseCase,
+    private val getUserPrefUseCase: GetUserPrefUseCase,
+    private val saveUserPreferencesUseCase: SaveUserPreferencesUseCase,
     private val dateProvider: DateProvider
 ) : ViewModel() {
 
@@ -29,7 +31,22 @@ class TrashViewModel @Inject constructor(
     val trashUiState = _trashUiState.asStateFlow()
 
     init {
+        getPreferences()
         getArchivedTasksAndObserve()
+    }
+
+    private fun getPreferences() {
+        viewModelScope.launch {
+            getUserPrefUseCase(GetUserPrefUseCase.Params())
+                .collect {
+                    when (it) {
+                        is Resource.Success -> _trashUiState.value =
+                            _trashUiState.value.copy(noteLayout = it.data.preferences.notesLayout)
+                        is Resource.Error -> showErrorMessage(it.exception)
+                        is Resource.Loading -> Unit
+                    }
+                }
+        }
     }
 
     private fun getArchivedTasksAndObserve() {
@@ -161,5 +178,15 @@ class TrashViewModel @Inject constructor(
         )
     }
 
+    fun onLayoutChange(noteLayout: NoteLayout) {
+        _trashUiState.value = _trashUiState.value.copy(noteLayout = noteLayout)
+        saveLayoutPreference(noteLayout)
+    }
+
+    private fun saveLayoutPreference(noteLayout: NoteLayout) {
+        viewModelScope.launch {
+            saveUserPreferencesUseCase(SaveUserPreferencesUseCase.Params(UserPreferences(noteLayout)))
+        }
+    }
 
 }

@@ -1,12 +1,10 @@
 package brillembourg.notes.simple.presentation.home
 
-import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -42,14 +40,6 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private var recylerViewState: Parcelable? = null
     private var actionMode: ActionMode? = null
-
-    private var layoutType = LayoutType.LinearVertical
-
-    private val USER_PREFERENCES_NAME = "user_preferences"
-
-    private val Context.dataStore by preferencesDataStore(
-        name = USER_PREFERENCES_NAME
-    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -88,6 +78,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
     override fun onPrepareMenu(menu: Menu) {
         super.onPrepareMenu(menu)
+        val layoutType = viewModel.homeUiState.value.noteLayout.toLayoutType()
         menu.findItem(R.id.menu_home_vertical)
             .apply { isVisible = layoutType == LayoutType.Staggered }
         menu.findItem(R.id.menu_home_staggered)
@@ -115,7 +106,6 @@ class HomeFragment : Fragment(), MenuProvider {
         recyclerView: RecyclerView,
         layoutType: LayoutType
     ) {
-        this.layoutType = layoutType
         val taskAdapter = recyclerView.adapter as TaskAdapter
 
         changeLayout(
@@ -132,12 +122,10 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun clickStaggeredLayout() {
         viewModel.onLayoutChange(NoteLayout.Grid)
-//        clickChangeLayout(binding.homeRecycler, LayoutType.Staggered)
     }
 
     private fun clickVerticalLayout() {
         viewModel.onLayoutChange(NoteLayout.Vertical)
-//        clickChangeLayout(binding.homeRecycler, LayoutType.LinearVertical)
     }
 
     override fun onDestroyView() {
@@ -172,10 +160,9 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun noteLayoutPreferenceObserver(noteLayout: NoteLayout) {
-        changeLayout(
+        clickChangeLayout(
             binding.homeRecycler,
-            noteLayout.toLayoutType(),
-            (binding.homeRecycler.adapter as TaskAdapter).currentList
+            noteLayout.toLayoutType()
         )
     }
 
@@ -245,6 +232,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun setupTaskRecycler(taskList: List<TaskPresentationModel>) {
         binding.homeRecycler.apply {
+            val layoutType = viewModel.homeUiState.value.noteLayout.toLayoutType()
             adapter = buildTaskAdapter(this, taskList, getDragDirs(layoutType))
             layoutManager = buildLayoutManager(context, layoutType).also { layoutManager ->
                 retrieveRecyclerStateIfApplies(layoutManager)

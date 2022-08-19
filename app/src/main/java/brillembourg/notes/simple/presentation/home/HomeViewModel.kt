@@ -23,7 +23,7 @@ class HomeViewModel @Inject constructor(
     private val getTaskListUseCase: GetTaskListUseCase,
     private val archiveTasksUseCase: ArchiveTasksUseCase,
     private val reorderTaskListUseCase: ReorderTaskListUseCase,
-    private val getUserPreferencesUseCase: GetUserPreferencesUseCase,
+    private val getUserPrefUseCase: GetUserPrefUseCase,
     private val saveUserPreferencesUseCase: SaveUserPreferencesUseCase,
     private val dateProvider: DateProvider
 ) : ViewModel() {
@@ -43,7 +43,7 @@ class HomeViewModel @Inject constructor(
 
     private fun getPreferences() {
         viewModelScope.launch {
-            getUserPreferencesUseCase(GetUserPreferencesUseCase.Params())
+            getUserPrefUseCase(GetUserPrefUseCase.Params())
                 .collect {
                     when (it) {
                         is Resource.Success -> _homeUiState.value =
