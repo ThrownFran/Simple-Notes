@@ -16,12 +16,17 @@ fun TaskAdapter.setupDragAndDropTouchHelper(dragAndDropDirs: Int): ItemTouchHelp
             override fun isLongPressDragEnabled(): Boolean {
                 return false
             }
+//
+//            override fun getMoveThreshold(viewHolder: RecyclerView.ViewHolder): Float {
+//                return 0.1f
+//            }
 
             override fun onMove(
                 recyclerView: RecyclerView,
                 viewHolder: RecyclerView.ViewHolder,
                 target: RecyclerView.ViewHolder
             ): Boolean {
+
                 val recyclerviewAdapter = recyclerView.adapter as TaskAdapter
                 val fromPosition = viewHolder.adapterPosition
                 val toPosition = target.adapterPosition

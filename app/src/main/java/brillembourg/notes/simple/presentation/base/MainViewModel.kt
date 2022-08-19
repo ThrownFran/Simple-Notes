@@ -28,7 +28,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun restoreNotes() {
+    fun onRestoreNotes() {
         viewModelScope.launch {
             when (val result = backupAndRestoreNotesUseCase.restore()) {
                 is Resource.Success -> {
@@ -43,7 +43,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun backupNotes() {
+    fun onBackupNotes() {
         viewModelScope.launch {
             when (val result = backupAndRestoreNotesUseCase.backup()) {
                 is Resource.Success -> {

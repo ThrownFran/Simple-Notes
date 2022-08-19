@@ -15,6 +15,7 @@ class TaskAdapter(
     val recyclerView: RecyclerView,
     val onClick: (task: TaskPresentationModel, clickedView: View) -> Unit,
     val onSelection: () -> Unit,
+    val onStartDrag: (() -> Unit)? = null,
     val onReorderSuccess: (reorderedTaskList: List<TaskPresentationModel>) -> Unit,
     val onReorderCanceled: () -> Unit
 ) : ListAdapter<TaskPresentationModel, NoteViewHolder>(setupTaskDiffCallback()) {
@@ -30,7 +31,10 @@ class TaskAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         return NoteViewHolder(
             binding = ItemTaskBinding.inflate(LayoutInflater.from(parent.context), parent, false),
-            onReadyToDrag = { startDrag(it) },
+            onReadyToDrag = {
+                onStartDrag?.invoke()
+                startDrag(it)
+            },
             onClick = onClick,
             onSelected = onSelection,
             getCurrentList = { currentList }

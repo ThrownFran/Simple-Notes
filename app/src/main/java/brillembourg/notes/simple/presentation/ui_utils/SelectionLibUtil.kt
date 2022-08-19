@@ -1,8 +1,10 @@
-package brillembourg.notes.simple.presentation.home
+package brillembourg.notes.simple.presentation.ui_utils
 
 import android.view.MotionEvent
 import androidx.recyclerview.selection.*
 import androidx.recyclerview.widget.RecyclerView
+import brillembourg.notes.simple.presentation.home.NoteViewHolder
+import brillembourg.notes.simple.presentation.home.TaskAdapter
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 
 

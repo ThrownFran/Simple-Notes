@@ -36,27 +36,21 @@ fun setupContextualActionBar(
 
 
     val actionMode = toolbar.startActionMode(object : ActionMode.Callback {
-        // Called when the action mode is created; startActionMode() was called
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            // Inflate a menu resource providing context menu items
             val inflater: MenuInflater = mode.menuInflater
             inflater.inflate(menuId, menu)
             return true
         }
 
-        // Called each time the action mode is shown. Always called after onCreateActionMode, but
-        // may be called multiple times if the mode is invalidated.
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
             onSetTitle.invoke(selectedList.size)
-            return false // Return false if nothing is done
+            return false
         }
 
-        // Called when the user selects a contextual menu item
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             return onActionClick.invoke(item.itemId)
         }
 
-        // Called when the user exits the action mode
         override fun onDestroyActionMode(mode: ActionMode) {
 
             taskList.forEachIndexed { index, taskPresentationModel ->
@@ -65,7 +59,6 @@ fun setupContextualActionBar(
                     adapter.notifyItemChanged(index, taskPresentationModel)
                 }
             }
-
             onDestroyMyActionMode.invoke()
         }
     })

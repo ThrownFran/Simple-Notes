@@ -17,12 +17,8 @@ import brillembourg.notes.simple.databinding.FragmentTrashBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.home.HomeFragment
-import brillembourg.notes.simple.presentation.home.LayoutType
-import brillembourg.notes.simple.presentation.home.buildLayoutManager
-import brillembourg.notes.simple.presentation.home.changeLayout
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
-import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
-import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
+import brillembourg.notes.simple.presentation.ui_utils.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -207,7 +203,7 @@ class TrashFragment : Fragment(), MenuProvider {
     private fun setupTaskRecycler(taskList: List<TaskPresentationModel>) {
         binding.trashRecycler.apply {
             adapter = buildTaskAdapter(this, taskList)
-            layoutManager = buildLayoutManager(layoutType).also { layoutManager ->
+            layoutManager = buildLayoutManager(context, layoutType).also { layoutManager ->
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
         }

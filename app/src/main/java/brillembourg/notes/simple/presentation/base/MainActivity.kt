@@ -84,6 +84,7 @@ class MainActivity : AppCompatActivity() {
 //            drawerLayout = binding.drawerLayout
 //        )
         setSupportActionBar(binding.toolbar)
+        supportActionBar?.setBackgroundDrawable(R.drawable.toolbar_shape)
 
         setupActionBarWithNavController(
             navController = navController,
@@ -92,14 +93,11 @@ class MainActivity : AppCompatActivity() {
 
         binding.navView.setupWithNavController(navController)
         //TODO
-        supportActionBar?.setBackgroundDrawable(R.drawable.toolbar_shape)
+        setupNavControllerListener()
+        setupDrawerListener()
+    }
 
-        navController.addOnDestinationChangedListener { controller, destination, arguments ->
-            binding.homeFab.apply {
-                if (destination.id == R.id.homeFragment) show() else hide()
-            }
-        }
-
+    private fun setupDrawerListener() {
         binding.navView.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.homeFragment -> {
@@ -132,12 +130,18 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+    }
 
-
+    private fun setupNavControllerListener() {
+        navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            binding.homeFab.apply {
+                if (destination.id == R.id.homeFragment) show() else hide()
+            }
+        }
     }
 
     private fun restoreNotes() {
-        viewModel.restoreNotes()
+        viewModel.onRestoreNotes()
     }
 
     private fun navigateToTrash() {
@@ -152,7 +156,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun backupNotes() {
-        viewModel.backupNotes()
+        viewModel.onBackupNotes()
     }
 
     private fun closeDrawer() {

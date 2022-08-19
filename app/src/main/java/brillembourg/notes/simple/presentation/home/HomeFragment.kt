@@ -20,9 +20,7 @@ import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
-import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
-import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
-import brillembourg.notes.simple.presentation.ui_utils.setupDragAndDropTouchHelper
+import brillembourg.notes.simple.presentation.ui_utils.*
 import brillembourg.notes.simple.util.UiText
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -220,11 +218,13 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun unlockToolbarScrolling() {
+        binding.homeRecycler.isNestedScrollingEnabled = true
         val activityBinding = (activity as MainActivity?)?.binding
         activityBinding?.toolbar?.unLockScroll()
     }
 
     private fun lockToolbarScrolling() {
+        binding.homeRecycler.isNestedScrollingEnabled = false
         val activityBinding = (activity as MainActivity?)?.binding
         activityBinding?.toolbar?.lockScroll()
     }
@@ -250,10 +250,11 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun setupTaskRecycler(taskList: List<TaskPresentationModel>) {
         binding.homeRecycler.apply {
             adapter = buildTaskAdapter(this, taskList, getDragDirs(layoutType))
-            layoutManager = buildLayoutManager(layoutType).also { layoutManager ->
+            layoutManager = buildLayoutManager(context, layoutType).also { layoutManager ->
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
             (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+            isNestedScrollingEnabled = true
         }
     }
 
@@ -297,6 +298,9 @@ class HomeFragment : Fragment(), MenuProvider {
             },
             onReorderCanceled = {
                 clickReorderCancelled()
+            },
+            onStartDrag = {
+                lockToolbarScrolling()
             })
             .also {
                 it.submitList(taskList)
@@ -338,11 +342,13 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun clickReorder(tasks: List<TaskPresentationModel>) {
         actionMode?.finish()
+        unlockToolbarScrolling()
         viewModel.onReorderedTaskList(tasks)
     }
 
     private fun clickReorderCancelled() {
         actionMode?.finish()
+        unlockToolbarScrolling()
     }
 
     private fun clickItem(it: TaskPresentationModel) {
