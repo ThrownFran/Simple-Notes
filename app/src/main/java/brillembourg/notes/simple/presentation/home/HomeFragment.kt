@@ -4,10 +4,10 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.util.Log
 import android.view.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
-import brillembourg.notes.simple.presentation.base.MainViewModel
 import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
@@ -36,8 +35,8 @@ class HomeFragment : Fragment(), MenuProvider {
         fun newInstance() = HomeFragment()
     }
 
+    private var confirmationArchiveDialog: AlertDialog? = null
     private val viewModel: HomeViewModel by viewModels()
-    private val activityViewModel: MainViewModel by activityViewModels()
 
     private var _binding: FragmentHomeBinding? = null
     private lateinit var binding: FragmentHomeBinding
@@ -141,6 +140,8 @@ class HomeFragment : Fragment(), MenuProvider {
     override fun onDestroyView() {
         saveRecyclerState()
         Log.e("HomeFragment", "OnDestroyView")
+        confirmationArchiveDialog?.dismiss()
+        confirmationArchiveDialog = null
         super.onDestroyView()
     }
 
@@ -151,8 +152,9 @@ class HomeFragment : Fragment(), MenuProvider {
                 viewModel.homeUiState.collect { homeUiState: HomeUiState ->
                     selectionModeObserver(homeUiState.selectionModeState)
                     userMessageObserver(homeUiState.userMessage)
-                    navigateToDetailObserver(homeUiState.navigateToDetail)
+                    navigateToDetailObserver(homeUiState.navigateToEditNote)
                     navigateToAddNoteObserver(homeUiState.navigateToAddNote)
+                    showArchiveConfirmationObserver(homeUiState.showArchiveNotesConfirmation)
                 }
             }
         }
@@ -166,6 +168,14 @@ class HomeFragment : Fragment(), MenuProvider {
         }
 
 
+    }
+
+    private fun showArchiveConfirmationObserver(showArchiveConfirmationState: ShowArchiveNotesConfirmationState) {
+        if (showArchiveConfirmationState.isVisible) {
+            showArchiveConfirmationDialog(showArchiveConfirmationState.tasksToArchiveSize) {
+                viewModel.onDismissConfirmArchiveShown()
+            }
+        }
     }
 
     private fun navigateToAddNoteObserver(navigateToAddNote: Boolean) {
@@ -193,7 +203,7 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun navigateToDetailObserver(navigateToDetail: NavigateToTaskDetail) {
+    private fun navigateToDetailObserver(navigateToDetail: NavigateToEditNote) {
         if (navigateToDetail.mustConsume) {
             val view =
                 binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
@@ -204,14 +214,10 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun navigateToCreateTask() {
         lockToolbarScrolling()
-        //TODO
-        selectionModeObserver(SelectionModeState())
-
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         setTransitionToCreateNote()
         findNavController().navigate(directions)
     }
-
 
     private fun unlockToolbarScrolling() {
         val activityBinding = (activity as MainActivity?)?.binding
@@ -283,8 +289,8 @@ class HomeFragment : Fragment(), MenuProvider {
             onSelection = {
                 clickSelection()
             },
-            onClick = { task, clickedView ->
-                clickItem(task, clickedView)
+            onClick = { task, _ ->
+                clickItem(task)
             },
             onReorderSuccess = { tasks ->
                 clickReorder(tasks)
@@ -324,8 +330,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun onContextualActionItem(menuId: Int) = when (menuId) {
         R.id.menu_context_menu_delete -> {
-            clickDeleteTasks((binding.homeRecycler
-                .adapter as TaskAdapter).currentList.filter { it.isSelected })
+            clickArchiveTasks()
             true
         }
         else -> false
@@ -340,30 +345,37 @@ class HomeFragment : Fragment(), MenuProvider {
         actionMode?.finish()
     }
 
-    private fun clickItem(it: TaskPresentationModel, view: View) {
+    private fun clickItem(it: TaskPresentationModel) {
         viewModel.onTaskClick(it)
     }
 
-    private fun clickDeleteTasks(taskList: List<TaskPresentationModel>) {
-        if (taskList.isEmpty()) throw IllegalArgumentException("Nothing to delete but trash was pressed")
+    private fun clickArchiveTasks() {
+        viewModel.onShowConfirmArchiveNotes()
+    }
 
+    private fun showArchiveConfirmationDialog(
+        size: Int,
+        onDismiss: () -> Unit
+    ) {
         val title =
-            if (taskList.size > 1) getString(R.string.move_tasks_to_trash) else getString(R.string.move_task_to_trash)
+            if (size > 1) getString(R.string.move_tasks_to_trash) else getString(R.string.move_task_to_trash)
 
-        MaterialAlertDialogBuilder(
+        confirmationArchiveDialog = MaterialAlertDialogBuilder(
             requireContext()
         )
             .setTitle(title)
             .setIcon(R.drawable.ic_baseline_delete_dark_24)
-//            .setMessage(resources.getString(R.string.supporting_text))
+            //            .setMessage(resources.getString(R.string.supporting_text))
             .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
+                confirmationArchiveDialog?.dismiss()
             }
             .setPositiveButton(resources.getString(R.string.all_move_to_trash)) { dialog, which ->
-                viewModel.deleteTasks(taskList)
-                actionMode?.finish()
+                viewModel.onArchiveNotes()
+            }
+            .setOnDismissListener {
+                onDismiss.invoke()
             }
             .show()
-
     }
 
 

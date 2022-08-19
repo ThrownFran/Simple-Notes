@@ -45,8 +45,6 @@ class HomeViewModel @Inject constructor(
                         is Resource.Success -> {
                             _taskListState.value = result.data.taskList
                                 .map { it.toPresentation(dateProvider) }
-                                .onEach { //TODO navigation
-                                }
                                 .sortedBy { taskPresentationModel -> taskPresentationModel.order }
                                 .asReversed()
                         }
@@ -55,14 +53,27 @@ class HomeViewModel @Inject constructor(
                         }
                         is Resource.Loading -> Unit
                     }
-
                 }
         }
     }
 
+    fun onAddNoteClick() {
+        _homeUiState.value = _homeUiState.value.copy(
+            navigateToAddNote = true,
+            selectionModeState = SelectionModeState()
+        )
+    }
+
+    fun onNavigateToAddNoteCompleted() {
+        _homeUiState.value = _homeUiState.value.copy(navigateToAddNote = false)
+    }
+
     fun onReorderedTaskList(reorderedTaskList: List<TaskPresentationModel>) {
         if (reorderedTaskList == taskListState.value) return
+        reorderTasks(reorderedTaskList)
+    }
 
+    private fun reorderTasks(reorderedTaskList: List<TaskPresentationModel>) {
         viewModelScope.launch {
             val params = ReorderTaskListUseCase.Params(reorderedTaskList.map {
                 it.toDomain(dateProvider)
@@ -76,13 +87,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun showErrorMessage(exception: Exception) {
-        _homeUiState.value = homeUiState.value.copy(userMessage = getMessageFromError(exception))
-    }
 
     fun onTaskClick(it: TaskPresentationModel) {
+        navigateToDetail(it)
+    }
+
+    private fun navigateToDetail(it: TaskPresentationModel) {
         _homeUiState.value = _homeUiState.value.copy(
-            navigateToDetail = NavigateToTaskDetail(
+            navigateToEditNote = NavigateToEditNote(
                 mustConsume = true,
                 taskIndex = taskListState.value.indexOf(it),
                 taskPresentationModel = it
@@ -91,14 +103,43 @@ class HomeViewModel @Inject constructor(
         )
     }
 
+    fun onNavigateToDetailCompleted() {
+
+        val navState =
+            _homeUiState.value.navigateToEditNote.copy(mustConsume = false)
+
+        _homeUiState.value = _homeUiState.value.copy(
+            navigateToEditNote = navState,
+        )
+    }
+
+    private fun showErrorMessage(exception: Exception) {
+        showMessage(getMessageFromError(exception))
+    }
+
     private fun showMessage(message: UiText) {
         _homeUiState.value = homeUiState.value.copy(userMessage = message)
     }
 
-    fun deleteTasks(tasksToDelete: List<TaskPresentationModel>) {
-        viewModelScope.launch {
-            val params = ArchiveTasksUseCase.Params(tasksToDelete.map { it.id })
+    fun onMessageShown() {
+        _homeUiState.value = _homeUiState.value.copy(userMessage = null)
+    }
 
+    fun onArchiveNotes() {
+
+        val tasksToDeleteIds = getSelectedTasks().map { it.id }
+        archiveNotes(tasksToDeleteIds)
+
+        _homeUiState.value = _homeUiState.value.copy(
+            showArchiveNotesConfirmation = ShowArchiveNotesConfirmationState(),
+            selectionModeState = SelectionModeState()
+        )
+
+    }
+
+    private fun archiveNotes(tasksToDeleteIds: List<Long>) {
+        viewModelScope.launch {
+            val params = ArchiveTasksUseCase.Params(tasksToDeleteIds)
             when (val result = archiveTasksUseCase(params)) {
                 is Resource.Success -> showMessage(result.data.message)
                 is Resource.Error -> showErrorMessage(result.exception)
@@ -108,22 +149,8 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun onMessageShown() {
-        _homeUiState.value = _homeUiState.value.copy(userMessage = null)
-    }
-
-    fun onNavigateToDetailCompleted() {
-
-        val navState =
-            _homeUiState.value.navigateToDetail.copy(mustConsume = false)
-
-        _homeUiState.value = _homeUiState.value.copy(
-            navigateToDetail = navState,
-        )
-    }
-
     fun onSelection() {
-        val sizeSelected = _taskListState.value.filter { it.isSelected }.size
+        val sizeSelected = getSelectedTasks().size
         _homeUiState.value = _homeUiState.value.copy(
             selectionModeState = SelectionModeState(
                 isActive = true, size = sizeSelected
@@ -135,15 +162,23 @@ class HomeViewModel @Inject constructor(
         _homeUiState.value = _homeUiState.value.copy(
             selectionModeState = SelectionModeState()
         )
-
     }
 
-    fun onAddNoteClick() {
-        _homeUiState.value = _homeUiState.value.copy(navigateToAddNote = true)
+    private fun getSelectedTasks() = _taskListState.value.filter { it.isSelected }
+
+    fun onShowConfirmArchiveNotes() {
+        _homeUiState.value = _homeUiState.value.copy(
+            showArchiveNotesConfirmation = ShowArchiveNotesConfirmationState(
+                isVisible = true,
+                tasksToArchiveSize = getSelectedTasks().size
+            )
+        )
     }
 
-    fun onNavigateToAddNoteCompleted() {
-        _homeUiState.value = _homeUiState.value.copy(navigateToAddNote = false)
+    fun onDismissConfirmArchiveShown() {
+        _homeUiState.value = _homeUiState.value.copy(
+            showArchiveNotesConfirmation = ShowArchiveNotesConfirmationState()
+        )
     }
 
 
