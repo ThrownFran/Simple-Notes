@@ -1,10 +1,12 @@
 package brillembourg.notes.simple.presentation.home
 
+import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.util.UiText
 
 data class HomeUiState(
     val userMessage: UiText? = null,
+    val noteLayout: NoteLayout = NoteLayout.Vertical,
     val selectionModeState: SelectionModeState = SelectionModeState(),
     val navigateToAddNote: Boolean = false,
     var navigateToEditNote: NavigateToEditNote = NavigateToEditNote(false),

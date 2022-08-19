@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.presentation.base
+package brillembourg.notes.simple.presentation.ui_utils
 
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
@@ -7,6 +7,9 @@ import androidx.databinding.ViewDataBinding
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+/*
+* Property delegate to inflate content view in Activity
+*/
 class ContentDelegate<R : AppCompatActivity, T : ViewDataBinding>(@LayoutRes val layoutRes: Int) :
     ReadOnlyProperty<R, T> {
 

@@ -3,9 +3,9 @@ package brillembourg.notes.simple.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
-import brillembourg.notes.simple.domain.use_cases.ArchiveTasksUseCase
-import brillembourg.notes.simple.domain.use_cases.GetTaskListUseCase
-import brillembourg.notes.simple.domain.use_cases.ReorderTaskListUseCase
+import brillembourg.notes.simple.domain.models.NoteLayout
+import brillembourg.notes.simple.domain.models.UserPreferences
+import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.presentation.models.toPresentation
@@ -23,6 +23,8 @@ class HomeViewModel @Inject constructor(
     private val getTaskListUseCase: GetTaskListUseCase,
     private val archiveTasksUseCase: ArchiveTasksUseCase,
     private val reorderTaskListUseCase: ReorderTaskListUseCase,
+    private val getUserPreferencesUseCase: GetUserPreferencesUseCase,
+    private val saveUserPreferencesUseCase: SaveUserPreferencesUseCase,
     private val dateProvider: DateProvider
 ) : ViewModel() {
 
@@ -35,7 +37,22 @@ class HomeViewModel @Inject constructor(
     val homeUiState = _homeUiState.asStateFlow()
 
     init {
+        getPreferences()
         observeTaskList()
+    }
+
+    private fun getPreferences() {
+        viewModelScope.launch {
+            getUserPreferencesUseCase(GetUserPreferencesUseCase.Params())
+                .collect {
+                    when (it) {
+                        is Resource.Success -> _homeUiState.value =
+                            _homeUiState.value.copy(noteLayout = it.data.preferences.notesLayout)
+                        is Resource.Error -> showErrorMessage(it.exception)
+                        is Resource.Loading -> Unit
+                    }
+                }
+        }
     }
 
     private fun observeTaskList() {
@@ -184,6 +201,17 @@ class HomeViewModel @Inject constructor(
         _homeUiState.value = _homeUiState.value.copy(
             showArchiveNotesConfirmation = ShowArchiveNotesConfirmationState()
         )
+    }
+
+    fun onLayoutChange(noteLayout: NoteLayout) {
+        _homeUiState.value = _homeUiState.value.copy(noteLayout = noteLayout)
+        saveLayoutPreference(noteLayout)
+    }
+
+    private fun saveLayoutPreference(noteLayout: NoteLayout) {
+        viewModelScope.launch {
+            saveUserPreferencesUseCase(SaveUserPreferencesUseCase.Params(UserPreferences(noteLayout)))
+        }
     }
 
 

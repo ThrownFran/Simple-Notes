@@ -5,14 +5,21 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
+import brillembourg.notes.simple.domain.models.NoteLayout
+
+fun NoteLayout.toLayoutType(): LayoutType {
+    return when (this) {
+        NoteLayout.Vertical -> LayoutType.LinearVertical
+        NoteLayout.Grid -> LayoutType.Staggered
+    }
+}
 
 enum class LayoutType {
-    Vertical, Grid
+    LinearVertical, Staggered
 }
 
 fun buildLayoutManager(context: Context, layoutType: LayoutType): RecyclerView.LayoutManager {
-    return if (layoutType == LayoutType.Grid) buildStaggeredManager(context) else buildVerticalManager(
+    return if (layoutType == LayoutType.Staggered) buildStaggeredManager(context) else buildVerticalManager(
         context
     )
 }
@@ -31,21 +38,22 @@ fun buildStaggeredManager(context: Context) =
 fun changeLayout(
     recyclerView: RecyclerView,
     type: LayoutType,
-    currentList: List<TaskPresentationModel>
+    currentList: Any?
 ) {
     recyclerView.apply {
 
-        if (type == LayoutType.Grid) {
-            val spanCount = when (type) {
-                LayoutType.Grid -> 2
-                LayoutType.Vertical -> 1
-            }
-
-            layoutManager = buildStaggeredManager(context)
-//            (layoutManager as StaggeredGridLayoutManager).spanCount = spanCount
-        } else {
-            layoutManager = buildVerticalManager(recyclerView.context)
+        val isLayoutChangeNeeded: Boolean = when (type) {
+            LayoutType.LinearVertical -> layoutManager is StaggeredGridLayoutManager
+            LayoutType.Staggered -> layoutManager is LinearLayoutManager
         }
+
+        if (!isLayoutChangeNeeded) return@apply
+
+        layoutManager = when (type) {
+            LayoutType.LinearVertical -> buildVerticalManager(recyclerView.context)
+            LayoutType.Staggered -> buildStaggeredManager(context)
+        }
+
         adapter?.notifyItemRangeChanged(
             0, adapter?.itemCount ?: 0,
             currentList
@@ -54,10 +62,10 @@ fun changeLayout(
 }
 
 fun getDragDirs(layoutType: LayoutType) = when (layoutType) {
-    LayoutType.Grid -> {
+    LayoutType.Staggered -> {
         ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END
     }
-    LayoutType.Vertical -> {
+    LayoutType.LinearVertical -> {
         ItemTouchHelper.UP or ItemTouchHelper.DOWN
     }
 }

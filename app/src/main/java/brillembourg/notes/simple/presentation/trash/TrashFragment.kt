@@ -3,7 +3,6 @@ package brillembourg.notes.simple.presentation.trash
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.*
-import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -17,7 +16,10 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentTrashBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
-import brillembourg.notes.simple.presentation.extras.*
+import brillembourg.notes.simple.presentation.extras.animateWithRecycler
+import brillembourg.notes.simple.presentation.extras.setTransitionToEditNote
+import brillembourg.notes.simple.presentation.extras.setupExtrasToDetail
+import brillembourg.notes.simple.presentation.extras.showMessage
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.*
 import brillembourg.notes.simple.util.UiText
@@ -34,7 +36,6 @@ class TrashFragment : Fragment(), MenuProvider {
         fun newInstance() = TrashFragment()
     }
 
-    private var confirmationDeleteDialog: AlertDialog? = null
     private val viewModel: TrashViewModel by viewModels()
 
     private var _binding: FragmentTrashBinding? = null
@@ -43,8 +44,7 @@ class TrashFragment : Fragment(), MenuProvider {
     private var recylerViewState: Parcelable? = null
     private var actionMode: ActionMode? = null
 
-    private var layoutType = LayoutType.Vertical
-//    private var isAnimatingTaskPosition = -1
+    private var layoutType = LayoutType.LinearVertical
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,7 +60,6 @@ class TrashFragment : Fragment(), MenuProvider {
         super.onViewCreated(view, savedInstanceState)
         setupMenu()
         setupObservers()
-        unlockToolbarScrolling()
         animateFabWithRecycler()
     }
 
@@ -80,9 +79,10 @@ class TrashFragment : Fragment(), MenuProvider {
 
     override fun onPrepareMenu(menu: Menu) {
         super.onPrepareMenu(menu)
-        menu.findItem(R.id.menu_home_vertical).apply { isVisible = layoutType == LayoutType.Grid }
+        menu.findItem(R.id.menu_home_vertical)
+            .apply { isVisible = layoutType == LayoutType.Staggered }
         menu.findItem(R.id.menu_home_staggered)
-            .apply { isVisible = layoutType == LayoutType.Vertical }
+            .apply { isVisible = layoutType == LayoutType.LinearVertical }
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -117,11 +117,11 @@ class TrashFragment : Fragment(), MenuProvider {
     }
 
     private fun clickStaggeredLayout() {
-        clickChangeLayout(binding.trashRecycler, LayoutType.Grid)
+        clickChangeLayout(binding.trashRecycler, LayoutType.Staggered)
     }
 
     private fun clickVerticalLayout() {
-        clickChangeLayout(binding.trashRecycler, LayoutType.Vertical)
+        clickChangeLayout(binding.trashRecycler, LayoutType.LinearVertical)
     }
 
     override fun onDestroyView() {
@@ -182,19 +182,7 @@ class TrashFragment : Fragment(), MenuProvider {
         }
     }
 
-
-    private fun unlockToolbarScrolling() {
-        val activityBinding = (activity as MainActivity?)?.binding
-        activityBinding?.toolbar?.unLockScroll()
-    }
-
-    private fun lockToolbarScrolling() {
-        val activityBinding = (activity as MainActivity?)?.binding
-        activityBinding?.toolbar?.lockScroll()
-    }
-
     private fun navigateToDetail(it: TaskPresentationModel, view: View) {
-        lockToolbarScrolling()
         //navigate to detail fragment
         val directions = TrashFragmentDirections.actionTrashFragmentToDetailFragment()
         directions.task = it
@@ -314,22 +302,20 @@ class TrashFragment : Fragment(), MenuProvider {
         val title =
             if (size <= 1) getString(R.string.delete_task_permanently) else getString(R.string.delete_tasks_permanently)
 
-        confirmationDeleteDialog = MaterialAlertDialogBuilder(
+        MaterialAlertDialogBuilder(
             requireContext()
         )
             .setTitle(title)
             .setIcon(R.drawable.ic_baseline_delete_dark_24)
 //            .setMessage(resources.getString(R.string.supporting_text))
             .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
-                confirmationDeleteDialog?.dismiss()
             }
             .setPositiveButton(resources.getString(R.string.all_delete)) { dialog, which ->
                 onDeleteNotes()
             }.setOnDismissListener {
                 onDismiss.invoke()
             }
-            .show()
-
+            .showWithLifecycle(viewLifecycleOwner)
     }
 
 

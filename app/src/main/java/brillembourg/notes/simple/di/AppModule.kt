@@ -9,6 +9,7 @@ import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.SchedulersImp
 import brillembourg.notes.simple.domain.repositories.DataRepository
 import brillembourg.notes.simple.domain.repositories.TaskRepository
+import brillembourg.notes.simple.domain.repositories.UserPrefRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,6 +39,12 @@ class AppModule {
     @Provides
     fun backupAndRestore(@ApplicationContext context: Context): BackupAndRestoreProvider {
         return RoomBackupLib(context)
+    }
+
+    @Singleton
+    @Provides
+    fun userPrefRepo(@ApplicationContext context: Context): UserPrefRepository {
+        return UserPreferencesRepositoryImp(context)
     }
 
     @Singleton

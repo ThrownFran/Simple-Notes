@@ -1,12 +1,12 @@
 package brillembourg.notes.simple.presentation.home
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.view.*
-import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
+import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
@@ -33,7 +34,7 @@ class HomeFragment : Fragment(), MenuProvider {
         fun newInstance() = HomeFragment()
     }
 
-    private var confirmationArchiveDialog: AlertDialog? = null
+    //    private var confirmationArchiveDialog: AlertDialog? = null
     private val viewModel: HomeViewModel by viewModels()
 
     private var _binding: FragmentHomeBinding? = null
@@ -42,7 +43,13 @@ class HomeFragment : Fragment(), MenuProvider {
     private var recylerViewState: Parcelable? = null
     private var actionMode: ActionMode? = null
 
-    private var layoutType = LayoutType.Vertical
+    private var layoutType = LayoutType.LinearVertical
+
+    private val USER_PREFERENCES_NAME = "user_preferences"
+
+    private val Context.dataStore by preferencesDataStore(
+        name = USER_PREFERENCES_NAME
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -81,9 +88,10 @@ class HomeFragment : Fragment(), MenuProvider {
 
     override fun onPrepareMenu(menu: Menu) {
         super.onPrepareMenu(menu)
-        menu.findItem(R.id.menu_home_vertical).apply { isVisible = layoutType == LayoutType.Grid }
+        menu.findItem(R.id.menu_home_vertical)
+            .apply { isVisible = layoutType == LayoutType.Staggered }
         menu.findItem(R.id.menu_home_staggered)
-            .apply { isVisible = layoutType == LayoutType.Vertical }
+            .apply { isVisible = layoutType == LayoutType.LinearVertical }
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -123,18 +131,17 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun clickStaggeredLayout() {
-        clickChangeLayout(binding.homeRecycler, LayoutType.Grid)
+        viewModel.onLayoutChange(NoteLayout.Grid)
+//        clickChangeLayout(binding.homeRecycler, LayoutType.Staggered)
     }
 
     private fun clickVerticalLayout() {
-        clickChangeLayout(binding.homeRecycler, LayoutType.Vertical)
+        viewModel.onLayoutChange(NoteLayout.Vertical)
+//        clickChangeLayout(binding.homeRecycler, LayoutType.LinearVertical)
     }
 
     override fun onDestroyView() {
         saveRecyclerState()
-        Log.e("HomeFragment", "OnDestroyView")
-        confirmationArchiveDialog?.dismiss()
-        confirmationArchiveDialog = null
         super.onDestroyView()
     }
 
@@ -148,6 +155,7 @@ class HomeFragment : Fragment(), MenuProvider {
                     navigateToDetailObserver(homeUiState.navigateToEditNote)
                     navigateToAddNoteObserver(homeUiState.navigateToAddNote)
                     showArchiveConfirmationObserver(homeUiState.showArchiveNotesConfirmation)
+                    noteLayoutPreferenceObserver(homeUiState.noteLayout)
                 }
             }
         }
@@ -161,6 +169,14 @@ class HomeFragment : Fragment(), MenuProvider {
         }
 
 
+    }
+
+    private fun noteLayoutPreferenceObserver(noteLayout: NoteLayout) {
+        changeLayout(
+            binding.homeRecycler,
+            noteLayout.toLayoutType(),
+            (binding.homeRecycler.adapter as TaskAdapter).currentList
+        )
     }
 
     private fun showArchiveConfirmationObserver(showArchiveConfirmationState: ShowArchiveNotesConfirmationState) {
@@ -339,14 +355,13 @@ class HomeFragment : Fragment(), MenuProvider {
         val title =
             if (size > 1) getString(R.string.move_tasks_to_trash) else getString(R.string.move_task_to_trash)
 
-        confirmationArchiveDialog = MaterialAlertDialogBuilder(
+        MaterialAlertDialogBuilder(
             requireContext()
         )
             .setTitle(title)
             .setIcon(R.drawable.ic_baseline_delete_dark_24)
             //            .setMessage(resources.getString(R.string.supporting_text))
             .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
-                confirmationArchiveDialog?.dismiss()
             }
             .setPositiveButton(resources.getString(R.string.all_move_to_trash)) { dialog, which ->
                 viewModel.onArchiveNotes()
@@ -354,7 +369,7 @@ class HomeFragment : Fragment(), MenuProvider {
             .setOnDismissListener {
                 onDismiss.invoke()
             }
-            .show()
+            .showWithLifecycle(viewLifecycleOwner)
     }
 
 

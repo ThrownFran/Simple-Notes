@@ -20,6 +20,7 @@ import brillembourg.notes.simple.presentation.extras.restartApp
 import brillembourg.notes.simple.presentation.extras.setBackgroundDrawable
 import brillembourg.notes.simple.presentation.extras.showToast
 import brillembourg.notes.simple.presentation.home.HomeFragmentDirections
+import brillembourg.notes.simple.presentation.ui_utils.contentViews
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
