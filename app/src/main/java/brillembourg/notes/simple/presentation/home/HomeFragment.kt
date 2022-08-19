@@ -52,6 +52,9 @@ class HomeFragment : Fragment(), MenuProvider {
         binding = _binding as FragmentHomeBinding
         binding.viewmodel = viewModel
         setupListeners()
+        setupMenu()
+        setupObservers()
+        animateFabWithRecycler()
         return binding.root
     }
 
@@ -60,14 +63,6 @@ class HomeFragment : Fragment(), MenuProvider {
         activityBinding?.homeFab?.setOnClickListener {
             viewModel.onAddNoteClick()
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupMenu()
-        setupObservers()
-        unlockToolbarScrolling()
-        animateFabWithRecycler()
     }
 
     private fun animateFabWithRecycler() {
@@ -189,7 +184,6 @@ class HomeFragment : Fragment(), MenuProvider {
             actionMode = null
             return
         }
-
         launchContextualActionBar(selectionModeState.size)
     }
 
@@ -211,26 +205,12 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun navigateToCreateTask() {
-        lockToolbarScrolling()
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         setTransitionToCreateNote()
         findNavController().navigate(directions)
     }
 
-    private fun unlockToolbarScrolling() {
-        binding.homeRecycler.isNestedScrollingEnabled = true
-        val activityBinding = (activity as MainActivity?)?.binding
-        activityBinding?.toolbar?.unLockScroll()
-    }
-
-    private fun lockToolbarScrolling() {
-        binding.homeRecycler.isNestedScrollingEnabled = false
-        val activityBinding = (activity as MainActivity?)?.binding
-        activityBinding?.toolbar?.lockScroll()
-    }
-
     private fun navigateToDetail(it: TaskPresentationModel, view: View) {
-        lockToolbarScrolling()
         //navigate to detail fragment
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         directions.task = it
@@ -254,7 +234,6 @@ class HomeFragment : Fragment(), MenuProvider {
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
             (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-            isNestedScrollingEnabled = true
         }
     }
 
@@ -288,19 +267,16 @@ class HomeFragment : Fragment(), MenuProvider {
             dragDirs,
             recyclerView,
             onSelection = {
-                clickSelection()
+                onNoteSelection()
             },
             onClick = { task, _ ->
-                clickItem(task)
+                onNoteClicked(task)
             },
             onReorderSuccess = { tasks ->
-                clickReorder(tasks)
+                onReorderedNotes(tasks)
             },
             onReorderCanceled = {
-                clickReorderCancelled()
-            },
-            onStartDrag = {
-                lockToolbarScrolling()
+                onReorderNotesCancelled()
             })
             .also {
                 it.submitList(taskList)
@@ -309,7 +285,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
 
-    private fun clickSelection() {
+    private fun onNoteSelection() {
         viewModel.onSelection()
     }
 
@@ -340,19 +316,16 @@ class HomeFragment : Fragment(), MenuProvider {
         else -> false
     }
 
-    private fun clickReorder(tasks: List<TaskPresentationModel>) {
-        actionMode?.finish()
-        unlockToolbarScrolling()
-        viewModel.onReorderedTaskList(tasks)
+    private fun onReorderedNotes(tasks: List<TaskPresentationModel>) {
+        viewModel.onReorderedNotes(tasks)
     }
 
-    private fun clickReorderCancelled() {
-        actionMode?.finish()
-        unlockToolbarScrolling()
+    private fun onReorderNotesCancelled() {
+        viewModel.onSelectionDismissed()
     }
 
-    private fun clickItem(it: TaskPresentationModel) {
-        viewModel.onTaskClick(it)
+    private fun onNoteClicked(it: TaskPresentationModel) {
+        viewModel.onNoteClick(it)
     }
 
     private fun clickArchiveTasks() {

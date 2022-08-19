@@ -1,14 +1,11 @@
 package brillembourg.notes.simple.presentation.trash
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.DeleteTasksUseCase
 import brillembourg.notes.simple.domain.use_cases.GetArchivedTasksUseCase
 import brillembourg.notes.simple.domain.use_cases.UnArchiveTasksUseCase
-import brillembourg.notes.simple.presentation.extras.SingleLiveEvent
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toPresentation
 import brillembourg.notes.simple.util.Resource
@@ -28,18 +25,8 @@ class TrashViewModel @Inject constructor(
     private val dateProvider: DateProvider
 ) : ViewModel() {
 
-    private val _state: MutableLiveData<TrashState> = MutableLiveData()
-    private val _navigateToDetailEvent: SingleLiveEvent<TaskPresentationModel> = SingleLiveEvent()
-    private val _messageEvent: SingleLiveEvent<UiText> = SingleLiveEvent()
-
-    //Observables
-    val state: LiveData<TrashState> get() = _state
-    val navigateToDetailEvent: LiveData<TaskPresentationModel> get() = _navigateToDetailEvent
-    val messageEvent: LiveData<UiText> get() = _messageEvent
-
-    private val _taskList: MutableStateFlow<List<TaskPresentationModel>> =
-        MutableStateFlow(ArrayList())
-    val taskList = _taskList.asStateFlow()
+    private val _trashUiState = MutableStateFlow(TrashUiState())
+    val trashUiState = _trashUiState.asStateFlow()
 
     init {
         getArchivedTasksAndObserve()
@@ -51,30 +38,66 @@ class TrashViewModel @Inject constructor(
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
-                            _taskList.value =
-                                result.data.taskList.map { it.toPresentation(dateProvider) }
+                            _trashUiState.value = _trashUiState.value.copy(
+                                taskList = result.data.taskList.map { it.toPresentation(dateProvider) }
                                     .sortedBy { taskPresentationModel -> taskPresentationModel.order }
                                     .asReversed()
+                            )
                         }
-                        is Resource.Error -> _state.value =
-                            TrashState.ShowError(UiText.DynamicString("Error loading tasks"))
+                        is Resource.Error ->
+                            showMessage(UiText.DynamicString("Error loading tasks"))
                         is Resource.Loading -> Unit
                     }
                 }
         }
     }
 
-    fun clickItem(it: TaskPresentationModel) {
-        _navigateToDetailEvent.value = it
+    fun onNoteClick(it: TaskPresentationModel) {
+        navigateToDetail(it)
+    }
+
+    private fun navigateToDetail(it: TaskPresentationModel) {
+        _trashUiState.value = trashUiState.value.copy(
+            navigateToEditNote =
+            NavigateToEditNote(
+                mustConsume = true,
+                taskIndex = trashUiState.value.taskList.indexOf(it),
+                taskPresentationModel = it
+            ),
+            selectionModeState = SelectionModeState()
+        )
+    }
+
+    fun onNavigateToDetailCompleted() {
+        val navState =
+            _trashUiState.value.navigateToEditNote.copy(mustConsume = false)
+
+        _trashUiState.value = _trashUiState.value.copy(
+            navigateToEditNote = navState,
+        )
+    }
+
+
+    private fun showErrorMessage(exception: Exception) {
+        showMessage(getMessageFromError(exception))
     }
 
     private fun showMessage(message: UiText) {
-        _messageEvent.value = message
+        _trashUiState.value = _trashUiState.value.copy(userMessage = message)
     }
 
-    fun unarchiveTasks(taskToUnarchive: List<TaskPresentationModel>) {
+    fun onMessageShown() {
+        _trashUiState.value = _trashUiState.value.copy(userMessage = null)
+    }
+
+    fun onUnarchiveTasks() {
+        val tasksSelectedIds = getSelectedTasks().map { it.id }
+        unarchiveTasks(tasksSelectedIds)
+    }
+
+    private fun unarchiveTasks(taskToUnarchiveIds: List<Long>) {
         viewModelScope.launch {
-            val params = UnArchiveTasksUseCase.Params(taskToUnarchive.map { it.id })
+            val params = UnArchiveTasksUseCase.Params(taskToUnarchiveIds)
             when (val result = unArchiveTasksUseCase(params)) {
                 is Resource.Success -> showMessage(result.data.message)
                 is Resource.Error -> showErrorMessage(result.exception)
@@ -83,19 +106,59 @@ class TrashViewModel @Inject constructor(
         }
     }
 
-    private fun showErrorMessage(exception: Exception) {
-        _messageEvent.value = getMessageFromError(exception)
+    fun onDeleteNotes() {
+
+        val tasksToDeleteIds = getSelectedTasks().map { it.id }
+        deleteTasks(tasksToDeleteIds)
+
+        _trashUiState.value = _trashUiState.value.copy(
+            showArchiveNotesConfirmation = ShowDeleteNotesConfirmationState(),
+            selectionModeState = SelectionModeState()
+        )
     }
 
-    fun clickDeleteTasks(tasksToDelete: List<TaskPresentationModel>) {
+    private fun getSelectedTasks() = _trashUiState.value.taskList.filter { it.isSelected }
+
+    private fun deleteTasks(tasksToDeleteIds: List<Long>) {
         viewModelScope.launch {
-            val params = DeleteTasksUseCase.Params(tasksToDelete.map { it.id })
+            val params = DeleteTasksUseCase.Params(tasksToDeleteIds)
             when (val result = deleteTasksUseCase(params)) {
                 is Resource.Success -> showMessage(result.data.message)
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
             }
         }
+    }
+
+    fun onSelection() {
+        val sizeSelected = getSelectedTasks().size
+        _trashUiState.value = _trashUiState.value.copy(
+            selectionModeState = SelectionModeState(
+                isActive = true,
+                size = sizeSelected
+            )
+        )
+    }
+
+    fun onSelectionDismissed() {
+        _trashUiState.value = _trashUiState.value.copy(
+            selectionModeState = SelectionModeState()
+        )
+    }
+
+    fun onShowConfirmDeleteNotes() {
+        _trashUiState.value = _trashUiState.value.copy(
+            showArchiveNotesConfirmation = ShowDeleteNotesConfirmationState(
+                isVisible = true,
+                tasksToDeleteSize = getSelectedTasks().size
+            )
+        )
+    }
+
+    fun onDismissConfirmDeleteShown() {
+        _trashUiState.value = _trashUiState.value.copy(
+            showArchiveNotesConfirmation = ShowDeleteNotesConfirmationState()
+        )
     }
 
 

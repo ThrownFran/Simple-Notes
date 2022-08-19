@@ -26,6 +26,7 @@ class HomeViewModel @Inject constructor(
     private val dateProvider: DateProvider
 ) : ViewModel() {
 
+    //Task list state separated from uiState to improve performance
     private val _taskListState: MutableStateFlow<List<TaskPresentationModel>> =
         MutableStateFlow(ArrayList())
     var taskListState = _taskListState.asStateFlow()
@@ -68,7 +69,11 @@ class HomeViewModel @Inject constructor(
         _homeUiState.value = _homeUiState.value.copy(navigateToAddNote = false)
     }
 
-    fun onReorderedTaskList(reorderedTaskList: List<TaskPresentationModel>) {
+    fun onReorderedNotes(reorderedTaskList: List<TaskPresentationModel>) {
+        _homeUiState.value = _homeUiState.value.copy(
+            selectionModeState = SelectionModeState()
+        )
+
         if (reorderedTaskList == taskListState.value) return
         reorderTasks(reorderedTaskList)
     }
@@ -88,7 +93,7 @@ class HomeViewModel @Inject constructor(
     }
 
 
-    fun onTaskClick(it: TaskPresentationModel) {
+    fun onNoteClick(it: TaskPresentationModel) {
         navigateToDetail(it)
     }
 

@@ -22,6 +22,7 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true">
 
+
             <com.google.android.material.appbar.AppBarLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -33,9 +34,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     android:background="@drawable/toolbar_shape"
+                    android:visibility="visible"
                     app:menu="@menu/menu_home"
                     android:theme="@style/Widget.Material3.ActionBar.Solid"
-                    app:layout_scrollFlags="scroll|enterAlways"
                     app:popupTheme="@style/ThemeOverlay.Material3.Light" />
 
             </com.google.android.material.appbar.AppBarLayout>

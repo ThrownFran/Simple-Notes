@@ -3,6 +3,7 @@ package brillembourg.notes.simple.presentation.trash
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -12,15 +13,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentTrashBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.extras.*
-import brillembourg.notes.simple.presentation.home.HomeFragment
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.*
+import brillembourg.notes.simple.util.UiText
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
@@ -28,9 +31,10 @@ import kotlinx.coroutines.launch
 class TrashFragment : Fragment(), MenuProvider {
 
     companion object TrashFragment {
-        fun newInstance() = HomeFragment()
+        fun newInstance() = TrashFragment()
     }
 
+    private var confirmationDeleteDialog: AlertDialog? = null
     private val viewModel: TrashViewModel by viewModels()
 
     private var _binding: FragmentTrashBinding? = null
@@ -40,7 +44,7 @@ class TrashFragment : Fragment(), MenuProvider {
     private var actionMode: ActionMode? = null
 
     private var layoutType = LayoutType.Vertical
-    private var isAnimatingTaskPosition = -1
+//    private var isAnimatingTaskPosition = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -126,38 +130,56 @@ class TrashFragment : Fragment(), MenuProvider {
     }
 
     private fun setupObservers() {
-        viewModel.navigateToDetailEvent.observe(viewLifecycleOwner) {
-//            navigateToDetail(it)
-            //TODO
-        }
 
-        viewModel.state.observe(viewLifecycleOwner) {
-            when (it) {
-                is TrashState.Loading -> {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.trashUiState.collectLatest {
+                    selectionModeObserver(it.selectionModeState)
+                    userMessageObserver(it.userMessage)
+                    navigateToDetailObserver(it.navigateToEditNote)
+                    showArchiveConfirmationObserver(it.showArchiveNotesConfirmation)
 
-                }
-                is TrashState.ShowError -> {
-                    showMessage(it.message)
+                    setupTaskList(it.taskList)
                 }
             }
         }
 
-        viewModel.messageEvent.observe(viewLifecycleOwner) {
-            showMessage(it)
-        }
+    }
 
-//        viewModel.observeTaskList().observe(viewLifecycleOwner) {
-//            setupTaskList(it)
-//        }
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                viewModel.taskList.collect {
-                    setupTaskList(it)
-                }
+    private fun showArchiveConfirmationObserver(showDeleteConfirmationState: ShowDeleteNotesConfirmationState) {
+        if (showDeleteConfirmationState.isVisible) {
+            showDeleteTasksDialog(showDeleteConfirmationState.tasksToDeleteSize) {
+                viewModel.onDismissConfirmDeleteShown()
             }
         }
+    }
 
+
+    private fun selectionModeObserver(selectionModeState: SelectionModeState) {
+        if (!selectionModeState.isActive) {
+            actionMode?.finish()
+            actionMode = null
+            return
+        }
+
+        launchContextualActionBar(selectionModeState.size)
+    }
+
+    private fun userMessageObserver(userMessage: UiText?) {
+        userMessage?.let {
+            showMessage(it) {
+                viewModel.onMessageShown()
+            }
+        }
+    }
+
+    private fun navigateToDetailObserver(navigateToDetail: NavigateToEditNote) {
+        if (navigateToDetail.mustConsume) {
+            val view =
+                binding.trashRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
+            navigateToDetail(navigateToDetail.taskPresentationModel!!, view)
+            viewModel.onNavigateToDetailCompleted()
+        }
     }
 
 
@@ -171,22 +193,11 @@ class TrashFragment : Fragment(), MenuProvider {
         activityBinding?.toolbar?.lockScroll()
     }
 
-    private fun finishSelectionActionModeIfActive() {
-        actionMode?.finish()
-        actionMode = null
-    }
-
     private fun navigateToDetail(it: TaskPresentationModel, view: View) {
         lockToolbarScrolling()
-        finishSelectionActionModeIfActive()
-
         //navigate to detail fragment
         val directions = TrashFragmentDirections.actionTrashFragmentToDetailFragment()
         directions.task = it
-
-
-        isAnimatingTaskPosition = (binding.trashRecycler.adapter as ArchivedTaskAdapter)
-            .currentList.indexOf(it)
 
         setTransitionToEditNote()
         findNavController().navigate(directions, setupExtrasToDetail(view))
@@ -206,6 +217,8 @@ class TrashFragment : Fragment(), MenuProvider {
             layoutManager = buildLayoutManager(context, layoutType).also { layoutManager ->
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
+            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+            isNestedScrollingEnabled = true
         }
     }
 
@@ -213,17 +226,7 @@ class TrashFragment : Fragment(), MenuProvider {
         taskAdapter: ArchivedTaskAdapter,
         taskList: List<TaskPresentationModel>
     ) = with(taskAdapter) {
-
         submitListAndScrollIfApplies(taskAdapter, currentList, taskList)
-
-        //Notify or update possible changes
-        if (isExitingFromDetailScreen()) {
-            val taskModel = currentList[isAnimatingTaskPosition]
-            notifyItemChanged(isAnimatingTaskPosition, taskModel)
-            exitFromDetailFinished()
-        } else {
-            notifyDataSetChanged()
-        }
     }
 
     private fun submitListAndScrollIfApplies(
@@ -234,14 +237,6 @@ class TrashFragment : Fragment(), MenuProvider {
         val isInsertingInList = currentList.size < taskList.size
         taskAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
     }
-
-
-    private fun isExitingFromDetailScreen() = isAnimatingTaskPosition != -1
-
-    private fun exitFromDetailFinished() {
-        isAnimatingTaskPosition = -1
-    }
-
 
     private fun scrollToTop() {
         binding.trashRecycler.scrollToPosition(0)
@@ -255,17 +250,21 @@ class TrashFragment : Fragment(), MenuProvider {
         return ArchivedTaskAdapter(
             recyclerView,
             onSelection = {
-                launchContextualActionBar()
+                onNoteSelection()
             },
             onClick = { task, clickedView ->
-                clickItem(task, clickedView)
+                onNoteClicked(task, clickedView)
             })
             .also {
                 it.submitList(taskList)
             }
     }
 
-    private fun launchContextualActionBar() {
+    private fun onNoteSelection() {
+        viewModel.onSelection()
+    }
+
+    private fun launchContextualActionBar(sizeSelected: Int) {
         actionMode = setupContextualActionBar(
             toolbar = requireActivity().findViewById(R.id.toolbar),
             menuId = R.menu.menu_context_trash,
@@ -278,53 +277,56 @@ class TrashFragment : Fragment(), MenuProvider {
                     selectedSize = selectedSize
                 )
             },
-            onDestroyMyActionMode = { actionMode = null }
+            onDestroyMyActionMode = { viewModel.onSelectionDismissed() }
         )
     }
 
     private fun onContextualActionItem(menuId: Int) = when (menuId) {
         R.id.menu_context_menu_delete -> {
-            clickDeleteTasks(getSelectedItems())
+            viewModel.onShowConfirmDeleteNotes()
             true
         }
         R.id.menu_context_menu_unarchive -> {
-            clickUnarchiveTasks(getSelectedItems())
+            onUnarchiveTasks()
             true
         }
         else -> false
     }
 
-    private fun clickUnarchiveTasks(selectedItems: List<TaskPresentationModel>) {
-        viewModel.unarchiveTasks(selectedItems)
-        actionMode?.finish()
+    private fun onDeleteNotes() {
+        viewModel.onDeleteNotes()
     }
 
-    private fun getSelectedItems() = (binding.trashRecycler
-        .adapter as ArchivedTaskAdapter).currentList.filter { it.isSelected }
-
-
-    private fun clickItem(it: TaskPresentationModel, view: View) {
-//        viewModel.clickItem(it)
-        navigateToDetail(it, view)
+    private fun onUnarchiveTasks() {
+        viewModel.onUnarchiveTasks()
     }
 
-    private fun clickDeleteTasks(taskList: List<TaskPresentationModel>) {
-        if (taskList.isEmpty()) throw IllegalArgumentException("Nothing to delete but trash was pressed")
+
+    private fun onNoteClicked(it: TaskPresentationModel, view: View) {
+        viewModel.onNoteClick(it)
+    }
+
+    private fun showDeleteTasksDialog(
+        size: Int,
+        onDismiss: () -> Unit
+    ) {
 
         val title =
-            if (taskList.size <= 1) getString(R.string.delete_task_permanently) else getString(R.string.delete_tasks_permanently)
+            if (size <= 1) getString(R.string.delete_task_permanently) else getString(R.string.delete_tasks_permanently)
 
-        MaterialAlertDialogBuilder(
+        confirmationDeleteDialog = MaterialAlertDialogBuilder(
             requireContext()
         )
             .setTitle(title)
             .setIcon(R.drawable.ic_baseline_delete_dark_24)
 //            .setMessage(resources.getString(R.string.supporting_text))
             .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
+                confirmationDeleteDialog?.dismiss()
             }
             .setPositiveButton(resources.getString(R.string.all_delete)) { dialog, which ->
-                viewModel.clickDeleteTasks(taskList)
-                actionMode?.finish()
+                onDeleteNotes()
+            }.setOnDismissListener {
+                onDismiss.invoke()
             }
             .show()
 
