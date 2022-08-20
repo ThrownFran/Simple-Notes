@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.CreateTaskUseCase
+import brillembourg.notes.simple.domain.use_cases.DeleteTasksUseCase
 import brillembourg.notes.simple.domain.use_cases.SaveTaskUseCase
+import brillembourg.notes.simple.domain.use_cases.UnArchiveTasksUseCase
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.util.Resource
@@ -24,6 +26,9 @@ class DetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val saveTaskUseCase: SaveTaskUseCase,
     private val createTaskUseCase: CreateTaskUseCase,
+    private val deleteTasksUseCase: DeleteTasksUseCase,
+    private val archiveTasksUseCase: UnArchiveTasksUseCase,
+    private val unArchiveTasksUseCase: UnArchiveTasksUseCase,
     private val dateProvider: DateProvider
 ) : ViewModel() {
 
@@ -56,7 +61,8 @@ class DetailViewModel @Inject constructor(
         _uiDetailState.value = _uiDetailState.value.copy(
             userInput = UserInput(it.title, it.content),
             unFocusInput = true,
-            isNewTask = false
+            isNewTask = false,
+            isArchivedTask = it.isArchived
         )
     }
 

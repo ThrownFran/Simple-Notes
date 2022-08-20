@@ -53,7 +53,7 @@ class TrashFragment : Fragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupMenu()
-        render()
+        renderStates()
         animateFabWithRecycler()
     }
 
@@ -84,12 +84,12 @@ class TrashFragment : Fragment(), MenuProvider {
         val menuHost = requireActivity()
         when (menuItem.itemId) {
             R.id.menu_home_vertical -> {
-                clickVerticalLayout()
+                viewModel.onLayoutChange(NoteLayout.Vertical)
                 menuHost.invalidateMenu()
                 return true
             }
             R.id.menu_home_staggered -> {
-                clickStaggeredLayout()
+                viewModel.onLayoutChange(NoteLayout.Grid)
                 menuHost.invalidateMenu()
                 return true
             }
@@ -97,33 +97,25 @@ class TrashFragment : Fragment(), MenuProvider {
         return false
     }
 
-    private fun clickChangeLayout(
-        recyclerView: RecyclerView,
-        layoutType: LayoutType
-    ) {
-        val taskAdapter: ArchivedTaskAdapter? = recyclerView.adapter as ArchivedTaskAdapter?
-
-        changeLayout(
-            recyclerView,
-            layoutType,
-            taskAdapter?.currentList
-        )
-    }
-
-    private fun clickStaggeredLayout() {
-        viewModel.onLayoutChange(NoteLayout.Grid)
-    }
-
-    private fun clickVerticalLayout() {
-        viewModel.onLayoutChange(NoteLayout.Vertical)
-    }
+//    private fun clickChangeLayout(
+//        recyclerView: RecyclerView,
+//        layoutType: LayoutType
+//    ) {
+//        val taskAdapter: ArchivedTaskAdapter? = recyclerView.adapter as ArchivedTaskAdapter?
+//
+//        changeLayout(
+//            recyclerView,
+//            layoutType,
+//            taskAdapter?.currentList
+//        )
+//    }
 
     override fun onDestroyView() {
         saveRecyclerState()
         super.onDestroyView()
     }
 
-    private fun render() {
+    private fun renderStates() {
 
         safeUiLaunch {
             viewModel.trashUiState.collect { uiState: TrashUiState ->
@@ -136,16 +128,20 @@ class TrashFragment : Fragment(), MenuProvider {
 
                 showArchiveConfirmationState(uiState.showArchiveNotesConfirmation)
 
-                noteLayoutPreferenceObserver(uiState.noteLayout)
+                noteLayoutState(uiState.noteLayout)
 
             }
         }
     }
 
-    private fun noteLayoutPreferenceObserver(noteLayout: NoteLayout) {
-        clickChangeLayout(
+    private fun noteLayoutState(noteLayout: NoteLayout) {
+        val taskAdapter: ArchivedTaskAdapter? =
+            binding.trashRecycler.adapter as ArchivedTaskAdapter?
+
+        changeLayout(
             binding.trashRecycler,
-            noteLayout.toLayoutType()
+            noteLayout.toLayoutType(),
+            taskAdapter?.currentList
         )
     }
 
@@ -210,15 +206,15 @@ class TrashFragment : Fragment(), MenuProvider {
     private fun updateListAndNotify(
         taskAdapter: ArchivedTaskAdapter,
         taskList: List<TaskPresentationModel>
-    ) = with(taskAdapter) {
-        submitListAndScrollIfApplies(taskAdapter, currentList, taskList)
+    ) {
+        submitListAndScrollIfApplies(taskAdapter, taskList)
     }
 
     private fun submitListAndScrollIfApplies(
         taskAdapter: ArchivedTaskAdapter,
-        currentList: List<TaskPresentationModel>,
         taskList: List<TaskPresentationModel>
     ) {
+        val currentList = taskAdapter.currentList
         val isInsertingInList = currentList.size < taskList.size
         taskAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
     }
@@ -240,8 +236,8 @@ class TrashFragment : Fragment(), MenuProvider {
             onClick = { task, clickedView ->
                 onNoteClicked(task, clickedView)
             })
-            .also {
-                it.submitList(taskList)
+            .apply {
+                submitList(taskList)
             }
     }
 

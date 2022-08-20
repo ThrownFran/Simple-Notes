@@ -4,6 +4,7 @@ import brillembourg.notes.simple.util.UiText
 
 data class DetailUiState(
     val isNewTask: Boolean = true,
+    val isArchivedTask: Boolean = false,
     var userInput: UserInput = UserInput(),
     val userMessage: UiText? = null,
     val navigateBack: Boolean = false,

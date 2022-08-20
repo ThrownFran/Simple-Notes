@@ -45,7 +45,7 @@ class HomeFragment : Fragment(), MenuProvider {
         binding.viewmodel = viewModel
         setupListeners()
         setupMenu()
-        setupObservers()
+        renderStates()
         animateFabWithRecycler()
         return binding.root
     }
@@ -128,7 +128,7 @@ class HomeFragment : Fragment(), MenuProvider {
         super.onDestroyView()
     }
 
-    private fun setupObservers() {
+    private fun renderStates() {
 
         safeUiLaunch {
             viewModel.homeUiState.collect { homeUiState: HomeUiState ->
