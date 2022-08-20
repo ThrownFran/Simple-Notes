@@ -6,6 +6,8 @@ import android.content.Context
 sealed class UiText {
     data class DynamicString(val value: String) : UiText()
 
+    object GetNotesError : UiText()
+
     object UnknownError : UiText()
     object BackupSuccess : UiText()
     object BackupFailed : UiText()
@@ -43,6 +45,7 @@ fun UiText.asString(context: Context): String {
         is UiText.RestoreFailed -> "Restore failed"
         is UiText.RestoreSuccess -> "Restore success"
         is UiText.UnknownError -> "We are sorry, we got an error!"
+        is UiText.GetNotesError -> "Error loading notes"
     }
 }
 

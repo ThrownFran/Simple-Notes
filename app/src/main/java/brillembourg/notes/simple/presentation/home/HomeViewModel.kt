@@ -29,9 +29,11 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     //Task list state separated from uiState to improve performance
-    private val _taskListState: MutableStateFlow<List<TaskPresentationModel>> =
-        MutableStateFlow(ArrayList())
-    var taskListState = _taskListState.asStateFlow()
+//    private val _taskListState: MutableStateFlow<List<TaskPresentationModel>> =
+//        MutableStateFlow(ArrayList())
+//    var taskListState = _taskListState.asStateFlow()
+    var userMessage: MutableStateFlow<UiText?> = MutableStateFlow(null)
+        private set
 
     private val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
@@ -61,13 +63,23 @@ class HomeViewModel @Inject constructor(
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
-                            _taskListState.value = result.data.taskList
-                                .map { it.toPresentation(dateProvider) }
-                                .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                                .asReversed()
+
+                            _homeUiState.value = _homeUiState.value.copy(
+                                noteList = NoteList(
+                                    notes = result.data.taskList
+                                        .map { it.toPresentation(dateProvider) }
+                                        .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+                                        .asReversed(),
+                                    mustRender = true)
+                            )
+
+//                            _taskListState.value = result.data.taskList
+//                                .map { it.toPresentation(dateProvider) }
+//                                .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+//                                .asReversed()
                         }
                         is Resource.Error -> {
-                            showMessage(UiText.DynamicString("Error loading tasks"))
+                            showErrorMessage(result.exception)
                         }
                         is Resource.Loading -> Unit
                     }
@@ -88,10 +100,14 @@ class HomeViewModel @Inject constructor(
 
     fun onReorderedNotes(reorderedTaskList: List<TaskPresentationModel>) {
         _homeUiState.value = _homeUiState.value.copy(
-            selectionModeState = SelectionModeState()
+            selectionModeState = SelectionModeState(),
+            noteList = _homeUiState.value.noteList.copy(
+                mustRender = false
+            )
         )
 
-        if (reorderedTaskList == taskListState.value) return
+//        if (reorderedTaskList == taskListState.value) return
+        if (reorderedTaskList == _homeUiState.value.noteList.notes) return
         reorderTasks(reorderedTaskList)
     }
 
@@ -118,7 +134,7 @@ class HomeViewModel @Inject constructor(
         _homeUiState.value = _homeUiState.value.copy(
             navigateToEditNote = NavigateToEditNote(
                 mustConsume = true,
-                taskIndex = taskListState.value.indexOf(it),
+                taskIndex = _homeUiState.value.noteList.notes.indexOf(it),
                 taskPresentationModel = it
             ),
             selectionModeState = SelectionModeState()
@@ -140,11 +156,32 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun showMessage(message: UiText) {
-        _homeUiState.value = homeUiState.value.copy(userMessage = message)
+        _homeUiState.value =
+            homeUiState.value.copy(
+                userMessage = _homeUiState.value.userMessage.copy(
+                    currentMessage = message
+                )
+            )
     }
 
-    fun onMessageShown() {
-        _homeUiState.value = _homeUiState.value.copy(userMessage = null)
+    fun onMessageShowing() {
+        _homeUiState.value = _homeUiState.value.copy(
+            userMessage = UserMessage(
+                isShowing = true,
+                currentMessage = null,
+                prevMessage = _homeUiState.value.userMessage.currentMessage
+            )
+        )
+    }
+
+    fun onMessageDismiss() {
+        _homeUiState.value = _homeUiState.value.copy(
+            userMessage = UserMessage(
+                currentMessage = null,
+                isShowing = false,
+                prevMessage = _homeUiState.value.userMessage.currentMessage
+            )
+        )
     }
 
     fun onArchiveNotes() {
@@ -186,7 +223,7 @@ class HomeViewModel @Inject constructor(
         )
     }
 
-    private fun getSelectedTasks() = _taskListState.value.filter { it.isSelected }
+    private fun getSelectedTasks() = _homeUiState.value.noteList.notes.filter { it.isSelected }
 
     fun onShowConfirmArchiveNotes() {
         _homeUiState.value = _homeUiState.value.copy(

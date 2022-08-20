@@ -20,7 +20,7 @@ import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.*
-import brillembourg.notes.simple.util.UiText
+import brillembourg.notes.simple.util.asString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -106,7 +106,7 @@ class HomeFragment : Fragment(), MenuProvider {
         recyclerView: RecyclerView,
         layoutType: LayoutType
     ) {
-        val taskAdapter = recyclerView.adapter as TaskAdapter
+        val taskAdapter = recyclerView.adapter as TaskAdapter? ?: return
 
         changeLayout(
             recyclerView,
@@ -137,36 +137,45 @@ class HomeFragment : Fragment(), MenuProvider {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+
                 viewModel.homeUiState.collect { homeUiState: HomeUiState ->
-                    selectionModeObserver(homeUiState.selectionModeState)
-                    userMessageObserver(homeUiState.userMessage)
-                    navigateToDetailObserver(homeUiState.navigateToEditNote)
-                    navigateToAddNoteObserver(homeUiState.navigateToAddNote)
-                    showArchiveConfirmationObserver(homeUiState.showArchiveNotesConfirmation)
-                    noteLayoutPreferenceObserver(homeUiState.noteLayout)
+
+                    userMessageState(homeUiState.userMessage)
+
+                    setupNoteState(homeUiState.noteList)
+
+                    selectionModeState(homeUiState.selectionModeState)
+
+                    navigateToDetailState(homeUiState.navigateToEditNote)
+
+                    navigateToAddNoteState(homeUiState.navigateToAddNote)
+
+                    showArchiveConfirmationState(homeUiState.showArchiveNotesConfirmation)
+
+                    noteListLayoutState(homeUiState.noteLayout)
                 }
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                viewModel.taskListState.collect {
-                    setupTaskList(it)
-                }
-            }
-        }
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                viewModel.taskListState.collect {
+//                    setupNoteList(it)
+//                }
+//            }
+//        }
 
 
     }
 
-    private fun noteLayoutPreferenceObserver(noteLayout: NoteLayout) {
+    private fun noteListLayoutState(noteLayout: NoteLayout) {
         clickChangeLayout(
             binding.homeRecycler,
             noteLayout.toLayoutType()
         )
     }
 
-    private fun showArchiveConfirmationObserver(showArchiveConfirmationState: ShowArchiveNotesConfirmationState) {
+    private fun showArchiveConfirmationState(showArchiveConfirmationState: ShowArchiveNotesConfirmationState) {
         if (showArchiveConfirmationState.isVisible) {
             showArchiveConfirmationDialog(showArchiveConfirmationState.tasksToArchiveSize) {
                 viewModel.onDismissConfirmArchiveShown()
@@ -174,14 +183,14 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun navigateToAddNoteObserver(navigateToAddNote: Boolean) {
+    private fun navigateToAddNoteState(navigateToAddNote: Boolean) {
         if (navigateToAddNote) {
             navigateToCreateTask()
             viewModel.onNavigateToAddNoteCompleted()
         }
     }
 
-    private fun selectionModeObserver(selectionModeState: SelectionModeState) {
+    private fun selectionModeState(selectionModeState: SelectionModeState) {
         if (!selectionModeState.isActive) {
             actionMode?.finish()
             actionMode = null
@@ -190,15 +199,24 @@ class HomeFragment : Fragment(), MenuProvider {
         launchContextualActionBar(selectionModeState.size)
     }
 
-    private fun userMessageObserver(userMessage: UiText?) {
-        userMessage?.let {
+    private fun userMessageState(userMessage: UserMessage) {
+
+        if (!userMessage.mustRenderMessage() &&
+            userMessage.currentMessage?.asString(requireContext()) ==
+            userMessage.prevMessage?.asString(requireContext())
+        ) {
+            return
+        }
+
+        userMessage.currentMessage?.let {
             showMessage(it) {
-                viewModel.onMessageShown()
+                viewModel.onMessageDismiss()
             }
+            viewModel.onMessageShowing()
         }
     }
 
-    private fun navigateToDetailObserver(navigateToDetail: NavigateToEditNote) {
+    private fun navigateToDetailState(navigateToDetail: NavigateToEditNote) {
         if (navigateToDetail.mustConsume) {
             val view =
                 binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
@@ -222,7 +240,11 @@ class HomeFragment : Fragment(), MenuProvider {
         findNavController().navigate(directions, setupExtrasToDetail(view))
     }
 
-    private fun setupTaskList(taskList: List<TaskPresentationModel>) {
+    private fun setupNoteState(noteList: NoteList) {
+        if (noteList.mustRender) setupNoteList(noteList.notes)
+    }
+
+    private fun setupNoteList(taskList: List<TaskPresentationModel>) {
         if (binding.homeRecycler.adapter == null) {
             setupTaskRecycler(taskList)
         } else {

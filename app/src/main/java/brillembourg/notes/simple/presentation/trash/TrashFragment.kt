@@ -133,19 +133,19 @@ class TrashFragment : Fragment(), MenuProvider {
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.trashUiState.collectLatest {
+                viewModel.trashUiState.collectLatest { uiState: TrashUiState ->
 
-                    setupNoteList(it.taskList)
+                    setupNoteList(uiState.taskList)
 
-                    selectionModeObserver(it.selectionModeState)
+                    selectionModeState(uiState.selectionModeState)
 
-                    userMessageObserver(it.userMessage)
+                    userMessageState(uiState.userMessage)
 
-                    navigateToDetailObserver(it.navigateToEditNote)
+                    navigateToDetailState(uiState.navigateToEditNote)
 
-                    showArchiveConfirmationObserver(it.showArchiveNotesConfirmation)
+                    showArchiveConfirmationState(uiState.showArchiveNotesConfirmation)
 
-                    noteLayoutPreferenceObserver(it.noteLayout)
+                    noteLayoutPreferenceObserver(uiState.noteLayout)
 
                 }
             }
@@ -160,7 +160,7 @@ class TrashFragment : Fragment(), MenuProvider {
         )
     }
 
-    private fun showArchiveConfirmationObserver(showDeleteConfirmationState: ShowDeleteNotesConfirmationState) {
+    private fun showArchiveConfirmationState(showDeleteConfirmationState: ShowDeleteNotesConfirmationState) {
         if (showDeleteConfirmationState.isVisible) {
             showDeleteTasksDialog(showDeleteConfirmationState.tasksToDeleteSize) {
                 viewModel.onDismissConfirmDeleteShown()
@@ -169,7 +169,7 @@ class TrashFragment : Fragment(), MenuProvider {
     }
 
 
-    private fun selectionModeObserver(selectionModeState: SelectionModeState) {
+    private fun selectionModeState(selectionModeState: SelectionModeState) {
         if (!selectionModeState.isActive) {
             actionMode?.finish()
             actionMode = null
@@ -179,7 +179,7 @@ class TrashFragment : Fragment(), MenuProvider {
         launchContextualActionBar(selectionModeState.size)
     }
 
-    private fun userMessageObserver(userMessage: UiText?) {
+    private fun userMessageState(userMessage: UiText?) {
         userMessage?.let {
             showMessage(it) {
                 viewModel.onMessageShown()
@@ -187,7 +187,7 @@ class TrashFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun navigateToDetailObserver(navigateToDetail: NavigateToEditNote) {
+    private fun navigateToDetailState(navigateToDetail: NavigateToEditNote) {
         if (navigateToDetail.mustConsume) {
             val view =
                 binding.trashRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView

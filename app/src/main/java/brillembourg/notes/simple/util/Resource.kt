@@ -17,6 +17,6 @@ suspend fun <T> safeCall(block: suspend () -> Resource<T>): Resource<T> {
     return try {
         block.invoke()
     } catch (e: Exception) {
-        Resource.Error(e)
+        Resource.Error(GenericException(e.message))
     }
 }

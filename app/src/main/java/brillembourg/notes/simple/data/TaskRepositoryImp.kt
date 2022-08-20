@@ -4,11 +4,13 @@ import brillembourg.notes.simple.data.room.toData
 import brillembourg.notes.simple.data.room.toDomain
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import brillembourg.notes.simple.domain.use_cases.*
+import brillembourg.notes.simple.util.GetTaskException
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.safeCall
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.transform
 
 class TaskRepositoryImp(
@@ -60,24 +62,30 @@ class TaskRepositoryImp(
     override fun getArchivedTasks(params: GetArchivedTasksUseCase.Params): Flow<Resource<GetArchivedTasksUseCase.Result>> {
         return database.getArchivedTasks()
             .debounce(200)
+            .distinctUntilChanged()
             .transform {
-                val result = GetArchivedTasksUseCase.Result(
-                    it.map { taskEntity -> taskEntity.toDomain() }
-                )
-                emit(Resource.Success(result))
+                try {
+                    val result = GetArchivedTasksUseCase.Result(
+                        it.map { taskEntity -> taskEntity.toDomain() }
+                    )
+                    emit(Resource.Success(result))
+                } catch (e: Exception) {
+                    emit(Resource.Error(GetTaskException(e.message)))
+                }
             }
     }
 
     override fun getTaskList(params: GetTaskListUseCase.Params): Flow<Resource<GetTaskListUseCase.Result>> {
         return database.getTaskList()
             .debounce(200)
+            .distinctUntilChanged()
             .transform {
                 try {
                     val taskListDomain = it.map { taskEntity -> taskEntity.toDomain() }
                     val result = GetTaskListUseCase.Result(taskListDomain)
                     emit(Resource.Success(result))
                 } catch (e: Exception) {
-                    emit(Resource.Error(e))
+                    emit(Resource.Error(GetTaskException(e.message)))
                 }
             }
     }

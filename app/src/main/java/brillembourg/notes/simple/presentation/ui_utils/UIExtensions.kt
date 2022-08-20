@@ -38,7 +38,7 @@ fun Context.showToast(message: UiText) {
 fun MainActivity.showMessage(message: String, onMessageShown: (() -> Unit)? = null) {
     Snackbar.make(binding.mainCoordinator, message, Snackbar.LENGTH_SHORT).apply {
 
-        //Snackbar still not styleable in Material3 (Could not style text color)
+        //Snackbar Widget still not styleable in Material3 (Could not style text color)
         setTextColor(resolveAttribute(com.google.android.material.R.attr.colorOnSecondaryContainer))
         setBackgroundTint(resolveAttribute(com.google.android.material.R.attr.colorSecondaryContainer))
 
@@ -54,7 +54,6 @@ fun MainActivity.showMessage(message: String, onMessageShown: (() -> Unit)? = nu
                 onMessageShown?.invoke()
             }
         })
-
         show()
     }
 }
