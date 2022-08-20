@@ -15,11 +15,10 @@ import brillembourg.notes.simple.databinding.ActivityMainBinding
 import brillembourg.notes.simple.domain.ContextDomain
 import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.home.HomeFragmentDirections
-import brillembourg.notes.simple.presentation.trash.MessageManager
 import brillembourg.notes.simple.presentation.ui_utils.contentViews
+import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.asString
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -31,14 +30,11 @@ class MainActivity : AppCompatActivity() {
     val binding: ActivityMainBinding by contentViews(R.layout.activity_main)
     private val viewModel: MainViewModel by viewModels()
 
-    @Inject
-    lateinit var messageManager: MessageManager
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding.viewmodel = viewModel
         setupToolbar()
-        setupObservers()
+        renderStates()
         prepareBackup()
     }
 
@@ -46,31 +42,29 @@ class MainActivity : AppCompatActivity() {
         viewModel.prepareBackupNotes(ContextDomain(this))
     }
 
-    private fun setupObservers() {
+    private fun renderStates() {
         safeUiLaunch {
             viewModel.mainUiState.collect { uiState ->
                 contextMessageState(uiState)
                 needsRestartState(uiState)
-            }
-        }
-
-        safeUiLaunch {
-            messageManager.message.collect { uiText ->
-
-                if (uiText == null) return@collect
-
-                val text = uiText.asString(this@MainActivity)
-                showMessage(text) {
-                    messageManager.setMessageShown(uiText)
-                }
+                userMessageState(uiState.userMessage)
             }
         }
     }
 
+    private fun userMessageState(uiText: UiText?) {
+        if (uiText == null) return
+
+        val text = uiText.asString(this@MainActivity)
+        showMessage(text) {
+            viewModel.onUserMessageShown(uiText)
+        }
+    }
+
     private fun contextMessageState(uiState: MainUiState) {
-        if (uiState.userContextMessage != null) {
-            showToast(uiState.userContextMessage)
-            viewModel.onMessageShown()
+        if (uiState.userToastMessage != null) {
+            showToast(uiState.userToastMessage)
+            viewModel.onToastMessageShown()
         }
     }
 

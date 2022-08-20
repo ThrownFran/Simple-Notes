@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.update
 interface MessageManager {
     val message: StateFlow<UiText?>
     fun showMessage(message: UiText)
-    fun setMessageShown(message: UiText)
+    fun onMessageShown(message: UiText)
 }
 
 class MessageManagerImp : MessageManager {
@@ -28,7 +28,7 @@ class MessageManagerImp : MessageManager {
 //        }
     }
 
-    override fun setMessageShown(message: UiText) {
+    override fun onMessageShown(message: UiText) {
         _message.update { null }
 //        _messages.update { currentMessages ->
 //            currentMessages - message
