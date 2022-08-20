@@ -13,6 +13,7 @@ import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,6 +27,9 @@ class TrashViewModel @Inject constructor(
     private val saveUserPreferencesUseCase: SaveUserPreferencesUseCase,
     private val dateProvider: DateProvider
 ) : ViewModel() {
+
+    private var _userMessage: MutableStateFlow<UiText?> = MutableStateFlow(null)
+    var userMessage: StateFlow<UiText?> = _userMessage.asStateFlow()
 
     private val _trashUiState = MutableStateFlow(TrashUiState())
     val trashUiState = _trashUiState.asStateFlow()
@@ -62,7 +66,7 @@ class TrashViewModel @Inject constructor(
                             )
                         }
                         is Resource.Error ->
-                            showMessage(UiText.DynamicString("Error loading tasks"))
+                            showErrorMessage(result.exception)
                         is Resource.Loading -> Unit
                     }
                 }
@@ -100,11 +104,11 @@ class TrashViewModel @Inject constructor(
     }
 
     private fun showMessage(message: UiText) {
-        _trashUiState.value = _trashUiState.value.copy(userMessage = message)
+        _userMessage.value = message
     }
 
-    fun onMessageShown() {
-        _trashUiState.value = _trashUiState.value.copy(userMessage = null)
+    fun onMessageDismissed() {
+        _userMessage.value = null
     }
 
     fun onUnarchiveTasks() {

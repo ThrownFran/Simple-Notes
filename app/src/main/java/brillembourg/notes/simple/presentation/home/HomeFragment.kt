@@ -20,7 +20,6 @@ import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.*
-import brillembourg.notes.simple.util.asString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -140,8 +139,6 @@ class HomeFragment : Fragment(), MenuProvider {
 
                 viewModel.homeUiState.collect { homeUiState: HomeUiState ->
 
-                    userMessageState(homeUiState.userMessage)
-
                     setupNoteState(homeUiState.noteList)
 
                     selectionModeState(homeUiState.selectionModeState)
@@ -157,13 +154,17 @@ class HomeFragment : Fragment(), MenuProvider {
             }
         }
 
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                viewModel.taskListState.collect {
-//                    setupNoteList(it)
-//                }
-//            }
-//        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.userMessage.collect {
+                    it?.let {
+                        showMessage(it) {
+                            viewModel.onMessageDismiss()
+                        }
+                    }
+                }
+            }
+        }
 
 
     }
@@ -199,22 +200,6 @@ class HomeFragment : Fragment(), MenuProvider {
         launchContextualActionBar(selectionModeState.size)
     }
 
-    private fun userMessageState(userMessage: UserMessage) {
-
-        if (!userMessage.mustRenderMessage() &&
-            userMessage.currentMessage?.asString(requireContext()) ==
-            userMessage.prevMessage?.asString(requireContext())
-        ) {
-            return
-        }
-
-        userMessage.currentMessage?.let {
-            showMessage(it) {
-                viewModel.onMessageDismiss()
-            }
-            viewModel.onMessageShowing()
-        }
-    }
 
     private fun navigateToDetailState(navigateToDetail: NavigateToEditNote) {
         if (navigateToDetail.mustConsume) {

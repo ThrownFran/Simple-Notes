@@ -139,7 +139,7 @@ class TrashFragment : Fragment(), MenuProvider {
 
                     selectionModeState(uiState.selectionModeState)
 
-                    userMessageState(uiState.userMessage)
+//                    userMessageState(uiState.userMessage)
 
                     navigateToDetailState(uiState.navigateToEditNote)
 
@@ -150,6 +150,19 @@ class TrashFragment : Fragment(), MenuProvider {
                 }
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.userMessage.collect {
+                    it?.let {
+                        showMessage(it) {
+                            viewModel.onMessageDismissed()
+                        }
+                    }
+                }
+            }
+        }
+
 
     }
 
@@ -182,7 +195,7 @@ class TrashFragment : Fragment(), MenuProvider {
     private fun userMessageState(userMessage: UiText?) {
         userMessage?.let {
             showMessage(it) {
-                viewModel.onMessageShown()
+                viewModel.onMessageDismissed()
             }
         }
     }

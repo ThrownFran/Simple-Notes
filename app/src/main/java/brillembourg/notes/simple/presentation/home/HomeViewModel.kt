@@ -14,6 +14,7 @@ import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,12 +29,8 @@ class HomeViewModel @Inject constructor(
     private val dateProvider: DateProvider
 ) : ViewModel() {
 
-    //Task list state separated from uiState to improve performance
-//    private val _taskListState: MutableStateFlow<List<TaskPresentationModel>> =
-//        MutableStateFlow(ArrayList())
-//    var taskListState = _taskListState.asStateFlow()
-    var userMessage: MutableStateFlow<UiText?> = MutableStateFlow(null)
-        private set
+    private var _userMessage: MutableStateFlow<UiText?> = MutableStateFlow(null)
+    var userMessage: StateFlow<UiText?> = _userMessage.asStateFlow()
 
     private val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
@@ -72,11 +69,6 @@ class HomeViewModel @Inject constructor(
                                         .asReversed(),
                                     mustRender = true)
                             )
-
-//                            _taskListState.value = result.data.taskList
-//                                .map { it.toPresentation(dateProvider) }
-//                                .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-//                                .asReversed()
                         }
                         is Resource.Error -> {
                             showErrorMessage(result.exception)
@@ -106,7 +98,6 @@ class HomeViewModel @Inject constructor(
             )
         )
 
-//        if (reorderedTaskList == taskListState.value) return
         if (reorderedTaskList == _homeUiState.value.noteList.notes) return
         reorderTasks(reorderedTaskList)
     }
@@ -156,32 +147,13 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun showMessage(message: UiText) {
-        _homeUiState.value =
-            homeUiState.value.copy(
-                userMessage = _homeUiState.value.userMessage.copy(
-                    currentMessage = message
-                )
-            )
+        _userMessage.value = message
     }
 
-    fun onMessageShowing() {
-        _homeUiState.value = _homeUiState.value.copy(
-            userMessage = UserMessage(
-                isShowing = true,
-                currentMessage = null,
-                prevMessage = _homeUiState.value.userMessage.currentMessage
-            )
-        )
-    }
+
 
     fun onMessageDismiss() {
-        _homeUiState.value = _homeUiState.value.copy(
-            userMessage = UserMessage(
-                currentMessage = null,
-                isShowing = false,
-                prevMessage = _homeUiState.value.userMessage.currentMessage
-            )
-        )
+        _userMessage.value = null
     }
 
     fun onArchiveNotes() {
