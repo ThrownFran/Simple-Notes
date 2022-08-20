@@ -34,7 +34,7 @@ class MainViewModel @Inject constructor(
                 is Resource.Success -> {
                     _mainUiState.value = _mainUiState.value.copy(
                         needsRestartApp = true,
-                        userToastMessage = result.data.message
+                        userContextMessage = result.data.message
                     )
                 }
                 is Resource.Loading -> Unit
@@ -49,7 +49,7 @@ class MainViewModel @Inject constructor(
                 is Resource.Success -> {
                     _mainUiState.value = _mainUiState.value.copy(
                         needsRestartApp = true,
-                        userToastMessage = result.data.message
+                        userContextMessage = result.data.message
                     )
                 }
                 is Resource.Loading -> Unit
@@ -60,11 +60,11 @@ class MainViewModel @Inject constructor(
 
     private fun showErrorMessage(exception: Exception) {
         _mainUiState.value =
-            _mainUiState.value.copy(userToastMessage = getMessageFromError(exception))
+            _mainUiState.value.copy(userContextMessage = getMessageFromError(exception))
     }
 
     fun onMessageShown() {
-        _mainUiState.value = _mainUiState.value.copy(userToastMessage = null)
+        _mainUiState.value = _mainUiState.value.copy(userContextMessage = null)
     }
 
 

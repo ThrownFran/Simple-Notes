@@ -8,8 +8,6 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -18,16 +16,13 @@ import brillembourg.notes.simple.databinding.FragmentTrashBinding
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.extras.animateWithRecycler
+import brillembourg.notes.simple.presentation.extras.safeUiLaunch
 import brillembourg.notes.simple.presentation.extras.setTransitionToEditNote
 import brillembourg.notes.simple.presentation.extras.setupExtrasToDetail
-import brillembourg.notes.simple.presentation.extras.showMessage
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.*
-import brillembourg.notes.simple.util.UiText
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -45,7 +40,6 @@ class TrashFragment : Fragment(), MenuProvider {
     private var recylerViewState: Parcelable? = null
     private var actionMode: ActionMode? = null
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -59,7 +53,7 @@ class TrashFragment : Fragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupMenu()
-        setupObservers()
+        render()
         animateFabWithRecycler()
     }
 
@@ -129,41 +123,23 @@ class TrashFragment : Fragment(), MenuProvider {
         super.onDestroyView()
     }
 
-    private fun setupObservers() {
+    private fun render() {
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.trashUiState.collectLatest { uiState: TrashUiState ->
+        safeUiLaunch {
+            viewModel.trashUiState.collect { uiState: TrashUiState ->
 
-                    setupNoteList(uiState.taskList)
+                setupNoteList(uiState.taskList)
 
-                    selectionModeState(uiState.selectionModeState)
+                selectionModeState(uiState.selectionModeActive)
 
-//                    userMessageState(uiState.userMessage)
+                navigateToDetailState(uiState.navigateToEditNote)
 
-                    navigateToDetailState(uiState.navigateToEditNote)
+                showArchiveConfirmationState(uiState.showArchiveNotesConfirmation)
 
-                    showArchiveConfirmationState(uiState.showArchiveNotesConfirmation)
+                noteLayoutPreferenceObserver(uiState.noteLayout)
 
-                    noteLayoutPreferenceObserver(uiState.noteLayout)
-
-                }
             }
         }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.userMessage.collect {
-                    it?.let {
-                        showMessage(it) {
-                            viewModel.onMessageDismissed()
-                        }
-                    }
-                }
-            }
-        }
-
-
     }
 
     private fun noteLayoutPreferenceObserver(noteLayout: NoteLayout) {
@@ -173,8 +149,8 @@ class TrashFragment : Fragment(), MenuProvider {
         )
     }
 
-    private fun showArchiveConfirmationState(showDeleteConfirmationState: ShowDeleteNotesConfirmationState) {
-        if (showDeleteConfirmationState.isVisible) {
+    private fun showArchiveConfirmationState(showDeleteConfirmationState: TrashUiState.ShowDeleteNotesConfirmation?) {
+        showDeleteConfirmationState?.let {
             showDeleteTasksDialog(showDeleteConfirmationState.tasksToDeleteSize) {
                 viewModel.onDismissConfirmDeleteShown()
             }
@@ -182,25 +158,17 @@ class TrashFragment : Fragment(), MenuProvider {
     }
 
 
-    private fun selectionModeState(selectionModeState: SelectionModeState) {
-        if (!selectionModeState.isActive) {
+    private fun selectionModeState(selectionModeActive: TrashUiState.SelectionModeActive?) {
+        if (selectionModeActive == null) {
             actionMode?.finish()
             actionMode = null
             return
         }
 
-        launchContextualActionBar(selectionModeState.size)
+        launchContextualActionBar(selectionModeActive.size)
     }
 
-    private fun userMessageState(userMessage: UiText?) {
-        userMessage?.let {
-            showMessage(it) {
-                viewModel.onMessageDismissed()
-            }
-        }
-    }
-
-    private fun navigateToDetailState(navigateToDetail: NavigateToEditNote) {
+    private fun navigateToDetailState(navigateToDetail: TrashUiState.NavigateToEditNote) {
         if (navigateToDetail.mustConsume) {
             val view =
                 binding.trashRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView

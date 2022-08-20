@@ -9,12 +9,12 @@ import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.presentation.models.toPresentation
+import brillembourg.notes.simple.presentation.trash.MessageManager
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,11 +26,9 @@ class HomeViewModel @Inject constructor(
     private val reorderTaskListUseCase: ReorderTaskListUseCase,
     private val getUserPrefUseCase: GetUserPrefUseCase,
     private val saveUserPreferencesUseCase: SaveUserPreferencesUseCase,
-    private val dateProvider: DateProvider
+    private val dateProvider: DateProvider,
+    private val messageManager: MessageManager
 ) : ViewModel() {
-
-    private var _userMessage: MutableStateFlow<UiText?> = MutableStateFlow(null)
-    var userMessage: StateFlow<UiText?> = _userMessage.asStateFlow()
 
     private val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
@@ -143,17 +141,11 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun showErrorMessage(exception: Exception) {
-        showMessage(getMessageFromError(exception))
+        messageManager.showMessage(getMessageFromError(exception))
     }
 
     private fun showMessage(message: UiText) {
-        _userMessage.value = message
-    }
-
-
-
-    fun onMessageDismiss() {
-        _userMessage.value = null
+        messageManager.showMessage(message)
     }
 
     fun onArchiveNotes() {

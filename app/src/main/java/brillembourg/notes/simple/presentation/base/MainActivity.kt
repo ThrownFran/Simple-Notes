@@ -4,9 +4,6 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -16,13 +13,13 @@ import androidx.navigation.ui.setupWithNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.ActivityMainBinding
 import brillembourg.notes.simple.domain.ContextDomain
-import brillembourg.notes.simple.presentation.extras.restartApp
-import brillembourg.notes.simple.presentation.extras.setBackgroundDrawable
-import brillembourg.notes.simple.presentation.extras.showToast
+import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.home.HomeFragmentDirections
+import brillembourg.notes.simple.presentation.trash.MessageManager
 import brillembourg.notes.simple.presentation.ui_utils.contentViews
+import brillembourg.notes.simple.util.asString
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -33,6 +30,9 @@ class MainActivity : AppCompatActivity() {
 
     val binding: ActivityMainBinding by contentViews(R.layout.activity_main)
     private val viewModel: MainViewModel by viewModels()
+
+    @Inject
+    lateinit var messageManager: MessageManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,24 +47,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.mainUiState.collect { uiState ->
-                    observeMessage(uiState)
-                    observeNeedsRestart(uiState)
+        safeUiLaunch {
+            viewModel.mainUiState.collect { uiState ->
+                contextMessageState(uiState)
+                needsRestartState(uiState)
+            }
+        }
+
+        safeUiLaunch {
+            messageManager.message.collect { uiText ->
+
+                if (uiText == null) return@collect
+
+                val text = uiText.asString(this@MainActivity)
+                showMessage(text) {
+                    messageManager.setMessageShown(uiText)
                 }
             }
         }
     }
 
-    private fun observeMessage(uiState: MainUiState) {
-        if (uiState.userToastMessage != null) {
-            showToast(uiState.userToastMessage)
+    private fun contextMessageState(uiState: MainUiState) {
+        if (uiState.userContextMessage != null) {
+            showToast(uiState.userContextMessage)
             viewModel.onMessageShown()
         }
     }
 
-    private fun observeNeedsRestart(uiState: MainUiState) {
+    private fun needsRestartState(uiState: MainUiState) {
         if (uiState.needsRestartApp) {
             restartApp()
         }

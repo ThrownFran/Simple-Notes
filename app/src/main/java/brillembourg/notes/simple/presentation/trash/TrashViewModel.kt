@@ -13,8 +13,8 @@ import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,11 +25,9 @@ class TrashViewModel @Inject constructor(
     private val deleteTasksUseCase: DeleteTasksUseCase,
     private val getUserPrefUseCase: GetUserPrefUseCase,
     private val saveUserPreferencesUseCase: SaveUserPreferencesUseCase,
-    private val dateProvider: DateProvider
+    private val dateProvider: DateProvider,
+    private val messageManager: MessageManager
 ) : ViewModel() {
-
-    private var _userMessage: MutableStateFlow<UiText?> = MutableStateFlow(null)
-    var userMessage: StateFlow<UiText?> = _userMessage.asStateFlow()
 
     private val _trashUiState = MutableStateFlow(TrashUiState())
     val trashUiState = _trashUiState.asStateFlow()
@@ -42,11 +40,12 @@ class TrashViewModel @Inject constructor(
     private fun getPreferences() {
         viewModelScope.launch {
             getUserPrefUseCase(GetUserPrefUseCase.Params())
-                .collect {
-                    when (it) {
-                        is Resource.Success -> _trashUiState.value =
-                            _trashUiState.value.copy(noteLayout = it.data.preferences.notesLayout)
-                        is Resource.Error -> showErrorMessage(it.exception)
+                .collect { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            _trashUiState.update { it.copy(noteLayout = result.data.preferences.notesLayout) }
+                        }
+                        is Resource.Error -> showErrorMessage(result.exception)
                         is Resource.Loading -> Unit
                     }
                 }
@@ -59,11 +58,15 @@ class TrashViewModel @Inject constructor(
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
-                            _trashUiState.value = _trashUiState.value.copy(
-                                taskList = result.data.taskList.map { it.toPresentation(dateProvider) }
-                                    .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                                    .asReversed()
-                            )
+                            _trashUiState.update { uiState ->
+                                uiState.copy(
+                                    taskList = result.data.taskList.map { task ->
+                                        task.toPresentation(dateProvider)
+                                    }
+                                        .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+                                        .asReversed()
+                                )
+                            }
                         }
                         is Resource.Error ->
                             showErrorMessage(result.exception)
@@ -77,25 +80,24 @@ class TrashViewModel @Inject constructor(
         navigateToDetail(it)
     }
 
-    private fun navigateToDetail(it: TaskPresentationModel) {
-        _trashUiState.value = trashUiState.value.copy(
-            navigateToEditNote =
-            NavigateToEditNote(
-                mustConsume = true,
-                taskIndex = trashUiState.value.taskList.indexOf(it),
-                taskPresentationModel = it
-            ),
-            selectionModeState = SelectionModeState()
-        )
+    private fun navigateToDetail(taskClicked: TaskPresentationModel) {
+        _trashUiState.update {
+            it.copy(
+                navigateToEditNote = TrashUiState.NavigateToEditNote(
+                    mustConsume = true,
+                    taskIndex = trashUiState.value.taskList.indexOf(taskClicked),
+                    taskPresentationModel = taskClicked
+                ),
+                selectionModeActive = null
+            )
+        }
     }
 
     fun onNavigateToDetailCompleted() {
         val navState =
             _trashUiState.value.navigateToEditNote.copy(mustConsume = false)
 
-        _trashUiState.value = _trashUiState.value.copy(
-            navigateToEditNote = navState,
-        )
+        _trashUiState.update { it.copy(navigateToEditNote = navState) }
     }
 
 
@@ -104,15 +106,16 @@ class TrashViewModel @Inject constructor(
     }
 
     private fun showMessage(message: UiText) {
-        _userMessage.value = message
-    }
-
-    fun onMessageDismissed() {
-        _userMessage.value = null
+        messageManager.showMessage(message)
     }
 
     fun onUnarchiveTasks() {
         val tasksSelectedIds = getSelectedTasks().map { it.id }
+
+        _trashUiState.update {
+            it.copy(selectionModeActive = null)
+        }
+
         unarchiveTasks(tasksSelectedIds)
     }
 
@@ -128,14 +131,16 @@ class TrashViewModel @Inject constructor(
     }
 
     fun onDeleteNotes() {
-
         val tasksToDeleteIds = getSelectedTasks().map { it.id }
-        deleteTasks(tasksToDeleteIds)
 
-        _trashUiState.value = _trashUiState.value.copy(
-            showArchiveNotesConfirmation = ShowDeleteNotesConfirmationState(),
-            selectionModeState = SelectionModeState()
-        )
+        _trashUiState.update {
+            it.copy(
+                showArchiveNotesConfirmation = null,
+                selectionModeActive = null
+            )
+        }
+
+        deleteTasks(tasksToDeleteIds)
     }
 
     private fun getSelectedTasks() = _trashUiState.value.taskList.filter { it.isSelected }
@@ -153,37 +158,35 @@ class TrashViewModel @Inject constructor(
 
     fun onSelection() {
         val sizeSelected = getSelectedTasks().size
-        _trashUiState.value = _trashUiState.value.copy(
-            selectionModeState = SelectionModeState(
-                isActive = true,
-                size = sizeSelected
+        _trashUiState.update {
+            it.copy(
+                selectionModeActive = TrashUiState.SelectionModeActive(sizeSelected)
             )
-        )
+        }
     }
 
     fun onSelectionDismissed() {
-        _trashUiState.value = _trashUiState.value.copy(
-            selectionModeState = SelectionModeState()
-        )
+        _trashUiState.update { it.copy(selectionModeActive = null) }
     }
 
     fun onShowConfirmDeleteNotes() {
-        _trashUiState.value = _trashUiState.value.copy(
-            showArchiveNotesConfirmation = ShowDeleteNotesConfirmationState(
-                isVisible = true,
-                tasksToDeleteSize = getSelectedTasks().size
+        _trashUiState.update {
+            it.copy(
+                showArchiveNotesConfirmation = TrashUiState.ShowDeleteNotesConfirmation(
+                    tasksToDeleteSize = getSelectedTasks().size
+                )
             )
-        )
+        }
     }
 
     fun onDismissConfirmDeleteShown() {
-        _trashUiState.value = _trashUiState.value.copy(
-            showArchiveNotesConfirmation = ShowDeleteNotesConfirmationState()
-        )
+        _trashUiState.update {
+            it.copy(showArchiveNotesConfirmation = null)
+        }
     }
 
     fun onLayoutChange(noteLayout: NoteLayout) {
-        _trashUiState.value = _trashUiState.value.copy(noteLayout = noteLayout)
+        _trashUiState.update { it.copy(noteLayout = noteLayout) }
         saveLayoutPreference(noteLayout)
     }
 

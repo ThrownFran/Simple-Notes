@@ -8,8 +8,6 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -22,7 +20,6 @@ import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(), MenuProvider {
@@ -31,7 +28,6 @@ class HomeFragment : Fragment(), MenuProvider {
         fun newInstance() = HomeFragment()
     }
 
-    //    private var confirmationArchiveDialog: AlertDialog? = null
     private val viewModel: HomeViewModel by viewModels()
 
     private var _binding: FragmentHomeBinding? = null
@@ -134,40 +130,24 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun setupObservers() {
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+        safeUiLaunch {
+            viewModel.homeUiState.collect { homeUiState: HomeUiState ->
 
-                viewModel.homeUiState.collect { homeUiState: HomeUiState ->
+                setupNoteState(homeUiState.noteList)
 
-                    setupNoteState(homeUiState.noteList)
+                selectionModeState(homeUiState.selectionModeState)
 
-                    selectionModeState(homeUiState.selectionModeState)
+                navigateToDetailState(homeUiState.navigateToEditNote)
 
-                    navigateToDetailState(homeUiState.navigateToEditNote)
+                navigateToAddNoteState(homeUiState.navigateToAddNote)
 
-                    navigateToAddNoteState(homeUiState.navigateToAddNote)
+                showArchiveConfirmationState(homeUiState.showArchiveNotesConfirmation)
 
-                    showArchiveConfirmationState(homeUiState.showArchiveNotesConfirmation)
-
-                    noteListLayoutState(homeUiState.noteLayout)
-                }
+                noteListLayoutState(homeUiState.noteLayout)
             }
         }
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.userMessage.collect {
-                    it?.let {
-                        showMessage(it) {
-                            viewModel.onMessageDismiss()
-                        }
-                    }
-                }
-            }
-        }
-
-
     }
+
 
     private fun noteListLayoutState(noteLayout: NoteLayout) {
         clickChangeLayout(

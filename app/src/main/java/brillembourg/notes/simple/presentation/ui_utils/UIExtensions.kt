@@ -9,6 +9,7 @@ import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
@@ -18,6 +19,9 @@ import androidx.core.content.res.use
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.util.UiText
@@ -26,10 +30,25 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-//fun Context.showToast(message: String) {
-//    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-//}
+
+fun ComponentActivity.safeUiLaunch(block: suspend CoroutineScope.() -> Unit) {
+    lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            block.invoke(this)
+        }
+    }
+}
+
+fun Fragment.safeUiLaunch(block: suspend CoroutineScope.() -> Unit) {
+    viewLifecycleOwner.lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            block.invoke(this)
+        }
+    }
+}
 
 fun Context.showToast(message: UiText) {
     Toast.makeText(this, message.asString(this), Toast.LENGTH_LONG).show()

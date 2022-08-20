@@ -10,6 +10,8 @@ import brillembourg.notes.simple.domain.SchedulersImp
 import brillembourg.notes.simple.domain.repositories.DataRepository
 import brillembourg.notes.simple.domain.repositories.TaskRepository
 import brillembourg.notes.simple.domain.repositories.UserPrefRepository
+import brillembourg.notes.simple.presentation.trash.MessageManager
+import brillembourg.notes.simple.presentation.trash.MessageManagerImp
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -65,5 +67,9 @@ class AppModule {
     fun dispatchers(): Schedulers {
         return SchedulersImp()
     }
+
+    @Singleton
+    @Provides
+    fun messageManager(): MessageManager = MessageManagerImp()
 
 }
