@@ -1,15 +1,15 @@
 package brillembourg.notes.simple.domain.use_cases
 
 import brillembourg.notes.simple.domain.Schedulers
-import brillembourg.notes.simple.domain.models.Task
-import brillembourg.notes.simple.domain.repositories.TaskRepository
+import brillembourg.notes.simple.domain.models.Note
+import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class SaveTaskUseCase @Inject constructor(
-    private val repository: TaskRepository,
+class SaveNoteUseCase @Inject constructor(
+    private val repository: NotesRepository,
     private val schedulers: Schedulers
 ) {
 
@@ -18,7 +18,7 @@ class SaveTaskUseCase @Inject constructor(
             repository.saveTask(params)
         }
 
-    class Params(val task: Task)
+    class Params(val note: Note)
     class Result(val message: UiText)
 
 }

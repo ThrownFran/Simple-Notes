@@ -4,13 +4,13 @@ import android.content.Context
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import brillembourg.notes.simple.databinding.ItemTaskBinding
+import brillembourg.notes.simple.databinding.ItemNoteBinding
 import brillembourg.notes.simple.presentation.extras.fromDpToPixel
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 
 class NoteViewHolder(
     private val getCurrentList: () -> List<TaskPresentationModel>,
-    private val binding: ItemTaskBinding,
+    private val binding: ItemNoteBinding,
     private val onClick: ((TaskPresentationModel, View) -> Unit)? = null,
     private val onSelected: (() -> Unit)? = null,
     private val onReadyToDrag: ((NoteViewHolder) -> Unit)? = null

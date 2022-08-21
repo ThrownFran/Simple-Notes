@@ -21,11 +21,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val getTaskListUseCase: GetTaskListUseCase,
-    private val archiveTasksUseCase: ArchiveTasksUseCase,
-    private val reorderTaskListUseCase: ReorderTaskListUseCase,
+    private val getNotesUseCase: GetNotesUseCase,
+    private val archiveNotesUseCase: ArchiveNotesUseCase,
+    private val reorderNotesUseCase: ReorderNotesUseCase,
     private val getUserPrefUseCase: GetUserPrefUseCase,
-    private val saveUserPreferencesUseCase: SaveUserPreferencesUseCase,
+    private val saveUserPrefUseCase: SaveUserPrefUseCase,
     private val dateProvider: DateProvider,
     private val messageManager: MessageManager
 ) : ViewModel() {
@@ -54,14 +54,14 @@ class HomeViewModel @Inject constructor(
 
     private fun observeTaskList() {
         viewModelScope.launch {
-            getTaskListUseCase(GetTaskListUseCase.Params())
+            getNotesUseCase(GetNotesUseCase.Params())
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
 
                             _homeUiState.value = _homeUiState.value.copy(
                                 noteList = NoteList(
-                                    notes = result.data.taskList
+                                    notes = result.data.noteList
                                         .map { it.toPresentation(dateProvider) }
                                         .sortedBy { taskPresentationModel -> taskPresentationModel.order }
                                         .asReversed(),
@@ -80,7 +80,7 @@ class HomeViewModel @Inject constructor(
     fun onAddNoteClick() {
         _homeUiState.value = _homeUiState.value.copy(
             navigateToAddNote = true,
-            selectionModeState = SelectionModeState()
+            selectionModeActive = null
         )
     }
 
@@ -90,7 +90,7 @@ class HomeViewModel @Inject constructor(
 
     fun onReorderedNotes(reorderedTaskList: List<TaskPresentationModel>) {
         _homeUiState.value = _homeUiState.value.copy(
-            selectionModeState = SelectionModeState(),
+            selectionModeActive = null,
             noteList = _homeUiState.value.noteList.copy(
                 mustRender = false
             )
@@ -102,11 +102,11 @@ class HomeViewModel @Inject constructor(
 
     private fun reorderTasks(reorderedTaskList: List<TaskPresentationModel>) {
         viewModelScope.launch {
-            val params = ReorderTaskListUseCase.Params(reorderedTaskList.map {
+            val params = ReorderNotesUseCase.Params(reorderedTaskList.map {
                 it.toDomain(dateProvider)
             })
 
-            when (val result = reorderTaskListUseCase(params)) {
+            when (val result = reorderNotesUseCase(params)) {
                 is Resource.Success -> showMessage(result.data.message)
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
@@ -126,7 +126,7 @@ class HomeViewModel @Inject constructor(
                 taskIndex = _homeUiState.value.noteList.notes.indexOf(it),
                 taskPresentationModel = it
             ),
-            selectionModeState = SelectionModeState()
+            selectionModeActive = null
         )
     }
 
@@ -154,16 +154,16 @@ class HomeViewModel @Inject constructor(
         archiveNotes(tasksToDeleteIds)
 
         _homeUiState.value = _homeUiState.value.copy(
-            showArchiveNotesConfirmation = ShowArchiveNotesConfirmationState(),
-            selectionModeState = SelectionModeState()
+            showArchiveNotesConfirmation = null,
+            selectionModeActive = null
         )
 
     }
 
     private fun archiveNotes(tasksToDeleteIds: List<Long>) {
         viewModelScope.launch {
-            val params = ArchiveTasksUseCase.Params(tasksToDeleteIds)
-            when (val result = archiveTasksUseCase(params)) {
+            val params = ArchiveNotesUseCase.Params(tasksToDeleteIds)
+            when (val result = archiveNotesUseCase(params)) {
                 is Resource.Success -> showMessage(result.data.message)
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
@@ -175,15 +175,15 @@ class HomeViewModel @Inject constructor(
     fun onSelection() {
         val sizeSelected = getSelectedTasks().size
         _homeUiState.value = _homeUiState.value.copy(
-            selectionModeState = SelectionModeState(
-                isActive = true, size = sizeSelected
+            selectionModeActive = SelectionModeActive(
+                size = sizeSelected
             )
         )
     }
 
     fun onSelectionDismissed() {
         _homeUiState.value = _homeUiState.value.copy(
-            selectionModeState = SelectionModeState()
+            selectionModeActive = null
         )
     }
 
@@ -192,7 +192,6 @@ class HomeViewModel @Inject constructor(
     fun onShowConfirmArchiveNotes() {
         _homeUiState.value = _homeUiState.value.copy(
             showArchiveNotesConfirmation = ShowArchiveNotesConfirmationState(
-                isVisible = true,
                 tasksToArchiveSize = getSelectedTasks().size
             )
         )
@@ -200,7 +199,7 @@ class HomeViewModel @Inject constructor(
 
     fun onDismissConfirmArchiveShown() {
         _homeUiState.value = _homeUiState.value.copy(
-            showArchiveNotesConfirmation = ShowArchiveNotesConfirmationState()
+            showArchiveNotesConfirmation = null
         )
     }
 
@@ -211,7 +210,7 @@ class HomeViewModel @Inject constructor(
 
     private fun saveLayoutPreference(noteLayout: NoteLayout) {
         viewModelScope.launch {
-            saveUserPreferencesUseCase(SaveUserPreferencesUseCase.Params(UserPreferences(noteLayout)))
+            saveUserPrefUseCase(SaveUserPrefUseCase.Params(UserPreferences(noteLayout)))
         }
     }
 

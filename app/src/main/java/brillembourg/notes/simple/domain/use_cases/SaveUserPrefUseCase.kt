@@ -6,7 +6,7 @@ import brillembourg.notes.simple.domain.repositories.UserPrefRepository
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class SaveUserPreferencesUseCase @Inject constructor(
+class SaveUserPrefUseCase @Inject constructor(
     private val repository: UserPrefRepository,
     private val schedulers: Schedulers
 ) {

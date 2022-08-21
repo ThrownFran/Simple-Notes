@@ -1,8 +1,8 @@
 package brillembourg.notes.simple.data.room
 
 import android.content.Context
-import brillembourg.notes.simple.domain.ContextDomain
-import brillembourg.notes.simple.domain.Screen
+import brillembourg.notes.simple.domain.use_cases.Screen
+import brillembourg.notes.simple.presentation.backup_restore.ContextDomain
 import de.raphaelebner.roomdatabasebackup.core.RoomBackup
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine

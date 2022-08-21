@@ -18,7 +18,6 @@ import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.*
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -101,16 +100,16 @@ class HomeFragment : Fragment(), MenuProvider {
         recyclerView: RecyclerView,
         layoutType: LayoutType
     ) {
-        val taskAdapter = recyclerView.adapter as TaskAdapter? ?: return
+        val noteAdapter = recyclerView.adapter as NoteAdapter? ?: return
 
         changeLayout(
             recyclerView,
             layoutType,
-            taskAdapter.currentList
+            noteAdapter.currentList
         )
 
-        taskAdapter.itemTouchHelper =
-            taskAdapter.setupDragAndDropTouchHelper(getDragDirs(layoutType)).also {
+        noteAdapter.itemTouchHelper =
+            noteAdapter.setupDragAndDropTouchHelper(getDragDirs(layoutType)).also {
                 it.attachToRecyclerView(recyclerView)
             }
     }
@@ -135,7 +134,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
                 setupNoteState(homeUiState.noteList)
 
-                selectionModeState(homeUiState.selectionModeState)
+                selectionModeState(homeUiState.selectionModeActive)
 
                 navigateToDetailState(homeUiState.navigateToEditNote)
 
@@ -156,11 +155,15 @@ class HomeFragment : Fragment(), MenuProvider {
         )
     }
 
-    private fun showArchiveConfirmationState(showArchiveConfirmationState: ShowArchiveNotesConfirmationState) {
-        if (showArchiveConfirmationState.isVisible) {
-            showArchiveConfirmationDialog(showArchiveConfirmationState.tasksToArchiveSize) {
-                viewModel.onDismissConfirmArchiveShown()
-            }
+    private fun showArchiveConfirmationState(showArchiveConfirmationState: ShowArchiveNotesConfirmationState?) {
+        if (showArchiveConfirmationState != null) {
+            showArchiveConfirmationDialog(this, showArchiveConfirmationState.tasksToArchiveSize,
+                onPositive = {
+                    viewModel.onArchiveNotes()
+                },
+                onDismiss = {
+                    viewModel.onDismissConfirmArchiveShown()
+                })
         }
     }
 
@@ -171,13 +174,13 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun selectionModeState(selectionModeState: SelectionModeState) {
-        if (!selectionModeState.isActive) {
+    private fun selectionModeState(selectionModeActive: SelectionModeActive?) {
+        if (selectionModeActive == null) {
             actionMode?.finish()
             actionMode = null
             return
         }
-        launchContextualActionBar(selectionModeState.size)
+        launchContextualActionBar(selectionModeActive.size)
     }
 
 
@@ -213,7 +216,7 @@ class HomeFragment : Fragment(), MenuProvider {
         if (binding.homeRecycler.adapter == null) {
             setupTaskRecycler(taskList)
         } else {
-            updateListAndNotify(binding.homeRecycler.adapter as TaskAdapter, taskList)
+            updateListAndNotify(binding.homeRecycler.adapter as NoteAdapter, taskList)
         }
     }
 
@@ -229,19 +232,19 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun updateListAndNotify(
-        taskAdapter: TaskAdapter,
+        noteAdapter: NoteAdapter,
         taskList: List<TaskPresentationModel>
     ) {
-        submitListAndScrollIfApplies(taskAdapter, taskAdapter.currentList, taskList)
+        submitListAndScrollIfApplies(noteAdapter, noteAdapter.currentList, taskList)
     }
 
     private fun submitListAndScrollIfApplies(
-        taskAdapter: TaskAdapter,
+        noteAdapter: NoteAdapter,
         currentList: List<TaskPresentationModel>,
         taskList: List<TaskPresentationModel>
     ) {
         val isInsertingInList = currentList.size < taskList.size
-        taskAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
+        noteAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
     }
 
     private fun scrollToTop() {
@@ -252,9 +255,9 @@ class HomeFragment : Fragment(), MenuProvider {
         recyclerView: RecyclerView,
         taskList: List<TaskPresentationModel>,
         dragDirs: Int
-    ): TaskAdapter {
+    ): NoteAdapter {
 
-        return TaskAdapter(
+        return NoteAdapter(
             dragDirs,
             recyclerView,
             onSelection = {
@@ -283,9 +286,9 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun launchContextualActionBar(sizeSelected: Int) {
         actionMode = setupContextualActionBar(
             toolbar = requireActivity().findViewById(R.id.toolbar),
-            menuId = R.menu.menu_context_home,
+            menuId = R.menu.menu_contextual_home,
             currentActionMode = actionMode,
-            adapter = binding.homeRecycler.adapter as TaskAdapter,
+            adapter = binding.homeRecycler.adapter as NoteAdapter,
             onActionClick = { onContextualActionItem(menuId = it) },
             onSetTitle = { selectedSize: Int ->
                 getNoteSelectedTitle(
@@ -300,7 +303,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun onContextualActionItem(menuId: Int) = when (menuId) {
-        R.id.menu_context_menu_delete -> {
+        R.id.menu_context_menu_archive -> {
             clickArchiveTasks()
             true
         }
@@ -323,29 +326,29 @@ class HomeFragment : Fragment(), MenuProvider {
         viewModel.onShowConfirmArchiveNotes()
     }
 
-    private fun showArchiveConfirmationDialog(
-        size: Int,
-        onDismiss: () -> Unit
-    ) {
-        val title =
-            if (size > 1) getString(R.string.move_tasks_to_trash) else getString(R.string.move_task_to_trash)
-
-        MaterialAlertDialogBuilder(
-            requireContext()
-        )
-            .setTitle(title)
-            .setIcon(R.drawable.ic_baseline_delete_dark_24)
-            //            .setMessage(resources.getString(R.string.supporting_text))
-            .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
-            }
-            .setPositiveButton(resources.getString(R.string.all_move_to_trash)) { dialog, which ->
-                viewModel.onArchiveNotes()
-            }
-            .setOnDismissListener {
-                onDismiss.invoke()
-            }
-            .showWithLifecycle(viewLifecycleOwner)
-    }
+//    private fun showArchiveConfirmationDialog(
+//        size: Int,
+//        onDismiss: () -> Unit
+//    ) {
+//        val title =
+//            if (size > 1) getString(R.string.move_tasks_to_trash) else getString(R.string.move_task_to_trash)
+//
+//        MaterialAlertDialogBuilder(
+//            requireContext()
+//        )
+//            .setTitle(title)
+//            .setIcon(R.drawable.ic_baseline_delete_dark_24)
+//            //            .setMessage(resources.getString(R.string.supporting_text))
+//            .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
+//            }
+//            .setPositiveButton(resources.getString(R.string.all_move_to_trash)) { dialog, which ->
+//                viewModel.onArchiveNotes()
+//            }
+//            .setOnDismissListener {
+//                onDismiss.invoke()
+//            }
+//            .showWithLifecycle(viewLifecycleOwner)
+//    }
 
 
     private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {

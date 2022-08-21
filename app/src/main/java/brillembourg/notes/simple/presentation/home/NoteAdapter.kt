@@ -5,12 +5,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import brillembourg.notes.simple.databinding.ItemTaskBinding
+import brillembourg.notes.simple.databinding.ItemNoteBinding
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.setupDragAndDropTouchHelper
 import brillembourg.notes.simple.presentation.ui_utils.setupTaskDiffCallback
 
-class TaskAdapter(
+class NoteAdapter(
     dragAndDropDirs: Int,
     val recyclerView: RecyclerView,
     val onClick: (task: TaskPresentationModel, clickedView: View) -> Unit,
@@ -30,7 +30,7 @@ class TaskAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         return NoteViewHolder(
-            binding = ItemTaskBinding.inflate(LayoutInflater.from(parent.context), parent, false),
+            binding = ItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false),
             onReadyToDrag = {
                 onStartDrag?.invoke()
                 startDrag(it)

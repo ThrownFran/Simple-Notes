@@ -23,7 +23,7 @@
         android:layout_height="match_parent"
         android:layout_marginTop="8dp"
         android:transitionGroup="true"
-        tools:listitem="@layout/item_task"
+        tools:listitem="@layout/item_note"
         tools:itemCount="3" />
 
     <!--    </androidx.constraintlayout.widget.ConstraintLayout>-->

@@ -1,13 +1,13 @@
 package brillembourg.notes.simple.data
 
 import brillembourg.notes.simple.data.room.BackupAndRestoreProvider
-import brillembourg.notes.simple.domain.repositories.DataRepository
+import brillembourg.notes.simple.domain.repositories.BackupAndRestoreRepository
 import brillembourg.notes.simple.domain.use_cases.BackupAndRestoreNotesUseCase
 import brillembourg.notes.simple.util.*
 
-class DataRepositoryImp(
+class BackupAndRestoreRepositoryImp(
     private val backupAndRestoreProvider: BackupAndRestoreProvider
-) : DataRepository {
+) : BackupAndRestoreRepository {
 
     override suspend fun restore(): Resource<BackupAndRestoreNotesUseCase.Result> {
         return safeCall {

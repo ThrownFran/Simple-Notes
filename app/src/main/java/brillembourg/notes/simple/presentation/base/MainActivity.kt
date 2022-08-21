@@ -12,7 +12,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.ActivityMainBinding
-import brillembourg.notes.simple.domain.ContextDomain
+import brillembourg.notes.simple.presentation.backup_restore.ContextDomain
 import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.home.HomeFragmentDirections
 import brillembourg.notes.simple.presentation.ui_utils.contentViews

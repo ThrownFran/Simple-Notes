@@ -3,8 +3,8 @@ package brillembourg.notes.simple.presentation.ui_utils
 import android.view.MotionEvent
 import androidx.recyclerview.selection.*
 import androidx.recyclerview.widget.RecyclerView
+import brillembourg.notes.simple.presentation.home.NoteAdapter
 import brillembourg.notes.simple.presentation.home.NoteViewHolder
-import brillembourg.notes.simple.presentation.home.TaskAdapter
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 
 
@@ -25,7 +25,7 @@ fun TaskPresentationModel.bindTracker(
 }
 
 
-fun TaskAdapter.buildTracker(recyclerView: RecyclerView, onSelectionChange: () -> Unit) {
+fun NoteAdapter.buildTracker(recyclerView: RecyclerView, onSelectionChange: () -> Unit) {
     //Tracker in Adapter
     SelectionTracker.Builder<Long>(
         "mySelection",
@@ -46,7 +46,7 @@ fun TaskAdapter.buildTracker(recyclerView: RecyclerView, onSelectionChange: () -
     }
 }
 
-class ItemsKeyProvider(private val adapter: TaskAdapter) : ItemKeyProvider<Long>(SCOPE_CACHED) {
+class ItemsKeyProvider(private val adapter: NoteAdapter) : ItemKeyProvider<Long>(SCOPE_CACHED) {
 
     override fun getKey(position: Int): Long =
         adapter.currentList[position].id
@@ -57,7 +57,7 @@ class ItemsKeyProvider(private val adapter: TaskAdapter) : ItemKeyProvider<Long>
 
 class MyItemDetailsLookup(
     private val recyclerView: RecyclerView,
-    private val adapter: TaskAdapter
+    private val adapter: NoteAdapter
 ) : ItemDetailsLookup<Long>() {
     override fun getItemDetails(event: MotionEvent): ItemDetails<Long>? {
         val view = recyclerView.findChildViewUnder(event.x, event.y)
@@ -69,7 +69,7 @@ class MyItemDetailsLookup(
     }
 }
 
-fun NoteViewHolder.getItemDetails(adapter: TaskAdapter): ItemDetailsLookup.ItemDetails<Long> =
+fun NoteViewHolder.getItemDetails(adapter: NoteAdapter): ItemDetailsLookup.ItemDetails<Long> =
     object : ItemDetailsLookup.ItemDetails<Long>() {
         override fun getPosition(): Int = adapterPosition
         override fun getSelectionKey(): Long = adapter.currentList[adapterPosition].id

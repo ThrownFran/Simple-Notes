@@ -36,7 +36,7 @@
     </fragment>
     <fragment
         android:id="@+id/trashFragment"
-        android:name="brillembourg.notes.simple.presentation.trash.TrashFragment"
+        android:name="brillembourg.notes.simple.presentation.trash.ArchivedFragment"
         android:label="@string/trash_title"
         tools:layout="@layout/fragment_trash">
         <action

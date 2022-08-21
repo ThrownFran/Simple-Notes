@@ -1,15 +1,15 @@
 package brillembourg.notes.simple.domain.use_cases
 
 import brillembourg.notes.simple.domain.Schedulers
-import brillembourg.notes.simple.domain.models.Task
-import brillembourg.notes.simple.domain.repositories.TaskRepository
+import brillembourg.notes.simple.domain.models.Note
+import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-class GetTaskListUseCase @Inject constructor(
-    private val repository: TaskRepository,
+class GetNotesUseCase @Inject constructor(
+    private val repository: NotesRepository,
     private val schedulers: Schedulers
 ) {
 
@@ -19,5 +19,5 @@ class GetTaskListUseCase @Inject constructor(
     }
 
     class Params
-    class Result(val taskList: List<Task>)
+    class Result(val noteList: List<Note>)
 }

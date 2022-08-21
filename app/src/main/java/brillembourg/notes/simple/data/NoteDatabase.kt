@@ -4,7 +4,7 @@ import brillembourg.notes.simple.data.room.AppDatabase
 import brillembourg.notes.simple.data.room.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
-class TaskDatabase(
+class NoteDatabase(
     private val roomDatabase: AppDatabase
 ) {
 

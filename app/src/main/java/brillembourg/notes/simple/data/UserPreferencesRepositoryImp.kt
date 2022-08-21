@@ -15,7 +15,7 @@ import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.repositories.UserPrefRepository
 import brillembourg.notes.simple.domain.use_cases.GetUserPrefUseCase
-import brillembourg.notes.simple.domain.use_cases.SaveUserPreferencesUseCase
+import brillembourg.notes.simple.domain.use_cases.SaveUserPrefUseCase
 import brillembourg.notes.simple.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -49,7 +49,7 @@ class UserPreferencesRepositoryImp(val context: Context) : UserPrefRepository {
             }
     }
 
-    override suspend fun saveUserPreferences(params: SaveUserPreferencesUseCase.Params) {
+    override suspend fun saveUserPreferences(params: SaveUserPrefUseCase.Params) {
         context.dataStore.edit { preferences ->
             preferences[IS_GRID] = params.userPreferences.notesLayout.toStringPreferenceValue()
         }

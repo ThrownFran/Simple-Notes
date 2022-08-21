@@ -3,7 +3,7 @@ package brillembourg.notes.simple.data.room
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import brillembourg.notes.simple.domain.models.Task
+import brillembourg.notes.simple.domain.models.Note
 
 @Entity(tableName = "taskentity")
 data class TaskEntity(
@@ -15,9 +15,9 @@ data class TaskEntity(
     @ColumnInfo(name = "is_archived") val isArchived: Boolean = false
 )
 
-fun TaskEntity.toDomain(): Task {
+fun TaskEntity.toDomain(): Note {
     if (id == null) throw IllegalArgumentException("id is null")
-    return Task(
+    return Note(
         id = id!!,
         title = title,
         content = content,
@@ -27,7 +27,7 @@ fun TaskEntity.toDomain(): Task {
     )
 }
 
-fun Task.toData(): TaskEntity =
+fun Note.toData(): TaskEntity =
     TaskEntity(
         id = id,
         title = title,

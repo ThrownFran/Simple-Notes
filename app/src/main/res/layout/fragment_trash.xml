@@ -7,7 +7,7 @@
 
         <variable
             name="viewmodel"
-            type="brillembourg.notes.simple.presentation.trash.TrashViewModel" />
+            type="brillembourg.notes.simple.presentation.trash.ArchivedViewModel" />
     </data>
 
 

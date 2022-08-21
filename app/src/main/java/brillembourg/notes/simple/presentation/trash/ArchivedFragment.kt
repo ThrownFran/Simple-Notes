@@ -21,18 +21,17 @@ import brillembourg.notes.simple.presentation.extras.setTransitionToEditNote
 import brillembourg.notes.simple.presentation.extras.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.*
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
-class TrashFragment : Fragment(), MenuProvider {
+class ArchivedFragment : Fragment(), MenuProvider {
 
     companion object TrashFragment {
-        fun newInstance() = TrashFragment()
+        fun newInstance() = ArchivedFragment()
     }
 
-    private val viewModel: TrashViewModel by viewModels()
+    private val viewModel: ArchivedViewModel by viewModels()
 
     private var _binding: FragmentTrashBinding? = null
     private lateinit var binding: FragmentTrashBinding
@@ -118,7 +117,7 @@ class TrashFragment : Fragment(), MenuProvider {
     private fun renderStates() {
 
         safeUiLaunch {
-            viewModel.trashUiState.collect { uiState: TrashUiState ->
+            viewModel.trashUiState.collect { uiState: ArchivedUiState ->
 
                 setupNoteList(uiState.taskList)
 
@@ -145,16 +144,22 @@ class TrashFragment : Fragment(), MenuProvider {
         )
     }
 
-    private fun showArchiveConfirmationState(showDeleteConfirmationState: TrashUiState.ShowDeleteNotesConfirmation?) {
+    private fun showArchiveConfirmationState(showDeleteConfirmationState: ArchivedUiState.ShowDeleteNotesConfirmation?) {
         showDeleteConfirmationState?.let {
-            showDeleteTasksDialog(showDeleteConfirmationState.tasksToDeleteSize) {
-                viewModel.onDismissConfirmDeleteShown()
-            }
+            showDeleteTasksDialog(
+                fragment = this,
+                size = showDeleteConfirmationState.tasksToDeleteSize,
+                onPositive = {
+                    onDeleteNotes()
+                },
+                onDismiss = {
+                    viewModel.onDismissConfirmDeleteShown()
+                })
         }
     }
 
 
-    private fun selectionModeState(selectionModeActive: TrashUiState.SelectionModeActive?) {
+    private fun selectionModeState(selectionModeActive: ArchivedUiState.SelectionModeActive?) {
         if (selectionModeActive == null) {
             actionMode?.finish()
             actionMode = null
@@ -164,7 +169,7 @@ class TrashFragment : Fragment(), MenuProvider {
         launchContextualActionBar(selectionModeActive.size)
     }
 
-    private fun navigateToDetailState(navigateToDetail: TrashUiState.NavigateToEditNote) {
+    private fun navigateToDetailState(navigateToDetail: ArchivedUiState.NavigateToEditNote) {
         if (navigateToDetail.mustConsume) {
             val view =
                 binding.trashRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
@@ -175,7 +180,7 @@ class TrashFragment : Fragment(), MenuProvider {
 
     private fun navigateToDetail(it: TaskPresentationModel, view: View) {
         //navigate to detail fragment
-        val directions = TrashFragmentDirections.actionTrashFragmentToDetailFragment()
+        val directions = ArchivedFragmentDirections.actionTrashFragmentToDetailFragment()
         directions.task = it
 
         setTransitionToEditNote()
@@ -248,7 +253,7 @@ class TrashFragment : Fragment(), MenuProvider {
     private fun launchContextualActionBar(sizeSelected: Int) {
         actionMode = setupContextualActionBar(
             toolbar = requireActivity().findViewById(R.id.toolbar),
-            menuId = R.menu.menu_context_trash,
+            menuId = R.menu.menu_contextual_trash,
             currentActionMode = actionMode,
             adapter = binding.trashRecycler.adapter as ArchivedTaskAdapter,
             onActionClick = { onContextualActionItem(menuId = it) },
@@ -263,7 +268,7 @@ class TrashFragment : Fragment(), MenuProvider {
     }
 
     private fun onContextualActionItem(menuId: Int) = when (menuId) {
-        R.id.menu_context_menu_delete -> {
+        R.id.menu_context_menu_archive -> {
             viewModel.onShowConfirmDeleteNotes()
             true
         }
@@ -287,29 +292,29 @@ class TrashFragment : Fragment(), MenuProvider {
         viewModel.onNoteClick(it)
     }
 
-    private fun showDeleteTasksDialog(
-        size: Int,
-        onDismiss: () -> Unit
-    ) {
-
-        val title =
-            if (size <= 1) getString(R.string.delete_task_permanently) else getString(R.string.delete_tasks_permanently)
-
-        MaterialAlertDialogBuilder(
-            requireContext()
-        )
-            .setTitle(title)
-            .setIcon(R.drawable.ic_baseline_delete_dark_24)
-//            .setMessage(resources.getString(R.string.supporting_text))
-            .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
-            }
-            .setPositiveButton(resources.getString(R.string.all_delete)) { dialog, which ->
-                onDeleteNotes()
-            }.setOnDismissListener {
-                onDismiss.invoke()
-            }
-            .showWithLifecycle(viewLifecycleOwner)
-    }
+//    private fun showDeleteTasksDialog(
+//        size: Int,
+//        onDismiss: () -> Unit
+//    ) {
+//
+//        val title =
+//            if (size <= 1) getString(R.string.delete_task_permanently) else getString(R.string.delete_tasks_permanently)
+//
+//        MaterialAlertDialogBuilder(
+//            requireContext()
+//        )
+//            .setTitle(title)
+//            .setIcon(R.drawable.ic_baseline_delete_dark_24)
+////            .setMessage(resources.getString(R.string.supporting_text))
+//            .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
+//            }
+//            .setPositiveButton(resources.getString(R.string.all_delete)) { dialog, which ->
+//                onDeleteNotes()
+//            }.setOnDismissListener {
+//                onDismiss.invoke()
+//            }
+//            .showWithLifecycle(viewLifecycleOwner)
+//    }
 
 
     private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {

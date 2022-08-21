@@ -7,8 +7,8 @@ import brillembourg.notes.simple.data.room.BackupAndRestoreProvider
 import brillembourg.notes.simple.data.room.RoomBackupLib
 import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.SchedulersImp
-import brillembourg.notes.simple.domain.repositories.DataRepository
-import brillembourg.notes.simple.domain.repositories.TaskRepository
+import brillembourg.notes.simple.domain.repositories.BackupAndRestoreRepository
+import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.domain.repositories.UserPrefRepository
 import brillembourg.notes.simple.presentation.trash.MessageManager
 import brillembourg.notes.simple.presentation.trash.MessageManagerImp
@@ -29,13 +29,13 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun taskRepo(database: TaskDatabase, dateProvider: DateProvider): TaskRepository =
-        TaskRepositoryImp(database, dateProvider)
+    fun taskRepo(database: NoteDatabase, dateProvider: DateProvider): NotesRepository =
+        NotesRepositoryImp(database, dateProvider)
 
     @Singleton
     @Provides
-    fun dataRepo(backupAndRestoreProvider: BackupAndRestoreProvider): DataRepository =
-        DataRepositoryImp(backupAndRestoreProvider)
+    fun dataRepo(backupAndRestoreProvider: BackupAndRestoreProvider): BackupAndRestoreRepository =
+        BackupAndRestoreRepositoryImp(backupAndRestoreProvider)
 
     @Singleton
     @Provides
@@ -53,8 +53,8 @@ class AppModule {
     @Provides
     fun taskDatabase(
         roomDatabase: AppDatabase
-    ): TaskDatabase =
-        TaskDatabase(roomDatabase)
+    ): NoteDatabase =
+        NoteDatabase(roomDatabase)
 
     @Singleton
     @Provides

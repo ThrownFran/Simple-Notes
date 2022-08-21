@@ -3,10 +3,10 @@ package brillembourg.notes.simple.presentation.ui_utils
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import brillembourg.notes.simple.presentation.home.TaskAdapter
+import brillembourg.notes.simple.presentation.home.NoteAdapter
 import java.util.*
 
-fun TaskAdapter.setupDragAndDropTouchHelper(dragAndDropDirs: Int): ItemTouchHelper {
+fun NoteAdapter.setupDragAndDropTouchHelper(dragAndDropDirs: Int): ItemTouchHelper {
     val itemTouchCallback =
         object : ItemTouchHelper.SimpleCallback(
             dragAndDropDirs,
@@ -27,7 +27,7 @@ fun TaskAdapter.setupDragAndDropTouchHelper(dragAndDropDirs: Int): ItemTouchHelp
                 target: RecyclerView.ViewHolder
             ): Boolean {
 
-                val recyclerviewAdapter = recyclerView.adapter as TaskAdapter
+                val recyclerviewAdapter = recyclerView.adapter as NoteAdapter
                 val fromPosition = viewHolder.adapterPosition
                 val toPosition = target.adapterPosition
                 isDragging = true

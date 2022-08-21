@@ -4,32 +4,29 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
-import brillembourg.notes.simple.domain.use_cases.CreateTaskUseCase
-import brillembourg.notes.simple.domain.use_cases.DeleteTasksUseCase
-import brillembourg.notes.simple.domain.use_cases.SaveTaskUseCase
-import brillembourg.notes.simple.domain.use_cases.UnArchiveTasksUseCase
+import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.presentation.models.TaskPresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
+import brillembourg.notes.simple.presentation.trash.MessageManager
 import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val saveTaskUseCase: SaveTaskUseCase,
-    private val createTaskUseCase: CreateTaskUseCase,
-    private val deleteTasksUseCase: DeleteTasksUseCase,
-    private val archiveTasksUseCase: UnArchiveTasksUseCase,
-    private val unArchiveTasksUseCase: UnArchiveTasksUseCase,
-    private val dateProvider: DateProvider
+    private val saveNoteUseCase: SaveNoteUseCase,
+    private val createNoteUseCase: CreateNoteUseCase,
+    private val deleteNotesUseCase: DeleteNotesUseCase,
+    private val archiveNotesUseCase: ArchiveNotesUseCase,
+    private val unArchiveNotesUseCase: UnArchiveNotesUseCase,
+    private val dateProvider: DateProvider,
+    private val messageManager: MessageManager
 ) : ViewModel() {
 
     private var currentTask: TaskPresentationModel? = null
@@ -64,6 +61,72 @@ class DetailViewModel @Inject constructor(
             isNewTask = false,
             isArchivedTask = it.isArchived
         )
+    }
+
+    fun onArchive() {
+        archiveNote()
+    }
+
+    private fun archiveNote() {
+        if (currentTask?.isArchived == true) throw IllegalArgumentException("Cannot archive an archived note")
+
+        viewModelScope.launch {
+            val id = currentTask?.id ?: return@launch
+            val result = archiveNotesUseCase.invoke(ArchiveNotesUseCase.Params(listOf(id)))
+            when (result) {
+                is Resource.Success -> {
+                    _uiDetailState.update { it.copy(navigateBack = true) }
+                    showMessage(result.data.message)
+                }
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
+    }
+
+    fun onUnarchive() {
+        unarchiveNote()
+    }
+
+    private fun unarchiveNote() {
+        if (currentTask?.isArchived == false) throw IllegalArgumentException("Cannot unarchive a non-archived note")
+
+        viewModelScope.launch {
+            val id = currentTask?.id ?: return@launch
+            val result = unArchiveNotesUseCase.invoke(UnArchiveNotesUseCase.Params(listOf(id)))
+            when (result) {
+                is Resource.Success -> {
+                    _uiDetailState.update { it.copy(navigateBack = true) }
+                    showMessage(result.data.message)
+                }
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
+    }
+
+    private fun showMessage(message: UiText) {
+        messageManager.showMessage(message)
+    }
+
+    fun onDelete() {
+        deleteNote()
+    }
+
+    private fun deleteNote() {
+        if (currentTask == null) throw IllegalArgumentException("Cannot delete note that is not created")
+        viewModelScope.launch {
+            val id = currentTask?.id ?: return@launch
+            val result = deleteNotesUseCase.invoke(DeleteNotesUseCase.Params(listOf(id)))
+            when (result) {
+                is Resource.Success -> {
+                    _uiDetailState.update { it.copy(navigateBack = true) }
+                    showMessage(result.data.message)
+                }
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
     }
 
     fun onBackPressed() {
@@ -121,8 +184,8 @@ class DetailViewModel @Inject constructor(
 
         viewModelScope.launch {
 
-            val result = createTaskUseCase(
-                CreateTaskUseCase.Params(
+            val result = createNoteUseCase(
+                CreateNoteUseCase.Params(
                     content = userInputState.content ?: "",
                     title = userInputState.title
                 )
@@ -163,9 +226,9 @@ class DetailViewModel @Inject constructor(
 
         viewModelScope.launch {
 
-            val params = SaveTaskUseCase.Params(task.toDomain(dateProvider))
+            val params = SaveNoteUseCase.Params(task.toDomain(dateProvider))
 
-            when (val result = saveTaskUseCase(params)) {
+            when (val result = saveNoteUseCase(params)) {
                 is Resource.Success -> {
                     _uiDetailState.value = _uiDetailState.value.copy(
                         userMessage = result.data.message,

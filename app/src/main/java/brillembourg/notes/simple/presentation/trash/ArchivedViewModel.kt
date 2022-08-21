@@ -19,18 +19,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TrashViewModel @Inject constructor(
-    private val getArchivedTasksUseCase: GetArchivedTasksUseCase,
-    private val unArchiveTasksUseCase: UnArchiveTasksUseCase,
-    private val deleteTasksUseCase: DeleteTasksUseCase,
+class ArchivedViewModel @Inject constructor(
+    private val getArchivedNotesUseCase: GetArchivedNotesUseCase,
+    private val unArchiveNotesUseCase: UnArchiveNotesUseCase,
+    private val deleteNotesUseCase: DeleteNotesUseCase,
     private val getUserPrefUseCase: GetUserPrefUseCase,
-    private val saveUserPreferencesUseCase: SaveUserPreferencesUseCase,
+    private val saveUserPrefUseCase: SaveUserPrefUseCase,
     private val dateProvider: DateProvider,
     private val messageManager: MessageManager
 ) : ViewModel() {
 
-    private val _trashUiState = MutableStateFlow(TrashUiState())
-    val trashUiState = _trashUiState.asStateFlow()
+    private val _archivedUiState = MutableStateFlow(ArchivedUiState())
+    val trashUiState = _archivedUiState.asStateFlow()
 
     init {
         getPreferences()
@@ -43,7 +43,7 @@ class TrashViewModel @Inject constructor(
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
-                            _trashUiState.update { it.copy(noteLayout = result.data.preferences.notesLayout) }
+                            _archivedUiState.update { it.copy(noteLayout = result.data.preferences.notesLayout) }
                         }
                         is Resource.Error -> showErrorMessage(result.exception)
                         is Resource.Loading -> Unit
@@ -54,13 +54,13 @@ class TrashViewModel @Inject constructor(
 
     private fun getArchivedTasksAndObserve() {
         viewModelScope.launch {
-            getArchivedTasksUseCase(GetArchivedTasksUseCase.Params())
+            getArchivedNotesUseCase(GetArchivedNotesUseCase.Params())
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
-                            _trashUiState.update { uiState ->
+                            _archivedUiState.update { uiState ->
                                 uiState.copy(
-                                    taskList = result.data.taskList.map { task ->
+                                    taskList = result.data.noteList.map { task ->
                                         task.toPresentation(dateProvider)
                                     }
                                         .sortedBy { taskPresentationModel -> taskPresentationModel.order }
@@ -81,9 +81,9 @@ class TrashViewModel @Inject constructor(
     }
 
     private fun navigateToDetail(taskClicked: TaskPresentationModel) {
-        _trashUiState.update {
+        _archivedUiState.update {
             it.copy(
-                navigateToEditNote = TrashUiState.NavigateToEditNote(
+                navigateToEditNote = ArchivedUiState.NavigateToEditNote(
                     mustConsume = true,
                     taskIndex = trashUiState.value.taskList.indexOf(taskClicked),
                     taskPresentationModel = taskClicked
@@ -95,9 +95,9 @@ class TrashViewModel @Inject constructor(
 
     fun onNavigateToDetailCompleted() {
         val navState =
-            _trashUiState.value.navigateToEditNote.copy(mustConsume = false)
+            _archivedUiState.value.navigateToEditNote.copy(mustConsume = false)
 
-        _trashUiState.update { it.copy(navigateToEditNote = navState) }
+        _archivedUiState.update { it.copy(navigateToEditNote = navState) }
     }
 
 
@@ -112,7 +112,7 @@ class TrashViewModel @Inject constructor(
     fun onUnarchiveTasks() {
         val tasksSelectedIds = getSelectedTasks().map { it.id }
 
-        _trashUiState.update {
+        _archivedUiState.update {
             it.copy(selectionModeActive = null)
         }
 
@@ -121,8 +121,8 @@ class TrashViewModel @Inject constructor(
 
     private fun unarchiveTasks(taskToUnarchiveIds: List<Long>) {
         viewModelScope.launch {
-            val params = UnArchiveTasksUseCase.Params(taskToUnarchiveIds)
-            when (val result = unArchiveTasksUseCase(params)) {
+            val params = UnArchiveNotesUseCase.Params(taskToUnarchiveIds)
+            when (val result = unArchiveNotesUseCase(params)) {
                 is Resource.Success -> showMessage(result.data.message)
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
@@ -133,7 +133,7 @@ class TrashViewModel @Inject constructor(
     fun onDeleteNotes() {
         val tasksToDeleteIds = getSelectedTasks().map { it.id }
 
-        _trashUiState.update {
+        _archivedUiState.update {
             it.copy(
                 showArchiveNotesConfirmation = null,
                 selectionModeActive = null
@@ -143,12 +143,12 @@ class TrashViewModel @Inject constructor(
         deleteTasks(tasksToDeleteIds)
     }
 
-    private fun getSelectedTasks() = _trashUiState.value.taskList.filter { it.isSelected }
+    private fun getSelectedTasks() = _archivedUiState.value.taskList.filter { it.isSelected }
 
     private fun deleteTasks(tasksToDeleteIds: List<Long>) {
         viewModelScope.launch {
-            val params = DeleteTasksUseCase.Params(tasksToDeleteIds)
-            when (val result = deleteTasksUseCase(params)) {
+            val params = DeleteNotesUseCase.Params(tasksToDeleteIds)
+            when (val result = deleteNotesUseCase(params)) {
                 is Resource.Success -> showMessage(result.data.message)
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
@@ -158,21 +158,21 @@ class TrashViewModel @Inject constructor(
 
     fun onSelection() {
         val sizeSelected = getSelectedTasks().size
-        _trashUiState.update {
+        _archivedUiState.update {
             it.copy(
-                selectionModeActive = TrashUiState.SelectionModeActive(sizeSelected)
+                selectionModeActive = ArchivedUiState.SelectionModeActive(sizeSelected)
             )
         }
     }
 
     fun onSelectionDismissed() {
-        _trashUiState.update { it.copy(selectionModeActive = null) }
+        _archivedUiState.update { it.copy(selectionModeActive = null) }
     }
 
     fun onShowConfirmDeleteNotes() {
-        _trashUiState.update {
+        _archivedUiState.update {
             it.copy(
-                showArchiveNotesConfirmation = TrashUiState.ShowDeleteNotesConfirmation(
+                showArchiveNotesConfirmation = ArchivedUiState.ShowDeleteNotesConfirmation(
                     tasksToDeleteSize = getSelectedTasks().size
                 )
             )
@@ -180,19 +180,19 @@ class TrashViewModel @Inject constructor(
     }
 
     fun onDismissConfirmDeleteShown() {
-        _trashUiState.update {
+        _archivedUiState.update {
             it.copy(showArchiveNotesConfirmation = null)
         }
     }
 
     fun onLayoutChange(noteLayout: NoteLayout) {
-        _trashUiState.update { it.copy(noteLayout = noteLayout) }
+        _archivedUiState.update { it.copy(noteLayout = noteLayout) }
         saveLayoutPreference(noteLayout)
     }
 
     private fun saveLayoutPreference(noteLayout: NoteLayout) {
         viewModelScope.launch {
-            saveUserPreferencesUseCase(SaveUserPreferencesUseCase.Params(UserPreferences(noteLayout)))
+            saveUserPrefUseCase(SaveUserPrefUseCase.Params(UserPreferences(noteLayout)))
         }
     }
 

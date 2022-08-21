@@ -1,12 +1,11 @@
 package brillembourg.notes.simple.domain.use_cases
 
-import brillembourg.notes.simple.domain.Screen
-import brillembourg.notes.simple.domain.repositories.DataRepository
+import brillembourg.notes.simple.domain.repositories.BackupAndRestoreRepository
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import javax.inject.Inject
 
-class BackupAndRestoreNotesUseCase @Inject constructor(private val repository: DataRepository) {
+class BackupAndRestoreNotesUseCase @Inject constructor(private val repository: BackupAndRestoreRepository) {
 
     suspend fun backup(): Resource<Result> {
         return repository.backup()
@@ -24,5 +23,7 @@ class BackupAndRestoreNotesUseCase @Inject constructor(private val repository: D
 
     class PrepareBackupParams(val screen: Screen)
     class PrepareBackupResult(val message: UiText)
-
 }
+
+//Interface used to represent UI in domain layer
+interface Screen

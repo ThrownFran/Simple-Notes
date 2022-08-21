@@ -2,7 +2,7 @@ package brillembourg.notes.simple.presentation.models
 
 import android.os.Parcelable
 import brillembourg.notes.simple.data.DateProvider
-import brillembourg.notes.simple.domain.models.Task
+import brillembourg.notes.simple.domain.models.Note
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -16,8 +16,8 @@ data class TaskPresentationModel(
     var isSelected: Boolean = false
 ): Parcelable
 
-fun TaskPresentationModel.toDomain (dateProvider: DateProvider): Task {
-    return Task(
+fun TaskPresentationModel.toDomain(dateProvider: DateProvider): Note {
+    return Note(
         id,
         title = title,
         content = content,
@@ -27,7 +27,7 @@ fun TaskPresentationModel.toDomain (dateProvider: DateProvider): Task {
     )
 }
 
-fun Task.toPresentation (dateProvider: DateProvider): TaskPresentationModel {
+fun Note.toPresentation(dateProvider: DateProvider): TaskPresentationModel {
     return TaskPresentationModel(
         id = id,
         title = title,

@@ -1,6 +1,7 @@
 package brillembourg.notes.simple.data.room
 
-import brillembourg.notes.simple.domain.Screen
+import brillembourg.notes.simple.domain.use_cases.Screen
+
 
 interface BackupAndRestoreProvider {
 

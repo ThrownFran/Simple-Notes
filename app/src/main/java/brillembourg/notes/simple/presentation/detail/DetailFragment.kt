@@ -1,12 +1,10 @@
 package brillembourg.notes.simple.presentation.detail
 
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -17,13 +15,15 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.extras.*
+import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
+import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 
 @AndroidEntryPoint
-class DetailFragment : Fragment() {
+class DetailFragment : Fragment(), MenuProvider {
 
     companion object {
         fun newInstance() = DetailFragment()
@@ -42,13 +42,61 @@ class DetailFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
-        Log.e("DetailFragment", "OnCreateView")
         binding = FragmentDetailBinding.inflate(inflater, container, false)
         binding.viewmodel = viewModel
         setHasOptionsMenu(true)
         unfocusScreenWhenKeyboardHidden()
+        setupMenu()
         return binding.root
+    }
+
+    private fun setupMenu() {
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_note, menu)
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
+        super.onPrepareMenu(menu)
+        val isArchived = viewModel.uiDetailUiState.value.isArchivedTask
+        menu.findItem(R.id.menu_note_unachive)
+            .apply { isVisible = isArchived }
+        menu.findItem(R.id.menu_note_archive).apply {
+            isVisible = !isArchived
+        }
+        menu.findItem(R.id.menu_note_delete).apply {
+            setShowAsAction(if (isArchived) MenuItem.SHOW_AS_ACTION_ALWAYS else MenuItem.SHOW_AS_ACTION_NEVER)
+        }
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            R.id.menu_note_unachive -> {
+                viewModel.onUnarchive()
+                return true
+            }
+            R.id.menu_note_delete -> {
+                showDeleteTasksDialog(
+                    fragment = this,
+                    size = 1,
+                    onPositive = {
+                        viewModel.onDelete()
+                    })
+                return true
+            }
+
+            R.id.menu_note_archive -> {
+                showArchiveConfirmationDialog(
+                    fragment = this,
+                    size = 1,
+                    onPositive = { viewModel.onArchive() })
+                return true
+            }
+        }
+        return false
     }
 
 
@@ -76,10 +124,10 @@ class DetailFragment : Fragment() {
             myStartView = requireActivity().findViewById(R.id.home_fab),
             myEndView = binding.detailLinear
         )
-        setupObservers()
+        renderState()
     }
 
-    private fun setupObservers() {
+    private fun renderState() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiDetailUiState.collect { uiState ->
@@ -88,10 +136,11 @@ class DetailFragment : Fragment() {
 
                     setToolbarTitle(uiState.isNewTask)
 
+                    setToolbarIcons(uiState.isArchivedTask)
+
                     if (uiState.unFocusInput) {
                         unFocus()
                         viewModel.onUnFocusCompleted()
-
                     }
 
                     if (uiState.focusInput) {
@@ -112,6 +161,10 @@ class DetailFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun setToolbarIcons(isArchiveNote: Boolean) {
+        //TODO
     }
 
     private fun setToolbarTitle(isNewTask: Boolean) {
