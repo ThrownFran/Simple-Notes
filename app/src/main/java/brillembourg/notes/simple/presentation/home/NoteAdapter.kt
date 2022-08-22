@@ -19,7 +19,7 @@ class NoteAdapter(
     val onReorderSuccess: (reorderedTaskList: List<NotePresentationModel>) -> Unit,
     val onReorderCanceled: () -> Unit
 ) : ListAdapter<NotePresentationModel, NoteViewHolder>(setupTaskDiffCallback()),
-    Draggable by ItemTouchDraggableImp(dragAndDropDirs) {
+    Draggable<NotePresentationModel> by ItemTouchDraggableImp(dragAndDropDirs) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         return NoteViewHolder(

@@ -11,10 +11,10 @@ data class NotePresentationModel(
     var title: String? = null,
     var content: String,
     val dateInLocal: String,
-    var order: Int,
+    override var order: Int,
     var isArchived: Boolean = false,
-    var isSelected: Boolean = false
-) : Parcelable
+    override var isSelected: Boolean = false
+) : Parcelable, HasOrder, IsSelectable
 
 fun NotePresentationModel.toDomain(dateProvider: DateProvider): Note {
     return Note(
@@ -36,4 +36,12 @@ fun Note.toPresentation(dateProvider: DateProvider): NotePresentationModel {
         dateInLocal = dateProvider.formatTimeToLocalDate(date),
         isArchived = isArchived
     )
+}
+
+interface HasOrder {
+    var order: Int
+}
+
+interface IsSelectable {
+    var isSelected: Boolean
 }

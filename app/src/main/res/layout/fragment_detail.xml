@@ -29,7 +29,7 @@
                 android:gravity="top"
                 android:textStyle="bold"
                 android:textSize="16sp"
-                android:onTextChanged="@{viewmodel.onTitleChanged}"
+                android:text="@={viewmodel.uiDetailUiState.component3().titleBinding}"
                 android:hint="@string/title"
                 android:inputType="textMultiLine"
                 android:importantForAutofill="no" />
@@ -57,7 +57,7 @@
                     android:padding="4dp"
                     android:gravity="top"
                     android:textSize="16sp"
-                    android:onTextChanged="@{viewmodel.onContentChanged}"
+                    android:text="@={viewmodel.uiDetailUiState.component3().contentBinding}"
                     android:hint="@string/note"
                     android:inputType="textMultiLine"
                     android:importantForAutofill="no" />

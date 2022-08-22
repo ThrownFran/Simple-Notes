@@ -112,7 +112,6 @@ class DetailFragment : Fragment(), MenuProvider {
         return false
     }
 
-
     private fun unfocusScreenWhenKeyboardHidden() {
         setEventListener(
             requireActivity(),
@@ -145,8 +144,9 @@ class DetailFragment : Fragment(), MenuProvider {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiDetailUiState.collect { uiState ->
 
-                    setupTitleAndContent(uiState.userInput)
+//                    setupTitleAndContent(uiState.userInput)
 
+                    //TODO
                     setToolbarTitle(uiState.isNewTask)
 
                     setToolbarIcons(uiState.isArchivedTask)
@@ -161,12 +161,6 @@ class DetailFragment : Fragment(), MenuProvider {
                         viewModel.onFocusCompleted()
                     }
 
-                    if (uiState.userMessage != null) {
-                        showMessage(uiState.userMessage) {
-                            viewModel.onMessageShown()
-                        }
-                    }
-
                     if (uiState.navigateBack) {
                         finishView()
                     }
@@ -177,7 +171,8 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     private fun setToolbarIcons(isArchiveNote: Boolean) {
-        //TODO
+        val menuHost: MenuHost = requireActivity()
+        menuHost.invalidateMenu()
     }
 
     private fun setToolbarTitle(isNewTask: Boolean) {
@@ -191,12 +186,12 @@ class DetailFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun setupTitleAndContent(userInput: UserInput) {
-        if (userInput.isNotEmpty()) {
-            setupTitle(userInput.title)
-            setupContent(userInput.content)
-        }
-    }
+//    private fun setupTitleAndContent(userInput: UserInput) {
+//        if (userInput.render && userInput.isNotEmpty()) {
+//            setupTitle(userInput.title)
+//            setupContent(userInput.content)
+//        }
+//    }
 
     private fun focus() {
         binding.detailEditContent.apply {
@@ -210,20 +205,21 @@ class DetailFragment : Fragment(), MenuProvider {
         binding.detailEditContent.hideKeyboard()
     }
 
-    private fun setupTitle(title: String?) {
-        if (title == binding.detailEditTitle.toString()) return
-
-        binding.detailEditTitle.setText(title)
-    }
-
-    private fun setupContent(content: String?) {
-        if (content == binding.detailEditContent.toString()) return
-
-        binding.detailEditContent.setText(content)
-    }
+//    private fun setupTitle(title: String?) {
+//        if (title == binding.detailEditTitle.toString()) return
+//        Log.e("Detail Fragment", "setup title")
+//        binding.detailEditTitle.setText(title)
+//    }
+//
+//    private fun setupContent(content: String?) {
+//        if (content == binding.detailEditContent.toString()) return
+//        Log.e("Detail Fragment", "setup content")
+//        binding.detailEditContent.setText(content)
+//    }
 
     private fun finishView() {
-        findNavController().popBackStack()
+        findNavController().navigateUp()
+//        findNavController().popBackStack()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

@@ -31,8 +31,20 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
 
+
+val View.onClickFlow: Flow<View>
+    get() = callbackFlow {
+        setOnClickListener {
+            trySend(it)
+        }
+        awaitClose { setOnClickListener(null) }
+    }.conflate()
 
 fun ComponentActivity.safeUiLaunch(block: suspend CoroutineScope.() -> Unit) {
     lifecycleScope.launch {

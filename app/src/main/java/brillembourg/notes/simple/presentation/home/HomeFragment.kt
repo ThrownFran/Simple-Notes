@@ -15,10 +15,7 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
-import brillembourg.notes.simple.presentation.custom_views.animateWithRecycler
-import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
-import brillembourg.notes.simple.presentation.custom_views.setTransitionToCreateNote
-import brillembourg.notes.simple.presentation.custom_views.setTransitionToEditNote
+import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.*
@@ -55,9 +52,16 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun setupListeners() {
         val activityBinding = (activity as MainActivity?)?.binding
-        activityBinding?.homeFab?.setOnClickListener {
-            viewModel.onAddNoteClick()
+
+        safeUiLaunch {
+            activityBinding?.homeFab?.onClickFlow?.collect {
+                viewModel.onAddNoteClick()
+            }
         }
+
+//        activityBinding?.homeFab?.setOnClickListener {
+//            viewModel.onAddNoteClick()
+//        }
     }
 
     private fun animateFabWithRecycler() {
@@ -325,31 +329,6 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun clickArchiveTasks() {
         viewModel.onShowConfirmArchiveNotes()
     }
-
-//    private fun showArchiveConfirmationDialog(
-//        size: Int,
-//        onDismiss: () -> Unit
-//    ) {
-//        val title =
-//            if (size > 1) getString(R.string.move_tasks_to_trash) else getString(R.string.move_task_to_trash)
-//
-//        MaterialAlertDialogBuilder(
-//            requireContext()
-//        )
-//            .setTitle(title)
-//            .setIcon(R.drawable.ic_baseline_delete_dark_24)
-//            //            .setMessage(resources.getString(R.string.supporting_text))
-//            .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
-//            }
-//            .setPositiveButton(resources.getString(R.string.all_move_to_trash)) { dialog, which ->
-//                viewModel.onArchiveNotes()
-//            }
-//            .setOnDismissListener {
-//                onDismiss.invoke()
-//            }
-//            .showWithLifecycle(viewLifecycleOwner)
-//    }
-
 
     private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {
         recylerViewState?.let { layoutManager.onRestoreInstanceState(it) }

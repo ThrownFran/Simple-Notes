@@ -7,13 +7,16 @@ import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
+import brillembourg.notes.simple.presentation.models.toPresentation
 import brillembourg.notes.simple.presentation.trash.MessageManager
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,6 +33,7 @@ class DetailViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var currentTask: NotePresentationModel? = null
+    var messageToShowWhenNavBack: UiText? = null
 
     private val _uiDetailState = MutableStateFlow(DetailUiState())
     val uiDetailUiState = _uiDetailState.asStateFlow()
@@ -45,13 +49,26 @@ class DetailViewModel @Inject constructor(
         if (currentTask == null) {
             newTaskState()
         }
+
+        onInputChangeFlow()
+    }
+
+    /*UserInput two way data binding*/
+    private fun onInputChangeFlow() {
+        viewModelScope.launch {
+            _uiDetailState.value.getOnInputChangedFlow()
+                .debounce(300)
+                .collect {
+                    saveTask(navigateBack = false)
+                }
+        }
     }
 
     private fun newTaskState() {
         _uiDetailState.update {
             it.copy(
                 isNewTask = true,
-                focusInput = true
+                focusInput = true,
             )
         }
     }
@@ -59,7 +76,11 @@ class DetailViewModel @Inject constructor(
     private fun editTaskState(note: NotePresentationModel) {
         _uiDetailState.update {
             it.copy(
-                userInput = UserInput(note.title, note.content),
+                userInput = _uiDetailState.value.userInput.copy(
+                    title = note.title ?: "",
+                    content = note.content,
+//                    render = true
+                ),
                 unFocusInput = true,
                 isNewTask = false,
                 isArchivedTask = note.isArchived
@@ -79,8 +100,8 @@ class DetailViewModel @Inject constructor(
             val result = archiveNotesUseCase.invoke(ArchiveNotesUseCase.Params(listOf(id)))
             when (result) {
                 is Resource.Success -> {
-                    _uiDetailState.update { it.copy(navigateBack = true) }
                     showMessage(result.data.message)
+                    _uiDetailState.update { it.copy(navigateBack = true) }
                 }
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
@@ -124,8 +145,8 @@ class DetailViewModel @Inject constructor(
             val result = deleteNotesUseCase.invoke(DeleteNotesUseCase.Params(listOf(id)))
             when (result) {
                 is Resource.Success -> {
-                    _uiDetailState.update { it.copy(navigateBack = true) }
                     showMessage(result.data.message)
+                    _uiDetailState.update { it.copy(navigateBack = true) }
                 }
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
@@ -135,10 +156,11 @@ class DetailViewModel @Inject constructor(
 
     fun onBackPressed() {
         if (hasNoChangesWithOriginalTask()) {
+            messageToShowWhenNavBack?.let { showMessage(it) }
             _uiDetailState.update { it.copy(navigateBack = true) }
             return
         }
-        saveTask()
+        saveTask(navigateBack = true)
     }
 
     fun onFocusCompleted() {
@@ -149,41 +171,9 @@ class DetailViewModel @Inject constructor(
         _uiDetailState.update { it.copy(unFocusInput = false) }
     }
 
-    fun onMessageShown() {
-        _uiDetailState.update { it.copy(userMessage = null) }
-    }
-
-    @OptIn(FlowPreview::class)
-    fun onContentChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-        viewModelScope.launch {
-            flow { emit(s.toString()) }
-                .debounce(100)
-                .collect { newText ->
-                    _uiDetailState.update {
-                        it.copy(
-                            userInput = _uiDetailState.value.userInput.copy(content = newText)
-                        )
-                    }
-                }
-        }
-    }
-
-    @OptIn(FlowPreview::class)
-    fun onTitleChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-        viewModelScope.launch {
-            flow { emit(s.toString()) }
-                .debounce(100)
-                .collect { newText ->
-                    _uiDetailState.update {
-                        it.copy(
-                            userInput = _uiDetailState.value.userInput.copy(title = newText)
-                        )
-                    }
-                }
-        }
-    }
-
-    private fun createTask() {
+    private fun createTask(
+        navigateBack: Boolean = true,
+    ) {
 
         val userInputState = _uiDetailState.value.userInput
 
@@ -196,19 +186,20 @@ class DetailViewModel @Inject constructor(
 
             val result = createNoteUseCase(
                 CreateNoteUseCase.Params(
-                    content = userInputState.content ?: "",
+                    content = userInputState.content,
                     title = userInputState.title
                 )
             )
 
             when (result) {
                 is Resource.Success -> {
+                    messageToShowWhenNavBack = result.data.message
                     _uiDetailState.update {
                         it.copy(
-                            userMessage = result.data.message,
-                            navigateBack = true
+                            navigateBack = navigateBack,
                         )
                     }
+                    currentTask = result.data.note.toPresentation(dateProvider)
                 }
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
@@ -218,22 +209,28 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun showErrorMessage(e: Exception) {
-        _uiDetailState.update { it.copy(userMessage = getMessageFromError(e)) }
+        messageManager.showMessage(getMessageFromError(e))
     }
 
-    private fun saveTask() {
+    private fun saveTask(
+        navigateBack: Boolean = true,
+    ) {
         if (isEditing()) {
-            currentTask?.let { updateTask(it) }
+            currentTask?.let { updateTask(it, navigateBack) }
             return
         }
 
-        createTask()
+        createTask(navigateBack)
     }
 
-    private fun isEditing(): Boolean = currentTask != null
+    private fun isEditing(): Boolean = !(_uiDetailState.value.isNewTask)
 
-    private fun updateTask(task: NotePresentationModel) {
-        task.content = _uiDetailState.value.userInput.content ?: ""
+    private fun updateTask(
+        task: NotePresentationModel,
+        navigateBack: Boolean = true
+    ) {
+
+        task.content = _uiDetailState.value.userInput.content
         task.title = _uiDetailState.value.userInput.title
 
         viewModelScope.launch {
@@ -242,10 +239,10 @@ class DetailViewModel @Inject constructor(
 
             when (val result = saveNoteUseCase(params)) {
                 is Resource.Success -> {
+                    messageToShowWhenNavBack = result.data.message
                     _uiDetailState.update {
                         it.copy(
-                            userMessage = result.data.message,
-                            navigateBack = true
+                            navigateBack = navigateBack,
                         )
                     }
                 }

@@ -97,9 +97,14 @@ class HomeViewModel @Inject constructor(
 
     fun onReorderedNotes(reorderedTaskList: List<NotePresentationModel>) {
         _homeUiState.update {
+
+            val noteList: List<NotePresentationModel> = _homeUiState.value.noteList.notes
+            noteList.forEach { it.isSelected = false }
+
             it.copy(
                 selectionModeActive = null,
                 noteList = _homeUiState.value.noteList.copy(
+                    notes = noteList,
                     mustRender = false
                 )
             )

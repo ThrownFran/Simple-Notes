@@ -2,39 +2,38 @@ package brillembourg.notes.simple.presentation.ui_utils
 
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import brillembourg.notes.simple.presentation.home.NoteAdapter
-import brillembourg.notes.simple.presentation.home.NoteViewHolder
-import brillembourg.notes.simple.presentation.models.NotePresentationModel
+import brillembourg.notes.simple.presentation.models.HasOrder
 import java.util.*
 
-interface Draggable {
+interface Draggable<T : HasOrder> {
 
     fun startDrag(
         recyclerView: RecyclerView,
-        viewHolder: NoteViewHolder,
-        onGetCurrentList: () -> List<NotePresentationModel>,
-        onSubmitList: (noteList: (List<NotePresentationModel>)?, submitSuccess: () -> Unit) -> Unit,
-        onReorderSuccess: (List<NotePresentationModel>) -> Unit,
+        viewHolder: RecyclerView.ViewHolder,
+        onGetCurrentList: () -> List<T>,
+        onSubmitList: (noteList: (List<T>)?, submitSuccess: () -> Unit) -> Unit,
+        onReorderSuccess: (List<T>) -> Unit,
         onReorderCanceled: () -> Unit
     )
 
     fun changeDragDirections(recyclerView: RecyclerView, dragDirs: Int)
 }
 
-class ItemTouchDraggableImp(
+class ItemTouchDraggableImp<T : HasOrder>(
     dragAndDropDirs: Int,
-) : Draggable {
+) : Draggable<T> {
 
     var itemTouchHelper = setupDragAndDropTouchHelper(dragAndDropDirs)
     private var isDragging: Boolean = false
-    private var dragAndDropList: List<NotePresentationModel>? = null
+    private var dragAndDropList: List<T>? = null
 
     //Adapter callbacks
-    private var onGetCurrentList: (() -> List<NotePresentationModel>)? = null
-    private var onSubmitList: ((noteList: (List<NotePresentationModel>)?, submitSuccess: () -> Unit) -> Unit)? =
+    private var onGetCurrentList: (() -> List<T>)? = null
+    private var onSubmitList: ((noteList: (List<T>)?, submitSuccess: () -> Unit) -> Unit)? =
         null
-    private var onReorderSuccess: ((List<NotePresentationModel>) -> Unit)? = null
+    private var onReorderSuccess: ((List<T>) -> Unit)? = null
     private var onReorderCanceled: (() -> Unit)? = null
 
     override fun changeDragDirections(recyclerView: RecyclerView, dragDirs: Int) {
@@ -45,10 +44,10 @@ class ItemTouchDraggableImp(
 
     override fun startDrag(
         recyclerView: RecyclerView,
-        viewHolder: NoteViewHolder,
-        onGetCurrentList: () -> List<NotePresentationModel>,
-        onSubmitList: (noteList: (List<NotePresentationModel>)?, submitSuccess: () -> Unit) -> Unit,
-        onReorderSuccess: (List<NotePresentationModel>) -> Unit,
+        viewHolder: RecyclerView.ViewHolder,
+        onGetCurrentList: () -> List<T>,
+        onSubmitList: (noteList: (List<T>)?, submitSuccess: () -> Unit) -> Unit,
+        onReorderSuccess: (List<T>) -> Unit,
         onReorderCanceled: () -> Unit
     ) {
         this.onGetCurrentList = onGetCurrentList
@@ -76,7 +75,7 @@ class ItemTouchDraggableImp(
                     target: RecyclerView.ViewHolder
                 ): Boolean {
 
-                    val recyclerviewAdapter = recyclerView.adapter as NoteAdapter
+                    val recyclerviewAdapter = recyclerView.adapter as ListAdapter<*, *>
                     val fromPosition = viewHolder.adapterPosition
                     val toPosition = target.adapterPosition
                     isDragging = true
@@ -117,7 +116,7 @@ class ItemTouchDraggableImp(
         return ItemTouchHelper(itemTouchCallback)
     }
 
-    private fun getListToSwap(): List<NotePresentationModel> {
+    private fun getListToSwap(): List<T> {
         if (dragAndDropList == null) {
             dragAndDropList = onGetCurrentList?.invoke()?.toMutableList()
         }
@@ -125,7 +124,7 @@ class ItemTouchDraggableImp(
     }
 
     private fun swapListIndexPositions(
-        noteList: List<NotePresentationModel>,
+        noteList: List<T>,
         fromPosition: Int,
         toPosition: Int
     ) {
@@ -158,8 +157,6 @@ class ItemTouchDraggableImp(
     private fun changeOrderInListWithIndexPositions() {
         dragAndDropList?.forEachIndexed { index, taskPresentationModel ->
             taskPresentationModel.order = dragAndDropList!!.size - index - 1
-            //                    taskPresentationModel.order = index + 1
-            taskPresentationModel.isSelected = false
         }
     }
 
