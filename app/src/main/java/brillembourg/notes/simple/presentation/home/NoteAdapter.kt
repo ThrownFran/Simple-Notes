@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemNoteBinding
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.Draggable
-import brillembourg.notes.simple.presentation.ui_utils.DraggableImp
+import brillembourg.notes.simple.presentation.ui_utils.ItemTouchDraggableImp
 import brillembourg.notes.simple.presentation.ui_utils.setupTaskDiffCallback
 
 class NoteAdapter(
@@ -19,7 +19,7 @@ class NoteAdapter(
     val onReorderSuccess: (reorderedTaskList: List<NotePresentationModel>) -> Unit,
     val onReorderCanceled: () -> Unit
 ) : ListAdapter<NotePresentationModel, NoteViewHolder>(setupTaskDiffCallback()),
-    Draggable by DraggableImp(dragAndDropDirs) {
+    Draggable by ItemTouchDraggableImp(dragAndDropDirs) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         return NoteViewHolder(
@@ -36,7 +36,14 @@ class NoteAdapter(
             recyclerView = recyclerView,
             viewHolder = noteViewHolder,
             onGetCurrentList = { currentList },
-            onSubmitList = { noteList -> submitList(noteList) },
+
+            onSubmitList = { noteList, submitSuccess ->
+                submitList(noteList) {
+                    //Commit callback
+                    submitSuccess()
+                }
+            },
+
             onReorderSuccess = onReorderSuccess,
             onReorderCanceled = onReorderCanceled
         )

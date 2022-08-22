@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.presentation.ui_utils
 
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.presentation.home.NoteAdapter
@@ -7,8 +8,21 @@ import brillembourg.notes.simple.presentation.home.NoteViewHolder
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import java.util.*
 
+interface Draggable {
 
-class DraggableImp(
+    fun startDrag(
+        recyclerView: RecyclerView,
+        viewHolder: NoteViewHolder,
+        onGetCurrentList: () -> List<NotePresentationModel>,
+        onSubmitList: (noteList: (List<NotePresentationModel>)?, submitSuccess: () -> Unit) -> Unit,
+        onReorderSuccess: (List<NotePresentationModel>) -> Unit,
+        onReorderCanceled: () -> Unit
+    )
+
+    fun changeDragDirections(recyclerView: RecyclerView, dragDirs: Int)
+}
+
+class ItemTouchDraggableImp(
     dragAndDropDirs: Int,
 ) : Draggable {
 
@@ -18,7 +32,8 @@ class DraggableImp(
 
     //Adapter callbacks
     private var onGetCurrentList: (() -> List<NotePresentationModel>)? = null
-    private var onSubmitList: (((List<NotePresentationModel>)?) -> Unit)? = null
+    private var onSubmitList: ((noteList: (List<NotePresentationModel>)?, submitSuccess: () -> Unit) -> Unit)? =
+        null
     private var onReorderSuccess: ((List<NotePresentationModel>) -> Unit)? = null
     private var onReorderCanceled: (() -> Unit)? = null
 
@@ -32,7 +47,7 @@ class DraggableImp(
         recyclerView: RecyclerView,
         viewHolder: NoteViewHolder,
         onGetCurrentList: () -> List<NotePresentationModel>,
-        onSubmitList: ((List<NotePresentationModel>)?) -> Unit,
+        onSubmitList: (noteList: (List<NotePresentationModel>)?, submitSuccess: () -> Unit) -> Unit,
         onReorderSuccess: (List<NotePresentationModel>) -> Unit,
         onReorderCanceled: () -> Unit
     ) {
@@ -66,29 +81,13 @@ class DraggableImp(
                     val toPosition = target.adapterPosition
                     isDragging = true
 
-                    if (dragAndDropList == null) {
-                        dragAndDropList = onGetCurrentList?.invoke()?.toMutableList()
-                    }
-                    dragAndDropList?.let {
-                        if (fromPosition < toPosition) {
-                            for (i in fromPosition until toPosition) {
-                                Collections.swap(it, i, i + 1)
-                            }
-                        } else {
-                            for (i in fromPosition downTo toPosition + 1) {
-                                Collections.swap(it, i, i - 1)
-                            }
-                        }
-                    }
-
-
+                    dragAndDropList = getListToSwap()
+                    swapListIndexPositions(dragAndDropList!!, fromPosition, toPosition)
                     recyclerviewAdapter.notifyItemMoved(fromPosition, toPosition)
                     return true
                 }
 
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-
-                }
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
 
                 override fun clearView(
                     recyclerView: RecyclerView,
@@ -107,26 +106,10 @@ class DraggableImp(
                         return
                     }
 
-                    dragAndDropList?.forEachIndexed { index, taskPresentationModel ->
-                        taskPresentationModel.order = dragAndDropList!!.size - index - 1
-//                    taskPresentationModel.order = index + 1
-                        taskPresentationModel.isSelected = false
-                    }
+                    changeOrderInListWithIndexPositions()
+                    notifyListChanged(recyclerView)
 
-                    recyclerView.itemAnimator = null
-                    val state = recyclerView.layoutManager?.onSaveInstanceState()
-                    onSubmitList?.invoke(null)
-                    onSubmitList?.invoke(dragAndDropList) //TODO
-//                    {
-//                        recyclerView.post {
-//                            recyclerView.itemAnimator = DefaultItemAnimator()
-//                        }
-//                    }
-                    recyclerView.layoutManager?.onRestoreInstanceState(state)
-
-                    dragAndDropList?.let {
-                        onReorderSuccess?.invoke(it)
-                    }
+                    dragAndDropList?.let { onReorderSuccess?.invoke(it) }
                     dragAndDropList = null
                 }
             }
@@ -134,21 +117,55 @@ class DraggableImp(
         return ItemTouchHelper(itemTouchCallback)
     }
 
+    private fun getListToSwap(): List<NotePresentationModel> {
+        if (dragAndDropList == null) {
+            dragAndDropList = onGetCurrentList?.invoke()?.toMutableList()
+        }
+        return dragAndDropList!!
+    }
+
+    private fun swapListIndexPositions(
+        noteList: List<NotePresentationModel>,
+        fromPosition: Int,
+        toPosition: Int
+    ) {
+        noteList.let {
+            if (fromPosition < toPosition) {
+                for (i in fromPosition until toPosition) {
+                    Collections.swap(it, i, i + 1)
+                }
+            } else {
+                for (i in fromPosition downTo toPosition + 1) {
+                    Collections.swap(it, i, i - 1)
+                }
+            }
+        }
+    }
+
+    private fun notifyListChanged(recyclerView: RecyclerView) {
+        recyclerView.itemAnimator = null
+        val state = recyclerView.layoutManager?.onSaveInstanceState()
+
+        onSubmitList?.invoke(null) {}
+        onSubmitList?.invoke(dragAndDropList) {
+            recyclerView.post {
+                recyclerView.itemAnimator = DefaultItemAnimator()
+            }
+        }
+        recyclerView.layoutManager?.onRestoreInstanceState(state)
+    }
+
+    private fun changeOrderInListWithIndexPositions() {
+        dragAndDropList?.forEachIndexed { index, taskPresentationModel ->
+            taskPresentationModel.order = dragAndDropList!!.size - index - 1
+            //                    taskPresentationModel.order = index + 1
+            taskPresentationModel.isSelected = false
+        }
+    }
+
 }
 
-interface Draggable {
 
-    fun startDrag(
-        recyclerView: RecyclerView,
-        viewHolder: NoteViewHolder,
-        onGetCurrentList: () -> List<NotePresentationModel>,
-        onSubmitList: ((List<NotePresentationModel>)?) -> Unit,
-        onReorderSuccess: (List<NotePresentationModel>) -> Unit,
-        onReorderCanceled: () -> Unit
-    )
-
-    fun changeDragDirections(recyclerView: RecyclerView, dragDirs: Int)
-}
 
 
 
