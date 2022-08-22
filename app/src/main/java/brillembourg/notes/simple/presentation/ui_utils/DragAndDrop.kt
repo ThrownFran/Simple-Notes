@@ -1,26 +1,50 @@
 package brillembourg.notes.simple.presentation.ui_utils
 
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.presentation.home.NoteAdapter
+import brillembourg.notes.simple.presentation.home.NoteViewHolder
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import java.util.*
 
 
-class DraggableImp() : Draggable {
-    override var isDragging: Boolean = false
-    override var dragAndDrogList: List<NotePresentationModel>? = null
-}
+class DraggableImp(
+    dragAndDropDirs: Int,
+) : Draggable {
 
-interface Draggable {
+    var itemTouchHelper = setupDragAndDropTouchHelper(dragAndDropDirs)
+    private var isDragging: Boolean = false
+    private var dragAndDropList: List<NotePresentationModel>? = null
 
+    //Adapter callbacks
+    private var onGetCurrentList: (() -> List<NotePresentationModel>)? = null
+    private var onSubmitList: (((List<NotePresentationModel>)?) -> Unit)? = null
+    private var onReorderSuccess: ((List<NotePresentationModel>) -> Unit)? = null
+    private var onReorderCanceled: (() -> Unit)? = null
 
-    var dragAndDrogList: List<NotePresentationModel>?
-    var isDragging: Boolean
+    override fun changeDragDirections(recyclerView: RecyclerView, dragDirs: Int) {
+        itemTouchHelper = setupDragAndDropTouchHelper(dragDirs).apply {
+            attachToRecyclerView(recyclerView)
+        }
+    }
 
+    override fun startDrag(
+        recyclerView: RecyclerView,
+        viewHolder: NoteViewHolder,
+        onGetCurrentList: () -> List<NotePresentationModel>,
+        onSubmitList: ((List<NotePresentationModel>)?) -> Unit,
+        onReorderSuccess: (List<NotePresentationModel>) -> Unit,
+        onReorderCanceled: () -> Unit
+    ) {
+        this.onGetCurrentList = onGetCurrentList
+        this.onSubmitList = onSubmitList
+        this.onReorderSuccess = onReorderSuccess
+        this.onReorderCanceled = onReorderCanceled
+        itemTouchHelper.attachToRecyclerView(recyclerView)
+        itemTouchHelper.startDrag(viewHolder)
+    }
 
-    fun NoteAdapter.setupDragAndDropTouchHelper(dragAndDropDirs: Int): ItemTouchHelper {
+    private fun setupDragAndDropTouchHelper(dragAndDropDirs: Int): ItemTouchHelper {
         val itemTouchCallback =
             object : ItemTouchHelper.SimpleCallback(
                 dragAndDropDirs,
@@ -42,10 +66,10 @@ interface Draggable {
                     val toPosition = target.adapterPosition
                     isDragging = true
 
-                    if (dragAndDrogList == null) {
-                        dragAndDrogList = currentList.toMutableList()
+                    if (dragAndDropList == null) {
+                        dragAndDropList = onGetCurrentList?.invoke()?.toMutableList()
                     }
-                    dragAndDrogList?.let {
+                    dragAndDropList?.let {
                         if (fromPosition < toPosition) {
                             for (i in fromPosition until toPosition) {
                                 Collections.swap(it, i, i + 1)
@@ -78,38 +102,52 @@ interface Draggable {
 
                     isDragging = false
 
-                    if (dragAndDrogList == null) {
-                        onReorderCanceled.invoke()
+                    if (dragAndDropList == null) {
+                        onReorderCanceled?.invoke()
                         return
                     }
 
-                    dragAndDrogList?.forEachIndexed { index, taskPresentationModel ->
-                        taskPresentationModel.order = dragAndDrogList!!.size - index - 1
+                    dragAndDropList?.forEachIndexed { index, taskPresentationModel ->
+                        taskPresentationModel.order = dragAndDropList!!.size - index - 1
 //                    taskPresentationModel.order = index + 1
                         taskPresentationModel.isSelected = false
                     }
 
                     recyclerView.itemAnimator = null
                     val state = recyclerView.layoutManager?.onSaveInstanceState()
-                    submitList(null)
-                    submitList(dragAndDrogList) {
-                        recyclerView.post {
-                            recyclerView.itemAnimator = DefaultItemAnimator()
-                        }
-                    }
+                    onSubmitList?.invoke(null)
+                    onSubmitList?.invoke(dragAndDropList) //TODO
+//                    {
+//                        recyclerView.post {
+//                            recyclerView.itemAnimator = DefaultItemAnimator()
+//                        }
+//                    }
                     recyclerView.layoutManager?.onRestoreInstanceState(state)
 
-                    dragAndDrogList?.let {
-                        onReorderSuccess.invoke(it)
+                    dragAndDropList?.let {
+                        onReorderSuccess?.invoke(it)
                     }
-                    dragAndDrogList = null
+                    dragAndDropList = null
                 }
             }
 
         return ItemTouchHelper(itemTouchCallback)
     }
 
+}
 
+interface Draggable {
+
+    fun startDrag(
+        recyclerView: RecyclerView,
+        viewHolder: NoteViewHolder,
+        onGetCurrentList: () -> List<NotePresentationModel>,
+        onSubmitList: ((List<NotePresentationModel>)?) -> Unit,
+        onReorderSuccess: (List<NotePresentationModel>) -> Unit,
+        onReorderCanceled: () -> Unit
+    )
+
+    fun changeDragDirections(recyclerView: RecyclerView, dragDirs: Int)
 }
 
 

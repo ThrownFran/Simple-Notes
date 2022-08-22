@@ -16,30 +16,30 @@ class NoteAdapter(
     val recyclerView: RecyclerView,
     val onClick: (task: NotePresentationModel, clickedView: View) -> Unit,
     val onSelection: () -> Unit,
-    val onStartDrag: (() -> Unit)? = null,
     val onReorderSuccess: (reorderedTaskList: List<NotePresentationModel>) -> Unit,
     val onReorderCanceled: () -> Unit
 ) : ListAdapter<NotePresentationModel, NoteViewHolder>(setupTaskDiffCallback()),
-    Draggable by DraggableImp() {
-
-    var itemTouchHelper = setupDragAndDropTouchHelper(dragAndDropDirs)
+    Draggable by DraggableImp(dragAndDropDirs) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         return NoteViewHolder(
             binding = ItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false),
-            onReadyToDrag = {
-                onStartDrag?.invoke()
-                startDrag(it)
-            },
+            onReadyToDrag = onStartDrag(),
             onClick = onClick,
             onSelected = onSelection,
             getCurrentList = { currentList }
         )
     }
 
-    private fun startDrag(viewHolder: NoteViewHolder) {
-        itemTouchHelper.attachToRecyclerView(recyclerView)
-        itemTouchHelper.startDrag(viewHolder)
+    private fun onStartDrag() = { noteViewHolder: NoteViewHolder ->
+        startDrag(
+            recyclerView = recyclerView,
+            viewHolder = noteViewHolder,
+            onGetCurrentList = { currentList },
+            onSubmitList = { noteList -> submitList(noteList) },
+            onReorderSuccess = onReorderSuccess,
+            onReorderCanceled = onReorderCanceled
+        )
     }
 
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {

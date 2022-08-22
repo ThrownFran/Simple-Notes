@@ -112,10 +112,7 @@ class HomeFragment : Fragment(), MenuProvider {
             noteAdapter.currentList
         )
 
-        noteAdapter.itemTouchHelper =
-            noteAdapter.setupDragAndDropTouchHelper(getDragDirs(layoutType)).also {
-                it.attachToRecyclerView(recyclerView)
-            }
+        noteAdapter.changeDragDirections(recyclerView, getDragDirs(layoutType))
     }
 
     private fun clickStaggeredLayout() {
@@ -276,9 +273,8 @@ class HomeFragment : Fragment(), MenuProvider {
             onReorderCanceled = {
                 onReorderNotesCancelled()
             })
-            .also {
-                it.submitList(taskList)
-                it.itemTouchHelper.attachToRecyclerView(recyclerView)
+            .apply {
+                submitList(taskList)
             }
     }
 
