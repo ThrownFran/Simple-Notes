@@ -37,3 +37,25 @@ class MessageManagerImp : MessageManager {
 }
 
 data class Message(val id: Long, val message: UiText)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
