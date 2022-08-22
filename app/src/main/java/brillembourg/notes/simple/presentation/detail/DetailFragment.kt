@@ -52,7 +52,7 @@ class DetailFragment : Fragment(), MenuProvider {
 
     private fun setupMenu() {
         val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.STARTED)
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -61,14 +61,25 @@ class DetailFragment : Fragment(), MenuProvider {
 
     override fun onPrepareMenu(menu: Menu) {
         super.onPrepareMenu(menu)
+        val isNewTask = viewModel.uiDetailUiState.value.isNewTask
         val isArchived = viewModel.uiDetailUiState.value.isArchivedTask
-        menu.findItem(R.id.menu_note_unachive)
-            .apply { isVisible = isArchived }
+
+
+        menu.findItem(R.id.menu_note_unachive).apply {
+            isVisible = isArchived && !isNewTask
+        }
         menu.findItem(R.id.menu_note_archive).apply {
-            isVisible = !isArchived
+            isVisible = !isArchived && !isNewTask
         }
         menu.findItem(R.id.menu_note_delete).apply {
-            setShowAsAction(if (isArchived) MenuItem.SHOW_AS_ACTION_ALWAYS else MenuItem.SHOW_AS_ACTION_NEVER)
+            isVisible = !isNewTask
+            setShowAsAction(
+                if (isArchived && !isNewTask) {
+                    MenuItem.SHOW_AS_ACTION_ALWAYS
+                } else {
+                    MenuItem.SHOW_AS_ACTION_NEVER
+                }
+            )
         }
     }
 
