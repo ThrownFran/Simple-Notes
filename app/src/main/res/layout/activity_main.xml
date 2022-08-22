@@ -51,6 +51,14 @@
                 app:navGraph="@navigation/nav_graph"
                 tools:context=".presentation.base.MainActivity" />
 
+            <com.google.android.material.bottomappbar.BottomAppBar
+                android:id="@+id/bottomAppBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                style="@style/Widget.Material3.BottomAppBar"
+                app:menu="@menu/menu_home" />
+
             <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
                 android:id="@+id/home_fab"
                 android:layout_width="wrap_content"

@@ -7,23 +7,17 @@ import javax.inject.Inject
 
 class BackupAndRestoreNotesUseCase @Inject constructor(private val repository: BackupAndRestoreRepository) {
 
-    suspend fun backup(): Resource<Result> {
-        return repository.backup()
+    suspend fun backup(params: Params): Resource<Result> {
+        return repository.backup(params)
     }
 
-    suspend fun restore(): Resource<Result> {
-        return repository.restore()
+    suspend fun restore(params: Params): Resource<Result> {
+        return repository.restore(params)
     }
 
     class Result(val message: UiText)
-
-    suspend fun prepareBackup(params: PrepareBackupParams): Resource<PrepareBackupResult> {
-        return repository.prepareBackupNotes(params)
-    }
-
-    class PrepareBackupParams(val screen: Screen)
-    class PrepareBackupResult(val message: UiText)
+    class Params(val backupModel: BackupModel)
 }
 
-//Interface used to represent UI in domain layer
-interface Screen
+//Interface used to represent backupParams in domain layer
+interface BackupModel

@@ -3,7 +3,7 @@ package brillembourg.notes.simple.presentation.base
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.domain.use_cases.BackupAndRestoreNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.Screen
+import brillembourg.notes.simple.domain.use_cases.BackupModel
 import brillembourg.notes.simple.presentation.trash.MessageManager
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
@@ -38,16 +38,17 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun prepareBackupNotes(screen: Screen) {
-        viewModelScope.launch {
-            val params = BackupAndRestoreNotesUseCase.PrepareBackupParams(screen)
-            backupAndRestoreNotesUseCase.prepareBackup(params)
-        }
-    }
+//    fun prepareBackupNotes(backupModel: BackupModel) {
+//        viewModelScope.launch {
+//            val params = BackupAndRestoreNotesUseCase.PrepareBackupParams(backupModel)
+//            backupAndRestoreNotesUseCase.prepareBackup(params)
+//        }
+//    }
 
-    fun onRestoreNotes() {
+    fun onRestoreNotes(backupModel: BackupModel) {
         viewModelScope.launch {
-            when (val result = backupAndRestoreNotesUseCase.restore()) {
+            when (val result =
+                backupAndRestoreNotesUseCase.restore(BackupAndRestoreNotesUseCase.Params(backupModel))) {
                 is Resource.Success -> {
                     _mainUiState.value = _mainUiState.value.copy(
                         needsRestartApp = true,
@@ -60,9 +61,10 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun onBackupNotes() {
+    fun onBackupNotes(backupModel: BackupModel) {
         viewModelScope.launch {
-            when (val result = backupAndRestoreNotesUseCase.backup()) {
+            when (val result =
+                backupAndRestoreNotesUseCase.backup(BackupAndRestoreNotesUseCase.Params(backupModel))) {
                 is Resource.Success -> {
                     _mainUiState.value = _mainUiState.value.copy(
                         needsRestartApp = true,

@@ -1,52 +1,56 @@
 package brillembourg.notes.simple.data.room
 
 import android.content.Context
-import brillembourg.notes.simple.domain.use_cases.Screen
-import brillembourg.notes.simple.presentation.backup_restore.ContextDomain
+import brillembourg.notes.simple.domain.use_cases.BackupModel
 import de.raphaelebner.roomdatabasebackup.core.RoomBackup
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class RoomBackupLib(val context: Context) : BackupAndRestoreProvider {
+class RoomBackupLib() : RoomBackupHandler {
 
-    var backup: RoomBackup? = null
 
-    override suspend fun restoreInLocalStorage(): BackupAndRestoreProvider.BackupResult {
+    private fun BackupModel.toRoomLibModel(): RoomBackup = (this as BackupWrapperModel).roomBackup
+
+    override suspend fun restoreInLocalStorage(backupModel: BackupModel): RoomBackupHandler.BackupResult {
         return suspendCoroutine {
-            if (backup == null) throw IllegalArgumentException("Backup has not been prepared. (OnCreate in Activity)")
+            val backup = backupModel.toRoomLibModel()
 
-            backup?.apply {
+            backup.apply {
                 onCompleteListener { success, message, exitCode ->
-                    it.resume(BackupAndRestoreProvider.BackupResult(success, message))
-//                    backup = null
+                    it.resume(RoomBackupHandler.BackupResult(success, message))
                 }
-            }?.restore()
+            }.restore()
         }
     }
 
-    override suspend fun backupInLocalStorage(): BackupAndRestoreProvider.BackupResult {
+    override suspend fun backupInLocalStorage(backupModel: BackupModel): RoomBackupHandler.BackupResult {
         return suspendCoroutine {
-            if (backup == null) throw IllegalArgumentException("Backup has not been prepared. (OnCreate in Activity)")
-
-            backup?.apply {
+            val backup = backupModel.toRoomLibModel()
+            backup.apply {
                 onCompleteListener { success, message, exitCode ->
-                    it.resume(BackupAndRestoreProvider.BackupResult(success, message))
-//                    backup = null
+                    it.resume(RoomBackupHandler.BackupResult(success, message))
                 }
-            }?.backup()
+            }.backup()
         }
     }
+}
 
-    override fun prepareBackupInLocalStorage(screen: Screen) {
-        val context = (screen as ContextDomain).context
-        backup = RoomBackup(context)
-            .database(AppDatabase.Companion.invoke(context))
+class BackupWrapperModel(val roomBackup: RoomBackup) : BackupModel
+
+/**
+ * This builder requires Activity Context
+ */
+class RoomBackupBuilderImp(val context: Context) : RoomBackupBuilder {
+
+    override fun prepareBackupInLocalStorage(): BackupModel {
+        val roomBackup = RoomBackup(context)
+            .database(AppDatabase.invoke(context))
             .enableLogDebug(true)
 //            .backupIsEncrypted(true)
 //            .customEncryptPassword("YOUR_SECRET_PASSWORD")
             .backupLocation(RoomBackup.BACKUP_FILE_LOCATION_CUSTOM_DIALOG)
             .maxFileCount(5)
+        return BackupWrapperModel(roomBackup)
     }
-
-
 }
+

@@ -1,17 +1,17 @@
 package brillembourg.notes.simple.data
 
-import brillembourg.notes.simple.data.room.BackupAndRestoreProvider
+import brillembourg.notes.simple.data.room.RoomBackupHandler
 import brillembourg.notes.simple.domain.repositories.BackupAndRestoreRepository
 import brillembourg.notes.simple.domain.use_cases.BackupAndRestoreNotesUseCase
 import brillembourg.notes.simple.util.*
 
 class BackupAndRestoreRepositoryImp(
-    private val backupAndRestoreProvider: BackupAndRestoreProvider
+    private val roomBackupHandler: RoomBackupHandler
 ) : BackupAndRestoreRepository {
 
-    override suspend fun restore(): Resource<BackupAndRestoreNotesUseCase.Result> {
+    override suspend fun restore(params: BackupAndRestoreNotesUseCase.Params): Resource<BackupAndRestoreNotesUseCase.Result> {
         return safeCall {
-            val result = backupAndRestoreProvider.restoreInLocalStorage()
+            val result = roomBackupHandler.restoreInLocalStorage(params.backupModel)
             if (result.success) {
                 Resource.Success(BackupAndRestoreNotesUseCase.Result(UiText.RestoreSuccess))
             } else {
@@ -20,22 +20,14 @@ class BackupAndRestoreRepositoryImp(
         }
     }
 
-    override suspend fun backup(): Resource<BackupAndRestoreNotesUseCase.Result> {
+    override suspend fun backup(params: BackupAndRestoreNotesUseCase.Params): Resource<BackupAndRestoreNotesUseCase.Result> {
         return safeCall {
-            val result = backupAndRestoreProvider.backupInLocalStorage()
+            val result = roomBackupHandler.backupInLocalStorage(params.backupModel)
             if (result.success) {
                 Resource.Success(BackupAndRestoreNotesUseCase.Result(UiText.BackupSuccess))
             } else {
                 Resource.Error(BackupException("Backup error ${result.message}"))
             }
-        }
-    }
-
-    override suspend fun prepareBackupNotes(params: BackupAndRestoreNotesUseCase.PrepareBackupParams): Resource<BackupAndRestoreNotesUseCase.PrepareBackupResult> {
-        return safeCall {
-            backupAndRestoreProvider.prepareBackupInLocalStorage(params.screen)
-            val message = UiText.DynamicString("")
-            Resource.Success(BackupAndRestoreNotesUseCase.PrepareBackupResult(message))
         }
     }
 }

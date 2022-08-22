@@ -4,7 +4,6 @@ import brillembourg.notes.simple.domain.use_cases.BackupAndRestoreNotesUseCase
 import brillembourg.notes.simple.util.Resource
 
 interface BackupAndRestoreRepository {
-    suspend fun prepareBackupNotes(params: BackupAndRestoreNotesUseCase.PrepareBackupParams): Resource<BackupAndRestoreNotesUseCase.PrepareBackupResult>
-    suspend fun backup(): Resource<BackupAndRestoreNotesUseCase.Result>
-    suspend fun restore(): Resource<BackupAndRestoreNotesUseCase.Result>
+    suspend fun backup(params: BackupAndRestoreNotesUseCase.Params): Resource<BackupAndRestoreNotesUseCase.Result>
+    suspend fun restore(params: BackupAndRestoreNotesUseCase.Params): Resource<BackupAndRestoreNotesUseCase.Result>
 }

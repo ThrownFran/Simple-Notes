@@ -11,14 +11,16 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import brillembourg.notes.simple.R
+import brillembourg.notes.simple.data.room.RoomBackupBuilder
 import brillembourg.notes.simple.databinding.ActivityMainBinding
-import brillembourg.notes.simple.presentation.backup_restore.ContextDomain
+import brillembourg.notes.simple.domain.use_cases.BackupModel
 import brillembourg.notes.simple.presentation.extras.*
 import brillembourg.notes.simple.presentation.home.HomeFragmentDirections
 import brillembourg.notes.simple.presentation.ui_utils.contentViews
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.asString
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -30,16 +32,16 @@ class MainActivity : AppCompatActivity() {
     val binding: ActivityMainBinding by contentViews(R.layout.activity_main)
     private val viewModel: MainViewModel by viewModels()
 
+    @Inject
+    lateinit var roomBackupBuilder: RoomBackupBuilder
+    lateinit var backupModel: BackupModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding.viewmodel = viewModel
         setupToolbar()
         renderStates()
-        prepareBackup()
-    }
-
-    private fun prepareBackup() {
-        viewModel.prepareBackupNotes(ContextDomain(this))
+        backupModel = roomBackupBuilder.prepareBackupInLocalStorage()
     }
 
     private fun renderStates() {
@@ -146,7 +148,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun restoreNotes() {
-        viewModel.onRestoreNotes()
+        viewModel.onRestoreNotes(backupModel)
     }
 
     private fun navigateToTrash() {
@@ -161,7 +163,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun backupNotes() {
-        viewModel.onBackupNotes()
+        viewModel.onBackupNotes(backupModel)
     }
 
     private fun closeDrawer() {
