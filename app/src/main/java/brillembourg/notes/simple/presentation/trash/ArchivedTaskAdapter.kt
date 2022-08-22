@@ -7,14 +7,14 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemNoteBinding
 import brillembourg.notes.simple.presentation.home.NoteViewHolder
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
+import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.setupTaskDiffCallback
 
 class ArchivedTaskAdapter(
     val recyclerView: RecyclerView,
-    val onClick: (TaskPresentationModel, View) -> Unit,
+    val onClick: (NotePresentationModel, View) -> Unit,
     val onSelection: () -> Unit,
-) : ListAdapter<TaskPresentationModel, NoteViewHolder>(setupTaskDiffCallback()) {
+) : ListAdapter<NotePresentationModel, NoteViewHolder>(setupTaskDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         return NoteViewHolder(

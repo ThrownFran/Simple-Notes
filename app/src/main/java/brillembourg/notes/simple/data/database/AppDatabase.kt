@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.data.room
+package brillembourg.notes.simple.data.database
 
 import android.content.Context
 import androidx.room.Database

@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.presentation.extras
+package brillembourg.notes.simple.presentation.custom_views
 
 import android.content.Context
 import android.graphics.Canvas

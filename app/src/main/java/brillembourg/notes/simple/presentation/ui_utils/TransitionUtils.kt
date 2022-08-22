@@ -1,11 +1,9 @@
-package brillembourg.notes.simple.presentation.extras
+package brillembourg.notes.simple.presentation.custom_views
 
 import android.graphics.Color
 import android.view.View
 import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.FragmentNavigator
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.presentation.detail.DetailFragment
 import brillembourg.notes.simple.presentation.home.HomeFragment
@@ -17,10 +15,8 @@ fun Fragment.prepareTransition(rootView: View) {
     rootView.doOnPreDraw { startPostponedEnterTransition() }
 }
 
-fun DetailFragment.setEditNoteEnterTransition() {
+fun DetailFragment.setEditNoteEnteringTransition() {
     sharedElementEnterTransition = MaterialContainerTransform().apply {
-        // Scope the transition to a view in the hierarchy so we know it will be added under
-        // the bottom app bar but over the elevation scale of the exiting HomeFragment.
         drawingViewId = R.id.fragment_container_view
         duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
         scrimColor = Color.TRANSPARENT
@@ -61,8 +57,3 @@ fun HomeFragment.setTransitionToCreateNote() {
     }
 }
 
-fun setupExtrasToDetail(sharedView: View): FragmentNavigator.Extras {
-    return FragmentNavigatorExtras(
-        sharedView.findViewById<View>(R.id.task_roundcontraint) to sharedView.context.getString(R.string.home_shared_detail_container),
-    )
-}

@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.presentation.extras
+package brillembourg.notes.simple.presentation.custom_views
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -24,8 +24,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.presentation.base.MainActivity
+import brillembourg.notes.simple.presentation.ui_utils.asString
 import brillembourg.notes.simple.util.UiText
-import brillembourg.notes.simple.util.asString
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -105,10 +105,6 @@ fun Context.resolveAttribute(@AttrRes attribute: Int): Int {
 fun Fragment.showMessage(message: UiText, onMessageShown: (() -> Unit)? = null) {
     (activity as MainActivity).showMessage(message.asString(requireContext()), onMessageShown)
 }
-
-//fun Fragment.showMessage(message: String) {
-//    (activity as MainActivity).showMessage(message)
-//}
 
 fun View.showSoftKeyboard() {
     if (requestFocus()) {

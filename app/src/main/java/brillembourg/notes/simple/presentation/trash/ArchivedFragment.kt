@@ -15,11 +15,11 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentTrashBinding
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
-import brillembourg.notes.simple.presentation.extras.animateWithRecycler
-import brillembourg.notes.simple.presentation.extras.safeUiLaunch
-import brillembourg.notes.simple.presentation.extras.setTransitionToEditNote
-import brillembourg.notes.simple.presentation.extras.setupExtrasToDetail
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
+import brillembourg.notes.simple.presentation.custom_views.animateWithRecycler
+import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
+import brillembourg.notes.simple.presentation.custom_views.setTransitionToEditNote
+import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
+import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.*
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -173,12 +173,12 @@ class ArchivedFragment : Fragment(), MenuProvider {
         if (navigateToDetail.mustConsume) {
             val view =
                 binding.trashRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
-            navigateToDetail(navigateToDetail.taskPresentationModel!!, view)
+            navigateToDetail(navigateToDetail.notePresentationModel!!, view)
             viewModel.onNavigateToDetailCompleted()
         }
     }
 
-    private fun navigateToDetail(it: TaskPresentationModel, view: View) {
+    private fun navigateToDetail(it: NotePresentationModel, view: View) {
         //navigate to detail fragment
         val directions = ArchivedFragmentDirections.actionTrashFragmentToDetailFragment()
         directions.task = it
@@ -187,7 +187,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
         findNavController().navigate(directions, setupExtrasToDetail(view))
     }
 
-    private fun setupNoteList(taskList: List<TaskPresentationModel>) {
+    private fun setupNoteList(taskList: List<NotePresentationModel>) {
         if (binding.trashRecycler.adapter == null) {
             setupTaskRecycler(taskList)
         } else {
@@ -195,7 +195,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun setupTaskRecycler(taskList: List<TaskPresentationModel>) {
+    private fun setupTaskRecycler(taskList: List<NotePresentationModel>) {
         binding.trashRecycler.apply {
             adapter = buildTaskAdapter(this, taskList)
 
@@ -210,14 +210,14 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
     private fun updateListAndNotify(
         taskAdapter: ArchivedTaskAdapter,
-        taskList: List<TaskPresentationModel>
+        taskList: List<NotePresentationModel>
     ) {
         submitListAndScrollIfApplies(taskAdapter, taskList)
     }
 
     private fun submitListAndScrollIfApplies(
         taskAdapter: ArchivedTaskAdapter,
-        taskList: List<TaskPresentationModel>
+        taskList: List<NotePresentationModel>
     ) {
         val currentList = taskAdapter.currentList
         val isInsertingInList = currentList.size < taskList.size
@@ -230,7 +230,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
     private fun buildTaskAdapter(
         recyclerView: RecyclerView,
-        taskList: List<TaskPresentationModel>
+        taskList: List<NotePresentationModel>
     ): ArchivedTaskAdapter {
 
         return ArchivedTaskAdapter(
@@ -288,7 +288,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
     }
 
 
-    private fun onNoteClicked(it: TaskPresentationModel, view: View) {
+    private fun onNoteClicked(it: NotePresentationModel, view: View) {
         viewModel.onNoteClick(it)
     }
 

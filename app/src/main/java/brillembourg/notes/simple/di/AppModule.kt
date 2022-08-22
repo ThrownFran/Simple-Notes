@@ -18,11 +18,6 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun dateProvider(): DateProvider = DateProviderImp()
-
-
-    @Singleton
-    @Provides
     fun dispatchers(): Schedulers {
         return SchedulersImp()
     }
@@ -30,6 +25,11 @@ class AppModule {
     @Singleton
     @Provides
     fun messageManager(): MessageManager = MessageManagerImp()
+
+
+    @Singleton
+    @Provides
+    fun dateProvider(): DateProvider = DateProviderImp()
 
 }
 

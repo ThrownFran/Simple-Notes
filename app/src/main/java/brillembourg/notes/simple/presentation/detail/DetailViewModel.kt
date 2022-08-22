@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.*
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
+import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.presentation.trash.MessageManager
 import brillembourg.notes.simple.util.Resource
@@ -29,7 +29,7 @@ class DetailViewModel @Inject constructor(
     private val messageManager: MessageManager
 ) : ViewModel() {
 
-    private var currentTask: TaskPresentationModel? = null
+    private var currentTask: NotePresentationModel? = null
 
     private val _uiDetailState = MutableStateFlow(DetailUiState())
     val uiDetailUiState = _uiDetailState.asStateFlow()
@@ -48,19 +48,23 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun newTaskState() {
-        _uiDetailState.value = _uiDetailState.value.copy(
-            isNewTask = true,
-            focusInput = true
-        )
+        _uiDetailState.update {
+            it.copy(
+                isNewTask = true,
+                focusInput = true
+            )
+        }
     }
 
-    private fun editTaskState(it: TaskPresentationModel) {
-        _uiDetailState.value = _uiDetailState.value.copy(
-            userInput = UserInput(it.title, it.content),
-            unFocusInput = true,
-            isNewTask = false,
-            isArchivedTask = it.isArchived
-        )
+    private fun editTaskState(note: NotePresentationModel) {
+        _uiDetailState.update {
+            it.copy(
+                userInput = UserInput(note.title, note.content),
+                unFocusInput = true,
+                isNewTask = false,
+                isArchivedTask = note.isArchived
+            )
+        }
     }
 
     fun onArchive() {
@@ -131,22 +135,22 @@ class DetailViewModel @Inject constructor(
 
     fun onBackPressed() {
         if (hasNoChangesWithOriginalTask()) {
-            _uiDetailState.value = _uiDetailState.value.copy(navigateBack = true)
+            _uiDetailState.update { it.copy(navigateBack = true) }
             return
         }
         saveTask()
     }
 
     fun onFocusCompleted() {
-        _uiDetailState.value = _uiDetailState.value.copy(focusInput = false)
+        _uiDetailState.update { it.copy(focusInput = false) }
     }
 
     fun onUnFocusCompleted() {
-        _uiDetailState.value = _uiDetailState.value.copy(unFocusInput = false)
+        _uiDetailState.update { it.copy(unFocusInput = false) }
     }
 
     fun onMessageShown() {
-        _uiDetailState.value = _uiDetailState.value.copy(userMessage = null)
+        _uiDetailState.update { it.copy(userMessage = null) }
     }
 
     @OptIn(FlowPreview::class)
@@ -154,9 +158,12 @@ class DetailViewModel @Inject constructor(
         viewModelScope.launch {
             flow { emit(s.toString()) }
                 .debounce(100)
-                .collect {
-                    _uiDetailState.value.userInput =
-                        _uiDetailState.value.userInput.copy(content = it)
+                .collect { newText ->
+                    _uiDetailState.update {
+                        it.copy(
+                            userInput = _uiDetailState.value.userInput.copy(content = newText)
+                        )
+                    }
                 }
         }
     }
@@ -166,9 +173,12 @@ class DetailViewModel @Inject constructor(
         viewModelScope.launch {
             flow { emit(s.toString()) }
                 .debounce(100)
-                .collect {
-                    _uiDetailState.value.userInput =
-                        _uiDetailState.value.userInput.copy(title = it)
+                .collect { newText ->
+                    _uiDetailState.update {
+                        it.copy(
+                            userInput = _uiDetailState.value.userInput.copy(title = newText)
+                        )
+                    }
                 }
         }
     }
@@ -178,7 +188,7 @@ class DetailViewModel @Inject constructor(
         val userInputState = _uiDetailState.value.userInput
 
         if (userInputState.isNullOrEmpty()) {
-            _uiDetailState.value = _uiDetailState.value.copy(navigateBack = true)
+            _uiDetailState.update { it.copy(navigateBack = true) }
             return
         }
 
@@ -193,10 +203,12 @@ class DetailViewModel @Inject constructor(
 
             when (result) {
                 is Resource.Success -> {
-                    _uiDetailState.value = _uiDetailState.value.copy(
-                        userMessage = result.data.message,
-                        navigateBack = true
-                    )
+                    _uiDetailState.update {
+                        it.copy(
+                            userMessage = result.data.message,
+                            navigateBack = true
+                        )
+                    }
                 }
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
@@ -206,7 +218,7 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun showErrorMessage(e: Exception) {
-        _uiDetailState.value = _uiDetailState.value.copy(userMessage = getMessageFromError(e))
+        _uiDetailState.update { it.copy(userMessage = getMessageFromError(e)) }
     }
 
     private fun saveTask() {
@@ -220,7 +232,7 @@ class DetailViewModel @Inject constructor(
 
     private fun isEditing(): Boolean = currentTask != null
 
-    private fun updateTask(task: TaskPresentationModel) {
+    private fun updateTask(task: NotePresentationModel) {
         task.content = _uiDetailState.value.userInput.content ?: ""
         task.title = _uiDetailState.value.userInput.title
 
@@ -230,10 +242,12 @@ class DetailViewModel @Inject constructor(
 
             when (val result = saveNoteUseCase(params)) {
                 is Resource.Success -> {
-                    _uiDetailState.value = _uiDetailState.value.copy(
-                        userMessage = result.data.message,
-                        navigateBack = true
-                    )
+                    _uiDetailState.update {
+                        it.copy(
+                            userMessage = result.data.message,
+                            navigateBack = true
+                        )
+                    }
                 }
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit

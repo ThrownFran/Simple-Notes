@@ -10,13 +10,13 @@ import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.ListAdapter
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.presentation.home.NoteViewHolder
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
+import brillembourg.notes.simple.presentation.models.NotePresentationModel
 
 fun setupContextualActionBar(
     toolbar: Toolbar,
     @MenuRes menuId: Int,
     currentActionMode: ActionMode?,
-    adapter: ListAdapter<TaskPresentationModel, NoteViewHolder>,
+    adapter: ListAdapter<NotePresentationModel, NoteViewHolder>,
     onActionClick: (menuId: Int) -> Boolean,
     onSetTitle: (selectedSize: Int) -> String,
     onDestroyMyActionMode: () -> Unit

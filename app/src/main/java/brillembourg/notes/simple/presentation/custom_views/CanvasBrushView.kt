@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.presentation
+package brillembourg.notes.simple.presentation.custom_views
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -6,7 +6,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import brillembourg.notes.simple.presentation.extras.RoundContraintLayout
 
 
 class CanvasBrushView(context: Context, attrs: AttributeSet) :

@@ -11,14 +11,14 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import brillembourg.notes.simple.R
-import brillembourg.notes.simple.data.room.RoomBackupBuilder
+import brillembourg.notes.simple.data.database.RoomBackupBuilder
 import brillembourg.notes.simple.databinding.ActivityMainBinding
 import brillembourg.notes.simple.domain.use_cases.BackupModel
-import brillembourg.notes.simple.presentation.extras.*
+import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.home.HomeFragmentDirections
+import brillembourg.notes.simple.presentation.ui_utils.asString
 import brillembourg.notes.simple.presentation.ui_utils.contentViews
 import brillembourg.notes.simple.util.UiText
-import brillembourg.notes.simple.util.asString
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

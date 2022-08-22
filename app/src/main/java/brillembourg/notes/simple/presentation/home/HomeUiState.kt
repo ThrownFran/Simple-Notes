@@ -1,7 +1,7 @@
 package brillembourg.notes.simple.presentation.home
 
 import brillembourg.notes.simple.domain.models.NoteLayout
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
+import brillembourg.notes.simple.presentation.models.NotePresentationModel
 
 data class HomeUiState(
     val noteList: NoteList = NoteList(),
@@ -13,7 +13,7 @@ data class HomeUiState(
 )
 
 data class NoteList(
-    val notes: List<TaskPresentationModel> = ArrayList(),
+    val notes: List<NotePresentationModel> = ArrayList(),
     val mustRender: Boolean = false //To avoid rendering set false
 )
 
@@ -25,7 +25,7 @@ data class ShowArchiveNotesConfirmationState(
 data class NavigateToEditNote(
     val mustConsume: Boolean = false,
     val taskIndex: Int? = null,
-    val taskPresentationModel: TaskPresentationModel? = null,
+    val notePresentationModel: NotePresentationModel? = null,
 )
 
 /*Notes are selected and contextual bar is shown*/

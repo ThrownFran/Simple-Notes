@@ -5,13 +5,13 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemNoteBinding
-import brillembourg.notes.simple.presentation.extras.fromDpToPixel
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
+import brillembourg.notes.simple.presentation.custom_views.fromDpToPixel
+import brillembourg.notes.simple.presentation.models.NotePresentationModel
 
 class NoteViewHolder(
-    private val getCurrentList: () -> List<TaskPresentationModel>,
+    private val getCurrentList: () -> List<NotePresentationModel>,
     private val binding: ItemNoteBinding,
-    private val onClick: ((TaskPresentationModel, View) -> Unit)? = null,
+    private val onClick: ((NotePresentationModel, View) -> Unit)? = null,
     private val onSelected: (() -> Unit)? = null,
     private val onReadyToDrag: ((NoteViewHolder) -> Unit)? = null
 
@@ -60,7 +60,7 @@ class NoteViewHolder(
         toggleItemSelection()
     }
 
-    fun bind(task: TaskPresentationModel) {
+    fun bind(task: NotePresentationModel) {
         binding.task = task
         bindTitle(task)
         bindContent(task)
@@ -68,16 +68,16 @@ class NoteViewHolder(
         bindSelection(task)
     }
 
-    private fun bindDate(task: TaskPresentationModel) {
+    private fun bindDate(task: NotePresentationModel) {
         binding.taskTextDate.text = task.dateInLocal
     }
 
-    fun bindContent(task: TaskPresentationModel) {
+    fun bindContent(task: NotePresentationModel) {
 //            binding.taskTextContent.text = "${task.order}. ${task.content}"
         binding.taskTextContent.text = task.content
     }
 
-    fun bindSelection(task: TaskPresentationModel) {
+    fun bindSelection(task: NotePresentationModel) {
 //            binding.taskCardview.isChecked = task.isSelected
         if (task.isSelected) {
             setBackgroundSelected()
@@ -98,7 +98,7 @@ class NoteViewHolder(
             3f.fromDpToPixel(binding.taskCardview.context).toInt()
     }
 
-    fun bindTitle(task: TaskPresentationModel) {
+    fun bindTitle(task: NotePresentationModel) {
         with(binding.taskTextTitle) {
             isVisible = !task.title.isNullOrEmpty()
             text = task.title

@@ -1,7 +1,5 @@
-package brillembourg.notes.simple.data
+package brillembourg.notes.simple.data.database
 
-import brillembourg.notes.simple.data.room.AppDatabase
-import brillembourg.notes.simple.data.room.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
 class NoteDatabase(

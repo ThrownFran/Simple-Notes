@@ -10,11 +10,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.FragmentNavigator
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
-import brillembourg.notes.simple.presentation.extras.*
+import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,7 +36,7 @@ class DetailFragment : Fragment(), MenuProvider {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setEditNoteEnterTransition()
+        setEditNoteEnteringTransition()
         setupBackPhysicalButtonListener()
     }
 
@@ -243,6 +245,13 @@ class DetailFragment : Fragment(), MenuProvider {
         }
         requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
+}
 
-
+fun setupExtrasToDetail(sharedView: View): FragmentNavigator.Extras {
+    return FragmentNavigatorExtras(
+        //View from item list
+        sharedView.findViewById<View>(R.id.task_roundcontraint)
+                //String mapping detail view (transition_name)
+                to sharedView.context.getString(R.string.home_shared_detail_container),
+    )
 }

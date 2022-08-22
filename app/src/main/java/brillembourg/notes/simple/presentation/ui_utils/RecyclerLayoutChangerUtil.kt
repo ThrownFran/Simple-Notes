@@ -26,10 +26,6 @@ fun buildLayoutManager(context: Context, layoutType: LayoutType): RecyclerView.L
 
 fun buildVerticalManager(context: Context) = LinearLayoutManager(context)
 
-//fun buildVerticalManager(context: Context) = StaggeredGridLayoutManager(1,RecyclerView.VERTICAL).also {
-//    it.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS
-//}
-
 fun buildStaggeredManager(context: Context) =
     StaggeredGridLayoutManager(2, RecyclerView.VERTICAL).also {
         it.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS

@@ -1,10 +1,10 @@
 package brillembourg.notes.simple.di
 
 import android.content.Context
-import brillembourg.notes.simple.data.NoteDatabase
-import brillembourg.notes.simple.data.room.AppDatabase
-import brillembourg.notes.simple.data.room.RoomBackupHandler
-import brillembourg.notes.simple.data.room.RoomBackupLib
+import brillembourg.notes.simple.data.database.AppDatabase
+import brillembourg.notes.simple.data.database.NoteDatabase
+import brillembourg.notes.simple.data.database.RoomBackupHandler
+import brillembourg.notes.simple.data.database.RoomBackupLib
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,7 +14,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class LocalDataSourceModule {
+class DataSourceModule {
 
     @Singleton
     @Provides

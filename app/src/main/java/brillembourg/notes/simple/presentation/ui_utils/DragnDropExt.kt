@@ -16,10 +16,6 @@ fun NoteAdapter.setupDragAndDropTouchHelper(dragAndDropDirs: Int): ItemTouchHelp
             override fun isLongPressDragEnabled(): Boolean {
                 return false
             }
-//
-//            override fun getMoveThreshold(viewHolder: RecyclerView.ViewHolder): Float {
-//                return 0.1f
-//            }
 
             override fun onMove(
                 recyclerView: RecyclerView,

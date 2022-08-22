@@ -6,27 +6,23 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemNoteBinding
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
+import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.setupDragAndDropTouchHelper
 import brillembourg.notes.simple.presentation.ui_utils.setupTaskDiffCallback
 
 class NoteAdapter(
     dragAndDropDirs: Int,
     val recyclerView: RecyclerView,
-    val onClick: (task: TaskPresentationModel, clickedView: View) -> Unit,
+    val onClick: (task: NotePresentationModel, clickedView: View) -> Unit,
     val onSelection: () -> Unit,
     val onStartDrag: (() -> Unit)? = null,
-    val onReorderSuccess: (reorderedTaskList: List<TaskPresentationModel>) -> Unit,
+    val onReorderSuccess: (reorderedTaskList: List<NotePresentationModel>) -> Unit,
     val onReorderCanceled: () -> Unit
-) : ListAdapter<TaskPresentationModel, NoteViewHolder>(setupTaskDiffCallback()) {
+) : ListAdapter<NotePresentationModel, NoteViewHolder>(setupTaskDiffCallback()) {
 
-    var dragAndDrogList: List<TaskPresentationModel>? = null
+    var dragAndDrogList: List<NotePresentationModel>? = null
     var isDragging = false
     var itemTouchHelper = setupDragAndDropTouchHelper(dragAndDropDirs)
-
-//    override fun submitList(list: List<TaskPresentationModel>?) {
-//        super.submitList(list?.let { ArrayList(it) })
-//    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         return NoteViewHolder(

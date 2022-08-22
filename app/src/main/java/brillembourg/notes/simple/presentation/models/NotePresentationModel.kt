@@ -6,7 +6,7 @@ import brillembourg.notes.simple.domain.models.Note
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class TaskPresentationModel(
+data class NotePresentationModel(
     val id: Long = -1L,
     var title: String? = null,
     var content: String,
@@ -14,9 +14,9 @@ data class TaskPresentationModel(
     var order: Int,
     var isArchived: Boolean = false,
     var isSelected: Boolean = false
-): Parcelable
+) : Parcelable
 
-fun TaskPresentationModel.toDomain(dateProvider: DateProvider): Note {
+fun NotePresentationModel.toDomain(dateProvider: DateProvider): Note {
     return Note(
         id,
         title = title,
@@ -27,8 +27,8 @@ fun TaskPresentationModel.toDomain(dateProvider: DateProvider): Note {
     )
 }
 
-fun Note.toPresentation(dateProvider: DateProvider): TaskPresentationModel {
-    return TaskPresentationModel(
+fun Note.toPresentation(dateProvider: DateProvider): NotePresentationModel {
+    return NotePresentationModel(
         id = id,
         title = title,
         content = content,

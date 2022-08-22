@@ -1,8 +1,12 @@
 package brillembourg.notes.simple.di
 
 import android.content.Context
-import brillembourg.notes.simple.data.*
-import brillembourg.notes.simple.data.room.RoomBackupHandler
+import brillembourg.notes.simple.data.DateProvider
+import brillembourg.notes.simple.data.database.NoteDatabase
+import brillembourg.notes.simple.data.database.RoomBackupHandler
+import brillembourg.notes.simple.data.repositories.BackupAndRestoreRepositoryImp
+import brillembourg.notes.simple.data.repositories.NotesRepositoryImp
+import brillembourg.notes.simple.data.repositories.UserPreferencesRepositoryImp
 import brillembourg.notes.simple.domain.repositories.BackupAndRestoreRepository
 import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.domain.repositories.UserPrefRepository

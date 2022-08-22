@@ -6,7 +6,7 @@ import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.use_cases.*
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
+import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toPresentation
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
@@ -76,17 +76,17 @@ class ArchivedViewModel @Inject constructor(
         }
     }
 
-    fun onNoteClick(it: TaskPresentationModel) {
+    fun onNoteClick(it: NotePresentationModel) {
         navigateToDetail(it)
     }
 
-    private fun navigateToDetail(taskClicked: TaskPresentationModel) {
+    private fun navigateToDetail(taskClicked: NotePresentationModel) {
         _archivedUiState.update {
             it.copy(
                 navigateToEditNote = ArchivedUiState.NavigateToEditNote(
                     mustConsume = true,
                     taskIndex = trashUiState.value.taskList.indexOf(taskClicked),
-                    taskPresentationModel = taskClicked
+                    notePresentationModel = taskClicked
                 ),
                 selectionModeActive = null
             )

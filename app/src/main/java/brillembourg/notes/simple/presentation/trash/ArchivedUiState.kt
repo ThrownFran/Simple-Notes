@@ -1,10 +1,10 @@
 package brillembourg.notes.simple.presentation.trash
 
 import brillembourg.notes.simple.domain.models.NoteLayout
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
+import brillembourg.notes.simple.presentation.models.NotePresentationModel
 
 data class ArchivedUiState(
-    val taskList: List<TaskPresentationModel> = ArrayList(),
+    val taskList: List<NotePresentationModel> = ArrayList(),
     val noteLayout: NoteLayout = NoteLayout.Vertical,
     val selectionModeActive: SelectionModeActive? = null,
     var navigateToEditNote: NavigateToEditNote = NavigateToEditNote(false),
@@ -19,7 +19,7 @@ data class ArchivedUiState(
     data class NavigateToEditNote(
         val mustConsume: Boolean = false,
         val taskIndex: Int? = null,
-        val taskPresentationModel: TaskPresentationModel? = null,
+        val notePresentationModel: NotePresentationModel? = null,
     )
 
     /*Notes are selected and contextual bar is shown*/

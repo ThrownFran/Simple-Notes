@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.data.room
+package brillembourg.notes.simple.data.database
 
 import brillembourg.notes.simple.domain.use_cases.BackupModel
 

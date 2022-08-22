@@ -15,8 +15,12 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
-import brillembourg.notes.simple.presentation.extras.*
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
+import brillembourg.notes.simple.presentation.custom_views.animateWithRecycler
+import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
+import brillembourg.notes.simple.presentation.custom_views.setTransitionToCreateNote
+import brillembourg.notes.simple.presentation.custom_views.setTransitionToEditNote
+import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
+import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.*
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -188,7 +192,7 @@ class HomeFragment : Fragment(), MenuProvider {
         if (navigateToDetail.mustConsume) {
             val view =
                 binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
-            navigateToDetail(navigateToDetail.taskPresentationModel!!, view)
+            navigateToDetail(navigateToDetail.notePresentationModel!!, view)
             viewModel.onNavigateToDetailCompleted()
         }
     }
@@ -199,7 +203,7 @@ class HomeFragment : Fragment(), MenuProvider {
         findNavController().navigate(directions)
     }
 
-    private fun navigateToDetail(it: TaskPresentationModel, view: View) {
+    private fun navigateToDetail(it: NotePresentationModel, view: View) {
         //navigate to detail fragment
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         directions.task = it
@@ -212,7 +216,7 @@ class HomeFragment : Fragment(), MenuProvider {
         if (noteList.mustRender) setupNoteList(noteList.notes)
     }
 
-    private fun setupNoteList(taskList: List<TaskPresentationModel>) {
+    private fun setupNoteList(taskList: List<NotePresentationModel>) {
         if (binding.homeRecycler.adapter == null) {
             setupTaskRecycler(taskList)
         } else {
@@ -220,7 +224,7 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun setupTaskRecycler(taskList: List<TaskPresentationModel>) {
+    private fun setupTaskRecycler(taskList: List<NotePresentationModel>) {
         binding.homeRecycler.apply {
             val layoutType = viewModel.homeUiState.value.noteLayout.toLayoutType()
             adapter = buildTaskAdapter(this, taskList, getDragDirs(layoutType))
@@ -233,15 +237,15 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun updateListAndNotify(
         noteAdapter: NoteAdapter,
-        taskList: List<TaskPresentationModel>
+        taskList: List<NotePresentationModel>
     ) {
         submitListAndScrollIfApplies(noteAdapter, noteAdapter.currentList, taskList)
     }
 
     private fun submitListAndScrollIfApplies(
         noteAdapter: NoteAdapter,
-        currentList: List<TaskPresentationModel>,
-        taskList: List<TaskPresentationModel>
+        currentList: List<NotePresentationModel>,
+        taskList: List<NotePresentationModel>
     ) {
         val isInsertingInList = currentList.size < taskList.size
         noteAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
@@ -253,7 +257,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun buildTaskAdapter(
         recyclerView: RecyclerView,
-        taskList: List<TaskPresentationModel>,
+        taskList: List<NotePresentationModel>,
         dragDirs: Int
     ): NoteAdapter {
 
@@ -310,7 +314,7 @@ class HomeFragment : Fragment(), MenuProvider {
         else -> false
     }
 
-    private fun onReorderedNotes(tasks: List<TaskPresentationModel>) {
+    private fun onReorderedNotes(tasks: List<NotePresentationModel>) {
         viewModel.onReorderedNotes(tasks)
     }
 
@@ -318,7 +322,7 @@ class HomeFragment : Fragment(), MenuProvider {
         viewModel.onSelectionDismissed()
     }
 
-    private fun onNoteClicked(it: TaskPresentationModel) {
+    private fun onNoteClicked(it: NotePresentationModel) {
         viewModel.onNoteClick(it)
     }
 

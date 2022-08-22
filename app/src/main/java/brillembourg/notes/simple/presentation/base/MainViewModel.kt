@@ -25,10 +25,10 @@ class MainViewModel @Inject constructor(
     val mainUiState = _mainUiState.asStateFlow()
 
     init {
-        observeUserMessages()
+        observeAndNotifyUserMessages()
     }
 
-    private fun observeUserMessages() {
+    private fun observeAndNotifyUserMessages() {
         viewModelScope.launch {
             messageManager.message.collect { uiText ->
                 _mainUiState.update {
@@ -38,22 +38,17 @@ class MainViewModel @Inject constructor(
         }
     }
 
-//    fun prepareBackupNotes(backupModel: BackupModel) {
-//        viewModelScope.launch {
-//            val params = BackupAndRestoreNotesUseCase.PrepareBackupParams(backupModel)
-//            backupAndRestoreNotesUseCase.prepareBackup(params)
-//        }
-//    }
-
     fun onRestoreNotes(backupModel: BackupModel) {
         viewModelScope.launch {
             when (val result =
                 backupAndRestoreNotesUseCase.restore(BackupAndRestoreNotesUseCase.Params(backupModel))) {
                 is Resource.Success -> {
-                    _mainUiState.value = _mainUiState.value.copy(
-                        needsRestartApp = true,
-                        userToastMessage = result.data.message
-                    )
+                    _mainUiState.update {
+                        it.copy(
+                            needsRestartApp = true,
+                            userToastMessage = result.data.message
+                        )
+                    }
                 }
                 is Resource.Loading -> Unit
                 is Resource.Error -> showToastErrorMessage(result.exception)
@@ -66,10 +61,12 @@ class MainViewModel @Inject constructor(
             when (val result =
                 backupAndRestoreNotesUseCase.backup(BackupAndRestoreNotesUseCase.Params(backupModel))) {
                 is Resource.Success -> {
-                    _mainUiState.value = _mainUiState.value.copy(
-                        needsRestartApp = true,
-                        userToastMessage = result.data.message
-                    )
+                    _mainUiState.update {
+                        it.copy(
+                            needsRestartApp = true,
+                            userToastMessage = result.data.message
+                        )
+                    }
                 }
                 is Resource.Loading -> Unit
                 is Resource.Error -> showToastErrorMessage(result.exception)
@@ -78,12 +75,11 @@ class MainViewModel @Inject constructor(
     }
 
     private fun showToastErrorMessage(exception: Exception) {
-        _mainUiState.value =
-            _mainUiState.value.copy(userToastMessage = getMessageFromError(exception))
+        _mainUiState.update { it.copy(userToastMessage = getMessageFromError(exception)) }
     }
 
     fun onToastMessageShown() {
-        _mainUiState.value = _mainUiState.value.copy(userToastMessage = null)
+        _mainUiState.update { it.copy(userToastMessage = null) }
     }
 
     fun onUserMessageShown(uiText: UiText) {

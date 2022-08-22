@@ -5,10 +5,10 @@ import androidx.recyclerview.selection.*
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.presentation.home.NoteAdapter
 import brillembourg.notes.simple.presentation.home.NoteViewHolder
-import brillembourg.notes.simple.presentation.models.TaskPresentationModel
+import brillembourg.notes.simple.presentation.models.NotePresentationModel
 
 
-fun TaskPresentationModel.bindTracker(
+fun NotePresentationModel.bindTracker(
     idItem: Long,
     viewHolder: NoteViewHolder,
     tracker: SelectionTracker<Long>

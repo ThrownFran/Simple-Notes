@@ -1,6 +1,6 @@
-package brillembourg.notes.simple.data
+package brillembourg.notes.simple.data.repositories
 
-import brillembourg.notes.simple.data.room.RoomBackupHandler
+import brillembourg.notes.simple.data.database.RoomBackupHandler
 import brillembourg.notes.simple.domain.repositories.BackupAndRestoreRepository
 import brillembourg.notes.simple.domain.use_cases.BackupAndRestoreNotesUseCase
 import brillembourg.notes.simple.util.*

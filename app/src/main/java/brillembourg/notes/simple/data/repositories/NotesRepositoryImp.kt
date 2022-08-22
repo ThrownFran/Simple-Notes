@@ -1,7 +1,9 @@
-package brillembourg.notes.simple.data
+package brillembourg.notes.simple.data.repositories
 
-import brillembourg.notes.simple.data.room.toData
-import brillembourg.notes.simple.data.room.toDomain
+import brillembourg.notes.simple.data.DateProvider
+import brillembourg.notes.simple.data.database.NoteDatabase
+import brillembourg.notes.simple.data.database.toData
+import brillembourg.notes.simple.data.database.toDomain
 import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.util.GetTaskException
