@@ -11,17 +11,17 @@ fun showArchiveConfirmationDialog(
     onDismiss: (() -> Unit)? = null
 ) {
     val title =
-        if (size > 1) fragment.getString(R.string.move_tasks_to_trash) else fragment.getString(R.string.move_task_to_trash)
+        if (size > 1) fragment.getString(R.string.move_tasks_archive) else fragment.getString(R.string.move_task_archive)
 
     MaterialAlertDialogBuilder(
         fragment.requireContext()
     )
         .setTitle(title)
-        .setIcon(R.drawable.ic_baseline_delete_dark_24)
+        .setIcon(R.drawable.ic_baseline_archive_on_surface_24)
         //            .setMessage(resources.getString(R.string.supporting_text))
         .setNegativeButton(fragment.resources.getString(R.string.all_cancel)) { dialog, which ->
         }
-        .setPositiveButton(fragment.resources.getString(R.string.all_move_to_trash)) { dialog, which ->
+        .setPositiveButton(fragment.resources.getString(R.string.archive)) { dialog, which ->
             onPositive.invoke()
         }
         .setOnDismissListener {
@@ -46,7 +46,7 @@ fun showDeleteTasksDialog(
         fragment.requireContext()
     )
         .setTitle(title)
-        .setIcon(R.drawable.ic_baseline_delete_dark_24)
+        .setIcon(R.drawable.ic_baseline_delete_on_surface_24)
 //            .setMessage(resources.getString(R.string.supporting_text))
         .setNegativeButton(fragment.resources.getString(R.string.all_cancel)) { dialog, which ->
         }

@@ -268,7 +268,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
     }
 
     private fun onContextualActionItem(menuId: Int) = when (menuId) {
-        R.id.menu_context_menu_archive -> {
+        R.id.menu_context_menu_delete -> {
             viewModel.onShowConfirmDeleteNotes()
             true
         }

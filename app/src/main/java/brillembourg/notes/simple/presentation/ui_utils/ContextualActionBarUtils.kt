@@ -71,5 +71,5 @@ fun getNoteSelectedTitle(resources: Resources, selectedSize: Int): String {
         if (selectedSize > 1) resources.getString(R.string.notes) else resources.getString(R.string.note)
     return "$selectedSize ${noteString.lowercase()} ${
         resources.getString(R.string.selected).lowercase()
-    })"
+    }"
 }

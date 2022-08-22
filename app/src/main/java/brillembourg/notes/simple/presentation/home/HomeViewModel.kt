@@ -24,6 +24,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getNotesUseCase: GetNotesUseCase,
     private val archiveNotesUseCase: ArchiveNotesUseCase,
+    private val deleteNotesUseCase: DeleteNotesUseCase,
     private val reorderNotesUseCase: ReorderNotesUseCase,
     private val getUserPrefUseCase: GetUserPrefUseCase,
     private val saveUserPrefUseCase: SaveUserPrefUseCase,
@@ -166,6 +167,29 @@ class HomeViewModel @Inject constructor(
         messageManager.showMessage(message)
     }
 
+    fun onDeleteNotes() {
+        val tasksToDeleteIds = getSelectedTasks().map { it.id }
+        deleteNotes(tasksToDeleteIds)
+
+        _homeUiState.update {
+            it.copy(
+                showDeleteNotesConfirmation = null,
+                selectionModeActive = null
+            )
+        }
+    }
+
+    private fun deleteNotes(tasksToDeleteIds: List<Long>) {
+        viewModelScope.launch {
+            val params = DeleteNotesUseCase.Params(tasksToDeleteIds)
+            when (val result = deleteNotesUseCase(params)) {
+                is Resource.Success -> showMessage(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
+    }
+
     fun onArchiveNotes() {
 
         val tasksToDeleteIds = getSelectedTasks().map { it.id }
@@ -211,7 +235,7 @@ class HomeViewModel @Inject constructor(
 
     private fun getSelectedTasks() = _homeUiState.value.noteList.notes.filter { it.isSelected }
 
-    fun onShowConfirmArchiveNotes() {
+    fun onArchiveConfirmNotes() {
 
         _homeUiState.update {
             it.copy(
@@ -226,6 +250,10 @@ class HomeViewModel @Inject constructor(
         _homeUiState.update { it.copy(showArchiveNotesConfirmation = null) }
     }
 
+    fun onDismissConfirmDeleteShown() {
+        _homeUiState.update { it.copy(showDeleteNotesConfirmation = null) }
+    }
+
     fun onLayoutChange(noteLayout: NoteLayout) {
         _homeUiState.update { it.copy(noteLayout = noteLayout) }
         saveLayoutPreference(noteLayout)
@@ -234,6 +262,16 @@ class HomeViewModel @Inject constructor(
     private fun saveLayoutPreference(noteLayout: NoteLayout) {
         viewModelScope.launch {
             saveUserPrefUseCase(SaveUserPrefUseCase.Params(UserPreferences(noteLayout)))
+        }
+    }
+
+    fun onDeleteConfirm() {
+        _homeUiState.update {
+            it.copy(
+                showDeleteNotesConfirmation = ShowDeleteNotesConfirmationState(
+                    tasksToDeleteSize = getSelectedTasks().size
+                )
+            )
         }
     }
 

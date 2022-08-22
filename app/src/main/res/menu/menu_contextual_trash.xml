@@ -9,8 +9,8 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/menu_context_menu_archive"
-        android:icon="@drawable/ic_baseline_delete_light_24"
+        android:id="@+id/menu_context_menu_delete"
+        android:icon="@drawable/ic_baseline_delete_on_secondary_24"
         android:title="@string/archive"
         app:showAsAction="always" />
 

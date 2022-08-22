@@ -58,10 +58,6 @@ class HomeFragment : Fragment(), MenuProvider {
                 viewModel.onAddNoteClick()
             }
         }
-
-//        activityBinding?.homeFab?.setOnClickListener {
-//            viewModel.onAddNoteClick()
-//        }
     }
 
     private fun animateFabWithRecycler() {
@@ -147,6 +143,8 @@ class HomeFragment : Fragment(), MenuProvider {
 
                 showArchiveConfirmationState(homeUiState.showArchiveNotesConfirmation)
 
+                showDeleteConfirmationState(homeUiState.showDeleteNotesConfirmation)
+
                 noteListLayoutState(homeUiState.noteLayout)
             }
         }
@@ -158,6 +156,18 @@ class HomeFragment : Fragment(), MenuProvider {
             binding.homeRecycler,
             noteLayout.toLayoutType()
         )
+    }
+
+    private fun showDeleteConfirmationState(showDeleteConfirmationState: ShowDeleteNotesConfirmationState?) {
+        if (showDeleteConfirmationState != null) {
+            showDeleteTasksDialog(this, showDeleteConfirmationState.tasksToDeleteSize,
+                onPositive = {
+                    viewModel.onDeleteNotes()
+                },
+                onDismiss = {
+                    viewModel.onDismissConfirmDeleteShown()
+                })
+        }
     }
 
     private fun showArchiveConfirmationState(showArchiveConfirmationState: ShowArchiveNotesConfirmationState?) {
@@ -269,6 +279,8 @@ class HomeFragment : Fragment(), MenuProvider {
                 onNoteSelection()
             },
             onClick = { task, _ ->
+
+
                 onNoteClicked(task)
             },
             onReorderSuccess = { tasks ->
@@ -308,10 +320,18 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun onContextualActionItem(menuId: Int) = when (menuId) {
         R.id.menu_context_menu_archive -> {
-            clickArchiveTasks()
+            onArchiveTasks()
+            true
+        }
+        R.id.menu_context_menu_delete -> {
+            onDeleteTasks()
             true
         }
         else -> false
+    }
+
+    private fun onDeleteTasks() {
+        viewModel.onDeleteConfirm()
     }
 
     private fun onReorderedNotes(tasks: List<NotePresentationModel>) {
@@ -326,8 +346,8 @@ class HomeFragment : Fragment(), MenuProvider {
         viewModel.onNoteClick(it)
     }
 
-    private fun clickArchiveTasks() {
-        viewModel.onShowConfirmArchiveNotes()
+    private fun onArchiveTasks() {
+        viewModel.onArchiveConfirmNotes()
     }
 
     private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {

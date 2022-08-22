@@ -7,8 +7,8 @@
     <string name="all_delete">Delete</string>
     <string name="all_cancel">Cancel</string>
     <string name="delete_task_confirm">Confirm note(s) deletion?</string>
-    <string name="move_task_to_trash">Move selected note to trash?</string>
-    <string name="move_tasks_to_trash">Move selected notes to trash?</string>
+    <string name="move_task_archive">Archive selected note?</string>
+    <string name="move_tasks_archive">Archive selected notes?</string>
     <string name="all_move_to_trash">Move to trash</string>
     <string name="trash_title">Trash</string>
     <string name="all_staggered">Staggered</string>

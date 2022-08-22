@@ -9,7 +9,8 @@ data class HomeUiState(
     val selectionModeActive: SelectionModeActive? = null,
     val navigateToAddNote: Boolean = false,
     var navigateToEditNote: NavigateToEditNote = NavigateToEditNote(false),
-    val showArchiveNotesConfirmation: ShowArchiveNotesConfirmationState? = null
+    val showArchiveNotesConfirmation: ShowArchiveNotesConfirmationState? = null,
+    val showDeleteNotesConfirmation: ShowDeleteNotesConfirmationState? = null
 )
 
 data class NoteList(
@@ -20,6 +21,11 @@ data class NoteList(
 /*Show confirm to archive notes*/
 data class ShowArchiveNotesConfirmationState(
     val tasksToArchiveSize: Int
+)
+
+/*Show confirm to archive notes*/
+data class ShowDeleteNotesConfirmationState(
+    val tasksToDeleteSize: Int
 )
 
 data class NavigateToEditNote(
