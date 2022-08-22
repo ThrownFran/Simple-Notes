@@ -215,15 +215,13 @@ class DetailViewModel @Inject constructor(
     private fun saveTask(
         navigateBack: Boolean = true,
     ) {
-        if (isEditing()) {
+        if (currentTask != null) {
             currentTask?.let { updateTask(it, navigateBack) }
             return
         }
 
         createTask(navigateBack)
     }
-
-    private fun isEditing(): Boolean = !(_uiDetailState.value.isNewTask)
 
     private fun updateTask(
         task: NotePresentationModel,
