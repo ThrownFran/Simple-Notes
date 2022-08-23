@@ -1,8 +1,9 @@
 package brillembourg.notes.simple.presentation.home
-
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
+import brillembourg.notes.simple.domain.models.Note
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.use_cases.*
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getNotesUseCase: GetNotesUseCase,
@@ -29,15 +31,29 @@ class HomeViewModel @Inject constructor(
     private val getUserPrefUseCase: GetUserPrefUseCase,
     private val saveUserPrefUseCase: SaveUserPrefUseCase,
     private val dateProvider: DateProvider,
-    private val messageManager: MessageManager
+    private val messageManager: MessageManager,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _homeUiState = MutableStateFlow(HomeUiState())
+    private val uiStateKey = HomeUiState::javaClass.name
+
+    private val _homeUiState = MutableStateFlow(getSavedUiState() ?: HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
+
+    private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
 
     init {
         getPreferences()
         observeTaskList()
+        saveChangesInSavedStateObserver()
+    }
+
+    private fun saveChangesInSavedStateObserver() {
+        viewModelScope.launch {
+            homeUiState.collect {
+                savedStateHandle[uiStateKey] = it
+            }
+        }
     }
 
     private fun getPreferences() {
@@ -62,11 +78,17 @@ class HomeViewModel @Inject constructor(
                     when (result) {
                         is Resource.Success -> {
 
-                            _homeUiState.update {
-                                it.copy(
+                            _homeUiState.update { uiState ->
+                                uiState.copy(
                                     noteList = NoteList(
                                         notes = result.data.noteList
-                                            .map { it.toPresentation(dateProvider) }
+                                            .map { note ->
+                                                note.toPresentation(dateProvider)
+                                                    .apply {
+                                                        this.isSelected =
+                                                            isNoteSelectedInUi(uiState, note)
+                                                    }
+                                            }
                                             .sortedBy { taskPresentationModel -> taskPresentationModel.order }
                                             .asReversed(),
                                         mustRender = true)
@@ -82,6 +104,13 @@ class HomeViewModel @Inject constructor(
                 }
         }
     }
+
+    private fun isNoteSelectedInUi(
+        uiState: HomeUiState,
+        note: Note
+    ) = (uiState.noteList.notes
+        .firstOrNull() { note.id == it.id }?.isSelected
+        ?: false)
 
     fun onAddNoteClick() {
         _homeUiState.update {
@@ -277,3 +306,5 @@ class HomeViewModel @Inject constructor(
 
 
 }
+
+
