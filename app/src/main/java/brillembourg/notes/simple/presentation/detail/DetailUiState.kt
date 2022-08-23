@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.presentation.detail
 
+import android.os.Parcelable
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
 import androidx.databinding.library.baseAdapters.BR
@@ -7,7 +8,10 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class DetailUiState(
     val isNewTask: Boolean = true, //If is new note or an editing note
     val isArchivedTask: Boolean = false,
@@ -15,28 +19,37 @@ data class DetailUiState(
     val navigateBack: Boolean = false,
     val focusInput: Boolean = false,
     val unFocusInput: Boolean = false,
-) {
+) : Parcelable {
+
     fun getOnInputChangedFlow(): Flow<UserInput> {
-        return callbackFlow {
-            userInput.onInputChanged = { trySend(it) }
-            awaitClose { userInput.onInputChanged = null }
-        }.conflate()
+        return userInput.getOnInputChangedFlow()
+//        return callbackFlow {
+//            userInput.onInputChanged = { trySend(it) }
+//            awaitClose { userInput.onInputChanged = null }
+//        }.conflate()
     }
 }
 
 /**
  * Two way data binding with title and content
  */
+@Parcelize
 data class UserInput(
     var title: String = "",
     var content: String = "",
-    var onInputChanged: ((UserInput) -> Unit)? = null
-) : BaseObservable() {
+) : BaseObservable(), Parcelable {
 
-//    fun isNotEmpty() =
-//        (title != null && title.isNotEmpty()) || (content != null && content.isNotEmpty())
+    @IgnoredOnParcel
+    private var onInputChanged: ((UserInput) -> Unit)? = null
 
     fun isNullOrEmpty() = title.isNullOrEmpty() && content.isNullOrEmpty()
+
+    fun getOnInputChangedFlow(): Flow<UserInput> {
+        return callbackFlow {
+            onInputChanged = { trySend(it) }
+            awaitClose { onInputChanged = null }
+        }.conflate()
+    }
 
     @Bindable
     fun getTitleBinding(): String {
@@ -69,6 +82,6 @@ data class UserInput(
             notifyPropertyChanged(BR.contentBinding)
         }
     }
-
-
 }
+
+

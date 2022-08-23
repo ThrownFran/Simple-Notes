@@ -37,7 +37,7 @@ class HomeFragment : Fragment(), MenuProvider {
     private var _binding: FragmentHomeBinding? = null
     private lateinit var binding: FragmentHomeBinding
 
-    private var recylerViewState: Parcelable? = null
+    private var recyclerViewState: Parcelable? = null
     private var actionMode: ActionMode? = null
 
     override fun onCreateView(
@@ -353,11 +353,11 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {
-        recylerViewState?.let { layoutManager.onRestoreInstanceState(it) }
+        recyclerViewState?.let { layoutManager.onRestoreInstanceState(it) }
     }
 
     private fun saveRecyclerState() {
-        recylerViewState = binding.homeRecycler.layoutManager?.onSaveInstanceState()
+        recyclerViewState = binding.homeRecycler.layoutManager?.onSaveInstanceState()
     }
 
 }

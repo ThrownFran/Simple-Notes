@@ -22,35 +22,47 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val saveNoteUseCase: SaveNoteUseCase,
     private val createNoteUseCase: CreateNoteUseCase,
     private val deleteNotesUseCase: DeleteNotesUseCase,
     private val archiveNotesUseCase: ArchiveNotesUseCase,
     private val unArchiveNotesUseCase: UnArchiveNotesUseCase,
     private val dateProvider: DateProvider,
-    private val messageManager: MessageManager
+    private val messageManager: MessageManager,
 ) : ViewModel() {
 
-    private var currentTask: NotePresentationModel? = null
-    var messageToShowWhenNavBack: UiText? = null
+    private val uiStateKey = "detail_ui_state"
+    private val noteSavedStateKey = "note_to_edit"
 
-    private val _uiDetailState = MutableStateFlow(DetailUiState())
+    private var currentNotePresentation: NotePresentationModel? = null
+
+    private val _uiDetailState = MutableStateFlow(getSavedUiState() ?: DetailUiState())
     val uiDetailUiState = _uiDetailState.asStateFlow()
 
-    init {
-        currentTask =
-            DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).task?.copy() //copy to avoid reference in home
+    var messageToShowWhenNavBack: UiText? = null
 
-        currentTask?.let {
+    private fun getSavedUiState(): DetailUiState? = savedStateHandle.get<DetailUiState>(uiStateKey)
+    private fun getSavedTaskFromDeath(): NotePresentationModel? =
+        savedStateHandle.get<NotePresentationModel>(noteSavedStateKey)
+
+    init {
+        currentNotePresentation =
+                //Saved state from death restore
+            getSavedTaskFromDeath()?.copy() ?://copy to avoid reference in home
+                    //Argument from navigation
+                    DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).task?.copy()
+
+        currentNotePresentation?.let {
             editTaskState(it)
         }
 
-        if (currentTask == null) {
+        if (currentNotePresentation == null) {
             newTaskState()
         }
 
         onInputChangeFlow()
+        saveChangesInSavedStateObserver()
     }
 
     /*UserInput two way data binding*/
@@ -60,6 +72,9 @@ class DetailViewModel @Inject constructor(
                 .debounce(300)
                 .collect {
                     saveTask(navigateBack = false)
+
+                    //Save new input in state
+                    saveStateInSavedStateHandler()
                 }
         }
     }
@@ -79,7 +94,6 @@ class DetailViewModel @Inject constructor(
                 userInput = _uiDetailState.value.userInput.copy(
                     title = note.title ?: "",
                     content = note.content,
-//                    render = true
                 ),
                 unFocusInput = true,
                 isNewTask = false,
@@ -93,10 +107,10 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun archiveNote() {
-        if (currentTask?.isArchived == true) throw IllegalArgumentException("Cannot archive an archived note")
+        if (currentNotePresentation?.isArchived == true) throw IllegalArgumentException("Cannot archive an archived note")
 
         viewModelScope.launch {
-            val id = currentTask?.id ?: return@launch
+            val id = currentNotePresentation?.id ?: return@launch
             val result = archiveNotesUseCase.invoke(ArchiveNotesUseCase.Params(listOf(id)))
             when (result) {
                 is Resource.Success -> {
@@ -114,10 +128,10 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun unarchiveNote() {
-        if (currentTask?.isArchived == false) throw IllegalArgumentException("Cannot unarchive a non-archived note")
+        if (currentNotePresentation?.isArchived == false) throw IllegalArgumentException("Cannot unarchive a non-archived note")
 
         viewModelScope.launch {
-            val id = currentTask?.id ?: return@launch
+            val id = currentNotePresentation?.id ?: return@launch
             val result = unArchiveNotesUseCase.invoke(UnArchiveNotesUseCase.Params(listOf(id)))
             when (result) {
                 is Resource.Success -> {
@@ -139,9 +153,9 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun deleteNote() {
-        if (currentTask == null) throw IllegalArgumentException("Cannot delete note that is not created")
+        if (currentNotePresentation == null) throw IllegalArgumentException("Cannot delete note that is not created")
         viewModelScope.launch {
-            val id = currentTask?.id ?: return@launch
+            val id = currentNotePresentation?.id ?: return@launch
             val result = deleteNotesUseCase.invoke(DeleteNotesUseCase.Params(listOf(id)))
             when (result) {
                 is Resource.Success -> {
@@ -199,7 +213,7 @@ class DetailViewModel @Inject constructor(
                             navigateBack = navigateBack,
                         )
                     }
-                    currentTask = result.data.note.toPresentation(dateProvider)
+                    currentNotePresentation = result.data.note.toPresentation(dateProvider)
                 }
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
@@ -215,8 +229,8 @@ class DetailViewModel @Inject constructor(
     private fun saveTask(
         navigateBack: Boolean = true,
     ) {
-        if (currentTask != null) {
-            currentTask?.let { updateTask(it, navigateBack) }
+        if (currentNotePresentation != null) {
+            currentNotePresentation?.let { updateTask(it, navigateBack) }
             return
         }
 
@@ -251,8 +265,21 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun hasNoChangesWithOriginalTask() =
-        currentTask?.content == _uiDetailState.value.userInput.content
-                && currentTask?.title == _uiDetailState.value.userInput.title
+        currentNotePresentation?.content == _uiDetailState.value.userInput.content
+                && currentNotePresentation?.title == _uiDetailState.value.userInput.title
+
+    private fun saveChangesInSavedStateObserver() {
+        viewModelScope.launch {
+            uiDetailUiState.collect {
+                saveStateInSavedStateHandler()
+            }
+        }
+    }
+
+    private fun saveStateInSavedStateHandler() {
+        savedStateHandle[uiStateKey] = uiDetailUiState.value
+        savedStateHandle[noteSavedStateKey] = currentNotePresentation
+    }
 
 
 }

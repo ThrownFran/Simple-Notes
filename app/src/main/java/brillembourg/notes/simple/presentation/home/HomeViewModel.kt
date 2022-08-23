@@ -24,6 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val getNotesUseCase: GetNotesUseCase,
     private val archiveNotesUseCase: ArchiveNotesUseCase,
     private val deleteNotesUseCase: DeleteNotesUseCase,
@@ -32,10 +33,9 @@ class HomeViewModel @Inject constructor(
     private val saveUserPrefUseCase: SaveUserPrefUseCase,
     private val dateProvider: DateProvider,
     private val messageManager: MessageManager,
-    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val uiStateKey = HomeUiState::javaClass.name
+    private val uiStateKey = "home_ui_state"
 
     private val _homeUiState = MutableStateFlow(getSavedUiState() ?: HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()

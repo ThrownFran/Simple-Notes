@@ -186,13 +186,6 @@ class DetailFragment : Fragment(), MenuProvider {
         }
     }
 
-//    private fun setupTitleAndContent(userInput: UserInput) {
-//        if (userInput.render && userInput.isNotEmpty()) {
-//            setupTitle(userInput.title)
-//            setupContent(userInput.content)
-//        }
-//    }
-
     private fun focus() {
         binding.detailEditContent.apply {
             requestFocus()
@@ -204,18 +197,6 @@ class DetailFragment : Fragment(), MenuProvider {
         binding.detailLinear.clearFocus()
         binding.detailEditContent.hideKeyboard()
     }
-
-//    private fun setupTitle(title: String?) {
-//        if (title == binding.detailEditTitle.toString()) return
-//        Log.e("Detail Fragment", "setup title")
-//        binding.detailEditTitle.setText(title)
-//    }
-//
-//    private fun setupContent(content: String?) {
-//        if (content == binding.detailEditContent.toString()) return
-//        Log.e("Detail Fragment", "setup content")
-//        binding.detailEditContent.setText(content)
-//    }
 
     private fun finishView() {
         findNavController().navigateUp()
