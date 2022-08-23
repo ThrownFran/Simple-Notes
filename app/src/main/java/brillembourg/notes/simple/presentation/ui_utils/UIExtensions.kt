@@ -142,6 +142,17 @@ fun Context.copy(text: String) {
     }
 }
 
+fun Fragment.shareText(text: String) {
+    val sendIntent: Intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, text)
+        type = "text/plain"
+    }
+    val shareIntent = Intent.createChooser(sendIntent, null)
+    startActivity(shareIntent)
+}
+
+
 fun View.showSoftKeyboard() {
     if (requestFocus()) {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

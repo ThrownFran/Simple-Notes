@@ -8,6 +8,7 @@ import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
+import brillembourg.notes.simple.presentation.models.toCopyString
 import brillembourg.notes.simple.presentation.models.toPresentation
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
@@ -214,6 +215,34 @@ class ArchivedViewModel @Inject constructor(
         viewModelScope.launch {
             saveUserPrefUseCase(SaveUserPrefUseCase.Params(UserPreferences(noteLayout)))
         }
+    }
+
+    fun onShare() {
+        val tasksToCopy = getSelectedTasks()
+        _archivedUiState.update {
+            it.copy(
+                shareNoteAsString = tasksToCopy.toString(),
+                selectionModeActive = null
+            )
+        }
+    }
+
+    fun onShareCompleted() {
+        _archivedUiState.update { it.copy(shareNoteAsString = null) }
+    }
+
+    fun onCopy() {
+        val tasksToCopy = getSelectedTasks()
+        _archivedUiState.update {
+            it.copy(
+                copyToClipboard = tasksToCopy.toCopyString(),
+                selectionModeActive = null
+            )
+        }
+    }
+
+    fun onCopiedCompleted() {
+        _archivedUiState.update { it.copy(copyToClipboard = null) }
     }
 
 }

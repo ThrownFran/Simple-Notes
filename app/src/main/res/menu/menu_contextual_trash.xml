@@ -11,14 +11,20 @@
     <item
         android:id="@+id/menu_context_menu_unarchive"
         android:icon="@drawable/ic_baseline_unarchive_24"
-        android:title="@string/archive"
+        android:title="@string/all_unarchive"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/menu_context_menu_delete"
         android:icon="@drawable/ic_baseline_delete_on_secondary_24"
-        android:title="@string/archive"
+        android:title="@string/delete"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/menu_context_share"
+        android:icon="@drawable/ic_baseline_share_24"
+        android:title="@string/all_share"
+        app:showAsAction="ifRoom" />
 
 
 </menu>

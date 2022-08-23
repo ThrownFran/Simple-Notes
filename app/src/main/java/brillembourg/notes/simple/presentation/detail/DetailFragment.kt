@@ -112,21 +112,31 @@ class DetailFragment : Fragment(), MenuProvider {
             R.id.menu_note_copy -> {
                 onCopy()
             }
+
+            R.id.menu_note_share -> {
+                onShare()
+            }
         }
         return false
     }
 
-    private fun onCopy() {
+    private fun onShare() {
+        shareText(generateTextToCopy())
+    }
+
+
+    private fun generateTextToCopy(): String {
         val title = viewModel.uiDetailUiState.value.userInput.title
         val content = viewModel.uiDetailUiState.value.userInput.content
 
-        //TODO
-        val textCopied = StringBuilder(title)
+        return StringBuilder(title)
             .append((if (title.isNotEmpty()) "\n\n" else ""))
             .append(content)
             .toString()
+    }
 
-        copy(textCopied)
+    private fun onCopy() {
+        copy(generateTextToCopy())
     }
 
     private fun unfocusScreenWhenKeyboardHidden() {

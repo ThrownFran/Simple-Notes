@@ -15,6 +15,7 @@ data class HomeUiState(
     val showArchiveNotesConfirmation: ShowArchiveNotesConfirmationState? = null,
     val showDeleteNotesConfirmation: ShowDeleteNotesConfirmationState? = null,
     val copyToClipboard: String? = null,
+    val shareNoteAsString: String? = null
 ) : Parcelable
 
 @Parcelize

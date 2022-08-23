@@ -157,7 +157,16 @@ class HomeFragment : Fragment(), MenuProvider {
                 noteListLayoutState(homeUiState.noteLayout)
 
                 copyClipboardState(homeUiState.copyToClipboard)
+
+                shareNotesAsStringState(homeUiState.shareNoteAsString)
             }
+        }
+    }
+
+    private fun shareNotesAsStringState(shareNoteAsString: String?) {
+        shareNoteAsString?.let {
+            shareText(shareNoteAsString)
+            viewModel.onShareCompleted()
         }
     }
 
@@ -346,14 +355,24 @@ class HomeFragment : Fragment(), MenuProvider {
         }
 
         R.id.menu_context_copy -> {
-            onCopiedNotes()
+            onCopyNotes()
             true
         }
+
+        R.id.menu_context_share -> {
+            onShareNotes()
+            true
+        }
+
         else -> false
     }
 
-    private fun onCopiedNotes() {
-        viewModel.onCopied()
+    private fun onShareNotes() {
+        viewModel.onShare()
+    }
+
+    private fun onCopyNotes() {
+        viewModel.onCopy()
     }
 
     private fun onDeleteTasks() {

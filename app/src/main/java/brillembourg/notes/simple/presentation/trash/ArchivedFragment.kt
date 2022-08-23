@@ -15,9 +15,7 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentTrashBinding
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
-import brillembourg.notes.simple.presentation.custom_views.animateWithRecycler
-import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
-import brillembourg.notes.simple.presentation.custom_views.setTransitionToEditNote
+import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
@@ -122,7 +120,25 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
                 noteLayoutState(uiState.noteLayout)
 
+                copyClipboardState(uiState.copyToClipboard)
+
+                shareNotesAsStringState(uiState.shareNoteAsString)
+
             }
+        }
+    }
+
+    private fun shareNotesAsStringState(shareNoteAsString: String?) {
+        shareNoteAsString?.let {
+            shareText(shareNoteAsString)
+            viewModel.onShareCompleted()
+        }
+    }
+
+    private fun copyClipboardState(copyToClipboard: String?) {
+        copyToClipboard?.let {
+            copy(it)
+            viewModel.onCopiedCompleted()
         }
     }
 
@@ -271,7 +287,19 @@ class ArchivedFragment : Fragment(), MenuProvider {
             onUnarchiveTasks()
             true
         }
+
+        R.id.menu_context_share -> {
+            onShareNotes()
+            true
+        }
+
+
         else -> false
+    }
+
+
+    private fun onShareNotes() {
+        viewModel.onShare()
     }
 
     private fun onDeleteNotes() {

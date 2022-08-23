@@ -52,3 +52,11 @@ fun NotePresentationModel.toCopyString(): String {
         .append(content)
         .toString()
 }
+
+fun List<NotePresentationModel>.toCopyString(): String {
+    var generatedText = ""
+    this.map {
+        generatedText = generatedText + it.toCopyString() + "\n\n"
+    }
+    return generatedText
+}

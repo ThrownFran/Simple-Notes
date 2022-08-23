@@ -299,15 +299,28 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun onCopied() {
+    fun onShare() {
         val tasksToCopy = getSelectedTasks()
-
-        var generatedText = ""
-        tasksToCopy.map {
-            generatedText = generatedText + it.toCopyString() + "\n\n"
+        _homeUiState.update {
+            it.copy(
+                shareNoteAsString = tasksToCopy.toString(),
+                selectionModeActive = null
+            )
         }
+    }
 
-        _homeUiState.update { it.copy(copyToClipboard = generatedText, selectionModeActive = null) }
+    fun onShareCompleted() {
+        _homeUiState.update { it.copy(shareNoteAsString = null) }
+    }
+
+    fun onCopy() {
+        val tasksToCopy = getSelectedTasks()
+        _homeUiState.update {
+            it.copy(
+                copyToClipboard = tasksToCopy.toCopyString(),
+                selectionModeActive = null
+            )
+        }
     }
 
     fun onCopiedCompleted() {
