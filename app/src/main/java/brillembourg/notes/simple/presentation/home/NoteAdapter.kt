@@ -1,7 +1,6 @@
 package brillembourg.notes.simple.presentation.home
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -14,7 +13,7 @@ import brillembourg.notes.simple.presentation.ui_utils.setupTaskDiffCallback
 class NoteAdapter(
     dragAndDropDirs: Int,
     val recyclerView: RecyclerView,
-    val onClick: (task: NotePresentationModel, clickedView: View) -> Unit,
+    val onClick: (task: NotePresentationModel) -> Unit,
     val onSelection: () -> Unit,
     val onReorderSuccess: (reorderedTaskList: List<NotePresentationModel>) -> Unit,
     val onReorderCanceled: () -> Unit
@@ -39,8 +38,7 @@ class NoteAdapter(
 
             onSubmitList = { noteList, submitSuccess ->
                 submitList(noteList) {
-                    //Commit callback
-                    submitSuccess()
+                    submitSuccess() //Commit callback
                 }
             },
 

@@ -20,7 +20,13 @@ import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
 import brillembourg.notes.simple.presentation.custom_views.setTransitionToEditNote
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
-import brillembourg.notes.simple.presentation.ui_utils.*
+import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.LayoutType
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.buildLayoutManager
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.changeLayout
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.toLayoutType
+import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
+import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -95,19 +101,6 @@ class ArchivedFragment : Fragment(), MenuProvider {
         }
         return false
     }
-
-//    private fun clickChangeLayout(
-//        recyclerView: RecyclerView,
-//        layoutType: LayoutType
-//    ) {
-//        val taskAdapter: ArchivedTaskAdapter? = recyclerView.adapter as ArchivedTaskAdapter?
-//
-//        changeLayout(
-//            recyclerView,
-//            layoutType,
-//            taskAdapter?.currentList
-//        )
-//    }
 
     override fun onDestroyView() {
         saveRecyclerState()
@@ -238,8 +231,8 @@ class ArchivedFragment : Fragment(), MenuProvider {
             onSelection = {
                 onNoteSelection()
             },
-            onClick = { task, clickedView ->
-                onNoteClicked(task, clickedView)
+            onClick = { task ->
+                onNoteClicked(task)
             })
             .apply {
                 submitList(taskList)
@@ -288,34 +281,9 @@ class ArchivedFragment : Fragment(), MenuProvider {
     }
 
 
-    private fun onNoteClicked(it: NotePresentationModel, view: View) {
+    private fun onNoteClicked(it: NotePresentationModel) {
         viewModel.onNoteClick(it)
     }
-
-//    private fun showDeleteTasksDialog(
-//        size: Int,
-//        onDismiss: () -> Unit
-//    ) {
-//
-//        val title =
-//            if (size <= 1) getString(R.string.delete_task_permanently) else getString(R.string.delete_tasks_permanently)
-//
-//        MaterialAlertDialogBuilder(
-//            requireContext()
-//        )
-//            .setTitle(title)
-//            .setIcon(R.drawable.ic_baseline_delete_dark_24)
-////            .setMessage(resources.getString(R.string.supporting_text))
-//            .setNegativeButton(resources.getString(R.string.all_cancel)) { dialog, which ->
-//            }
-//            .setPositiveButton(resources.getString(R.string.all_delete)) { dialog, which ->
-//                onDeleteNotes()
-//            }.setOnDismissListener {
-//                onDismiss.invoke()
-//            }
-//            .showWithLifecycle(viewLifecycleOwner)
-//    }
-
 
     private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {
         recylerViewState?.let { layoutManager.onRestoreInstanceState(it) }

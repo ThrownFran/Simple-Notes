@@ -1,7 +1,6 @@
 package brillembourg.notes.simple.presentation.trash
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -12,7 +11,7 @@ import brillembourg.notes.simple.presentation.ui_utils.setupTaskDiffCallback
 
 class ArchivedTaskAdapter(
     val recyclerView: RecyclerView,
-    val onClick: (NotePresentationModel, View) -> Unit,
+    val onClick: (NotePresentationModel) -> Unit,
     val onSelection: () -> Unit,
 ) : ListAdapter<NotePresentationModel, NoteViewHolder>(setupTaskDiffCallback()) {
 

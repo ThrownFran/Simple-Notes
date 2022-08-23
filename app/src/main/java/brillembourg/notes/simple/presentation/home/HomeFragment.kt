@@ -18,7 +18,11 @@ import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
-import brillembourg.notes.simple.presentation.ui_utils.*
+import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.*
+import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
+import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
+import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -278,9 +282,7 @@ class HomeFragment : Fragment(), MenuProvider {
             onSelection = {
                 onNoteSelection()
             },
-            onClick = { task, _ ->
-
-
+            onClick = { task ->
                 onNoteClicked(task)
             },
             onReorderSuccess = { tasks ->

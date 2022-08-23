@@ -1,63 +1,42 @@
 package brillembourg.notes.simple.presentation.home
 
-import android.content.Context
-import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemNoteBinding
 import brillembourg.notes.simple.presentation.custom_views.fromDpToPixel
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
+import brillembourg.notes.simple.presentation.ui_utils.Selectable
+import brillembourg.notes.simple.presentation.ui_utils.SelectableImp
 
 class NoteViewHolder(
     private val getCurrentList: () -> List<NotePresentationModel>,
     private val binding: ItemNoteBinding,
-    private val onClick: ((NotePresentationModel, View) -> Unit)? = null,
+    onClick: ((NotePresentationModel) -> Unit)? = null,
     private val onSelected: (() -> Unit)? = null,
     private val onReadyToDrag: ((NoteViewHolder) -> Unit)? = null
-
-) :
-    RecyclerView.ViewHolder(binding.root) {
+) : RecyclerView.ViewHolder(binding.root),
+    Selectable<NotePresentationModel> by SelectableImp(getCurrentList) {
 
     init {
         setupClickListeners()
+        setupSelection(
+            bindSelection = { note -> bindSelection(note) },
+            onSelected = { onSelected?.invoke() },
+            onClickWithNoSelection = onClick,
+            onReadyToDrag = { onReadyToDrag?.invoke(this) }
+        )
     }
 
     private fun setupClickListeners() {
-        binding.taskCardview.setOnClickListener { click() }
+
+        binding.taskCardview.setOnClickListener {
+            onItemClick(adapterPosition, getCurrentList()[adapterPosition])
+        }
 
         binding.taskCardview.setOnLongClickListener {
-            if (isSelectionNotVisible()) {
-                longClickInNormalState()
-            } else {
-                longClickInSelectionVisible()
-            }
+            onItemSelection(adapterPosition, getCurrentList()[adapterPosition])
             true
         }
-    }
-
-    private fun longClickInSelectionVisible() {
-        toggleItemSelection()
-    }
-
-    private fun longClickInNormalState() {
-        startDrag()
-        toggleItemSelection()
-    }
-
-    private fun click() {
-        if (isSelectionVisible()) {
-            clickInSelectionVisible()
-            return
-        }
-        clickInNormalState()
-    }
-
-    private fun clickInNormalState() {
-        onClick?.invoke(getCurrentList()[adapterPosition], binding.root)
-    }
-
-    private fun clickInSelectionVisible() {
-        toggleItemSelection()
     }
 
     fun bind(task: NotePresentationModel) {
@@ -78,7 +57,6 @@ class NoteViewHolder(
     }
 
     fun bindSelection(task: NotePresentationModel) {
-//            binding.taskCardview.isChecked = task.isSelected
         if (task.isSelected) {
             setBackgroundSelected()
         } else {
@@ -105,25 +83,5 @@ class NoteViewHolder(
         }
     }
 
-    private fun isSelectionNotVisible() = !isSelectionVisible()
-
-    private fun toggleItemSelection() {
-        getCurrentList()[adapterPosition]?.let {
-            it.isSelected = !it.isSelected
-            bindSelection(it)
-            onSelected?.invoke()
-        }
-    }
-
-    private fun isSelectionVisible(): Boolean =
-        getCurrentList().any { it.isSelected }
-
-    private fun startDrag() {
-        onReadyToDrag?.invoke(this)
-    }
-
-    fun pxFromDp(context: Context, dp: Float): Float {
-        return dp * context.getResources().getDisplayMetrics().density
-    }
 
 }

@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.presentation.ui_utils
+package brillembourg.notes.simple.presentation.ui_utils.recycler_view
 
 import android.content.Context
 import androidx.recyclerview.widget.ItemTouchHelper
