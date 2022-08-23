@@ -78,7 +78,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
     override fun onPrepareMenu(menu: Menu) {
         super.onPrepareMenu(menu)
-        val layoutType = viewModel.trashUiState.value.noteLayout.toLayoutType()
+        val layoutType = viewModel.archivedUiState.value.noteLayout.toLayoutType()
         menu.findItem(R.id.menu_home_vertical)
             .apply { isVisible = layoutType == LayoutType.Staggered }
         menu.findItem(R.id.menu_home_staggered)
@@ -107,12 +107,23 @@ class ArchivedFragment : Fragment(), MenuProvider {
         super.onDestroyView()
     }
 
+//    override fun onSaveInstanceState(outState: Bundle) {
+//        saveRecyclerState()
+//        outState.putParcelable("recycler_position",recylerViewState)
+//        super.onSaveInstanceState(outState)
+//    }
+//
+//    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+//        super.onViewStateRestored(savedInstanceState)
+//        recylerViewState = savedInstanceState?.getParcelable("recycler_position")
+//    }
+
     private fun renderStates() {
 
         safeUiLaunch {
-            viewModel.trashUiState.collect { uiState: ArchivedUiState ->
+            viewModel.archivedUiState.collect { uiState: ArchivedUiState ->
 
-                setupNoteList(uiState.taskList)
+                setupNoteList(uiState.noteList)
 
                 selectionModeState(uiState.selectionModeActive)
 
@@ -192,12 +203,14 @@ class ArchivedFragment : Fragment(), MenuProvider {
         binding.trashRecycler.apply {
             adapter = buildTaskAdapter(this, taskList)
 
-            val layoutType = viewModel.trashUiState.value.noteLayout.toLayoutType()
+            val layoutType = viewModel.archivedUiState.value.noteLayout.toLayoutType()
             layoutManager = buildLayoutManager(context, layoutType).also { layoutManager ->
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
             (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
             isNestedScrollingEnabled = true
+            adapter?.stateRestorationPolicy =
+                RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
     }
 

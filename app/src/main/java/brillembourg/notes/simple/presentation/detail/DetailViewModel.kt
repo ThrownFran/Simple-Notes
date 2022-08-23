@@ -35,24 +35,25 @@ class DetailViewModel @Inject constructor(
     private val uiStateKey = "detail_ui_state"
     private val noteSavedStateKey = "note_to_edit"
 
-    private var currentNotePresentation: NotePresentationModel? = null
+    private var currentNotePresentation: NotePresentationModel? =
+        getSavedTaskFromDeath()?.copy() //copy to avoid reference in home
+            ?: getSavedNoteFromNav()?.copy() //Argument from navigation
 
-    private val _uiDetailState = MutableStateFlow(getSavedUiState() ?: DetailUiState())
+    private val _uiDetailState = MutableStateFlow(getSavedUiStateFromDeath() ?: DetailUiState())
     val uiDetailUiState = _uiDetailState.asStateFlow()
 
-    var messageToShowWhenNavBack: UiText? = null
+    private fun getSavedUiStateFromDeath(): DetailUiState? =
+        savedStateHandle.get<DetailUiState>(uiStateKey)
 
-    private fun getSavedUiState(): DetailUiState? = savedStateHandle.get<DetailUiState>(uiStateKey)
     private fun getSavedTaskFromDeath(): NotePresentationModel? =
         savedStateHandle.get<NotePresentationModel>(noteSavedStateKey)
 
-    init {
-        currentNotePresentation =
-                //Saved state from death restore
-            getSavedTaskFromDeath()?.copy() ?://copy to avoid reference in home
-                    //Argument from navigation
-                    DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).task?.copy()
+    private fun getSavedNoteFromNav() =
+        DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).task
 
+    var messageToShowWhenNavBack: UiText? = null
+
+    init {
         currentNotePresentation?.let {
             editTaskState(it)
         }
@@ -61,22 +62,25 @@ class DetailViewModel @Inject constructor(
             newTaskState()
         }
 
-        onInputChangeFlow()
+        observeInputChanges()
         saveChangesInSavedStateObserver()
     }
 
     /*UserInput two way data binding*/
-    private fun onInputChangeFlow() {
+    private fun observeInputChanges() {
         viewModelScope.launch {
             _uiDetailState.value.getOnInputChangedFlow()
                 .debounce(300)
                 .collect {
-                    saveTask(navigateBack = false)
-
-                    //Save new input in state
-                    saveStateInSavedStateHandler()
+                    onInputChange()
                 }
         }
+    }
+
+    private fun onInputChange() {
+        saveTask(navigateBack = false)
+        //Save new input in state
+        saveStateInSavedStateHandler()
     }
 
     private fun newTaskState() {

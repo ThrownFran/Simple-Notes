@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.presentation.trash
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
@@ -20,6 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ArchivedViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val getArchivedNotesUseCase: GetArchivedNotesUseCase,
     private val unArchiveNotesUseCase: UnArchiveNotesUseCase,
     private val deleteNotesUseCase: DeleteNotesUseCase,
@@ -29,12 +31,26 @@ class ArchivedViewModel @Inject constructor(
     private val messageManager: MessageManager
 ) : ViewModel() {
 
-    private val _archivedUiState = MutableStateFlow(ArchivedUiState())
-    val trashUiState = _archivedUiState.asStateFlow()
+    private val uiStateKey = "archived_ui_state"
+
+    private val _archivedUiState = MutableStateFlow(getSavedUiState() ?: ArchivedUiState())
+    val archivedUiState = _archivedUiState.asStateFlow()
+
+    private fun getSavedUiState(): ArchivedUiState? =
+        savedStateHandle.get<ArchivedUiState>(uiStateKey)
 
     init {
         getPreferences()
         getArchivedTasksAndObserve()
+        saveChangesInSavedStateObserver()
+    }
+
+    private fun saveChangesInSavedStateObserver() {
+        viewModelScope.launch {
+            archivedUiState.collect {
+                savedStateHandle[uiStateKey] = it
+            }
+        }
     }
 
     private fun getPreferences() {
@@ -60,8 +76,11 @@ class ArchivedViewModel @Inject constructor(
                         is Resource.Success -> {
                             _archivedUiState.update { uiState ->
                                 uiState.copy(
-                                    taskList = result.data.noteList.map { task ->
+                                    noteList = result.data.noteList.map { task ->
                                         task.toPresentation(dateProvider)
+                                            .apply {
+                                                this.isSelected = isNoteSelectedInUi(uiState, this)
+                                            }
                                     }
                                         .sortedBy { taskPresentationModel -> taskPresentationModel.order }
                                         .asReversed()
@@ -76,6 +95,13 @@ class ArchivedViewModel @Inject constructor(
         }
     }
 
+    private fun isNoteSelectedInUi(
+        uiState: ArchivedUiState,
+        note: NotePresentationModel
+    ) = (uiState.noteList
+        .firstOrNull() { note.id == it.id }?.isSelected
+        ?: false)
+
     fun onNoteClick(it: NotePresentationModel) {
         navigateToDetail(it)
     }
@@ -85,7 +111,7 @@ class ArchivedViewModel @Inject constructor(
             it.copy(
                 navigateToEditNote = ArchivedUiState.NavigateToEditNote(
                     mustConsume = true,
-                    taskIndex = trashUiState.value.taskList.indexOf(taskClicked),
+                    taskIndex = archivedUiState.value.noteList.indexOf(taskClicked),
                     notePresentationModel = taskClicked
                 ),
                 selectionModeActive = null
@@ -143,7 +169,7 @@ class ArchivedViewModel @Inject constructor(
         deleteTasks(tasksToDeleteIds)
     }
 
-    private fun getSelectedTasks() = _archivedUiState.value.taskList.filter { it.isSelected }
+    private fun getSelectedTasks() = _archivedUiState.value.noteList.filter { it.isSelected }
 
     private fun deleteTasks(tasksToDeleteIds: List<Long>) {
         viewModelScope.launch {

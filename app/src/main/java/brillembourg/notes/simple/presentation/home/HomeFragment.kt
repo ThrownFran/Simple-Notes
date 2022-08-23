@@ -127,6 +127,11 @@ class HomeFragment : Fragment(), MenuProvider {
         viewModel.onLayoutChange(NoteLayout.Vertical)
     }
 
+//    override fun onSaveInstanceState(outState: Bundle) {
+//        saveRecyclerState()
+//        super.onSaveInstanceState(outState)
+//    }
+
     override fun onDestroyView() {
         saveRecyclerState()
         super.onDestroyView()
@@ -247,6 +252,7 @@ class HomeFragment : Fragment(), MenuProvider {
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
             (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+//            adapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
     }
 
@@ -264,6 +270,7 @@ class HomeFragment : Fragment(), MenuProvider {
     ) {
         val isInsertingInList = currentList.size < taskList.size
         noteAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
+        binding.homeRecycler.layoutManager?.let { retrieveRecyclerStateIfApplies(it) }
     }
 
     private fun scrollToTop() {
