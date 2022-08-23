@@ -279,7 +279,6 @@ class HomeFragment : Fragment(), MenuProvider {
     ) {
         val isInsertingInList = currentList.size < taskList.size
         noteAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
-        binding.homeRecycler.layoutManager?.let { retrieveRecyclerStateIfApplies(it) }
     }
 
     private fun scrollToTop() {
