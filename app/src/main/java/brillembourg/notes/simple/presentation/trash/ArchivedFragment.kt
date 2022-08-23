@@ -33,7 +33,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class ArchivedFragment : Fragment(), MenuProvider {
 
-    companion object TrashFragment {
+    companion object ArchivedFragment {
         fun newInstance() = ArchivedFragment()
     }
 
@@ -106,17 +106,6 @@ class ArchivedFragment : Fragment(), MenuProvider {
         saveRecyclerState()
         super.onDestroyView()
     }
-
-//    override fun onSaveInstanceState(outState: Bundle) {
-//        saveRecyclerState()
-//        outState.putParcelable("recycler_position",recylerViewState)
-//        super.onSaveInstanceState(outState)
-//    }
-//
-//    override fun onViewStateRestored(savedInstanceState: Bundle?) {
-//        super.onViewStateRestored(savedInstanceState)
-//        recylerViewState = savedInstanceState?.getParcelable("recycler_position")
-//    }
 
     private fun renderStates() {
 

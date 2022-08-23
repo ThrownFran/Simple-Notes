@@ -2,9 +2,12 @@ package brillembourg.notes.simple.presentation.custom_views
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -23,6 +26,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
+import brillembourg.notes.simple.R
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.ui_utils.asString
 import brillembourg.notes.simple.util.UiText
@@ -116,6 +120,26 @@ fun Context.resolveAttribute(@AttrRes attribute: Int): Int {
 
 fun Fragment.showMessage(message: UiText, onMessageShown: (() -> Unit)? = null) {
     (activity as MainActivity).showMessage(message.asString(requireContext()), onMessageShown)
+}
+
+fun Fragment.showToast(message: UiText, onMessageShown: (() -> Unit)? = null) {
+    (activity as MainActivity).showToast(message)
+}
+
+fun Fragment.copy(text: String) {
+    context?.copy(text)
+}
+
+fun Context.copy(text: String) {
+    val clipboard =
+        getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+    val clip: ClipData = ClipData.newPlainText("", text)
+    clipboard.setPrimaryClip(clip)
+
+    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+        showToast(UiText.DynamicString(getString(R.string.note_copied)))
+    }
 }
 
 fun View.showSoftKeyboard() {

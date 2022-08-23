@@ -1,4 +1,5 @@
 package brillembourg.notes.simple.presentation.home
+
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,9 +16,7 @@ import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -72,37 +71,32 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun observeTaskList() {
-        viewModelScope.launch {
-            getNotesUseCase(GetNotesUseCase.Params())
-                .collect { result ->
-                    when (result) {
-                        is Resource.Success -> {
-
-                            _homeUiState.update { uiState ->
-                                uiState.copy(
-                                    noteList = NoteList(
-                                        notes = result.data.noteList
-                                            .map { note ->
-                                                note.toPresentation(dateProvider)
-                                                    .apply {
-                                                        this.isSelected =
-                                                            isNoteSelectedInUi(uiState, note)
-                                                    }
+        getNotesUseCase(GetNotesUseCase.Params())
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _homeUiState.update { uiState ->
+                            uiState.copy(
+                                noteList = NoteList(
+                                    notes = result.data.noteList
+                                        .map { note ->
+                                            note.toPresentation(dateProvider).apply {
+                                                this.isSelected =
+                                                    isNoteSelectedInUi(uiState, note)
                                             }
-                                            .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                                            .asReversed(),
-                                        mustRender = true)
-                                )
-                            }
-
+                                        }
+                                        .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+                                        .asReversed(),
+                                    mustRender = true)
+                            )
                         }
-                        is Resource.Error -> {
-                            showErrorMessage(result.exception)
-                        }
-                        is Resource.Loading -> Unit
                     }
+                    is Resource.Error -> {
+                        showErrorMessage(result.exception)
+                    }
+                    is Resource.Loading -> Unit
                 }
-        }
+            }.launchIn(viewModelScope)
     }
 
     private fun isNoteSelectedInUi(

@@ -30,11 +30,11 @@ class NoteViewHolder(
     private fun setupClickListeners() {
 
         binding.taskCardview.setOnClickListener {
-            onItemClick(adapterPosition, getCurrentList()[adapterPosition])
+            onItemClick(bindingAdapterPosition, getCurrentList()[bindingAdapterPosition])
         }
 
         binding.taskCardview.setOnLongClickListener {
-            onItemSelection(adapterPosition, getCurrentList()[adapterPosition])
+            onItemSelection(bindingAdapterPosition, getCurrentList()[bindingAdapterPosition])
             true
         }
     }

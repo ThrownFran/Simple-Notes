@@ -13,9 +13,7 @@ import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -54,45 +52,41 @@ class ArchivedViewModel @Inject constructor(
     }
 
     private fun getPreferences() {
-        viewModelScope.launch {
-            getUserPrefUseCase(GetUserPrefUseCase.Params())
-                .collect { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            _archivedUiState.update { it.copy(noteLayout = result.data.preferences.notesLayout) }
-                        }
-                        is Resource.Error -> showErrorMessage(result.exception)
-                        is Resource.Loading -> Unit
+        getUserPrefUseCase(GetUserPrefUseCase.Params())
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _archivedUiState.update { it.copy(noteLayout = result.data.preferences.notesLayout) }
                     }
+                    is Resource.Error -> showErrorMessage(result.exception)
+                    is Resource.Loading -> Unit
                 }
-        }
+            }.launchIn(viewModelScope)
     }
 
     private fun getArchivedTasksAndObserve() {
-        viewModelScope.launch {
-            getArchivedNotesUseCase(GetArchivedNotesUseCase.Params())
-                .collect { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            _archivedUiState.update { uiState ->
-                                uiState.copy(
-                                    noteList = result.data.noteList.map { task ->
-                                        task.toPresentation(dateProvider)
-                                            .apply {
-                                                this.isSelected = isNoteSelectedInUi(uiState, this)
-                                            }
-                                    }
-                                        .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                                        .asReversed()
-                                )
-                            }
+        getArchivedNotesUseCase(GetArchivedNotesUseCase.Params())
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _archivedUiState.update { uiState ->
+                            uiState.copy(
+                                noteList = result.data.noteList.map { task ->
+                                    task.toPresentation(dateProvider)
+                                        .apply {
+                                            this.isSelected = isNoteSelectedInUi(uiState, this)
+                                        }
+                                }
+                                    .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+                                    .asReversed()
+                            )
                         }
-                        is Resource.Error ->
-                            showErrorMessage(result.exception)
-                        is Resource.Loading -> Unit
                     }
+                    is Resource.Error ->
+                        showErrorMessage(result.exception)
+                    is Resource.Loading -> Unit
                 }
-        }
+            }.launchIn(viewModelScope)
     }
 
     private fun isNoteSelectedInUi(

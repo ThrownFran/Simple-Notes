@@ -108,8 +108,24 @@ class DetailFragment : Fragment(), MenuProvider {
                     onPositive = { viewModel.onArchive() })
                 return true
             }
+
+            R.id.menu_note_copy -> {
+                onCopy()
+            }
         }
         return false
+    }
+
+    private fun onCopy() {
+        val title = viewModel.uiDetailUiState.value.userInput.title
+        val content = viewModel.uiDetailUiState.value.userInput.content
+
+        val textCopied = StringBuilder(title)
+            .append((if (title.isNotEmpty()) "\n\n" else ""))
+            .append(content)
+            .toString()
+
+        copy(textCopied)
     }
 
     private fun unfocusScreenWhenKeyboardHidden() {
