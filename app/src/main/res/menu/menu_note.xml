@@ -3,6 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/menu_note_share"
+        android:icon="@drawable/ic_baseline_share_24"
+        android:title="@string/all_share"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/menu_note_copy"
         android:icon="@drawable/ic_baseline_content_copy_24"
         android:title="@string/all_copy"
@@ -20,11 +26,6 @@
         android:title="@string/archive"
         app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/menu_note_share"
-        android:icon="@drawable/ic_baseline_share_24"
-        android:title="@string/all_share"
-        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_note_delete"

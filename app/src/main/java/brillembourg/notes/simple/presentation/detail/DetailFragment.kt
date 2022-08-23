@@ -20,6 +20,7 @@ import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
@@ -83,6 +84,15 @@ class DetailFragment : Fragment(), MenuProvider {
                 }
             )
         }
+
+        val userInput = viewModel.uiDetailUiState.value.userInput
+        val isShareOrCopyEnabled = !userInput.isNullOrEmpty()
+        menu.findItem(R.id.menu_note_share).apply {
+            isVisible = isShareOrCopyEnabled
+        }
+        menu.findItem(R.id.menu_note_copy).apply {
+            isVisible = isShareOrCopyEnabled
+        }
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -121,7 +131,8 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     private fun onShare() {
-        shareText(generateTextToCopy())
+        val textToCopy = generateTextToCopy()
+        shareText(textToCopy)
     }
 
 
@@ -171,12 +182,9 @@ class DetailFragment : Fragment(), MenuProvider {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiDetailUiState.collect { uiState ->
 
-//                    setupTitleAndContent(uiState.userInput)
-
-                    //TODO
                     setToolbarTitle(uiState.isNewTask)
 
-                    setToolbarIcons(uiState.isArchivedTask)
+                    updateToolbarIcons()
 
                     if (uiState.unFocusInput) {
                         unFocus()
@@ -191,13 +199,24 @@ class DetailFragment : Fragment(), MenuProvider {
                     if (uiState.navigateBack) {
                         finishView()
                     }
-
                 }
             }
         }
+
+        safeUiLaunch {
+            viewModel.uiDetailUiState.value.getOnInputChangedFlow()
+                .debounce(300)
+                .collect {
+                    updateToolbarIcons()
+                }
+        }
     }
 
-    private fun setToolbarIcons(isArchiveNote: Boolean) {
+    private fun onInputChange() {
+
+    }
+
+    private fun updateToolbarIcons() {
         val menuHost: MenuHost = requireActivity()
         menuHost.invalidateMenu()
     }
