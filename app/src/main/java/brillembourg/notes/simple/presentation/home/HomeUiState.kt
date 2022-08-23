@@ -13,7 +13,8 @@ data class HomeUiState(
     val navigateToAddNote: Boolean = false,
     var navigateToEditNote: NavigateToEditNote = NavigateToEditNote(false),
     val showArchiveNotesConfirmation: ShowArchiveNotesConfirmationState? = null,
-    val showDeleteNotesConfirmation: ShowDeleteNotesConfirmationState? = null
+    val showDeleteNotesConfirmation: ShowDeleteNotesConfirmationState? = null,
+    val copyToClipboard: String? = null,
 ) : Parcelable
 
 @Parcelize

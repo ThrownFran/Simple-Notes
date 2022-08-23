@@ -120,6 +120,7 @@ class DetailFragment : Fragment(), MenuProvider {
         val title = viewModel.uiDetailUiState.value.userInput.title
         val content = viewModel.uiDetailUiState.value.userInput.content
 
+        //TODO
         val textCopied = StringBuilder(title)
             .append((if (title.isNotEmpty()) "\n\n" else ""))
             .append(content)

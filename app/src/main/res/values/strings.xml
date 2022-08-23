@@ -25,4 +25,5 @@
     <string name="delete_tasks_permanently">Delete notes permanently?</string>
     <string name="all_unarchive">Unarchive</string>
     <string name="note_copied">Copied</string>
+    <string name="all_copy">Copy</string>
 </resources>

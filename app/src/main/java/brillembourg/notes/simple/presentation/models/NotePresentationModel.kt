@@ -45,3 +45,10 @@ interface HasOrder {
 interface IsSelectable {
     var isSelected: Boolean
 }
+
+fun NotePresentationModel.toCopyString(): String {
+    return StringBuilder(title ?: "")
+        .append((if (title?.isNotEmpty() == true) "\n\n" else ""))
+        .append(content)
+        .toString()
+}

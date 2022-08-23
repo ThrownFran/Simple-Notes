@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/menu_context_copy"
+        android:icon="@drawable/ic_baseline_content_copy_24"
+        android:title="@string/all_copy"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/menu_context_menu_unarchive"
         android:icon="@drawable/ic_baseline_unarchive_24"
         android:title="@string/archive"

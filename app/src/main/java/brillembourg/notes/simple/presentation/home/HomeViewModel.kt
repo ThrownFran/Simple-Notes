@@ -9,6 +9,7 @@ import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
+import brillembourg.notes.simple.presentation.models.toCopyString
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.presentation.models.toPresentation
 import brillembourg.notes.simple.presentation.trash.MessageManager
@@ -296,6 +297,21 @@ class HomeViewModel @Inject constructor(
                 )
             )
         }
+    }
+
+    fun onCopied() {
+        val tasksToCopy = getSelectedTasks()
+
+        var generatedText = ""
+        tasksToCopy.map {
+            generatedText = generatedText + it.toCopyString() + "\n\n"
+        }
+
+        _homeUiState.update { it.copy(copyToClipboard = generatedText, selectionModeActive = null) }
+    }
+
+    fun onCopiedCompleted() {
+        _homeUiState.update { it.copy(copyToClipboard = null) }
     }
 
 

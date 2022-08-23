@@ -155,7 +155,16 @@ class HomeFragment : Fragment(), MenuProvider {
                 showDeleteConfirmationState(homeUiState.showDeleteNotesConfirmation)
 
                 noteListLayoutState(homeUiState.noteLayout)
+
+                copyClipboardState(homeUiState.copyToClipboard)
             }
+        }
+    }
+
+    private fun copyClipboardState(copyToClipboard: String?) {
+        copyToClipboard?.let {
+            copy(it)
+            viewModel.onCopiedCompleted()
         }
     }
 
@@ -336,7 +345,16 @@ class HomeFragment : Fragment(), MenuProvider {
             onDeleteTasks()
             true
         }
+
+        R.id.menu_context_copy -> {
+            onCopiedNotes()
+            true
+        }
         else -> false
+    }
+
+    private fun onCopiedNotes() {
+        viewModel.onCopied()
     }
 
     private fun onDeleteTasks() {

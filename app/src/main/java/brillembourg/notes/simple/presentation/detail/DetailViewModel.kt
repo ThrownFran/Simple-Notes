@@ -39,6 +39,7 @@ class DetailViewModel @Inject constructor(
         getSavedTaskFromDeath()?.copy() //copy to avoid reference in home
             ?: getSavedNoteFromNav()?.copy() //Argument from navigation
 
+
     private val _uiDetailState = MutableStateFlow(getSavedUiStateFromDeath() ?: DetailUiState())
     val uiDetailUiState = _uiDetailState.asStateFlow()
 

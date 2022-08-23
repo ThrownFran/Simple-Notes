@@ -5,7 +5,7 @@
     <item
         android:id="@+id/menu_note_copy"
         android:icon="@drawable/ic_baseline_content_copy_24"
-        android:title="@string/all_delete"
+        android:title="@string/all_copy"
         app:showAsAction="ifRoom" />
 
     <item
