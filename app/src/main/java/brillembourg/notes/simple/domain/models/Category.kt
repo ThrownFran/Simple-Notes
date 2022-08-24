@@ -1,7 +1,7 @@
 package brillembourg.notes.simple.domain.models
 
 class Category(
-    val id: Long? = null,
+    val id: Long,
     val name: String,
     val order: Int
 )

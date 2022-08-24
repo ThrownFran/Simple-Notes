@@ -8,7 +8,8 @@ import kotlinx.parcelize.Parcelize
 data class CategoriesUiState(
     val list: List<CategoryPresentationModel> = emptyList(),
     val selectionModeActive: SelectionModeActive? = null,
-    val showDeleteNotesConfirmationState: ShowDeleteNotesConfirmationState? = null
+    val showDeleteNotesConfirmationState: ShowDeleteNotesConfirmationState? = null,
+    val createCategory: Boolean = false
 ) : Parcelable
 
 
