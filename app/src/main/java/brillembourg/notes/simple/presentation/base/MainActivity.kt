@@ -16,7 +16,6 @@ import brillembourg.notes.simple.data.database.RoomBackupBuilder
 import brillembourg.notes.simple.databinding.ActivityMainBinding
 import brillembourg.notes.simple.domain.use_cases.BackupModel
 import brillembourg.notes.simple.presentation.custom_views.*
-import brillembourg.notes.simple.presentation.home.HomeFragmentDirections
 import brillembourg.notes.simple.presentation.ui_utils.asString
 import brillembourg.notes.simple.presentation.ui_utils.contentViews
 import brillembourg.notes.simple.util.UiText
@@ -138,6 +137,12 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
 
+                R.id.categoriesFragment -> {
+                    navigateToCategories()
+                    closeDrawer()
+                    true
+                }
+
                 R.id.menu_backup -> {
                     backupNotes()
                     closeDrawer()
@@ -159,6 +164,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     private fun setupNavControllerListener() {
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             binding.homeFab.apply {
@@ -173,13 +179,27 @@ class MainActivity : AppCompatActivity() {
 
     private fun navigateToTrash() {
         if (navController.currentDestination?.id == R.id.trashFragment) return
-        navController.navigate(HomeFragmentDirections.actionHomeFragmentToTrashFragment())
-//        navController.navigate(brillembourg.notes.simple.R.id.trashFragment,navBuilder.build())
+
+//        when (navController.currentDestination?.id) {
+//            R.id.trashFragment -> return
+//            R.id.categoriesFragment -> navController.navigate()
+//        }
+
+
+//        navController.navigate(HomeFragmentDirections.actionHomeFragmentToTrashFragment())
+        navController.navigate(R.id.trashFragment)
     }
 
     private fun navigateToHome() {
         if (navController.currentDestination?.id == R.id.homeFragment) return
-        navController.popBackStack()
+        navController.navigate(R.id.homeFragment)
+//        navController.navigateUp()
+    }
+
+    private fun navigateToCategories() {
+        if (navController.currentDestination?.id == R.id.categoriesFragment) return
+        navController.navigate(R.id.categoriesFragment)
+//        navController.navigate(HomeFragmentDirections.actionHomeFragmentToCategoriesFragment())
     }
 
     private fun backupNotes() {

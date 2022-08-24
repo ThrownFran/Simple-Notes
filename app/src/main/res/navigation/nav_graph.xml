@@ -56,6 +56,6 @@
     <fragment
         android:id="@+id/categoriesFragment"
         android:name="brillembourg.notes.simple.presentation.categories.CategoriesFragment"
-        android:label="fragment_categories"
+        android:label="@string/categories"
         tools:layout="@layout/fragment_categories" />
 </navigation>

@@ -11,7 +11,9 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.databinding.FragmentCategoriesBinding
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.buildVerticalManager
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class CategoriesFragment : Fragment() {
 
     companion object {

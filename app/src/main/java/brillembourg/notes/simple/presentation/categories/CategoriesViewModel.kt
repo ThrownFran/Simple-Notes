@@ -33,7 +33,7 @@ class CategoriesViewModel @Inject constructor(
         observeCategoryList()
 
         //TODO erase
-        onCreateCategory("My first category")
+        onCreateCategory("My Second category")
     }
 
     private fun observeCategoryList() {

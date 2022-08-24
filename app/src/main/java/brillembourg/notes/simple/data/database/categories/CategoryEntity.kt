@@ -7,13 +7,14 @@ import brillembourg.notes.simple.domain.models.Category
 
 @Entity(tableName = "categoryentity")
 data class CategoryEntity(
-    @PrimaryKey(autoGenerate = true) var id: Long = -1L,
+    @PrimaryKey(autoGenerate = true) var id: Long? = null,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "order") val order: Int
 )
 
 fun CategoryEntity.toDomain(): Category {
-    return Category(id, name, order)
+    if (id == null) throw IllegalArgumentException("id is null")
+    return Category(id!!, name, order)
 }
 
 fun Category.toEntity(): CategoryEntity {

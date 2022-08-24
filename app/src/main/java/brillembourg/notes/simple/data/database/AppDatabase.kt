@@ -13,7 +13,7 @@ import brillembourg.notes.simple.data.database.notes.TaskEntity
 
 
 @Database(
-    entities = [TaskEntity::class, CategoryEntity::class], version = 7
+    entities = [TaskEntity::class, CategoryEntity::class], version = 8
 )
 abstract class AppDatabase : RoomDatabase() {
 

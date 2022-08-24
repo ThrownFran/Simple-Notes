@@ -5,6 +5,7 @@
     android:id="@+id/category_cardview"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="8dp"
     android:checkable="true"
     app:cardElevation="2dp"
     app:cardForegroundColor="@drawable/selector_cardview_foreground_color"
