@@ -13,7 +13,7 @@ import brillembourg.notes.simple.data.database.notes.TaskEntity
 
 
 @Database(
-    entities = [TaskEntity::class, CategoryEntity::class], version = 8
+    entities = [TaskEntity::class, CategoryEntity::class], version = 7
 )
 abstract class AppDatabase : RoomDatabase() {
 
@@ -56,7 +56,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         private val MIGRATION_6_to_7: Migration = object : Migration(6, 7) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("CREATE TABLE IF NOT EXISTS `categoryentity` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `order` INTEGER NOT NULL, PRIMARY KEY(`id`))")
+                database.execSQL("CREATE TABLE IF NOT EXISTS `categoryentity` (`id` INTEGER, `name` TEXT NOT NULL, `order` INTEGER NOT NULL, PRIMARY KEY(`id`))")
             }
         }
     }
