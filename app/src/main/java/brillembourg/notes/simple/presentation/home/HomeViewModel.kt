@@ -8,11 +8,11 @@ import brillembourg.notes.simple.domain.models.Note
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.use_cases.*
+import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toCopyString
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.presentation.models.toPresentation
-import brillembourg.notes.simple.presentation.trash.MessageManager
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
@@ -137,6 +137,10 @@ class HomeViewModel @Inject constructor(
 
         if (reorderedTaskList == _homeUiState.value.noteList.notes) return
         reorderTasks(reorderedTaskList)
+    }
+
+    fun onReorderNotesCancelled() {
+        onSelectionDismissed()
     }
 
     private fun reorderTasks(reorderedTaskList: List<NotePresentationModel>) {
@@ -292,7 +296,7 @@ class HomeViewModel @Inject constructor(
     fun onDeleteConfirm() {
         _homeUiState.update {
             it.copy(
-                showDeleteNotesConfirmation = ShowDeleteNotesConfirmationState(
+                showDeleteNotesConfirmation = ShowDeleteCategoriesConfirmation(
                     tasksToDeleteSize = getSelectedTasks().size
                 )
             )

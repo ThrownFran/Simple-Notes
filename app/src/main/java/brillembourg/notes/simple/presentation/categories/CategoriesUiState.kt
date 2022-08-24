@@ -4,15 +4,21 @@ import android.os.Parcelable
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
 import androidx.databinding.library.baseAdapters.BR
-import brillembourg.notes.simple.presentation.home.ShowDeleteNotesConfirmationState
+import brillembourg.notes.simple.presentation.home.ShowDeleteCategoriesConfirmation
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class CategoriesUiState(
-    val list: List<CategoryPresentationModel> = emptyList(),
-    val selectionModeActive: SelectionModeActive? = null,
-    val showDeleteNotesConfirmationState: ShowDeleteNotesConfirmationState? = null,
-    val createCategory: CreateCategory = CreateCategory()
+    val listContainer: CategoryList = CategoryList(),
+    val selectionMode: SelectionMode? = null,
+    val showDeleteConfirmationState: ShowDeleteCategoriesConfirmation? = null,
+    val createCategory: CreateCategory = CreateCategory(),
+) : Parcelable
+
+@Parcelize
+data class CategoryList(
+    val data: List<CategoryPresentationModel> = emptyList(),
+    val mustRender: Boolean = false //To avoid rendering set false
 ) : Parcelable
 
 @Parcelize
@@ -43,7 +49,7 @@ data class CreateCategory(var isEnabled: Boolean = false, var name: String = "")
 
 /*Notes are selected and contextual bar is shown*/
 @Parcelize
-data class SelectionModeActive(
+data class SelectionMode(
     val size: Int
 ) : Parcelable
 
@@ -52,3 +58,4 @@ data class SelectionModeActive(
 data class ShowDeleteCategoriesConfirmationState(
     val categoriesToDeleteSize: Int
 ) : Parcelable
+

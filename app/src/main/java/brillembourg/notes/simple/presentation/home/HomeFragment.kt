@@ -197,7 +197,7 @@ class HomeFragment : Fragment(), MenuProvider {
         )
     }
 
-    private fun showDeleteConfirmationState(showDeleteConfirmationState: ShowDeleteNotesConfirmationState?) {
+    private fun showDeleteConfirmationState(showDeleteConfirmationState: ShowDeleteCategoriesConfirmation?) {
         if (showDeleteConfirmationState != null) {
             showDeleteTasksDialog(this, showDeleteConfirmationState.tasksToDeleteSize,
                 onPositive = {
@@ -362,7 +362,7 @@ class HomeFragment : Fragment(), MenuProvider {
             true
         }
         R.id.menu_context_menu_delete -> {
-            onDeleteTasks()
+            onDeleteNotesConfirm()
             true
         }
 
@@ -387,7 +387,7 @@ class HomeFragment : Fragment(), MenuProvider {
         viewModel.onCopy()
     }
 
-    private fun onDeleteTasks() {
+    private fun onDeleteNotesConfirm() {
         viewModel.onDeleteConfirm()
     }
 
@@ -396,7 +396,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun onReorderNotesCancelled() {
-        viewModel.onSelectionDismissed()
+        viewModel.onReorderNotesCancelled()
     }
 
     private fun onNoteClicked(it: NotePresentationModel) {

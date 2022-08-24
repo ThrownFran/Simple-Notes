@@ -18,3 +18,7 @@ class CategoryPresentationModel(
 fun Category.toPresentation(): CategoryPresentationModel {
     return CategoryPresentationModel(id, name, order, false)
 }
+
+fun CategoryPresentationModel.toDomain(): Category {
+    return Category(id, name, order)
+}

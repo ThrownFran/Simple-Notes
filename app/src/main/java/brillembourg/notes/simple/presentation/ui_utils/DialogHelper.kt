@@ -57,3 +57,32 @@ fun showDeleteTasksDialog(
         }
         .showWithLifecycle(fragment.viewLifecycleOwner)
 }
+
+fun showDeleteCategoriesDialog(
+    fragment: Fragment,
+    size: Int,
+    onPositive: () -> Unit,
+    onDismiss: (() -> Unit)? = null
+) {
+
+    val title =
+        if (size <= 1) fragment.getString(R.string.delete_category) else fragment.getString(
+            R.string.delete_categories
+        )
+
+    MaterialAlertDialogBuilder(
+        fragment.requireContext()
+    )
+        .setTitle(title)
+        .setIcon(R.drawable.ic_baseline_delete_on_surface_24)
+//            .setMessage(resources.getString(R.string.supporting_text))
+        .setNegativeButton(fragment.resources.getString(R.string.all_cancel)) { dialog, which ->
+        }
+        .setPositiveButton(fragment.resources.getString(R.string.all_delete)) { dialog, which ->
+            onPositive()
+        }.setOnDismissListener {
+            onDismiss?.invoke()
+        }
+        .showWithLifecycle(fragment.viewLifecycleOwner)
+}
+

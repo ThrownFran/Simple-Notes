@@ -7,6 +7,7 @@ import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.use_cases.*
+import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toCopyString
 import brillembourg.notes.simple.presentation.models.toPresentation

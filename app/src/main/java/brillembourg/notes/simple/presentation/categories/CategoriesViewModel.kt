@@ -3,11 +3,9 @@ package brillembourg.notes.simple.presentation.categories
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import brillembourg.notes.simple.domain.use_cases.categories.CreateCategoryUseCase
-import brillembourg.notes.simple.domain.use_cases.categories.DeleteCategoriesUseCase
-import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
-import brillembourg.notes.simple.domain.use_cases.categories.SaveCategoryUseCase
-import brillembourg.notes.simple.presentation.trash.MessageManager
+import brillembourg.notes.simple.domain.use_cases.categories.*
+import brillembourg.notes.simple.presentation.base.MessageManager
+import brillembourg.notes.simple.presentation.home.ShowDeleteCategoriesConfirmation
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
@@ -23,6 +21,7 @@ class CategoriesViewModel @Inject constructor(
     private val createCategoryUseCase: CreateCategoryUseCase,
     private val saveCategoryUseCase: SaveCategoryUseCase,
     private val deleteCategoriesUseCase: DeleteCategoriesUseCase,
+    private val reorderCategoriesUseCase: ReorderCategoriesUseCase,
     private val messageManager: MessageManager
 ) : ViewModel() {
 
@@ -31,9 +30,6 @@ class CategoriesViewModel @Inject constructor(
 
     init {
         observeCategoryList()
-
-        //TODO erase
-//        onCreateCategory("My Second category")
     }
 
     private fun observeCategoryList() {
@@ -42,10 +38,13 @@ class CategoriesViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> _categoryUiState.update {
                         it.copy(
-                            list = result.data.categoryList
-                                .map { category -> category.toPresentation() }
-                                .sortedBy { it.order }
-                                .asReversed()
+                            listContainer = CategoryList(
+                                data = result.data.categoryList
+                                    .map { category -> category.toPresentation() }
+                                    .sortedBy { it.order }
+                                    .asReversed(),
+                                mustRender = true
+                            )
                         )
                     }
                     is Resource.Error -> showErrorMessage(result.exception)
@@ -68,7 +67,7 @@ class CategoriesViewModel @Inject constructor(
         _categoryUiState.update {
             it.copy(
                 createCategory = it.createCategory.copy(isEnabled = true),
-                selectionModeActive = null
+                selectionMode = null
             )
         }
     }
@@ -105,6 +104,105 @@ class CategoriesViewModel @Inject constructor(
                 is Resource.Loading -> Unit
             }
         }
+    }
+
+    fun onSelection() {
+        val sizeSelected = getSelectedCategories().size
+
+        _categoryUiState.update {
+            it.copy(
+                selectionMode = SelectionMode(
+                    size = sizeSelected
+                )
+            )
+        }
+    }
+
+    fun onSelectionDismissed() {
+        _categoryUiState.update { it.copy(selectionMode = null) }
+    }
+
+    private fun getSelectedCategories(): List<CategoryPresentationModel> {
+        return categoryUiState.value.listContainer.data.filter { it.isSelected }
+    }
+
+    fun onDeleteConfirmCategories() {
+        _categoryUiState.update {
+            it.copy(
+                showDeleteConfirmationState = ShowDeleteCategoriesConfirmation(
+                    getSelectedCategories().size
+                )
+            )
+        }
+    }
+
+    fun onDismissConfirmDeleteShown() {
+        _categoryUiState.update {
+            it.copy(
+                showDeleteConfirmationState = null
+            )
+        }
+    }
+
+    fun onDeleteCategories() {
+        val tasksToDeleteIds = getSelectedCategories().map { it.id }
+        deleteCategories(tasksToDeleteIds)
+
+        _categoryUiState.update {
+            it.copy(
+                showDeleteConfirmationState = null,
+                selectionMode = null
+            )
+        }
+    }
+
+    private fun deleteCategories(tasksToDeleteIds: List<Long>) {
+        viewModelScope.launch {
+            val params = DeleteCategoriesUseCase.Params(tasksToDeleteIds)
+            when (val result = deleteCategoriesUseCase(params)) {
+                is Resource.Success -> showMessage(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
+    }
+
+    fun onReorderedCategories(reorderedCategoryList: List<CategoryPresentationModel>) {
+        _categoryUiState.update {
+
+            val categoryList: List<CategoryPresentationModel> =
+                _categoryUiState.value.listContainer.data
+            categoryList.forEach { it.isSelected = false }
+
+            it.copy(
+                selectionMode = null,
+                listContainer = _categoryUiState.value.listContainer.copy(
+                    data = categoryList,
+                    mustRender = false
+                )
+            )
+        }
+
+        if (reorderedCategoryList == _categoryUiState.value.listContainer.data) return
+        reorderCategories(reorderedCategoryList)
+    }
+
+    private fun reorderCategories(reorderedTaskList: List<CategoryPresentationModel>) {
+        viewModelScope.launch {
+            val params = ReorderCategoriesUseCase.Params(reorderedTaskList.map {
+                it.toDomain()
+            })
+
+            when (val result = reorderCategoriesUseCase(params)) {
+                is Resource.Success -> showMessage(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
+    }
+
+    fun onReorderCategoriesCancelled() {
+        onSelectionDismissed()
     }
 
 

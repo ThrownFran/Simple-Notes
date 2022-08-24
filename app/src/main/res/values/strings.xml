@@ -32,4 +32,8 @@
     <string name="restore">Restore</string>
     <string name="settings">Settings</string>
     <string name="categories">Categories</string>
+
+    <string name="delete_category">Delete category?</string>
+    <string name="delete_categories">Delete categories?</string>
+    <string name="category">Category</string>
 </resources>

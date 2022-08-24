@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.presentation.trash
+package brillembourg.notes.simple.presentation.base
 
 import brillembourg.notes.simple.util.UiText
 import kotlinx.coroutines.flow.MutableStateFlow

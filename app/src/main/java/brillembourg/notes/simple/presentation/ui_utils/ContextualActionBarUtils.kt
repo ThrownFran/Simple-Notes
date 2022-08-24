@@ -8,18 +8,18 @@ import android.view.MenuItem
 import androidx.annotation.MenuRes
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.R
-import brillembourg.notes.simple.presentation.home.NoteViewHolder
-import brillembourg.notes.simple.presentation.models.NotePresentationModel
+import brillembourg.notes.simple.presentation.models.IsSelectable
 
-fun setupContextualActionBar(
+inline fun <T : IsSelectable, VH : RecyclerView.ViewHolder> setupContextualActionBar(
     toolbar: Toolbar,
     @MenuRes menuId: Int,
     currentActionMode: ActionMode?,
-    adapter: ListAdapter<NotePresentationModel, NoteViewHolder>,
-    onActionClick: (menuId: Int) -> Boolean,
-    onSetTitle: (selectedSize: Int) -> String,
-    onDestroyMyActionMode: () -> Unit
+    adapter: ListAdapter<T, VH>,
+    crossinline onActionClick: (menuId: Int) -> Boolean,
+    crossinline onSetTitle: (selectedSize: Int) -> String,
+    crossinline onDestroyMyActionMode: () -> Unit
 ): ActionMode? {
     val taskList = adapter.currentList
     val selectedList = taskList.filter { it.isSelected }
@@ -69,6 +69,14 @@ fun setupContextualActionBar(
 fun getNoteSelectedTitle(resources: Resources, selectedSize: Int): String {
     val noteString =
         if (selectedSize > 1) resources.getString(R.string.notes) else resources.getString(R.string.note)
+    return "$selectedSize ${noteString.lowercase()} ${
+        resources.getString(R.string.selected).lowercase()
+    }"
+}
+
+fun getCategoriesSelectedTitle(resources: Resources, selectedSize: Int): String {
+    val noteString =
+        if (selectedSize > 1) resources.getString(R.string.categories) else resources.getString(R.string.category)
     return "$selectedSize ${noteString.lowercase()} ${
         resources.getString(R.string.selected).lowercase()
     }"

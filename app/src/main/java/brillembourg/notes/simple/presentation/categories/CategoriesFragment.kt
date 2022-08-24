@@ -1,6 +1,7 @@
 package brillembourg.notes.simple.presentation.categories
 
 import android.os.Bundle
+import android.view.ActionMode
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,12 +10,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentCategoriesBinding
 import brillembourg.notes.simple.presentation.custom_views.hideKeyboard
 import brillembourg.notes.simple.presentation.custom_views.onClickFlow
 import brillembourg.notes.simple.presentation.custom_views.onFocusFlow
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
+import brillembourg.notes.simple.presentation.home.ShowDeleteCategoriesConfirmation
+import brillembourg.notes.simple.presentation.ui_utils.getCategoriesSelectedTitle
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.buildVerticalManager
+import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
+import brillembourg.notes.simple.presentation.ui_utils.showDeleteCategoriesDialog
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -28,6 +34,8 @@ class CategoriesFragment : Fragment() {
 
     private var _binding: FragmentCategoriesBinding? = null
     private lateinit var binding: FragmentCategoriesBinding
+
+    private var actionMode: ActionMode? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -78,11 +86,36 @@ class CategoriesFragment : Fragment() {
         safeUiLaunch {
             viewModel.categoryUiState.collect {
 
-                setupCategoryList(it.list)
+                setupCategoryList(it.listContainer)
 
                 enableOrDisableCreateCategory(it.createCategory)
+
+                selectionModeState(it.selectionMode)
+
+                showDeleteCategoriesState(it.showDeleteConfirmationState)
             }
         }
+    }
+
+    private fun showDeleteCategoriesState(state: ShowDeleteCategoriesConfirmation?) {
+        if (state != null) {
+            showDeleteCategoriesDialog(this, state.tasksToDeleteSize,
+                onPositive = {
+                    viewModel.onDeleteCategories()
+                },
+                onDismiss = {
+                    viewModel.onDismissConfirmDeleteShown()
+                })
+        }
+    }
+
+    private fun selectionModeState(selectionMode: SelectionMode?) {
+        if (selectionMode == null) {
+            actionMode?.finish()
+            actionMode = null
+            return
+        }
+        launchContextualActionBar(selectionMode.size)
     }
 
     private fun enableOrDisableCreateCategory(createCategory: CreateCategory) {
@@ -104,12 +137,14 @@ class CategoriesFragment : Fragment() {
         }
     }
 
-    private fun setupCategoryList(list: List<CategoryPresentationModel>) {
+    private fun setupCategoryList(categoryList: CategoryList) {
+        if (!categoryList.mustRender) return
+
         if (binding.categoriesRecycler.adapter == null) {
-            setupCategoryRecycler(list)
+            setupCategoryRecycler(categoryList.data)
         } else {
             val adapter = binding.categoriesRecycler.adapter as CategoryAdapter
-            submitListAndScrollIfApplies(adapter, adapter.currentList, list)
+            submitListAndScrollIfApplies(adapter, adapter.currentList, categoryList.data)
         }
     }
 
@@ -149,15 +184,15 @@ class CategoriesFragment : Fragment() {
     }
 
     private fun onSelection() {
-        //TODO
+        viewModel.onSelection()
     }
 
     private fun onReorderCanceled() {
-        //TODO
+        viewModel.onReorderCategoriesCancelled()
     }
 
     private fun onReorderedCategories(categories: List<CategoryPresentationModel>) {
-        //TODO
+        viewModel.onReorderedCategories(categories)
     }
 
     private fun onCategoryClicked(category: CategoryPresentationModel) {
@@ -166,6 +201,37 @@ class CategoriesFragment : Fragment() {
 
     private fun scrollToTop() {
         binding.categoriesRecycler.scrollToPosition(0)
+    }
+
+    private fun launchContextualActionBar(sizeSelected: Int) {
+        actionMode = setupContextualActionBar(
+            toolbar = requireActivity().findViewById(R.id.toolbar),
+            menuId = R.menu.menu_contextual_categories,
+            currentActionMode = actionMode,
+            adapter = binding.categoriesRecycler.adapter as CategoryAdapter,
+            onActionClick = { onContextualActionItem(menuId = it) },
+            onSetTitle = { selectedSize: Int ->
+                getCategoriesSelectedTitle(
+                    resources = resources,
+                    selectedSize = selectedSize
+                )
+            },
+            onDestroyMyActionMode = {
+                viewModel.onSelectionDismissed()
+            }
+        )
+    }
+
+    private fun onContextualActionItem(menuId: Int) = when (menuId) {
+        R.id.menu_context_menu_delete -> {
+            onDeleteCategoriesConfirm()
+            true
+        }
+        else -> false
+    }
+
+    private fun onDeleteCategoriesConfirm() {
+        viewModel.onDeleteConfirmCategories()
     }
 
 
