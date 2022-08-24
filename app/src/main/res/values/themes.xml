@@ -45,7 +45,7 @@
 
         <!-- Action mode -->
         <item name="actionModeStyle">@style/Widget.SimpleNotes.ActionMode</item>
-        <item name="actionModeCloseDrawable">@drawable/ic_baseline_clear_24</item>
+        <item name="actionModeCloseDrawable">@drawable/ic_baseline_clear_on_secondary_24</item>
         <item name="windowActionModeOverlay">true</item>
 
         <!-- Cardview   -->

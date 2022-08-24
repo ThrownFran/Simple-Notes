@@ -23,10 +23,6 @@ data class DetailUiState(
 
     fun getOnInputChangedFlow(): Flow<UserInput> {
         return userInput.getOnInputChangedFlow()
-//        return callbackFlow {
-//            userInput.onInputChanged = { trySend(it) }
-//            awaitClose { userInput.onInputChanged = null }
-//        }.conflate()
     }
 }
 

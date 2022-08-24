@@ -33,7 +33,7 @@ class CategoriesViewModel @Inject constructor(
         observeCategoryList()
 
         //TODO erase
-        onCreateCategory("My Second category")
+//        onCreateCategory("My Second category")
     }
 
     private fun observeCategoryList() {
@@ -67,19 +67,35 @@ class CategoriesViewModel @Inject constructor(
     fun onShowCreateCategory() {
         _categoryUiState.update {
             it.copy(
-                createCategory = true,
+                createCategory = it.createCategory.copy(isEnabled = true),
                 selectionModeActive = null
             )
         }
     }
 
-    fun onShowCreateCategoryCompleted() {
+    fun onCreateCategory() {
+        val name = categoryUiState.value.createCategory?.name
+
+        if (name.isNullOrEmpty()) {
+            showMessage(UiText.DynamicString("No name"))
+            return
+        }
+
+        createCategory(name)
+
         _categoryUiState.update {
-            it.copy(createCategory = false)
+            it.copy(createCategory = it.createCategory.copy(isEnabled = false, name = ""))
+        }
+        _categoryUiState.value.createCategory.clear()
+    }
+
+    fun onShowCreateCategoryDismiss() {
+        _categoryUiState.update {
+            it.copy(createCategory = it.createCategory.copy(isEnabled = false, name = ""))
         }
     }
 
-    fun onCreateCategory(name: String) {
+    private fun createCategory(name: String) {
 
         viewModelScope.launch {
             val result = createCategoryUseCase(CreateCategoryUseCase.Params(name))

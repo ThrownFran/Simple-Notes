@@ -50,6 +50,14 @@ val View.onClickFlow: Flow<View>
         awaitClose { setOnClickListener(null) }
     }.conflate()
 
+val View.onFocusFlow: Flow<Boolean>
+    get() = callbackFlow<Boolean> {
+        setOnFocusChangeListener { view, b ->
+            trySend(b)
+        }
+        awaitClose { onFocusChangeListener = null }
+    }.conflate()
+
 fun ComponentActivity.safeUiLaunch(block: suspend CoroutineScope.() -> Unit) {
     lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
