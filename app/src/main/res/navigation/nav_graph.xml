@@ -33,6 +33,12 @@
             android:defaultValue="@null"
             app:argType="brillembourg.notes.simple.presentation.models.NotePresentationModel"
             app:nullable="true" />
+
+        <argument
+            android:name="ContentOptional"
+            android:defaultValue="@null"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
     <fragment
         android:id="@+id/trashFragment"

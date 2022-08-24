@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.presentation.base
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -42,6 +43,21 @@ class MainActivity : AppCompatActivity() {
         setupToolbar()
         renderStates()
         backupModel = roomBackupBuilder.prepareBackupInLocalStorage()
+
+        when (intent?.action) {
+            Intent.ACTION_SEND -> {
+                if ("text/plain" == intent.type) {
+                    handleSendText(intent) // Handle text being sent
+                }
+            }
+        }
+    }
+
+    private fun handleSendText(intent: Intent) {
+        intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
+            showMessage(it)
+            viewModel.onIncommingContentFromExternalApp(it)
+        }
     }
 
     private fun renderStates() {

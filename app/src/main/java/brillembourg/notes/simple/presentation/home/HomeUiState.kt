@@ -10,13 +10,16 @@ data class HomeUiState(
     val noteList: NoteList = NoteList(),
     val noteLayout: NoteLayout = NoteLayout.Vertical,
     val selectionModeActive: SelectionModeActive? = null,
-    val navigateToAddNote: Boolean = false,
+    val navigateToAddNote: NavigateToAddNote? = null,
     var navigateToEditNote: NavigateToEditNote = NavigateToEditNote(false),
     val showArchiveNotesConfirmation: ShowArchiveNotesConfirmationState? = null,
     val showDeleteNotesConfirmation: ShowDeleteNotesConfirmationState? = null,
     val copyToClipboard: String? = null,
     val shareNoteAsString: String? = null
 ) : Parcelable
+
+@Parcelize
+data class NavigateToAddNote(val content: String? = null) : Parcelable
 
 @Parcelize
 data class NoteList(

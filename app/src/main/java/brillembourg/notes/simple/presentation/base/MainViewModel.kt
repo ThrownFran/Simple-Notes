@@ -24,8 +24,15 @@ class MainViewModel @Inject constructor(
     private val _mainUiState = MutableStateFlow(MainUiState())
     val mainUiState = _mainUiState.asStateFlow()
 
+    private val _incomingContentFromExternalApp: MutableStateFlow<String?> = MutableStateFlow(null)
+    val incomingContentFromExternalApp = _incomingContentFromExternalApp.asStateFlow()
+
     init {
         observeAndNotifyUserMessages()
+    }
+
+    fun onIncommingContentFromExternalApp(content: String) {
+        _incomingContentFromExternalApp.update { content }
     }
 
     private fun observeAndNotifyUserMessages() {
@@ -84,6 +91,10 @@ class MainViewModel @Inject constructor(
 
     fun onUserMessageShown(uiText: UiText) {
         messageManager.onMessageShown(uiText)
+    }
+
+    fun onIncommingContentProcessed() {
+        _incomingContentFromExternalApp.update { null }
     }
 
 

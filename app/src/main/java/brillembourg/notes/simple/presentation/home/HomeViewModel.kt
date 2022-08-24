@@ -107,17 +107,17 @@ class HomeViewModel @Inject constructor(
         .firstOrNull() { note.id == it.id }?.isSelected
         ?: false)
 
-    fun onAddNoteClick() {
+    fun onAddNoteClick(content: String? = null) {
         _homeUiState.update {
             it.copy(
-                navigateToAddNote = true,
+                navigateToAddNote = NavigateToAddNote(content),
                 selectionModeActive = null
             )
         }
     }
 
     fun onNavigateToAddNoteCompleted() {
-        _homeUiState.update { it.copy(navigateToAddNote = false) }
+        _homeUiState.update { it.copy(navigateToAddNote = null) }
     }
 
     fun onReorderedNotes(reorderedTaskList: List<NotePresentationModel>) {

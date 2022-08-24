@@ -6,6 +6,7 @@ import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
@@ -15,6 +16,7 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
+import brillembourg.notes.simple.presentation.base.MainViewModel
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
@@ -33,6 +35,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private val viewModel: HomeViewModel by viewModels()
+    private val activityViewModel: MainViewModel by activityViewModels()
 
     private var _binding: FragmentHomeBinding? = null
     private lateinit var binding: FragmentHomeBinding
@@ -161,6 +164,15 @@ class HomeFragment : Fragment(), MenuProvider {
                 shareNotesAsStringState(homeUiState.shareNoteAsString)
             }
         }
+
+        safeUiLaunch {
+            activityViewModel.incomingContentFromExternalApp.collect {
+                it?.let {
+                    viewModel.onAddNoteClick(it)
+                    activityViewModel.onIncommingContentProcessed()
+                }
+            }
+        }
     }
 
     private fun shareNotesAsStringState(shareNoteAsString: String?) {
@@ -209,9 +221,9 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun navigateToAddNoteState(navigateToAddNote: Boolean) {
-        if (navigateToAddNote) {
-            navigateToCreateTask()
+    private fun navigateToAddNoteState(navigateToAddNote: NavigateToAddNote?) {
+        navigateToAddNote?.let {
+            navigateToCreateTask(navigateToAddNote.content)
             viewModel.onNavigateToAddNoteCompleted()
         }
     }
@@ -235,8 +247,9 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun navigateToCreateTask() {
+    private fun navigateToCreateTask(content: String? = null) {
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
+        directions.contentOptional = content
         setTransitionToCreateNote()
         findNavController().navigate(directions)
     }

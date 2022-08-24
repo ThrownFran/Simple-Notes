@@ -67,13 +67,28 @@ class DetailFragment : Fragment(), MenuProvider {
         val isNewTask = viewModel.uiDetailUiState.value.isNewTask
         val isArchived = viewModel.uiDetailUiState.value.isArchivedTask
 
+        menuUnarchiveVisibility(menu, isArchived, isNewTask)
+        menuArchiveVisibility(menu, isArchived, isNewTask)
+        menuDeleteVisibilityAndOptions(menu, isNewTask, isArchived)
+        menuShareAndCopyVisibility(menu)
+    }
 
-        menu.findItem(R.id.menu_note_unachive).apply {
-            isVisible = isArchived && !isNewTask
+    private fun menuShareAndCopyVisibility(menu: Menu) {
+        val userInput = viewModel.uiDetailUiState.value.userInput
+        val isShareOrCopyEnabled = !userInput.isNullOrEmpty()
+        menu.findItem(R.id.menu_note_share).apply {
+            isVisible = isShareOrCopyEnabled
         }
-        menu.findItem(R.id.menu_note_archive).apply {
-            isVisible = !isArchived && !isNewTask
+        menu.findItem(R.id.menu_note_copy).apply {
+            isVisible = isShareOrCopyEnabled
         }
+    }
+
+    private fun menuDeleteVisibilityAndOptions(
+        menu: Menu,
+        isNewTask: Boolean,
+        isArchived: Boolean
+    ) {
         menu.findItem(R.id.menu_note_delete).apply {
             isVisible = !isNewTask
             setShowAsAction(
@@ -84,14 +99,25 @@ class DetailFragment : Fragment(), MenuProvider {
                 }
             )
         }
+    }
 
-        val userInput = viewModel.uiDetailUiState.value.userInput
-        val isShareOrCopyEnabled = !userInput.isNullOrEmpty()
-        menu.findItem(R.id.menu_note_share).apply {
-            isVisible = isShareOrCopyEnabled
+    private fun menuArchiveVisibility(
+        menu: Menu,
+        isArchived: Boolean,
+        isNewTask: Boolean
+    ) {
+        menu.findItem(R.id.menu_note_archive).apply {
+            isVisible = !isArchived && !isNewTask
         }
-        menu.findItem(R.id.menu_note_copy).apply {
-            isVisible = isShareOrCopyEnabled
+    }
+
+    private fun menuUnarchiveVisibility(
+        menu: Menu,
+        isArchived: Boolean,
+        isNewTask: Boolean
+    ) {
+        menu.findItem(R.id.menu_note_unachive).apply {
+            isVisible = isArchived && !isNewTask
         }
     }
 

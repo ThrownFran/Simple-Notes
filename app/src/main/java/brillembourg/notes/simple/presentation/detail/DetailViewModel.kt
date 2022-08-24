@@ -39,7 +39,6 @@ class DetailViewModel @Inject constructor(
         getSavedTaskFromDeath()?.copy() //copy to avoid reference in home
             ?: getSavedNoteFromNav()?.copy() //Argument from navigation
 
-
     private val _uiDetailState = MutableStateFlow(getSavedUiStateFromDeath() ?: DetailUiState())
     val uiDetailUiState = _uiDetailState.asStateFlow()
 
@@ -85,10 +84,14 @@ class DetailViewModel @Inject constructor(
     }
 
     private fun newTaskState() {
+        val contentOptional: String? =
+            DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).contentOptional
+
         _uiDetailState.update {
             it.copy(
+                userInput = it.userInput.copy(content = contentOptional ?: ""),
                 isNewTask = true,
-                focusInput = true,
+                focusInput = contentOptional.isNullOrEmpty(),
             )
         }
     }
