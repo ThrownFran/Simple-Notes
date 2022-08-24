@@ -53,7 +53,10 @@ class NoteViewHolder(
 
     fun bindContent(task: NotePresentationModel) {
 //            binding.taskTextContent.text = "${task.order}. ${task.content}"
-        binding.taskTextContent.text = task.content
+        binding.taskTextContent.apply {
+            text = task.content
+            isVisible = task.content.isNotEmpty()
+        }
     }
 
     fun bindSelection(task: NotePresentationModel) {

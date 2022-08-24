@@ -27,4 +27,8 @@
     <string name="note_copied">Copied</string>
     <string name="all_copy">Copy</string>
     <string name="all_share">Share</string>
+    <string name="archived">Archived</string>
+    <string name="backup">Backup</string>
+    <string name="restore">Restore</string>
+    <string name="settings">Settings</string>
 </resources>

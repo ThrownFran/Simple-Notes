@@ -12,8 +12,8 @@
 
         <item
             android:id="@+id/trashFragment"
-            android:icon="@drawable/ic_outline_delete_24"
-            android:title="@string/trash_title" />
+            android:icon="@drawable/ic_outline_archive_on_surface_24"
+            android:title="@string/archived" />
 
     </group>
 
@@ -24,22 +24,22 @@
 
         <item
             android:id="@+id/menu_backup"
-            android:title="Backup"
+            android:title="@string/backup"
             android:icon="@drawable/ic_outline_cloud_upload_24" />
 
         <item
             android:id="@+id/menu_restore"
-            android:title="Restore"
+            android:title="@string/restore"
             android:icon="@drawable/ic_outline_cloud_download_24" />
 
         <item
             android:id="@+id/menu_settings"
             android:icon="@drawable/ic_outline_settings_24"
-            android:title="Settings" />
+            android:title="@string/settings" />
 
-        <item
-            android:id="@+id/menu_privacy"
-            android:title="Privacy" />
+        <!--        <item-->
+        <!--            android:id="@+id/menu_privacy"-->
+        <!--            android:title="Privacy" />-->
     </group>
 
 

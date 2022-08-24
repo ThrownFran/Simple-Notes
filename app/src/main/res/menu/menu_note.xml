@@ -10,19 +10,19 @@
 
     <item
         android:id="@+id/menu_note_copy"
-        android:icon="@drawable/ic_baseline_content_copy_24"
+        android:icon="@drawable/ic_round_content_copy_24"
         android:title="@string/all_copy"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_note_unachive"
-        android:icon="@drawable/ic_baseline_unarchive_24"
+        android:icon="@drawable/ic_outline_unarchive_24"
         android:title="@string/all_unarchive"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_note_archive"
-        android:icon="@drawable/ic_baseline_archive_on_secondary_24"
+        android:icon="@drawable/ic_outline_archive_on_secondary_24"
         android:title="@string/archive"
         app:showAsAction="ifRoom" />
 

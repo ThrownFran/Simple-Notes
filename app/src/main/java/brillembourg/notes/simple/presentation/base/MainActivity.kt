@@ -150,9 +150,9 @@ class MainActivity : AppCompatActivity() {
                 R.id.menu_settings -> {
                     true
                 }
-                R.id.menu_privacy -> {
-                    true
-                }
+//                R.id.menu_privacy -> {
+//                    true
+//                }
                 else -> false
             }
         }

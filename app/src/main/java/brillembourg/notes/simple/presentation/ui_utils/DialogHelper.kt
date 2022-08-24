@@ -17,7 +17,7 @@ fun showArchiveConfirmationDialog(
         fragment.requireContext()
     )
         .setTitle(title)
-        .setIcon(R.drawable.ic_baseline_archive_on_surface_24)
+        .setIcon(R.drawable.ic_outline_archive_on_surface_24)
         //            .setMessage(resources.getString(R.string.supporting_text))
         .setNegativeButton(fragment.resources.getString(R.string.all_cancel)) { dialog, which ->
         }
