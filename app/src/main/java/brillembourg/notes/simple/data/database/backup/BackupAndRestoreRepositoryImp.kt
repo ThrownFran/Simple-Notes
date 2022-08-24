@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.data.repositories
+package brillembourg.notes.simple.data.database.backup
 
 import brillembourg.notes.simple.data.database.RoomBackupHandler
 import brillembourg.notes.simple.domain.repositories.BackupAndRestoreRepository

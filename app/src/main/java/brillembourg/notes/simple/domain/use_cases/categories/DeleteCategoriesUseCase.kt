@@ -14,7 +14,7 @@ class DeleteCategoriesUseCase @Inject constructor(
 
     suspend operator fun invoke(params: Params): Resource<Result> =
         withContext(schedulers.defaultDispatcher()) {
-            repository.deleteCategories(params)
+            repository.deleteMultiple(params)
         }
 
     class Params(val ids: List<Long>)

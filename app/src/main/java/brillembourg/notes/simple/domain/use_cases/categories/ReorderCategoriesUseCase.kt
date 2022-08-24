@@ -15,7 +15,7 @@ class ReorderCategoriesUseCase @Inject constructor(
 
     suspend operator fun invoke(params: Params): Resource<Result> =
         withContext(schedulers.defaultDispatcher()) {
-            repository.reorderCategories(params)
+            repository.reorderList(params)
         }
 
     class Params(val categoryList: List<Category>)

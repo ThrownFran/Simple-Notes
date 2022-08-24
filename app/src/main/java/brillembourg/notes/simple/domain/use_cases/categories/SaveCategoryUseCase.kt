@@ -15,7 +15,7 @@ class SaveCategoryUseCase @Inject constructor(
 
     suspend operator fun invoke(params: Params): Resource<Result> =
         withContext(schedulers.defaultDispatcher()) {
-            repository.saveCategory(params)
+            repository.save(params)
         }
 
     class Params(val category: Category)

@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.data.repositories
+package brillembourg.notes.simple.data.user
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -7,10 +7,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import brillembourg.notes.simple.data.repositories.UserPreferencesRepositoryImp.PreferencesKeys.IS_GRID
-import brillembourg.notes.simple.data.repositories.UserPreferencesRepositoryImp.PreferencesKeys.LAYOUT_GRID
-import brillembourg.notes.simple.data.repositories.UserPreferencesRepositoryImp.PreferencesKeys.LAYOUT_VERTICAL
-import brillembourg.notes.simple.data.repositories.UserPreferencesRepositoryImp.PreferencesKeys.PREFERENCE_STORE
+import brillembourg.notes.simple.data.user.UserPreferencesRepositoryImp.PreferencesKeys.IS_GRID
+import brillembourg.notes.simple.data.user.UserPreferencesRepositoryImp.PreferencesKeys.LAYOUT_GRID
+import brillembourg.notes.simple.data.user.UserPreferencesRepositoryImp.PreferencesKeys.LAYOUT_VERTICAL
+import brillembourg.notes.simple.data.user.UserPreferencesRepositoryImp.PreferencesKeys.PREFERENCE_STORE
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.repositories.UserPrefRepository

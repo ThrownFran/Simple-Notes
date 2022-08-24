@@ -23,6 +23,11 @@ sealed class UiText {
     object NotesArchived : UiText()
     object NoteUnarchived : UiText()
     object NotesUnarchived : UiText()
+    object CategoryCreated : UiText()
+    object CategoryUpdated : UiText()
+    object CategoryDeleted : UiText()
+    object CategoriesDeleted : UiText()
+    object CategoriesReordered : UiText()
 }
 
 

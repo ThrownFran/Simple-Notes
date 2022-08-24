@@ -5,10 +5,10 @@ import brillembourg.notes.simple.util.Resource
 import kotlinx.coroutines.flow.Flow
 
 interface CategoryRepository {
-    suspend fun createCategory(params: CreateCategoryUseCase.Params): Resource<CreateCategoryUseCase.Result>
-    suspend fun saveCategory(params: SaveCategoryUseCase.Params): Resource<SaveCategoryUseCase.Result>
-    suspend fun deleteCategories(params: DeleteCategoriesUseCase.Params): Resource<DeleteCategoriesUseCase.Result>
-    suspend fun reorderCategories(params: ReorderCategoriesUseCase.Params): Resource<ReorderCategoriesUseCase.Result>
-    fun getCategories(params: GetCategoriesUseCase.Params): Flow<Resource<GetCategoriesUseCase.Result>>
+    suspend fun create(params: CreateCategoryUseCase.Params): Resource<CreateCategoryUseCase.Result>
+    suspend fun save(params: SaveCategoryUseCase.Params): Resource<SaveCategoryUseCase.Result>
+    suspend fun deleteMultiple(params: DeleteCategoriesUseCase.Params): Resource<DeleteCategoriesUseCase.Result>
+    suspend fun reorderList(params: ReorderCategoriesUseCase.Params): Resource<ReorderCategoriesUseCase.Result>
+    fun getList(params: GetCategoriesUseCase.Params): Flow<Resource<GetCategoriesUseCase.Result>>
 
 }

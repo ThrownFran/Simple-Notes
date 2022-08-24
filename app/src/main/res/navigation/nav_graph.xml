@@ -50,4 +50,9 @@
             app:destination="@id/detailFragment"
             app:popUpTo="@id/trashFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/categoriesFragment"
+        android:name="brillembourg.notes.simple.presentation.categories.CategoriesFragment"
+        android:label="fragment_categories"
+        tools:layout="@layout/fragment_categories" />
 </navigation>

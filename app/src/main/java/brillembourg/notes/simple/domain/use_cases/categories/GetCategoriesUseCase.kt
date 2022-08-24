@@ -14,7 +14,7 @@ class GetCategoriesUseCase @Inject constructor(
 ) {
 
     operator fun invoke(params: Params): Flow<Resource<Result>> {
-        return repository.getCategories(params)
+        return repository.getList(params)
             .flowOn(schedulers.defaultDispatcher())
     }
 

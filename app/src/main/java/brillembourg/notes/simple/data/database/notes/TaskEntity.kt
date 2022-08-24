@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.data.database
+package brillembourg.notes.simple.data.database.notes
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

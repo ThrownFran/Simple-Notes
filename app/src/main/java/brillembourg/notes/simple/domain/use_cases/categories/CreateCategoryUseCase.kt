@@ -15,13 +15,13 @@ class CreateCategoryUseCase @Inject constructor(
 
     suspend operator fun invoke(params: Params): Resource<Result> =
         withContext(schedulers.defaultDispatcher()) {
-            repository.createCategory(params)
+            repository.create(params)
         }
 
     class Params(val name: String)
 
     class Result(
-        val note: Category,
+        val category: Category,
         val message: UiText
     )
 

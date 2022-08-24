@@ -7,6 +7,9 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import brillembourg.notes.simple.data.database.backup.CategoryEntity
+import brillembourg.notes.simple.data.database.categories.CategoryDao
+import brillembourg.notes.simple.data.database.notes.TaskDao
+import brillembourg.notes.simple.data.database.notes.TaskEntity
 
 
 @Database(
@@ -15,6 +18,7 @@ import brillembourg.notes.simple.data.database.backup.CategoryEntity
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun taskDao(): TaskDao
+    abstract fun categoryDao(): CategoryDao
 
     companion object {
         @Volatile
