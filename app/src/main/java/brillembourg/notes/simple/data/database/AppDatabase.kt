@@ -6,10 +6,11 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import brillembourg.notes.simple.data.database.backup.CategoryEntity
 
 
 @Database(
-    entities = [TaskEntity::class], version = 6
+    entities = [TaskEntity::class, CategoryEntity::class], version = 7
 )
 abstract class AppDatabase : RoomDatabase() {
 
