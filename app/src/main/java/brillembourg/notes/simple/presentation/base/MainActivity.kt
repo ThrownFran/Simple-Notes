@@ -102,7 +102,8 @@ class MainActivity : AppCompatActivity() {
 
         //top level configuration
         appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.homeFragment, R.id.trashFragment), binding.drawerLayout
+            setOf(R.id.homeFragment, R.id.categoriesFragment, R.id.trashFragment),
+            binding.drawerLayout
         )
 
 //        appBarConfiguration = AppBarConfiguration(

@@ -18,7 +18,7 @@ class CategoriesDatabase(
         val lastOrderPosition = calculateLastOrderPosition()
         val nextOrderPosition = lastOrderPosition + 1
 
-        return CategoryEntity(null, name, nextOrderPosition).run {
+        return CategoryEntity(name = name, order = nextOrderPosition).run {
             id = roomDatabase.categoryDao().create(this)
             this
         }

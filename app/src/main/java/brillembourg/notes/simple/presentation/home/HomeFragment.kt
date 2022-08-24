@@ -283,7 +283,6 @@ class HomeFragment : Fragment(), MenuProvider {
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
             (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-//            adapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
     }
 

@@ -21,5 +21,10 @@ fun UiText.asString(context: Context): String {
         is UiText.RestoreSuccess -> "Restore success"
         is UiText.UnknownError -> "We are sorry, we got an error!"
         is UiText.GetNotesError -> "Error loading notes"
+        UiText.CategoriesDeleted -> "Categories deleted"
+        UiText.CategoriesReordered -> "Categories reordered"
+        UiText.CategoryCreated -> "Category created"
+        UiText.CategoryDeleted -> "Category deleted"
+        UiText.CategoryUpdated -> "Category updated"
     }
 }

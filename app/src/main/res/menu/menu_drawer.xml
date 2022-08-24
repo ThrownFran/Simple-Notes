@@ -11,6 +11,11 @@
             android:title="@string/notes" />
 
         <item
+            android:id="@+id/categoriesFragment"
+            android:icon="@drawable/ic_outline_label_24"
+            android:title="@string/categories" />
+
+        <item
             android:id="@+id/trashFragment"
             android:icon="@drawable/ic_outline_archive_on_surface_24"
             android:title="@string/archived" />

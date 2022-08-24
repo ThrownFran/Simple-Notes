@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 abstract class CategoryDao {
 
     //CREATE
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun create(item: CategoryEntity): Long
 
     //GET
@@ -28,8 +29,8 @@ abstract class CategoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun save(categoryEntity: CategoryEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun saveMultiple(itemList: ArrayList<CategoryEntity>)
+//    @Insert(onConflict = OnConflictStrategy.REPLACE)
+//    abstract suspend fun saveMultiple(itemList: ArrayList<CategoryEntity>)
 
     @Query("UPDATE categoryentity SET `order` = :order WHERE id = :id")
     abstract suspend fun updateOrder(id: Long, order: Int)

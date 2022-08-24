@@ -7,7 +7,7 @@ import brillembourg.notes.simple.domain.models.Category
 
 @Entity(tableName = "categoryentity")
 data class CategoryEntity(
-    @PrimaryKey(autoGenerate = true) var id: Long? = null,
+    @PrimaryKey(autoGenerate = true) var id: Long = -1L,
     @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "order") val order: Int
 )

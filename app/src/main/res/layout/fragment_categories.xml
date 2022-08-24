@@ -5,9 +5,9 @@
     android:layout_height="match_parent"
     tools:context=".presentation.categories.CategoriesFragment">
 
-    <TextView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/categories_recycler"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Hello" />
+        android:layout_height="match_parent" />
 
 </FrameLayout>

@@ -6,8 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import brillembourg.notes.simple.data.database.backup.CategoryEntity
 import brillembourg.notes.simple.data.database.categories.CategoryDao
+import brillembourg.notes.simple.data.database.categories.CategoryEntity
 import brillembourg.notes.simple.data.database.notes.TaskDao
 import brillembourg.notes.simple.data.database.notes.TaskEntity
 
@@ -41,6 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
             "task_database"
         )
             .addMigrations(MIGRATION_5_to_6)
+            .addMigrations(MIGRATION_6_to_7)
             .build()
 
 
@@ -50,6 +51,12 @@ abstract class AppDatabase : RoomDatabase() {
                     "ALTER TABLE taskentity"
                             + " ADD COLUMN is_archived INTEGER NOT NULL DEFAULT '0'"
                 )
+            }
+        }
+
+        private val MIGRATION_6_to_7: Migration = object : Migration(6, 7) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS `categoryentity` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `order` INTEGER NOT NULL, PRIMARY KEY(`id`))")
             }
         }
     }

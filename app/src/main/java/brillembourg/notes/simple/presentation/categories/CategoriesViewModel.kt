@@ -31,6 +31,9 @@ class CategoriesViewModel @Inject constructor(
 
     init {
         observeCategoryList()
+
+        //TODO erase
+        onCreateCategory("My first category")
     }
 
     private fun observeCategoryList() {

@@ -1,28 +1,31 @@
-package brillembourg.notes.simple.presentation.home
+package brillembourg.notes.simple.presentation.categories
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import brillembourg.notes.simple.databinding.ItemNoteBinding
-import brillembourg.notes.simple.presentation.models.NotePresentationModel
+import brillembourg.notes.simple.databinding.ItemCategoryBinding
 import brillembourg.notes.simple.presentation.ui_utils.Draggable
 import brillembourg.notes.simple.presentation.ui_utils.ItemTouchDraggableImp
-import brillembourg.notes.simple.presentation.ui_utils.setupTaskDiffCallback
+import brillembourg.notes.simple.presentation.ui_utils.setupCategoryDiffCallback
 
-class NoteAdapter(
-    dragAndDropDirs: Int,
+class CategoryAdapter(
     private val recyclerView: RecyclerView,
-    private val onClick: (task: NotePresentationModel) -> Unit,
+    private val onClick: (task: CategoryPresentationModel) -> Unit,
     private val onSelection: () -> Unit,
-    private val onReorderSuccess: (reorderedTaskList: List<NotePresentationModel>) -> Unit,
+    private val onReorderSuccess: (reorderedTaskList: List<CategoryPresentationModel>) -> Unit,
     private val onReorderCanceled: () -> Unit
-) : ListAdapter<NotePresentationModel, NoteViewHolder>(setupTaskDiffCallback()),
-    Draggable<NotePresentationModel> by ItemTouchDraggableImp(dragAndDropDirs) {
+) : ListAdapter<CategoryPresentationModel, CategoryViewHolder>(setupCategoryDiffCallback()),
+    Draggable<CategoryPresentationModel> by ItemTouchDraggableImp(ItemTouchHelper.UP or ItemTouchHelper.DOWN) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
-        return NoteViewHolder(
-            binding = ItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false),
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
+        return CategoryViewHolder(
+            binding = ItemCategoryBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            ),
             onReadyToDrag = onStartDrag(),
             onClick = onClick,
             onSelected = onSelection,
@@ -30,7 +33,7 @@ class NoteAdapter(
         )
     }
 
-    private fun onStartDrag() = { noteViewHolder: NoteViewHolder ->
+    private fun onStartDrag() = { noteViewHolder: CategoryViewHolder ->
         startDrag(
             recyclerView = recyclerView,
             viewHolder = noteViewHolder,
@@ -47,7 +50,7 @@ class NoteAdapter(
         )
     }
 
-    override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
