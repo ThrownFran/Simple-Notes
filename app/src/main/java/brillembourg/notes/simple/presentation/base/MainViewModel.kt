@@ -31,7 +31,7 @@ class MainViewModel @Inject constructor(
         observeAndNotifyUserMessages()
     }
 
-    fun onIncommingContentFromExternalApp(content: String) {
+    fun onIncomingContentFromExternalApp(content: String) {
         _incomingContentFromExternalApp.update { content }
     }
 

@@ -43,21 +43,7 @@ class MainActivity : AppCompatActivity() {
         setupToolbar()
         renderStates()
         backupModel = roomBackupBuilder.prepareBackupInLocalStorage()
-
-        when (intent?.action) {
-            Intent.ACTION_SEND -> {
-                if ("text/plain" == intent.type) {
-                    handleSendText(intent) // Handle text being sent
-                }
-            }
-        }
-    }
-
-    private fun handleSendText(intent: Intent) {
-        intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
-            showMessage(it)
-            viewModel.onIncommingContentFromExternalApp(it)
-        }
+        handleIntentReceiver()
     }
 
     private fun renderStates() {
@@ -69,6 +55,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun handleIntentReceiver() {
+        when (intent?.action) {
+            Intent.ACTION_SEND -> {
+                if ("text/plain" == intent.type) {
+                    onIncomingContentIntent(intent) // Handle text being sent
+                }
+            }
+        }
+    }
+
+    private fun onIncomingContentIntent(intent: Intent) {
+        intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
+            viewModel.onIncomingContentFromExternalApp(it)
+        }
+    }
+
 
     private fun userMessageState(uiText: UiText?) {
         if (uiText == null) return

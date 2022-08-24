@@ -13,10 +13,7 @@ import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,7 +36,15 @@ class DetailViewModel @Inject constructor(
         getSavedTaskFromDeath()?.copy() //copy to avoid reference in home
             ?: getSavedNoteFromNav()?.copy() //Argument from navigation
 
-    private val _uiDetailState = MutableStateFlow(getSavedUiStateFromDeath() ?: DetailUiState())
+    private val _uiDetailState =
+        MutableStateFlow(getSavedUiStateFromDeath() ?: DetailUiState())
+            .apply {
+                observeInputChanges(value)
+                onEach { saveStateInSavedStateHandler(value) }
+                    .launchIn(viewModelScope)
+            }
+
+
     val uiDetailUiState = _uiDetailState.asStateFlow()
 
     private fun getSavedUiStateFromDeath(): DetailUiState? =
@@ -62,34 +67,49 @@ class DetailViewModel @Inject constructor(
             newTaskState()
         }
 
-        observeInputChanges()
-        saveChangesInSavedStateObserver()
+//        observeInputChanges()
+        saveStateInSavedStateHandler()
     }
 
-    /*UserInput two way data binding*/
-    private fun observeInputChanges() {
-        viewModelScope.launch {
-            _uiDetailState.value.getOnInputChangedFlow()
-                .debounce(300)
-                .collect {
-                    onInputChange()
-                }
-        }
+    private fun observeInputChanges(uiState: DetailUiState) {
+        uiState.getOnInputChangedFlow()
+            .debounce(300)
+            .onEach {
+                onInputChange()
+            }.launchIn(viewModelScope)
     }
+
+//    /*UserInput two way data binding*/
+//    private fun observeInputChanges() {
+//        viewModelScope.launch {
+//            _uiDetailState.value.getOnInputChangedFlow()
+//                .debounce(300)
+//                .collect {
+//                    onInputChange()
+//                }
+//        }
+//    }
 
     private fun onInputChange() {
         saveTask(navigateBack = false)
         //Save new input in state
-        saveStateInSavedStateHandler()
+        saveStateInSavedStateHandler(_uiDetailState.value)
     }
 
     private fun newTaskState() {
         val contentOptional: String? =
             DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).contentOptional
+        val currentContent: String = _uiDetailState.value.userInput.content
+
+        val content: String = when {
+            currentContent.isNotEmpty() -> currentContent //Entry from death restore
+            contentOptional?.isNotEmpty() == true -> contentOptional //Entry with incoming Content
+            else -> "" //Entry from Home
+        }
 
         _uiDetailState.update {
             it.copy(
-                userInput = it.userInput.copy(content = contentOptional ?: ""),
+                userInput = it.userInput.copy(content = content),
                 isNewTask = true,
                 focusInput = contentOptional.isNullOrEmpty(),
             )
@@ -276,16 +296,21 @@ class DetailViewModel @Inject constructor(
         currentNotePresentation?.content == _uiDetailState.value.userInput.content
                 && currentNotePresentation?.title == _uiDetailState.value.userInput.title
 
-    private fun saveChangesInSavedStateObserver() {
-        viewModelScope.launch {
-            uiDetailUiState.collect {
-                saveStateInSavedStateHandler()
-            }
-        }
+//    private fun saveChangesInSavedStateObserver() {
+//        viewModelScope.launch {
+//            uiDetailUiState.collect {
+//                saveStateInSavedStateHandler()
+//            }
+//        }
+//    }
+
+    private fun saveStateInSavedStateHandler(detailUiState: DetailUiState) {
+        savedStateHandle[uiStateKey] = detailUiState
+        savedStateHandle[noteSavedStateKey] = currentNotePresentation
     }
 
     private fun saveStateInSavedStateHandler() {
-        savedStateHandle[uiStateKey] = uiDetailUiState.value
+        savedStateHandle[uiStateKey] = _uiDetailState.value
         savedStateHandle[noteSavedStateKey] = currentNotePresentation
     }
 

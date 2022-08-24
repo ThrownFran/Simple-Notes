@@ -166,8 +166,8 @@ class HomeFragment : Fragment(), MenuProvider {
         }
 
         safeUiLaunch {
-            activityViewModel.incomingContentFromExternalApp.collect {
-                it?.let {
+            activityViewModel.incomingContentFromExternalApp.collect { content ->
+                content?.let {
                     viewModel.onAddNoteClick(it)
                     activityViewModel.onIncommingContentProcessed()
                 }

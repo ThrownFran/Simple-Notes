@@ -8,8 +8,6 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
@@ -21,7 +19,6 @@ import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDi
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 
@@ -204,27 +201,25 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     private fun renderState() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiDetailUiState.collect { uiState ->
+        safeUiLaunch {
+            viewModel.uiDetailUiState.collect { uiState ->
 
-                    setToolbarTitle(uiState.isNewTask)
+                setToolbarTitle(uiState.isNewTask)
 
-                    updateToolbarIcons()
+                updateToolbarIcons()
 
-                    if (uiState.unFocusInput) {
-                        unFocus()
-                        viewModel.onUnFocusCompleted()
-                    }
+                if (uiState.unFocusInput) {
+                    unFocus()
+                    viewModel.onUnFocusCompleted()
+                }
 
-                    if (uiState.focusInput) {
-                        focus()
-                        viewModel.onFocusCompleted()
-                    }
+                if (uiState.focusInput) {
+                    focus()
+                    viewModel.onFocusCompleted()
+                }
 
-                    if (uiState.navigateBack) {
-                        finishView()
-                    }
+                if (uiState.navigateBack) {
+                    finishView()
                 }
             }
         }
@@ -236,10 +231,6 @@ class DetailFragment : Fragment(), MenuProvider {
                     updateToolbarIcons()
                 }
         }
-    }
-
-    private fun onInputChange() {
-
     }
 
     private fun updateToolbarIcons() {
