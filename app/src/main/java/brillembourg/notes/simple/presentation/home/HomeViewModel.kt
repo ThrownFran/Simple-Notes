@@ -303,7 +303,7 @@ class HomeViewModel @Inject constructor(
         val tasksToCopy = getSelectedTasks()
         _homeUiState.update {
             it.copy(
-                shareNoteAsString = tasksToCopy.toString(),
+                shareNoteAsString = tasksToCopy.toCopyString(),
                 selectionModeActive = null
             )
         }
