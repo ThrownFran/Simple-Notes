@@ -82,8 +82,8 @@ fun MainActivity.showMessage(message: String, onMessageShown: (() -> Unit)? = nu
     Snackbar.make(binding.mainCoordinator, message, Snackbar.LENGTH_SHORT).apply {
 
         //Snackbar Widget still not styleable in Material3 (Could not style text color)
-        setTextColor(resolveAttribute(com.google.android.material.R.attr.colorOnTertiaryContainer))
-        setBackgroundTint(resolveAttribute(com.google.android.material.R.attr.colorTertiaryContainer))
+        setTextColor(resolveAttribute(com.google.android.material.R.attr.colorOnSecondaryContainer))
+        setBackgroundTint(resolveAttribute(com.google.android.material.R.attr.colorSecondaryContainer))
 
         addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
             override fun onShown(transientBottomBar: Snackbar?) {

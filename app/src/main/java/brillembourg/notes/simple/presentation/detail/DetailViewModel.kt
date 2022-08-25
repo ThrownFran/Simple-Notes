@@ -73,22 +73,11 @@ class DetailViewModel @Inject constructor(
 
     private fun observeInputChanges(uiState: DetailUiState) {
         uiState.getOnInputChangedFlow()
-//            .debounce(300)
+            .debounce(200)
             .onEach {
                 onInputChange()
             }.launchIn(viewModelScope)
     }
-
-//    /*UserInput two way data binding*/
-//    private fun observeInputChanges() {
-//        viewModelScope.launch {
-//            _uiDetailState.value.getOnInputChangedFlow()
-//                .debounce(300)
-//                .collect {
-//                    onInputChange()
-//                }
-//        }
-//    }
 
     private fun onInputChange() {
         saveTask(navigateBack = false)

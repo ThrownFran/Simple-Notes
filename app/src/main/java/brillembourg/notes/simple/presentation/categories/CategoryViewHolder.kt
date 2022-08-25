@@ -62,30 +62,51 @@ class CategoryViewHolder(
             onItemClick(bindingAdapterPosition, getCurrentList()[bindingAdapterPosition])
         }
 
+
         binding.categoryCardview.setOnLongClickListener {
             onItemSelection(bindingAdapterPosition, getCurrentList()[bindingAdapterPosition])
             true
         }
 
         binding.categoryImageEdit.setOnClickListener {
-            editCategoryAndUnfocusOthers(getCurrentList()[bindingAdapterPosition])
+            onEdit()
         }
 
         binding.categoryImageSave.setOnClickListener {
-            val presentationModel = getCurrentList()[bindingAdapterPosition]
-            val newName = binding.categoryEditName.text.toString()
-
-            if (newName != presentationModel.name) {
-                onRename.invoke(newName, presentationModel)
-            }
-
-            unfocusCategory(presentationModel)
+            onSave()
         }
 
         binding.categoryImageCancel.setOnClickListener {
-            val presentationModel = getCurrentList()[bindingAdapterPosition]
-            unfocusCategory(presentationModel)
+            onCancel()
         }
+    }
+
+    private fun onCancel() {
+        val presentationModel = getCurrentList()[bindingAdapterPosition]
+        unfocusCategory(presentationModel)
+    }
+
+    private fun onSave() {
+        val presentationModel = getCurrentList()[bindingAdapterPosition]
+        val newName = binding.categoryEditName.text.toString()
+
+        if (newName != presentationModel.name) {
+            renameCategory(newName, presentationModel)
+        }
+
+        unfocusCategory(presentationModel)
+    }
+
+    private fun onEdit() {
+        editCategoryAndUnfocusOthers(getCurrentList()[bindingAdapterPosition])
+    }
+
+    private fun renameCategory(
+        newName: String,
+        presentationModel: CategoryPresentationModel
+    ) {
+        onRename.invoke(newName, presentationModel)
+        presentationModel.name = newName
     }
 
     private fun unfocusCategory(presentationModel: CategoryPresentationModel) {
@@ -101,32 +122,53 @@ class CategoryViewHolder(
 
     private fun bindIsEditing(category: CategoryPresentationModel) {
         if (category.isEditing) {
-            binding.categoryTextName.isVisible = false
-            binding.categoryEditName.isVisible = true
-            binding.categoryImageLabel.isVisible = false
-            binding.categoryImageSave.isVisible = true
-            binding.categoryImageCancel.isVisible = true
-            binding.categoryImageEdit.isVisible = false
 
-            binding.categoryEditName.setText(category.name)
-            binding.categoryEditName.requestFocus()
-            binding.categoryEditName.showSoftKeyboard()
+            showEditingViews()
+
+            binding.categoryEditName.apply {
+                setText(category.name)
+                requestFocus()
+                showSoftKeyboard()
+            }
 
         } else {
-            binding.categoryTextName.isVisible = true
-            binding.categoryEditName.clearFocus()
-            binding.categoryEditName.isVisible = false
-            binding.categoryEditName.isVisible = false
+            hideEditingViews()
 
-            binding.categoryImageLabel.isVisible = true
-            binding.categoryImageSave.isVisible = false
-            binding.categoryImageCancel.isVisible = false
-            binding.categoryImageEdit.isVisible = true
-
-            if (getCurrentList().none { it.isEditing }) {
-                binding.categoryEditName.hideKeyboard()
+            binding.categoryEditName.apply {
+                clearFocus()
             }
+
+            hideKeyboardIfNoItemInListIsEditing()
         }
+    }
+
+    private fun hideKeyboardIfNoItemInListIsEditing() {
+        if (getCurrentList().none { it.isEditing }) {
+            binding.categoryEditName.hideKeyboard()
+        }
+    }
+
+    private fun hideEditingViews() {
+        binding.categoryImageLabel.isVisible = true
+        binding.categoryImageSave.isVisible = false
+        binding.categoryImageCancel.isVisible = false
+        binding.categoryImageEdit.isVisible = true
+
+        //Text fields
+        binding.categoryEditName.isVisible = false
+        binding.categoryTextName.isVisible = true
+    }
+
+    private fun showEditingViews() {
+        binding.categoryTextName.isVisible = false
+        binding.categoryImageLabel.isVisible = false
+        binding.categoryImageSave.isVisible = true
+        binding.categoryImageCancel.isVisible = true
+        binding.categoryImageEdit.isVisible = false
+
+        //Text fields
+        binding.categoryEditName.isVisible = true
+        binding.categoryTextName.isVisible = false
     }
 
     private fun bindName(category: CategoryPresentationModel) {
@@ -150,7 +192,7 @@ class CategoryViewHolder(
     private fun setBackgroundSelected() {
         binding.categoryCardview.isChecked = true
         binding.categoryCardview.strokeWidth =
-            4f.fromDpToPixel(binding.categoryCardview.context).toInt()
+            2.5f.fromDpToPixel(binding.categoryCardview.context).toInt()
     }
 
 
