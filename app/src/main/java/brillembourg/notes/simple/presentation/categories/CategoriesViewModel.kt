@@ -205,23 +205,23 @@ class CategoriesViewModel @Inject constructor(
         onSelectionDismissed()
     }
 
-    fun onEdit() {
-        _categoryUiState.update { it.copy(isEditing = true) }
-    }
+//    fun onEdit() {
+//        _categoryUiState.update { it.copy(isEditing = true) }
+//    }
 
     fun onSave() {
-        val categoryList = categoryUiState.value.categoryList.data
-            .onEach { it.isEditing = false }
-
-        _categoryUiState.update { uiState ->
-            uiState.copy(
-                isEditing = false,
-                categoryList = uiState.categoryList.copy(
-                    data = categoryList,
-                    mustRender = true
-                )
-            )
-        }
+//        val categoryList = categoryUiState.value.categoryList.data
+//            .onEach { it.isEditing = false }
+//
+//        _categoryUiState.update { uiState ->
+//            uiState.copy(
+//                isEditing = false,
+//                categoryList = uiState.categoryList.copy(
+//                    data = categoryList,
+//                    mustRender = true
+//                )
+//            )
+//        }
 
         //TODO SAVE ACTUAL
     }

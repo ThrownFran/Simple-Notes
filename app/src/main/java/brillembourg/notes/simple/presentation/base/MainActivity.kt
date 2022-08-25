@@ -2,6 +2,7 @@ package brillembourg.notes.simple.presentation.base
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -124,6 +125,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupDrawerListener() {
+
+        //TODO
+        binding.navView.menu.findItem(R.id.customMenu).actionView
+            .findViewById<TextView>(R.id.category_text_name)
+            .setText("Helloooo")
+
         binding.navView.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.homeFragment -> {

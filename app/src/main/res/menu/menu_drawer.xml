@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <group
         android:id="@+id/menu_group_top_level_destinations"
@@ -14,6 +15,12 @@
             android:id="@+id/categoriesFragment"
             android:icon="@drawable/ic_outline_label_24"
             android:title="@string/categories" />
+
+        <item
+            android:id="@+id/customMenu"
+            app:actionLayout="@layout/item_category"
+            app:showAsAction="collapseActionView"
+            android:title="@null" />
 
         <item
             android:id="@+id/trashFragment"

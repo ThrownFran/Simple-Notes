@@ -12,7 +12,7 @@
 -->
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:alpha="1" android:color="?colorSecondary" app:state_dragged="true" />
-    <item android:alpha="1" android:color="?colorSecondary" android:state_checked="true" />
+    <item android:alpha="1" android:color="?colorSecondaryVariant" app:state_dragged="true" />
+    <item android:alpha="1" android:color="?colorSecondaryVariant" android:state_checked="true" />
     <item android:color="@color/md_theme_light_primary_transparent" android:state_checked="false" app:state_dragged="false" />
 </selector>

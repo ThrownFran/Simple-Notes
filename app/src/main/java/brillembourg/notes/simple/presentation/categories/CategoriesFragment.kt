@@ -1,13 +1,13 @@
 package brillembourg.notes.simple.presentation.categories
 
 import android.os.Bundle
-import android.view.*
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
+import android.view.ActionMode
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
@@ -24,7 +24,7 @@ import brillembourg.notes.simple.presentation.ui_utils.showDeleteCategoriesDialo
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class CategoriesFragment : Fragment(), MenuProvider {
+class CategoriesFragment : Fragment() {
 
     companion object {
         fun newInstance() = CategoriesFragment()
@@ -45,45 +45,45 @@ class CategoriesFragment : Fragment(), MenuProvider {
             FragmentCategoriesBinding.inflate(inflater, container, false)
         binding = _binding as FragmentCategoriesBinding
         binding.viewmodel = viewModel
-        setupMenu()
+//        setupMenu()
         renderStates()
         setupListeners()
         return binding.root
     }
 
-    private fun setupMenu() {
-        val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.STARTED)
-    }
+//    private fun setupMenu() {
+//        val menuHost: MenuHost = requireActivity()
+//        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.STARTED)
+//    }
 
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        menuInflater.inflate(R.menu.menu_categories, menu)
-    }
+//    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+//        menuInflater.inflate(R.menu.menu_categories, menu)
+//    }
 
-    override fun onPrepareMenu(menu: Menu) {
-        super.onPrepareMenu(menu)
-        menu.findItem(R.id.menu_categories_edit).apply {
-            isVisible = viewModel.categoryUiState.value.editIconVisibility()
-        }
-        menu.findItem(R.id.menu_categories_save).apply {
-            isVisible = viewModel.categoryUiState.value.saveIconVisibility()
-        }
-    }
+//    override fun onPrepareMenu(menu: Menu) {
+//        super.onPrepareMenu(menu)
+//        menu.findItem(R.id.menu_categories_edit).apply {
+//            isVisible = viewModel.categoryUiState.value.editIconVisibility()
+//        }
+//        menu.findItem(R.id.menu_categories_save).apply {
+//            isVisible = viewModel.categoryUiState.value.saveIconVisibility()
+//        }
+//    }
 
 
-    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        when (menuItem.itemId) {
-            R.id.menu_categories_edit -> {
-                viewModel.onEdit()
-                return true
-            }
-            R.id.menu_categories_save -> {
-                viewModel.onSave()
-                return true
-            }
-        }
-        return false
-    }
+//    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+//        when (menuItem.itemId) {
+//            R.id.menu_categories_edit -> {
+//                viewModel.onEdit()
+//                return true
+//            }
+//            R.id.menu_categories_save -> {
+//                viewModel.onSave()
+//                return true
+//            }
+//        }
+//        return false
+//    }
 
     private fun setupListeners() {
         safeUiLaunch {
@@ -129,14 +129,14 @@ class CategoriesFragment : Fragment(), MenuProvider {
 
                 showDeleteCategoriesState(it.deleteConfirmation)
 
-                toolbarMenu(it.isEditing)
+//                toolbarMenu(it.isEditing)
             }
         }
     }
 
-    private fun toolbarMenu(editing: Boolean) {
-        requireActivity().invalidateMenu()
-    }
+//    private fun toolbarMenu(editing: Boolean) {
+//        requireActivity().invalidateMenu()
+//    }
 
     private fun showDeleteCategoriesState(state: DeleteCategoriesConfirmation?) {
         if (state != null) {
@@ -225,7 +225,8 @@ class CategoriesFragment : Fragment(), MenuProvider {
         list: List<CategoryPresentationModel>
     ): CategoryAdapter {
         return CategoryAdapter(
-            isEditing = { viewModel.categoryUiState.value.isEditing },
+//            isEditing = { viewModel.categoryUiState.value.isEditing },
+            isEditing = { true },
             recyclerView = recyclerView,
             onClick = { category -> onCategoryClicked(category) },
             onReorderSuccess = { categories -> onReorderedCategories(categories) },

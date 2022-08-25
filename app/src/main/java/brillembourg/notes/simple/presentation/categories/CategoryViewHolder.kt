@@ -1,10 +1,11 @@
 package brillembourg.notes.simple.presentation.categories
 
-import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemCategoryBinding
 import brillembourg.notes.simple.presentation.custom_views.fromDpToPixel
+import brillembourg.notes.simple.presentation.custom_views.hideKeyboard
+import brillembourg.notes.simple.presentation.custom_views.showSoftKeyboard
 import brillembourg.notes.simple.presentation.ui_utils.Selectable
 import brillembourg.notes.simple.presentation.ui_utils.SelectableImp
 
@@ -25,15 +26,19 @@ class CategoryViewHolder(
             onSelected = { onSelected?.invoke() },
             onClickWithNoSelection = { presentationModel ->
 
-                if (isEditing()) {
-                    unFocusAnyEditingCategory()
-                    editCategory(presentationModel)
-                }
+                editCategoryAndUnfocusOthers(presentationModel)
 
                 onClick?.invoke(presentationModel)
             },
             onReadyToDrag = { onReadyToDrag?.invoke(this) }
         )
+    }
+
+    private fun editCategoryAndUnfocusOthers(presentationModel: CategoryPresentationModel) {
+        if (isEditing()) {
+            unFocusAnyEditingCategory()
+            editCategory(presentationModel)
+        }
     }
 
     private fun editCategory(presentationModel: CategoryPresentationModel) {
@@ -60,6 +65,26 @@ class CategoryViewHolder(
             onItemSelection(bindingAdapterPosition, getCurrentList()[bindingAdapterPosition])
             true
         }
+
+        binding.categoryImageEdit.setOnClickListener {
+            editCategoryAndUnfocusOthers(getCurrentList()[bindingAdapterPosition])
+        }
+
+        binding.categoryImageSave.setOnClickListener {
+            val presentationModel = getCurrentList()[bindingAdapterPosition]
+            presentationModel.name = binding.categoryEditName.text.toString()
+            unfocusCategory(presentationModel)
+        }
+
+        binding.categoryImageCancel.setOnClickListener {
+            val presentationModel = getCurrentList()[bindingAdapterPosition]
+            unfocusCategory(presentationModel)
+        }
+    }
+
+    private fun unfocusCategory(presentationModel: CategoryPresentationModel) {
+        presentationModel.isEditing = false
+        bindingAdapter?.notifyItemChanged(bindingAdapterPosition, presentationModel)
     }
 
     fun bind(category: CategoryPresentationModel) {
@@ -72,13 +97,29 @@ class CategoryViewHolder(
         if (category.isEditing) {
             binding.categoryTextName.isVisible = false
             binding.categoryEditName.isVisible = true
+            binding.categoryImageLabel.isVisible = false
+            binding.categoryImageSave.isVisible = true
+            binding.categoryImageCancel.isVisible = true
+            binding.categoryImageEdit.isVisible = false
+
             binding.categoryEditName.setText(category.name)
             binding.categoryEditName.requestFocus()
+            binding.categoryEditName.showSoftKeyboard()
+
         } else {
             binding.categoryTextName.isVisible = true
             binding.categoryEditName.clearFocus()
             binding.categoryEditName.isVisible = false
-            binding.categoryEditName.visibility = View.GONE
+            binding.categoryEditName.isVisible = false
+
+            binding.categoryImageLabel.isVisible = true
+            binding.categoryImageSave.isVisible = false
+            binding.categoryImageCancel.isVisible = false
+            binding.categoryImageEdit.isVisible = true
+
+            if (getCurrentList().none { it.isEditing }) {
+                binding.categoryEditName.hideKeyboard()
+            }
         }
     }
 
