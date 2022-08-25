@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
 import androidx.databinding.library.baseAdapters.BR
+import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -19,12 +20,20 @@ data class DetailUiState(
     val navigateBack: Boolean = false,
     val focusInput: Boolean = false,
     val unFocusInput: Boolean = false,
+    val noteCategories: List<CategoryPresentationModel> = emptyList(),
+    var selectCategories: SelectCategories = SelectCategories()
 ) : Parcelable {
 
     fun getOnInputChangedFlow(): Flow<UserInput> {
         return userInput.getOnInputChangedFlow()
     }
 }
+
+@Parcelize
+data class SelectCategories(
+    val isShowing: Boolean = false,
+    val categories: List<CategoryPresentationModel> = emptyList()
+) : Parcelable
 
 /**
  * Two way data binding with title and content

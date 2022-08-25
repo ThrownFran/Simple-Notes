@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.*
+import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
+import brillembourg.notes.simple.presentation.categories.toPresentation
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.presentation.models.toPresentation
@@ -25,6 +27,7 @@ class DetailViewModel @Inject constructor(
     private val deleteNotesUseCase: DeleteNotesUseCase,
     private val archiveNotesUseCase: ArchiveNotesUseCase,
     private val unArchiveNotesUseCase: UnArchiveNotesUseCase,
+    private val getCategoriesUseCase: GetCategoriesUseCase,
     private val dateProvider: DateProvider,
     private val messageManager: MessageManager,
 ) : ViewModel() {
@@ -47,6 +50,47 @@ class DetailViewModel @Inject constructor(
 
     val uiDetailUiState = _uiDetailState.asStateFlow()
 
+    var messageToShowWhenNavBack: UiText? = null
+
+    init {
+        getCategories()
+
+        currentNotePresentation?.let {
+            editTaskState(it)
+        }
+
+        if (currentNotePresentation == null) {
+            newTaskState()
+        }
+        saveStateInSavedStateHandler()
+    }
+
+    private fun getCategories() {
+        getCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _uiDetailState.update { uiState ->
+                            uiState.copy(
+                                selectCategories = _uiDetailState.value.selectCategories.copy(
+                                    categories = result.data.categoryList
+                                        .map { it.toPresentation() }
+                                        .sortedBy { it.order }
+                                        .reversed()
+                                )
+                            )
+                        }
+                    }
+                    is Resource.Error -> showErrorMessage(result.exception)
+                    is Resource.Loading -> Unit
+
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    //region Helpers
+
     private fun getSavedUiStateFromDeath(): DetailUiState? =
         savedStateHandle.get<DetailUiState>(uiStateKey)
 
@@ -56,152 +100,23 @@ class DetailViewModel @Inject constructor(
     private fun getSavedNoteFromNav() =
         DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).task
 
-    var messageToShowWhenNavBack: UiText? = null
+    private fun hasNoChangesWithOriginalTask() =
+        currentNotePresentation?.content == _uiDetailState.value.userInput.content
+                && currentNotePresentation?.title == _uiDetailState.value.userInput.title
 
-    init {
-        currentNotePresentation?.let {
-            editTaskState(it)
-        }
-
-        if (currentNotePresentation == null) {
-            newTaskState()
-        }
-
-//        observeInputChanges()
-        saveStateInSavedStateHandler()
+    private fun saveStateInSavedStateHandler(detailUiState: DetailUiState) {
+        savedStateHandle[uiStateKey] = detailUiState
+        savedStateHandle[noteSavedStateKey] = currentNotePresentation
     }
 
-    private fun observeInputChanges(uiState: DetailUiState) {
-        uiState.getOnInputChangedFlow()
-            .debounce(200)
-            .onEach {
-                onInputChange()
-            }.launchIn(viewModelScope)
+    private fun saveStateInSavedStateHandler() {
+        savedStateHandle[uiStateKey] = _uiDetailState.value
+        savedStateHandle[noteSavedStateKey] = currentNotePresentation
     }
 
-    private fun onInputChange() {
-        saveTask(navigateBack = false)
-        //Save new input in state
-        saveStateInSavedStateHandler(_uiDetailState.value)
-    }
+    //endregion
 
-    private fun newTaskState() {
-        val contentOptional: String? =
-            DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).contentOptional
-        val currentContent: String = _uiDetailState.value.userInput.content
-
-        val content: String = when {
-            currentContent.isNotEmpty() -> currentContent //Entry from death restore
-            contentOptional?.isNotEmpty() == true -> contentOptional //Entry with incoming Content
-            else -> "" //Entry from Home
-        }
-
-        _uiDetailState.update {
-            it.copy(
-                userInput = it.userInput.copy(content = content),
-                isNewTask = true,
-                focusInput = contentOptional.isNullOrEmpty(),
-            )
-        }
-    }
-
-    private fun editTaskState(note: NotePresentationModel) {
-        _uiDetailState.update {
-            it.copy(
-                userInput = _uiDetailState.value.userInput.copy(
-                    title = note.title ?: "",
-                    content = note.content,
-                ),
-                unFocusInput = true,
-                isNewTask = false,
-                isArchivedTask = note.isArchived
-            )
-        }
-    }
-
-    fun onArchive() {
-        archiveNote()
-    }
-
-    private fun archiveNote() {
-        if (currentNotePresentation?.isArchived == true) throw IllegalArgumentException("Cannot archive an archived note")
-
-        viewModelScope.launch {
-            val id = currentNotePresentation?.id ?: return@launch
-            val result = archiveNotesUseCase.invoke(ArchiveNotesUseCase.Params(listOf(id)))
-            when (result) {
-                is Resource.Success -> {
-                    showMessage(result.data.message)
-                    _uiDetailState.update { it.copy(navigateBack = true) }
-                }
-                is Resource.Error -> showErrorMessage(result.exception)
-                is Resource.Loading -> Unit
-            }
-        }
-    }
-
-    fun onUnarchive() {
-        unarchiveNote()
-    }
-
-    private fun unarchiveNote() {
-        if (currentNotePresentation?.isArchived == false) throw IllegalArgumentException("Cannot unarchive a non-archived note")
-
-        viewModelScope.launch {
-            val id = currentNotePresentation?.id ?: return@launch
-            val result = unArchiveNotesUseCase.invoke(UnArchiveNotesUseCase.Params(listOf(id)))
-            when (result) {
-                is Resource.Success -> {
-                    _uiDetailState.update { it.copy(navigateBack = true) }
-                    showMessage(result.data.message)
-                }
-                is Resource.Error -> showErrorMessage(result.exception)
-                is Resource.Loading -> Unit
-            }
-        }
-    }
-
-    private fun showMessage(message: UiText) {
-        messageManager.showMessage(message)
-    }
-
-    fun onDelete() {
-        deleteNote()
-    }
-
-    private fun deleteNote() {
-        if (currentNotePresentation == null) throw IllegalArgumentException("Cannot delete note that is not created")
-        viewModelScope.launch {
-            val id = currentNotePresentation?.id ?: return@launch
-            val result = deleteNotesUseCase.invoke(DeleteNotesUseCase.Params(listOf(id)))
-            when (result) {
-                is Resource.Success -> {
-                    showMessage(result.data.message)
-                    _uiDetailState.update { it.copy(navigateBack = true) }
-                }
-                is Resource.Error -> showErrorMessage(result.exception)
-                is Resource.Loading -> Unit
-            }
-        }
-    }
-
-    fun onBackPressed() {
-        if (hasNoChangesWithOriginalTask()) {
-            messageToShowWhenNavBack?.let { showMessage(it) }
-            _uiDetailState.update { it.copy(navigateBack = true) }
-            return
-        }
-        saveTask(navigateBack = true)
-    }
-
-    fun onFocusCompleted() {
-        _uiDetailState.update { it.copy(focusInput = false) }
-    }
-
-    fun onUnFocusCompleted() {
-        _uiDetailState.update { it.copy(unFocusInput = false) }
-    }
-
+    //region Create
     private fun createTask(
         navigateBack: Boolean = true,
     ) {
@@ -240,8 +155,42 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    private fun showErrorMessage(e: Exception) {
-        messageManager.showMessage(getMessageFromError(e))
+    private fun newTaskState() {
+        val contentOptional: String? =
+            DetailFragmentArgs.fromSavedStateHandle(savedStateHandle).contentOptional
+        val currentContent: String = _uiDetailState.value.userInput.content
+
+        val content: String = when {
+            currentContent.isNotEmpty() -> currentContent //Entry from death restore
+            contentOptional?.isNotEmpty() == true -> contentOptional //Entry with incoming Content
+            else -> "" //Entry from Home
+        }
+
+        _uiDetailState.update {
+            it.copy(
+                userInput = it.userInput.copy(content = content),
+                isNewTask = true,
+                focusInput = contentOptional.isNullOrEmpty(),
+            )
+        }
+    }
+
+    //endregion
+
+    //region Edit/Save
+
+    private fun editTaskState(note: NotePresentationModel) {
+        _uiDetailState.update {
+            it.copy(
+                userInput = _uiDetailState.value.userInput.copy(
+                    title = note.title ?: "",
+                    content = note.content,
+                ),
+                unFocusInput = true,
+                isNewTask = false,
+                isArchivedTask = note.isArchived
+            )
+        }
     }
 
     private fun saveTask(
@@ -286,27 +235,150 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    private fun hasNoChangesWithOriginalTask() =
-        currentNotePresentation?.content == _uiDetailState.value.userInput.content
-                && currentNotePresentation?.title == _uiDetailState.value.userInput.title
+    private fun observeInputChanges(uiState: DetailUiState) {
+        uiState.getOnInputChangedFlow()
+            .debounce(200)
+            .onEach {
+                onInputChange()
+            }.launchIn(viewModelScope)
+    }
 
-//    private fun saveChangesInSavedStateObserver() {
+    private fun onInputChange() {
+        saveTask(navigateBack = false)
+        //Save new input in state
+        saveStateInSavedStateHandler(_uiDetailState.value)
+    }
+
+    //endregion
+
+//    fun onEditCategories () {
 //        viewModelScope.launch {
-//            uiDetailUiState.collect {
-//                saveStateInSavedStateHandler()
-//            }
+//            when (getCategoriesUseCase)
 //        }
 //    }
 
-    private fun saveStateInSavedStateHandler(detailUiState: DetailUiState) {
-        savedStateHandle[uiStateKey] = detailUiState
-        savedStateHandle[noteSavedStateKey] = currentNotePresentation
+
+    //region Archive/Unarchive
+
+    fun onArchive() {
+        archiveNote()
     }
 
-    private fun saveStateInSavedStateHandler() {
-        savedStateHandle[uiStateKey] = _uiDetailState.value
-        savedStateHandle[noteSavedStateKey] = currentNotePresentation
+    private fun archiveNote() {
+        if (currentNotePresentation?.isArchived == true) throw IllegalArgumentException("Cannot archive an archived note")
+
+        viewModelScope.launch {
+            val id = currentNotePresentation?.id ?: return@launch
+            val result = archiveNotesUseCase.invoke(ArchiveNotesUseCase.Params(listOf(id)))
+            when (result) {
+                is Resource.Success -> {
+                    showMessage(result.data.message)
+                    _uiDetailState.update { it.copy(navigateBack = true) }
+                }
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
     }
 
+    fun onUnarchive() {
+        unarchiveNote()
+    }
+
+    private fun unarchiveNote() {
+        if (currentNotePresentation?.isArchived == false) throw IllegalArgumentException("Cannot unarchive a non-archived note")
+
+        viewModelScope.launch {
+            val id = currentNotePresentation?.id ?: return@launch
+            val result = unArchiveNotesUseCase.invoke(UnArchiveNotesUseCase.Params(listOf(id)))
+            when (result) {
+                is Resource.Success -> {
+                    _uiDetailState.update { it.copy(navigateBack = true) }
+                    showMessage(result.data.message)
+                }
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
+    }
+
+    //endregion
+
+    //region Delete
+
+    fun onDelete() {
+        deleteNote()
+    }
+
+    private fun deleteNote() {
+        if (currentNotePresentation == null) throw IllegalArgumentException("Cannot delete note that is not created")
+        viewModelScope.launch {
+            val id = currentNotePresentation?.id ?: return@launch
+            val result = deleteNotesUseCase.invoke(DeleteNotesUseCase.Params(listOf(id)))
+            when (result) {
+                is Resource.Success -> {
+                    showMessage(result.data.message)
+                    _uiDetailState.update { it.copy(navigateBack = true) }
+                }
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
+    }
+
+    //endregion
+
+    fun onBackPressed() {
+        if (hasNoChangesWithOriginalTask()) {
+            messageToShowWhenNavBack?.let { showMessage(it) }
+            _uiDetailState.update { it.copy(navigateBack = true) }
+            return
+        }
+        saveTask(navigateBack = true)
+    }
+
+    //region Focus/Unfocus
+
+    fun onFocusCompleted() {
+        _uiDetailState.update { it.copy(focusInput = false) }
+    }
+
+    fun onUnFocusCompleted() {
+        _uiDetailState.update { it.copy(unFocusInput = false) }
+    }
+
+    //endregion
+
+    //region Messages
+    private fun showErrorMessage(e: Exception) {
+        messageManager.showMessage(getMessageFromError(e))
+    }
+
+    private fun showMessage(message: UiText) {
+        messageManager.showMessage(message)
+    }
+
+
+    //endregion
+
+    fun onShowCategories() {
+        _uiDetailState.update {
+            it.copy(
+                selectCategories = it.selectCategories.copy(
+                    isShowing = true
+                )
+            )
+        }
+    }
+
+    fun onHideCategories() {
+        _uiDetailState.update {
+            it.copy(
+                selectCategories = it.selectCategories.copy(
+                    isShowing = false
+                )
+            )
+        }
+    }
 
 }

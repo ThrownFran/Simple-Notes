@@ -3,6 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/menu_note_label"
+        android:icon="@drawable/ic_outline_label_on_primary"
+        android:title="@string/add_categories"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/menu_note_share"
         android:icon="@drawable/ic_baseline_share_24"
         android:title="@string/all_share"

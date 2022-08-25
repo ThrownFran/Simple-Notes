@@ -11,12 +11,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.FragmentNavigator
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.debounce
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
@@ -47,7 +49,21 @@ class DetailFragment : Fragment(), MenuProvider {
         setHasOptionsMenu(true)
         unfocusScreenWhenKeyboardHidden()
         setupMenu()
+        setupCategoriesBottomSheet()
         return binding.root
+    }
+
+    private fun setupCategoriesBottomSheet() {
+        val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
+
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                // Do something for new state.
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                // Do something for slide offset.
+            }
+        }
     }
 
     private fun setupMenu() {
@@ -149,8 +165,16 @@ class DetailFragment : Fragment(), MenuProvider {
             R.id.menu_note_share -> {
                 onShare()
             }
+
+            R.id.menu_note_label -> {
+                onAddCategories()
+            }
         }
         return false
+    }
+
+    private fun onAddCategories() {
+        viewModel.onShowCategories()
     }
 
     private fun onShare() {
@@ -221,6 +245,8 @@ class DetailFragment : Fragment(), MenuProvider {
                 if (uiState.navigateBack) {
                     finishView()
                 }
+
+                setupCategories(uiState.selectCategories)
             }
         }
 
@@ -231,6 +257,48 @@ class DetailFragment : Fragment(), MenuProvider {
                     updateToolbarIcons()
                 }
         }
+    }
+
+    private fun setupCategories(selectCategories: SelectCategories) {
+        val standardBottomSheetBehavior =
+            BottomSheetBehavior.from(binding.detailBottomsheetCategories)
+
+        if (!selectCategories.isShowing) {
+            standardBottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        } else {
+            standardBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+
+        val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
+
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                // Do something for new state.
+                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                    viewModel.onHideCategories()
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                // Do something for slide offset.
+            }
+        }
+
+        standardBottomSheetBehavior.addBottomSheetCallback(bottomSheetCallback)
+
+        if (binding.detailRecyclerCategories.adapter == null) {
+            binding.detailRecyclerCategories.apply {
+                adapter = SelectCategoryAdapter()
+                    .apply {
+                        submitList(selectCategories.categories)
+                    }
+                layoutManager = LinearLayoutManager(context)
+            }
+        } else {
+            (binding.detailRecyclerCategories.adapter as SelectCategoryAdapter)
+                .submitList(selectCategories.categories)
+        }
+
+
     }
 
     private fun updateToolbarIcons() {

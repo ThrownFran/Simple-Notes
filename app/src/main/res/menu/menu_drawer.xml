@@ -13,7 +13,7 @@
 
         <item
             android:id="@+id/categoriesFragment"
-            android:icon="@drawable/ic_outline_label_24"
+            android:icon="@drawable/ic_outline_label_on_secondary_container_24"
             android:title="@string/categories" />
 
         <item

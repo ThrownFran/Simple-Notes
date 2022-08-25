@@ -40,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_outline_label_24" />
+                android:src="@drawable/ic_outline_label_on_secondary_container_24" />
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/category_image_cancel"

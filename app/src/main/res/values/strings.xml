@@ -37,4 +37,5 @@
     <string name="delete_categories">Delete categories?</string>
     <string name="category">Category</string>
     <string name="edit_categories">Edit categories</string>
+    <string name="add_categories">Add categories</string>
 </resources>
