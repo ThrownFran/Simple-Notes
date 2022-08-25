@@ -209,7 +209,20 @@ class CategoriesViewModel @Inject constructor(
 //        _categoryUiState.update { it.copy(isEditing = true) }
 //    }
 
-    fun onSave() {
+    fun onSave(newName: String, categoryPresentationModel: CategoryPresentationModel) {
+        val categoryRenamed = categoryPresentationModel.copy(name = newName).toDomain()
+
+        viewModelScope.launch {
+            val params = SaveCategoryUseCase.Params(categoryRenamed)
+            when (val result = saveCategoryUseCase(params)) {
+                is Resource.Success -> showMessage(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
+    }
+
+//    fun onSave() {
 //        val categoryList = categoryUiState.value.categoryList.data
 //            .onEach { it.isEditing = false }
 //
@@ -223,8 +236,8 @@ class CategoriesViewModel @Inject constructor(
 //            )
 //        }
 
-        //TODO SAVE ACTUAL
-    }
+    //TODO SAVE ACTUAL
+//    }
 
 
 }

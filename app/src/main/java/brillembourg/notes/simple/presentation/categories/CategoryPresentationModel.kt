@@ -7,7 +7,7 @@ import brillembourg.notes.simple.presentation.models.IsSelectable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class CategoryPresentationModel(
+data class CategoryPresentationModel(
     val id: Long = -1L,
     var name: String,
     override var order: Int,

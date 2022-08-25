@@ -73,7 +73,7 @@ class DetailViewModel @Inject constructor(
 
     private fun observeInputChanges(uiState: DetailUiState) {
         uiState.getOnInputChangedFlow()
-            .debounce(300)
+//            .debounce(300)
             .onEach {
                 onInputChange()
             }.launchIn(viewModelScope)
@@ -235,11 +235,12 @@ class DetailViewModel @Inject constructor(
 
             when (result) {
                 is Resource.Success -> {
-                    messageToShowWhenNavBack = result.data.message
+
+                    if (navigateBack) showMessage(result.data.message) else messageToShowWhenNavBack =
+                        result.data.message
+
                     _uiDetailState.update {
-                        it.copy(
-                            navigateBack = navigateBack,
-                        )
+                        it.copy(navigateBack = navigateBack)
                     }
                     currentNotePresentation = result.data.note.toPresentation(dateProvider)
                 }
@@ -279,7 +280,11 @@ class DetailViewModel @Inject constructor(
 
             when (val result = saveNoteUseCase(params)) {
                 is Resource.Success -> {
-                    messageToShowWhenNavBack = result.data.message
+                    if (navigateBack) {
+                        showMessage(result.data.message)
+                    } else {
+                        messageToShowWhenNavBack = result.data.message
+                    }
                     _uiDetailState.update {
                         it.copy(
                             navigateBack = navigateBack,

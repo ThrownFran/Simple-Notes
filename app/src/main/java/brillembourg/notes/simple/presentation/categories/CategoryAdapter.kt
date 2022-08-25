@@ -13,6 +13,7 @@ import brillembourg.notes.simple.presentation.ui_utils.setupCategoryDiffCallback
 class CategoryAdapter(
     private val isEditing: () -> Boolean,
     private val recyclerView: RecyclerView,
+    private val onRename: (name: String, CategoryPresentationModel) -> Unit,
     private val onClick: (task: CategoryPresentationModel) -> Unit,
     private val onSelection: () -> Unit,
     private val onReorderSuccess: (reorderedTaskList: List<CategoryPresentationModel>) -> Unit,
@@ -23,6 +24,7 @@ class CategoryAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
         return CategoryViewHolder(
             isEditing = isEditing,
+            onRename = onRename,
             binding = ItemCategoryBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,

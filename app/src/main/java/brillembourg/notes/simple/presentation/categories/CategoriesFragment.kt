@@ -225,6 +225,7 @@ class CategoriesFragment : Fragment() {
         list: List<CategoryPresentationModel>
     ): CategoryAdapter {
         return CategoryAdapter(
+            onRename = { it, model -> onSaveRenaming(it, model) },
 //            isEditing = { viewModel.categoryUiState.value.isEditing },
             isEditing = { true },
             recyclerView = recyclerView,
@@ -235,6 +236,10 @@ class CategoriesFragment : Fragment() {
         ).apply {
             submitList(list)
         }
+    }
+
+    private fun onSaveRenaming(newName: String, presentationModel: CategoryPresentationModel) {
+        viewModel.onSave(newName, presentationModel)
     }
 
     private fun onSelection() {

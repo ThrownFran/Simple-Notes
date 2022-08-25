@@ -11,6 +11,7 @@ import brillembourg.notes.simple.presentation.ui_utils.SelectableImp
 
 class CategoryViewHolder(
     private val isEditing: () -> Boolean,
+    private val onRename: (newName: String, CategoryPresentationModel) -> Unit,
     private val getCurrentList: () -> List<CategoryPresentationModel>,
     private val binding: ItemCategoryBinding,
     onClick: ((CategoryPresentationModel) -> Unit)? = null,
@@ -72,7 +73,12 @@ class CategoryViewHolder(
 
         binding.categoryImageSave.setOnClickListener {
             val presentationModel = getCurrentList()[bindingAdapterPosition]
-            presentationModel.name = binding.categoryEditName.text.toString()
+            val newName = binding.categoryEditName.text.toString()
+
+            if (newName != presentationModel.name) {
+                onRename.invoke(newName, presentationModel)
+            }
+
             unfocusCategory(presentationModel)
         }
 
