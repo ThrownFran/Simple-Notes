@@ -1,13 +1,13 @@
 package brillembourg.notes.simple.presentation.categories
 
 import android.os.Bundle
-import android.view.ActionMode
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
@@ -16,7 +16,7 @@ import brillembourg.notes.simple.presentation.custom_views.hideKeyboard
 import brillembourg.notes.simple.presentation.custom_views.onClickFlow
 import brillembourg.notes.simple.presentation.custom_views.onFocusFlow
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
-import brillembourg.notes.simple.presentation.home.ShowDeleteCategoriesConfirmation
+import brillembourg.notes.simple.presentation.home.DeleteCategoriesConfirmation
 import brillembourg.notes.simple.presentation.ui_utils.getCategoriesSelectedTitle
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.buildVerticalManager
 import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
@@ -24,7 +24,7 @@ import brillembourg.notes.simple.presentation.ui_utils.showDeleteCategoriesDialo
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class CategoriesFragment : Fragment() {
+class CategoriesFragment : Fragment(), MenuProvider {
 
     companion object {
         fun newInstance() = CategoriesFragment()
@@ -45,9 +45,44 @@ class CategoriesFragment : Fragment() {
             FragmentCategoriesBinding.inflate(inflater, container, false)
         binding = _binding as FragmentCategoriesBinding
         binding.viewmodel = viewModel
+        setupMenu()
         renderStates()
         setupListeners()
         return binding.root
+    }
+
+    private fun setupMenu() {
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.STARTED)
+    }
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_categories, menu)
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
+        super.onPrepareMenu(menu)
+        menu.findItem(R.id.menu_categories_edit).apply {
+            isVisible = viewModel.categoryUiState.value.editIconVisibility()
+        }
+        menu.findItem(R.id.menu_categories_save).apply {
+            isVisible = viewModel.categoryUiState.value.saveIconVisibility()
+        }
+    }
+
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        when (menuItem.itemId) {
+            R.id.menu_categories_edit -> {
+                viewModel.onEdit()
+                return true
+            }
+            R.id.menu_categories_save -> {
+                viewModel.onSave()
+                return true
+            }
+        }
+        return false
     }
 
     private fun setupListeners() {
@@ -86,18 +121,24 @@ class CategoriesFragment : Fragment() {
         safeUiLaunch {
             viewModel.categoryUiState.collect {
 
-                setupCategoryList(it.listContainer)
+                setupCategoryList(it.categoryList)
 
                 enableOrDisableCreateCategory(it.createCategory)
 
                 selectionModeState(it.selectionMode)
 
-                showDeleteCategoriesState(it.showDeleteConfirmationState)
+                showDeleteCategoriesState(it.deleteConfirmation)
+
+                toolbarMenu(it.isEditing)
             }
         }
     }
 
-    private fun showDeleteCategoriesState(state: ShowDeleteCategoriesConfirmation?) {
+    private fun toolbarMenu(editing: Boolean) {
+        requireActivity().invalidateMenu()
+    }
+
+    private fun showDeleteCategoriesState(state: DeleteCategoriesConfirmation?) {
         if (state != null) {
             showDeleteCategoriesDialog(this, state.tasksToDeleteSize,
                 onPositive = {
@@ -154,7 +195,18 @@ class CategoriesFragment : Fragment() {
         taskList: List<CategoryPresentationModel>
     ) {
         val isInsertingInList = currentList.size < taskList.size
-        noteAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
+        noteAdapter.submitList(taskList.toMutableList()) { if (isInsertingInList) scrollToTop() }
+
+//        currentList.forEachIndexed { index, categoryPresentationModel ->
+//            if(categoryPresentationModel.isEditing) {
+//                noteAdapter.notifyItemChanged(index)
+//            }
+//        }
+
+//        binding.categoriesRecycler.post {
+//            noteAdapter.notifyDataSetChanged()
+//        }
+
     }
 
     private fun setupCategoryRecycler(list: List<CategoryPresentationModel>) {
@@ -173,6 +225,7 @@ class CategoriesFragment : Fragment() {
         list: List<CategoryPresentationModel>
     ): CategoryAdapter {
         return CategoryAdapter(
+            isEditing = { viewModel.categoryUiState.value.isEditing },
             recyclerView = recyclerView,
             onClick = { category -> onCategoryClicked(category) },
             onReorderSuccess = { categories -> onReorderedCategories(categories) },

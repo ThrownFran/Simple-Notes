@@ -9,6 +9,7 @@ import brillembourg.notes.simple.presentation.ui_utils.Selectable
 import brillembourg.notes.simple.presentation.ui_utils.SelectableImp
 
 class CategoryViewHolder(
+    private val isEditing: () -> Boolean,
     private val getCurrentList: () -> List<CategoryPresentationModel>,
     private val binding: ItemCategoryBinding,
     onClick: ((CategoryPresentationModel) -> Unit)? = null,
@@ -24,19 +25,29 @@ class CategoryViewHolder(
             onSelected = { onSelected?.invoke() },
             onClickWithNoSelection = { presentationModel ->
 
-                getCurrentList().forEachIndexed { index, it ->
-                    if (it.isEditing) {
-                        it.isEditing = false
-                        bindingAdapter?.notifyItemChanged(index, it)
-                    }
+                if (isEditing()) {
+                    unFocusAnyEditingCategory()
+                    editCategory(presentationModel)
                 }
 
-                presentationModel.isEditing = true
-                bindingAdapter?.notifyItemChanged(bindingAdapterPosition, presentationModel)
                 onClick?.invoke(presentationModel)
             },
             onReadyToDrag = { onReadyToDrag?.invoke(this) }
         )
+    }
+
+    private fun editCategory(presentationModel: CategoryPresentationModel) {
+        presentationModel.isEditing = true
+        bindingAdapter?.notifyItemChanged(bindingAdapterPosition, presentationModel)
+    }
+
+    private fun unFocusAnyEditingCategory() {
+        getCurrentList().forEachIndexed { index, it ->
+            if (it.isEditing) {
+                it.isEditing = false
+                bindingAdapter?.notifyItemChanged(index, it)
+            }
+        }
     }
 
     private fun setupClickListeners() {

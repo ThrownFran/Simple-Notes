@@ -296,7 +296,7 @@ class HomeViewModel @Inject constructor(
     fun onDeleteConfirm() {
         _homeUiState.update {
             it.copy(
-                showDeleteNotesConfirmation = ShowDeleteCategoriesConfirmation(
+                showDeleteNotesConfirmation = DeleteCategoriesConfirmation(
                     tasksToDeleteSize = getSelectedTasks().size
                 )
             )

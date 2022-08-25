@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.domain.use_cases.categories.*
 import brillembourg.notes.simple.presentation.base.MessageManager
-import brillembourg.notes.simple.presentation.home.ShowDeleteCategoriesConfirmation
+import brillembourg.notes.simple.presentation.home.DeleteCategoriesConfirmation
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
@@ -38,7 +38,7 @@ class CategoriesViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> _categoryUiState.update {
                         it.copy(
-                            listContainer = CategoryList(
+                            categoryList = CategoryList(
                                 data = result.data.categoryList
                                     .map { category -> category.toPresentation() }
                                     .sortedBy { it.order }
@@ -123,13 +123,13 @@ class CategoriesViewModel @Inject constructor(
     }
 
     private fun getSelectedCategories(): List<CategoryPresentationModel> {
-        return categoryUiState.value.listContainer.data.filter { it.isSelected }
+        return categoryUiState.value.categoryList.data.filter { it.isSelected }
     }
 
     fun onDeleteConfirmCategories() {
         _categoryUiState.update {
             it.copy(
-                showDeleteConfirmationState = ShowDeleteCategoriesConfirmation(
+                deleteConfirmation = DeleteCategoriesConfirmation(
                     getSelectedCategories().size
                 )
             )
@@ -139,7 +139,7 @@ class CategoriesViewModel @Inject constructor(
     fun onDismissConfirmDeleteShown() {
         _categoryUiState.update {
             it.copy(
-                showDeleteConfirmationState = null
+                deleteConfirmation = null
             )
         }
     }
@@ -150,7 +150,7 @@ class CategoriesViewModel @Inject constructor(
 
         _categoryUiState.update {
             it.copy(
-                showDeleteConfirmationState = null,
+                deleteConfirmation = null,
                 selectionMode = null
             )
         }
@@ -171,19 +171,19 @@ class CategoriesViewModel @Inject constructor(
         _categoryUiState.update {
 
             val categoryList: List<CategoryPresentationModel> =
-                _categoryUiState.value.listContainer.data
+                _categoryUiState.value.categoryList.data
             categoryList.forEach { it.isSelected = false }
 
             it.copy(
                 selectionMode = null,
-                listContainer = _categoryUiState.value.listContainer.copy(
+                categoryList = _categoryUiState.value.categoryList.copy(
                     data = categoryList,
                     mustRender = false
                 )
             )
         }
 
-        if (reorderedCategoryList == _categoryUiState.value.listContainer.data) return
+        if (reorderedCategoryList == _categoryUiState.value.categoryList.data) return
         reorderCategories(reorderedCategoryList)
     }
 
@@ -203,6 +203,27 @@ class CategoriesViewModel @Inject constructor(
 
     fun onReorderCategoriesCancelled() {
         onSelectionDismissed()
+    }
+
+    fun onEdit() {
+        _categoryUiState.update { it.copy(isEditing = true) }
+    }
+
+    fun onSave() {
+        val categoryList = categoryUiState.value.categoryList.data
+            .onEach { it.isEditing = false }
+
+        _categoryUiState.update { uiState ->
+            uiState.copy(
+                isEditing = false,
+                categoryList = uiState.categoryList.copy(
+                    data = categoryList,
+                    mustRender = true
+                )
+            )
+        }
+
+        //TODO SAVE ACTUAL
     }
 
 

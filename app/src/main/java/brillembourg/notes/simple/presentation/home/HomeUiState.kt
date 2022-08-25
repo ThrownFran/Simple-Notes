@@ -13,7 +13,7 @@ data class HomeUiState(
     val navigateToAddNote: NavigateToAddNote? = null,
     var navigateToEditNote: NavigateToEditNote = NavigateToEditNote(false),
     val showArchiveNotesConfirmation: ShowArchiveNotesConfirmationState? = null,
-    val showDeleteNotesConfirmation: ShowDeleteCategoriesConfirmation? = null,
+    val showDeleteNotesConfirmation: DeleteCategoriesConfirmation? = null,
     val copyToClipboard: String? = null,
     val shareNoteAsString: String? = null
 ) : Parcelable
@@ -35,7 +35,7 @@ data class ShowArchiveNotesConfirmationState(
 
 /*Show confirm to archive notes*/
 @Parcelize
-data class ShowDeleteCategoriesConfirmation(
+data class DeleteCategoriesConfirmation(
     val tasksToDeleteSize: Int
 ) : Parcelable
 

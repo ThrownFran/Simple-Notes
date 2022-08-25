@@ -11,6 +11,7 @@ import brillembourg.notes.simple.presentation.ui_utils.ItemTouchDraggableImp
 import brillembourg.notes.simple.presentation.ui_utils.setupCategoryDiffCallback
 
 class CategoryAdapter(
+    private val isEditing: () -> Boolean,
     private val recyclerView: RecyclerView,
     private val onClick: (task: CategoryPresentationModel) -> Unit,
     private val onSelection: () -> Unit,
@@ -21,6 +22,7 @@ class CategoryAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
         return CategoryViewHolder(
+            isEditing = isEditing,
             binding = ItemCategoryBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,

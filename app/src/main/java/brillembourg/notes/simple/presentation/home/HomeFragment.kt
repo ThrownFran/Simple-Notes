@@ -197,7 +197,7 @@ class HomeFragment : Fragment(), MenuProvider {
         )
     }
 
-    private fun showDeleteConfirmationState(showDeleteConfirmationState: ShowDeleteCategoriesConfirmation?) {
+    private fun showDeleteConfirmationState(showDeleteConfirmationState: DeleteCategoriesConfirmation?) {
         if (showDeleteConfirmationState != null) {
             showDeleteTasksDialog(this, showDeleteConfirmationState.tasksToDeleteSize,
                 onPositive = {

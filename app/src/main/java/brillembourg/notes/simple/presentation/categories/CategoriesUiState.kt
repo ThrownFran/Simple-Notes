@@ -4,16 +4,22 @@ import android.os.Parcelable
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
 import androidx.databinding.library.baseAdapters.BR
-import brillembourg.notes.simple.presentation.home.ShowDeleteCategoriesConfirmation
+import brillembourg.notes.simple.presentation.home.DeleteCategoriesConfirmation
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class CategoriesUiState(
-    val listContainer: CategoryList = CategoryList(),
+    val categoryList: CategoryList = CategoryList(),
     val selectionMode: SelectionMode? = null,
-    val showDeleteConfirmationState: ShowDeleteCategoriesConfirmation? = null,
+    val deleteConfirmation: DeleteCategoriesConfirmation? = null,
     val createCategory: CreateCategory = CreateCategory(),
-) : Parcelable
+    val isEditing: Boolean = false
+) : Parcelable {
+
+    fun saveIconVisibility() = isEditing
+    fun editIconVisibility() = !isEditing
+}
+
 
 @Parcelize
 data class CategoryList(
