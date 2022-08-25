@@ -11,12 +11,13 @@ class CategoryPresentationModel(
     val id: Long = -1L,
     var name: String,
     override var order: Int,
-    override var isSelected: Boolean
+    override var isSelected: Boolean = false,
+    var isEditing: Boolean = false
 ) : Parcelable, HasOrder, IsSelectable
 
 
 fun Category.toPresentation(): CategoryPresentationModel {
-    return CategoryPresentationModel(id, name, order, false)
+    return CategoryPresentationModel(id, name, order)
 }
 
 fun CategoryPresentationModel.toDomain(): Category {

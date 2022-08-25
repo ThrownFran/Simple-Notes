@@ -1,5 +1,7 @@
 package brillembourg.notes.simple.presentation.categories
 
+import android.view.View
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemCategoryBinding
 import brillembourg.notes.simple.presentation.custom_views.fromDpToPixel
@@ -20,7 +22,19 @@ class CategoryViewHolder(
         setupSelection(
             bindSelection = { categoryPresentationModel -> bindSelection(categoryPresentationModel) },
             onSelected = { onSelected?.invoke() },
-            onClickWithNoSelection = onClick,
+            onClickWithNoSelection = { presentationModel ->
+
+                getCurrentList().forEachIndexed { index, it ->
+                    if (it.isEditing) {
+                        it.isEditing = false
+                        bindingAdapter?.notifyItemChanged(index, it)
+                    }
+                }
+
+                presentationModel.isEditing = true
+                bindingAdapter?.notifyItemChanged(bindingAdapterPosition, presentationModel)
+                onClick?.invoke(presentationModel)
+            },
             onReadyToDrag = { onReadyToDrag?.invoke(this) }
         )
     }
@@ -40,10 +54,25 @@ class CategoryViewHolder(
     fun bind(category: CategoryPresentationModel) {
         bindName(category)
         bindSelection(category)
+        bindIsEditing(category)
+    }
+
+    private fun bindIsEditing(category: CategoryPresentationModel) {
+        if (category.isEditing) {
+            binding.categoryTextName.isVisible = false
+            binding.categoryEditName.isVisible = true
+            binding.categoryEditName.setText(category.name)
+            binding.categoryEditName.requestFocus()
+        } else {
+            binding.categoryTextName.isVisible = true
+            binding.categoryEditName.clearFocus()
+            binding.categoryEditName.isVisible = false
+            binding.categoryEditName.visibility = View.GONE
+        }
     }
 
     private fun bindName(category: CategoryPresentationModel) {
-        binding.categoryTextName.text = category.name
+        binding.categoryTextName.setText(category.name)
     }
 
     private fun bindSelection(task: CategoryPresentationModel) {
@@ -63,7 +92,7 @@ class CategoryViewHolder(
     private fun setBackgroundSelected() {
         binding.categoryCardview.isChecked = true
         binding.categoryCardview.strokeWidth =
-            3f.fromDpToPixel(binding.categoryCardview.context).toInt()
+            4f.fromDpToPixel(binding.categoryCardview.context).toInt()
     }
 
 

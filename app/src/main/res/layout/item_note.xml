@@ -38,7 +38,7 @@
             app:cardElevation="2dp"
             app:cardForegroundColor="@drawable/selector_cardview_foreground_color"
             app:rippleColor="?colorSecondaryContainer"
-            app:strokeColor="@drawable/selector_cardview_stroke_color">
+            app:strokeColor="@drawable/selector_cardview_stroke_color_secondary">
 
             <brillembourg.notes.simple.presentation.custom_views.RoundContraintLayout
                 android:id="@+id/task_contraint"

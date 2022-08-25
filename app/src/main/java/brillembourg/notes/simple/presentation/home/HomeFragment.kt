@@ -278,7 +278,7 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun setupTaskRecycler(taskList: List<NotePresentationModel>) {
         binding.homeRecycler.apply {
             val layoutType = viewModel.homeUiState.value.noteLayout.toLayoutType()
-            adapter = buildTaskAdapter(this, taskList, getDragDirs(layoutType))
+            adapter = buildNoteAdapter(this, taskList, getDragDirs(layoutType))
             layoutManager = buildLayoutManager(context, layoutType).also { layoutManager ->
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
@@ -306,9 +306,9 @@ class HomeFragment : Fragment(), MenuProvider {
         binding.homeRecycler.scrollToPosition(0)
     }
 
-    private fun buildTaskAdapter(
+    private fun buildNoteAdapter(
         recyclerView: RecyclerView,
-        taskList: List<NotePresentationModel>,
+        noteList: List<NotePresentationModel>,
         dragDirs: Int
     ): NoteAdapter {
 
@@ -328,7 +328,7 @@ class HomeFragment : Fragment(), MenuProvider {
                 onReorderNotesCancelled()
             })
             .apply {
-                submitList(taskList)
+                submitList(noteList)
             }
     }
 
