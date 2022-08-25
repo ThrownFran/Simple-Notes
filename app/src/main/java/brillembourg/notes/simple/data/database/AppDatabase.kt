@@ -8,12 +8,12 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import brillembourg.notes.simple.data.database.categories.CategoryDao
 import brillembourg.notes.simple.data.database.categories.CategoryEntity
+import brillembourg.notes.simple.data.database.notes.NoteEntity
 import brillembourg.notes.simple.data.database.notes.TaskDao
-import brillembourg.notes.simple.data.database.notes.TaskEntity
 
 
 @Database(
-    entities = [TaskEntity::class, CategoryEntity::class], version = 7
+    entities = [NoteEntity::class, CategoryEntity::class, CategoryNoteCrossRef::class], version = 9
 )
 abstract class AppDatabase : RoomDatabase() {
 
@@ -42,6 +42,8 @@ abstract class AppDatabase : RoomDatabase() {
         )
             .addMigrations(MIGRATION_5_to_6)
             .addMigrations(MIGRATION_6_to_7)
+            .addMigrations(MIGRATION_7_to_8)
+            .addMigrations(MIGRATION_8_to_9)
             .build()
 
 
@@ -59,6 +61,21 @@ abstract class AppDatabase : RoomDatabase() {
                 database.execSQL("CREATE TABLE IF NOT EXISTS `categoryentity` (`id` INTEGER, `name` TEXT NOT NULL, `order` INTEGER NOT NULL, PRIMARY KEY(`id`))")
             }
         }
+
+        private val MIGRATION_7_to_8: Migration = object : Migration(7, 8) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE categoryentity RENAME COLUMN id TO category_id")
+                database.execSQL("ALTER TABLE taskentity RENAME COLUMN id TO note_id")
+            }
+        }
+
+        private val MIGRATION_8_to_9: Migration = object : Migration(8, 9) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS `category_note_cross_ref` (`category_id` INTEGER NOT NULL, `note_id` INTEGER NOT NULL, PRIMARY KEY(`category_id`, `note_id`))")
+            }
+        }
+
+
     }
 
 

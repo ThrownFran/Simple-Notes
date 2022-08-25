@@ -11,12 +11,12 @@ class NoteDatabase(
         content: String,
         dateCreated: String,
         title: String? = null
-    ): TaskEntity {
+    ): NoteEntity {
 
         val lastOrderPosition = calculateLastOrderPosition()
         val nextOrderPosition = lastOrderPosition + 1
 
-        return TaskEntity(null, content, dateCreated, title, nextOrderPosition).run {
+        return NoteEntity(null, content, dateCreated, title, nextOrderPosition).run {
             id = roomDatabase.taskDao().create(this)
             this
         }
@@ -33,15 +33,15 @@ class NoteDatabase(
         return lastOrderPosition
     }
 
-    suspend fun saveTask(task: TaskEntity) {
+    suspend fun saveTask(task: NoteEntity) {
         roomDatabase.taskDao().save(task)
     }
 
-    fun getArchivedTasks(): Flow<List<TaskEntity>> {
+    fun getArchivedTasks(): Flow<List<NoteEntity>> {
         return roomDatabase.taskDao().getArchivedList()
     }
 
-    fun getTaskList(): Flow<List<TaskEntity>> {
+    fun getTaskList(): Flow<List<NoteEntity>> {
         return roomDatabase.taskDao().getList()
     }
 
@@ -69,13 +69,13 @@ class NoteDatabase(
         roomDatabase.taskDao().delete(taskId)
     }
 
-    suspend fun saveTasksReordering(taskList: List<TaskEntity>) {
+    suspend fun saveTasksReordering(taskList: List<NoteEntity>) {
         taskList.forEach {
             roomDatabase.taskDao().updateOrder(it.id!!, it.order)
         }
     }
 
-    suspend fun saveTasks(taskList: List<TaskEntity>) {
+    suspend fun saveTasks(taskList: List<NoteEntity>) {
         roomDatabase.taskDao().saveTasks(ArrayList(taskList))
     }
 

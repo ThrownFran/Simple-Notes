@@ -6,8 +6,8 @@ import androidx.room.PrimaryKey
 import brillembourg.notes.simple.domain.models.Note
 
 @Entity(tableName = "taskentity")
-data class TaskEntity(
-    @PrimaryKey(autoGenerate = true) var id: Long? = null,
+data class NoteEntity(
+    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "note_id") var id: Long? = null,
     @ColumnInfo(name = "description") val content: String,
     @ColumnInfo(name = "date_created") val dateCreated: String,
     @ColumnInfo(name = "title") val title: String? = null,
@@ -15,7 +15,7 @@ data class TaskEntity(
     @ColumnInfo(name = "is_archived") val isArchived: Boolean = false
 )
 
-fun TaskEntity.toDomain(): Note {
+fun NoteEntity.toDomain(): Note {
     if (id == null) throw IllegalArgumentException("id is null")
     return Note(
         id = id!!,
@@ -27,8 +27,8 @@ fun TaskEntity.toDomain(): Note {
     )
 }
 
-fun Note.toData(): TaskEntity =
-    TaskEntity(
+fun Note.toData(): NoteEntity =
+    NoteEntity(
         id = id,
         title = title,
         content = content,

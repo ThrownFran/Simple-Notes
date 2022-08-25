@@ -1,9 +1,7 @@
 package brillembourg.notes.simple.data.database.notes
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
+import brillembourg.notes.simple.data.database.NoteWithCategories
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -12,43 +10,51 @@ abstract class TaskDao {
     //CREATE
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    abstract suspend fun create(item: TaskEntity): Long
+    abstract suspend fun create(item: NoteEntity): Long
 
     //GET
 
     @Query("SELECT * FROM taskentity WHERE is_archived = 0")
-    abstract fun getList(): Flow<List<TaskEntity>>
+    abstract fun getList(): Flow<List<NoteEntity>>
 
     @Query("SELECT * FROM taskentity WHERE is_archived = 1")
-    abstract fun getArchivedList(): Flow<List<TaskEntity>>
+    abstract fun getArchivedList(): Flow<List<NoteEntity>>
 
     @Query("SELECT * FROM taskentity")
-    abstract suspend fun getListAsSuspend(): List<TaskEntity>
+    abstract suspend fun getListAsSuspend(): List<NoteEntity>
 
     //DELETE
 
-    @Query("DELETE FROM taskentity WHERE id = :taskId")
+    @Query("DELETE FROM taskentity WHERE note_id = :taskId")
     abstract suspend fun delete(taskId: Long)
 
-    @Query("delete from taskentity where id in (:ids)")
+    @Query("delete from taskentity where note_id in (:ids)")
     abstract suspend fun deleteTasks(ids: List<Long>)
 
     //UPDATE
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun save(task: TaskEntity)
+    abstract suspend fun save(task: NoteEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun saveTasks(itemList: ArrayList<TaskEntity>)
+    abstract suspend fun saveTasks(itemList: ArrayList<NoteEntity>)
 
-    @Query("UPDATE taskentity SET `order` = :order WHERE id = :id")
+    @Query("UPDATE taskentity SET `order` = :order WHERE note_id = :id")
     abstract suspend fun updateOrder(id: Long, order: Int)
 
-    @Query("UPDATE taskentity SET `is_archived` = 1 WHERE id in (:ids)")
+    @Query("UPDATE taskentity SET `is_archived` = 1 WHERE note_id in (:ids)")
     abstract suspend fun archive(ids: List<Long>)
 
-    @Query("UPDATE taskentity SET `is_archived` = 0 WHERE id in (:ids)")
+    @Query("UPDATE taskentity SET `is_archived` = 0 WHERE note_id in (:ids)")
     abstract suspend fun unarchive(ids: List<Long>)
+
+    @Transaction
+    @Query("SELECT * FROM taskentity")
+    abstract suspend fun getNotesWithCategories(): List<NoteWithCategories>
+
+    @Transaction
+    @Query("SELECT * FROM taskentity WHERE note_id = :noteId")
+    abstract suspend fun getNoteWithCategories(noteId: Long): NoteWithCategories
 
 
 }
