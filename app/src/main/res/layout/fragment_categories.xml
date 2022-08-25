@@ -30,6 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:padding="8dp"
+                android:tint="?colorSecondary"
                 android:src="@drawable/ic_baseline_add_on_surface_24"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -50,8 +51,9 @@
             <EditText
                 android:id="@+id/categories_edit_add"
                 style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                app:layout_constraintEnd_toStartOf="@id/categories_image_add_success"
                 android:hint="Add category"
                 android:text="@={viewmodel.categoryUiState.component4().createCategoryNameBinding}"
                 android:importantForAutofill="no"
