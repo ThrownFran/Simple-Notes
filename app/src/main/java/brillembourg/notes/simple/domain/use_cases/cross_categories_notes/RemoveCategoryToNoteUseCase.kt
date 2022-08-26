@@ -9,14 +9,14 @@ import brillembourg.notes.simple.util.UiText
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class AddCategoryToNoteUseCase @Inject constructor(
+class RemoveCategoryToNoteUseCase @Inject constructor(
     private val repository: NotesRepository,
     private val schedulers: Schedulers
 ) {
 
     suspend operator fun invoke(params: Params): Resource<Result> =
         withContext(schedulers.defaultDispatcher()) {
-            repository.addCategoryToNote(params)
+            repository.removeCategoryToNote(params)
         }
 
     class Params(val note: Note, val category: Category)

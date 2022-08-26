@@ -82,6 +82,11 @@ class NoteDatabase(
         roomDatabase.taskDao().saveTasks(ArrayList(taskList))
     }
 
+    suspend fun removeCategoryToNote(categoryEntity: CategoryEntity, noteEntity: NoteEntity) {
+        roomDatabase.taskDao()
+            .deleteNoteCrossCategory(CategoryNoteCrossRef(categoryEntity.id!!, noteEntity.id!!))
+    }
+
     suspend fun addCategoryToNote(categoryEntity: CategoryEntity, noteEntity: NoteEntity) {
         roomDatabase.taskDao()
             .createNoteCrossCategory(CategoryNoteCrossRef(categoryEntity.id!!, noteEntity.id!!))

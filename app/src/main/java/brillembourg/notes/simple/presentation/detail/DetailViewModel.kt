@@ -8,6 +8,7 @@ import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.AddCategoryToNoteUseCase
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.GetCategoriesForNoteUseCase
+import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.RemoveCategoryToNoteUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.categories.toDomain
@@ -35,6 +36,7 @@ class DetailViewModel @Inject constructor(
     private val dateProvider: DateProvider,
     private val messageManager: MessageManager,
     private val addCategoryUseCase: AddCategoryToNoteUseCase,
+    private val removeCategoryToNoteUseCase: RemoveCategoryToNoteUseCase,
     private val getCategoriesForNoteUseCase: GetCategoriesForNoteUseCase
 ) : ViewModel() {
 
@@ -439,16 +441,31 @@ class DetailViewModel @Inject constructor(
     fun onCategoryChecked(category: CategoryPresentationModel, isChecked: Boolean) {
         val categoryUpdated = category.copy(isSelected = isChecked)
 
-        viewModelScope.launch {
-            val params = AddCategoryToNoteUseCase.Params(
-                currentNotePresentation!!.toDomain(dateProvider),
-                categoryUpdated.toDomain()
-            )
+        if (isChecked) {
+            viewModelScope.launch {
+                val params = AddCategoryToNoteUseCase.Params(
+                    currentNotePresentation!!.toDomain(dateProvider),
+                    categoryUpdated.toDomain()
+                )
 
-            when (val result = addCategoryUseCase(params)) {
-                is Resource.Success -> showMessage(result.data.message)
-                is Resource.Error -> showErrorMessage(result.exception)
-                is Resource.Loading -> Unit
+                when (val result = addCategoryUseCase(params)) {
+                    is Resource.Success -> showMessage(result.data.message)
+                    is Resource.Error -> showErrorMessage(result.exception)
+                    is Resource.Loading -> Unit
+                }
+            }
+        } else {
+            viewModelScope.launch {
+                val params = RemoveCategoryToNoteUseCase.Params(
+                    currentNotePresentation!!.toDomain(dateProvider),
+                    categoryUpdated.toDomain()
+                )
+
+                when (val result = removeCategoryToNoteUseCase(params)) {
+                    is Resource.Success -> showMessage(result.data.message)
+                    is Resource.Error -> showErrorMessage(result.exception)
+                    is Resource.Loading -> Unit
+                }
             }
         }
     }

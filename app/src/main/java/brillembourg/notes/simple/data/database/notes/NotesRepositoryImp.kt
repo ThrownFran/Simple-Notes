@@ -7,6 +7,7 @@ import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.AddCategoryToNoteUseCase
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.GetCategoriesForNoteUseCase
+import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.RemoveCategoryToNoteUseCase
 import brillembourg.notes.simple.util.GetTaskException
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
@@ -80,10 +81,17 @@ class NotesRepositoryImp(
             }
     }
 
-    override suspend fun saveCategoryToNote(params: AddCategoryToNoteUseCase.Params): Resource<AddCategoryToNoteUseCase.Result> {
+    override suspend fun addCategoryToNote(params: AddCategoryToNoteUseCase.Params): Resource<AddCategoryToNoteUseCase.Result> {
         return safeCall {
             database.addCategoryToNote(params.category.toEntity(), params.note.toEntity())
             Resource.Success(AddCategoryToNoteUseCase.Result(UiText.NoteUpdated))
+        }
+    }
+
+    override suspend fun removeCategoryToNote(params: RemoveCategoryToNoteUseCase.Params): Resource<RemoveCategoryToNoteUseCase.Result> {
+        return safeCall {
+            database.removeCategoryToNote(params.category.toEntity(), params.note.toEntity())
+            Resource.Success(RemoveCategoryToNoteUseCase.Result(UiText.NoteUpdated))
         }
     }
 

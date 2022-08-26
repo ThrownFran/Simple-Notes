@@ -60,5 +60,7 @@ abstract class TaskDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun createNoteCrossCategory(noteCrossRef: CategoryNoteCrossRef)
 
+    @Delete
+    abstract suspend fun deleteNoteCrossCategory(noteCrossRef: CategoryNoteCrossRef)
 
 }
