@@ -15,11 +15,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
-        android:transitionName="@{@string/home_shared_item_container(task.id)}"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="4dp"
-        android:padding="2dp">
+        android:padding="2dp"
+        android:transitionName="@{@string/home_shared_item_container(task.id)}">
 
         <!--    <brillembourg.notes.simple.ui.CanvasBrushView-->
         <!--        android:layout_width="match_parent"-->
@@ -82,6 +82,25 @@
                     tools:text="Lorem ipsum dolor sit amet. Hic sapiente architecto qui deleniti odio in similique delectus! Et dignissimos iste id corporis atque qui debitis harum.
 
 In nulla voluptas ut voluptatem modi qui consectetur quos. Ut sunt quibusdam non neque fuga aut explicabo recusandae 33 maiores expedita in quibusdam dolores aut laudantium itaque. Est cupiditate similique ut voluptate dolores et maiores doloribus eos internos porro ex quaerat fugit. Qui nobis molestias et soluta dolor aut modi quam 33 maiores rerum rem deserunt delectus et harum quaerat." />
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/task_chipgroup_categories"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/task_text_content"
+                    app:singleLine="true">
+
+
+                    <!-- Chips can be declared here, or added dynamically. -->
+                    <!--                    <com.google.android.material.chip.Chip-->
+                    <!--                        android:layout_width="wrap_content"-->
+                    <!--                        android:layout_height="wrap_content"-->
+                    <!--                        android:text="My chip" />-->
+
+
+                </com.google.android.material.chip.ChipGroup>
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/task_text_date"

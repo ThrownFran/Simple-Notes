@@ -41,11 +41,11 @@
                         android:layout_marginTop="4dp"
                         app:singleLine="true">
 
-                        <!-- Chips can be declared here, or added dynamically. -->
-                        <com.google.android.material.chip.Chip
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="My chip" />
+                        <!--                        &lt;!&ndash; Chips can be declared here, or added dynamically. &ndash;&gt;-->
+                        <!--                        <com.google.android.material.chip.Chip-->
+                        <!--                            android:layout_width="wrap_content"-->
+                        <!--                            android:layout_height="wrap_content"-->
+                        <!--                            android:text="My chip" />-->
 
 
                     </com.google.android.material.chip.ChipGroup>
