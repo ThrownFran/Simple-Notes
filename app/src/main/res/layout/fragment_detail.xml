@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -19,20 +19,19 @@
             android:layout_height="wrap_content"
             android:background="?colorSurface"
             android:orientation="vertical"
-            android:transitionName="@{@string/home_shared_detail_container}"
             tools:context=".presentation.detail.DetailFragment">
 
             <LinearLayout
-                android:id="@+id/detail_linear"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp">
+
+                android:orientation="vertical">
 
                 <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
                     android:scrollbars="none">
 
                     <com.google.android.material.chip.ChipGroup
@@ -42,44 +41,55 @@
                         android:layout_marginTop="4dp"
                         app:singleLine="true">
 
-                        <!--                    &lt;!&ndash; Chips can be declared here, or added dynamically. &ndash;&gt;-->
-                        <!--                    <com.google.android.material.chip.Chip-->
-                        <!--                        android:layout_width="wrap_content"-->
-                        <!--                        android:layout_height="wrap_content"-->
-                        <!--                        android:text="My chip"/>-->
+                        <!-- Chips can be declared here, or added dynamically. -->
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="My chip" />
 
 
                     </com.google.android.material.chip.ChipGroup>
                 </HorizontalScrollView>
 
-
-                <EditText
-                    android:id="@+id/detail_edit_title"
+                <LinearLayout
+                    android:id="@+id/detail_linear"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:gravity="top"
-                    android:hint="@string/title"
-                    android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
-                    android:text="@={viewmodel.uiDetailUiState.component3().titleBinding}"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:orientation="vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:transitionName="@{@string/home_shared_detail_container}">
 
 
-                <EditText
-                    android:id="@+id/detail_edit_content"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:gravity="top"
-                    android:hint="@string/note"
-                    android:importantForAutofill="no"
-                    android:inputType="textMultiLine"
-                    android:padding="4dp"
-                    android:text="@={viewmodel.uiDetailUiState.component3().contentBinding}"
-                    android:textSize="16sp" />
+                    <EditText
+                        android:id="@+id/detail_edit_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="top"
+                        android:hint="@string/title"
+                        android:importantForAutofill="no"
+                        android:inputType="textMultiLine"
+                        android:text="@={viewmodel.uiDetailUiState.component3().titleBinding}"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
+
+                    <EditText
+                        android:id="@+id/detail_edit_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:gravity="top"
+                        android:hint="@string/note"
+                        android:importantForAutofill="no"
+                        android:inputType="textMultiLine"
+                        android:padding="4dp"
+                        android:text="@={viewmodel.uiDetailUiState.component3().contentBinding}"
+                        android:textSize="16sp" />
+
+
+                </LinearLayout>
 
             </LinearLayout>
 

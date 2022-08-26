@@ -55,8 +55,6 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
 
-
-
     private fun setupMenu() {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.STARTED)
@@ -265,16 +263,18 @@ class DetailFragment : Fragment(), MenuProvider {
         if (noteCategories.size == binding.detailChipgroup.size) return
 
         binding.detailChipgroup.removeAllViews()
-        noteCategories.forEach {
+        noteCategories.forEach { categoryPresentationModel: CategoryPresentationModel ->
             val chip = Chip(context)
-            chip.text = it.name
-            chip.id = it.id.toInt()
-            chip.isCloseIconVisible = true
+            chip.text = categoryPresentationModel.name
+            chip.id = categoryPresentationModel.id.toInt()
             binding.detailChipgroup.addView(chip)
-        }
+            chip.setOnClickListener {
+                viewModel.onNavigateToCategories()
 
-        binding.detailChipgroup.setOnCheckedStateChangeListener { group, checkedIds ->
 
+//                binding.detailChipgroup.removeView(chip)
+//                viewModel.onCategoryChecked(categoryPresentationModel,false)
+            }
         }
     }
 

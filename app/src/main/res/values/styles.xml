@@ -88,11 +88,12 @@
         <item name="cornerSize">24dp</item>
     </style>
 
-    <style name="Widget.SimpleNotes.Chip" parent="Widget.Material3.Chip.Input">
+    <style name="Widget.SimpleNotes.Chip" parent="Widget.Material3.Chip.Assist">
         <item name="chipIconTint">?colorOnSurface</item>
         <item name="chipBackgroundColor">?colorSurface</item>
         <item name="chipStrokeWidth">1dp</item>
         <item name="chipStartPadding">6dp</item>
+        <item name="chipMinHeight">30dp</item>
         <item name="chipStrokeColor">@color/md_theme_light_primary_transparent</item>
         <item name="checkedIconVisible">false</item>
         <item name="chipIcon">@drawable/ic_outline_label_on_secondary_container_24</item>
