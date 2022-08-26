@@ -51,21 +51,20 @@
                 android:textColor="?colorOnSecondaryContainer"
                 android:padding="8dp"
                 tools:text="Category name" />
-
-
         </LinearLayout>
 
 
     </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.checkbox.MaterialCheckBox
+    <brillembourg.notes.simple.presentation.custom_views.CustomCheckBox
         android:id="@+id/select_category_check"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        style="@style/Widget.Material3.CompoundButton.CheckBox"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginEnd="8dp" />
+        android:layout_marginEnd="4dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

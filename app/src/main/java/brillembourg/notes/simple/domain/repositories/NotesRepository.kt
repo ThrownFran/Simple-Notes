@@ -1,6 +1,8 @@
 package brillembourg.notes.simple.domain.repositories
 
 import brillembourg.notes.simple.domain.use_cases.*
+import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.AddCategoryToNoteUseCase
+import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.GetCategoriesForNoteUseCase
 import brillembourg.notes.simple.util.Resource
 import kotlinx.coroutines.flow.Flow
 
@@ -14,4 +16,6 @@ interface NotesRepository {
     fun getTaskList(params: GetNotesUseCase.Params): Flow<Resource<GetNotesUseCase.Result>>
     fun getArchivedTasks(params: GetArchivedNotesUseCase.Params): Flow<Resource<GetArchivedNotesUseCase.Result>>
     suspend fun saveCategoryToNote(params: AddCategoryToNoteUseCase.Params): Resource<AddCategoryToNoteUseCase.Result>
+    fun getCategoriesForNote(params: GetCategoriesForNoteUseCase.Params): Flow<Resource<GetCategoriesForNoteUseCase.Result>>
+
 }

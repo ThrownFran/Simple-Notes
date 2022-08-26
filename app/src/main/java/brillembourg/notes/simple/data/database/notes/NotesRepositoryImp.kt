@@ -1,9 +1,12 @@
 package brillembourg.notes.simple.data.database.notes
 
 import brillembourg.notes.simple.data.DateProvider
+import brillembourg.notes.simple.data.database.categories.toDomain
 import brillembourg.notes.simple.data.database.categories.toEntity
 import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.domain.use_cases.*
+import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.AddCategoryToNoteUseCase
+import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.GetCategoriesForNoteUseCase
 import brillembourg.notes.simple.util.GetTaskException
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
@@ -82,6 +85,21 @@ class NotesRepositoryImp(
             database.addCategoryToNote(params.category.toEntity(), params.note.toEntity())
             Resource.Success(AddCategoryToNoteUseCase.Result(UiText.NoteUpdated))
         }
+    }
+
+    override fun getCategoriesForNote(params: GetCategoriesForNoteUseCase.Params): Flow<Resource<GetCategoriesForNoteUseCase.Result>> {
+        return database.getCategoriesForNote(params.note.toEntity())
+            .debounce(300)
+            .distinctUntilChanged()
+            .transform {
+                try {
+                    val categoriesDomain = it.map { categoryEntity -> categoryEntity.toDomain() }
+                    val result = GetCategoriesForNoteUseCase.Result(categoriesDomain)
+                    emit(Resource.Success(result))
+                } catch (e: Exception) {
+                    emit(Resource.Error(GetTaskException(e.message)))
+                }
+            }
     }
 
     override fun getTaskList(params: GetNotesUseCase.Params): Flow<Resource<GetNotesUseCase.Result>> {

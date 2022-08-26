@@ -162,7 +162,7 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     private fun onAddCategories() {
-        viewModel.onShowCategories()
+        viewModel.onNavigateToCategories()
     }
 
     private fun onShare() {
@@ -257,8 +257,9 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     private fun setupCategories(selectCategories: SelectCategories) {
-        if (selectCategories.isShowing) {
+        if (selectCategories.navigate && !selectCategories.isShowing) {
             showCategoriesModalBottomSheet()
+            viewModel.onCategoriesShowing()
         }
     }
 

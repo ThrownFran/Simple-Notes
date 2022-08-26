@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
+import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.AddCategoryToNoteUseCase
+import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.GetCategoriesForNoteUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.categories.toDomain
@@ -32,7 +34,8 @@ class DetailViewModel @Inject constructor(
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val dateProvider: DateProvider,
     private val messageManager: MessageManager,
-    private val addCategoryUseCase: AddCategoryToNoteUseCase
+    private val addCategoryUseCase: AddCategoryToNoteUseCase,
+    private val getCategoriesForNoteUseCase: GetCategoriesForNoteUseCase
 ) : ViewModel() {
 
     private val uiStateKey = "detail_ui_state"
@@ -364,13 +367,49 @@ class DetailViewModel @Inject constructor(
                 }
             }
             .launchIn(viewModelScope)
+
+        currentNotePresentation?.let {
+            getCategoriesInCurrentNote(it)
+        }
+
     }
 
-    fun onShowCategories() {
+    private fun getCategoriesInCurrentNote(it: NotePresentationModel) =
+        getCategoriesForNoteUseCase.invoke(
+            GetCategoriesForNoteUseCase.Params(
+                it.toDomain(
+                    dateProvider
+                )
+            )
+        )
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _uiDetailState.update { uiState ->
+                            uiState.copy(
+                                noteCategories = result.data.categoryList
+                                    .map { it.toPresentation() }
+                                    .sortedBy { it.order }
+                                    .reversed()
+                            )
+                        }
+                    }
+                    is Resource.Error -> {
+                        showErrorMessage(result.exception)
+                    }
+                    is Resource.Loading -> {
+                        Unit
+                    }
+                }
+            }
+            .launchIn(viewModelScope)
+
+
+    fun onNavigateToCategories() {
         _uiDetailState.update {
             it.copy(
                 selectCategories = it.selectCategories.copy(
-                    isShowing = true
+                    navigate = true,
                 )
             )
         }
@@ -386,13 +425,24 @@ class DetailViewModel @Inject constructor(
         }
     }
 
+    fun onCategoriesShowing() {
+        _uiDetailState.update {
+            it.copy(
+                selectCategories = it.selectCategories.copy(
+                    isShowing = true,
+                    navigate = false
+                )
+            )
+        }
+    }
+
     fun onCategoryChecked(category: CategoryPresentationModel, isChecked: Boolean) {
-        category.isSelected = isChecked
+        val categoryUpdated = category.copy(isSelected = isChecked)
 
         viewModelScope.launch {
             val params = AddCategoryToNoteUseCase.Params(
                 currentNotePresentation!!.toDomain(dateProvider),
-                category.toDomain()
+                categoryUpdated.toDomain()
             )
 
             when (val result = addCategoryUseCase(params)) {
@@ -402,6 +452,7 @@ class DetailViewModel @Inject constructor(
             }
         }
     }
+
 
     //endregion
 

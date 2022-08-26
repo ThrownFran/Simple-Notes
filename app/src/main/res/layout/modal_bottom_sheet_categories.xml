@@ -32,7 +32,7 @@
         android:id="@+id/select_categories_image_clear"
         android:layout_width="34dp"
         android:layout_height="34dp"
-        android:layout_marginEnd="14dp"
+        android:layout_marginEnd="16dp"
         android:src="@drawable/ic_baseline_clear_on_surface_24"
         app:layout_constraintBottom_toBottomOf="@+id/select_categories_text_title"
         app:layout_constraintEnd_toEndOf="parent"

@@ -31,6 +31,7 @@ data class DetailUiState(
 
 @Parcelize
 data class SelectCategories(
+    val navigate: Boolean = false,
     val isShowing: Boolean = false,
     val categories: List<CategoryPresentationModel> = emptyList()
 ) : Parcelable

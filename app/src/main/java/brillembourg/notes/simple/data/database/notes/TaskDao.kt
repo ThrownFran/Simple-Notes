@@ -55,7 +55,7 @@ abstract class TaskDao {
 
     @Transaction
     @Query("SELECT * FROM taskentity WHERE note_id = :noteId")
-    abstract suspend fun getNoteWithCategories(noteId: Long): NoteWithCategories
+    abstract fun getNoteWithCategories(noteId: Long): Flow<NoteWithCategories>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun createNoteCrossCategory(noteCrossRef: CategoryNoteCrossRef)

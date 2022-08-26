@@ -35,7 +35,7 @@ class SelectCategoriesModalBottomSheet : BottomSheetDialogFragment() {
         safeUiLaunch {
             detailViewModel.uiDetailUiState.collect {
                 if (it.selectCategories.isShowing) {
-                    setupCategories(it.selectCategories.categories)
+                    setupCategories(it.selectCategories.categories, it.noteCategories)
                 } else {
                     dismiss()
                 }
@@ -48,8 +48,17 @@ class SelectCategoriesModalBottomSheet : BottomSheetDialogFragment() {
         super.onDestroy()
     }
 
-    private fun setupCategories(categories: List<CategoryPresentationModel>) {
+    private fun setupCategories(
+        categories: List<CategoryPresentationModel>,
+        noteCategories: List<CategoryPresentationModel>
+    ) {
         val recycler = binding.detailRecyclerCategories
+
+        categories.forEach {
+            if (noteCategories.contains(it)) {
+                it.isSelected = true
+            }
+        }
 
         if (recycler.adapter == null) {
             recycler.apply {

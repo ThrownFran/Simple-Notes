@@ -21,6 +21,11 @@ class SelectCategoryViewHolder(
 
     fun bind(category: CategoryPresentationModel) {
         bindName(category)
+        bindChecked(category)
+    }
+
+    private fun bindChecked(category: CategoryPresentationModel) {
+        binding.selectCategoryCheck.setChecked(category.isSelected, false)
     }
 
     private fun bindName(category: CategoryPresentationModel) {
