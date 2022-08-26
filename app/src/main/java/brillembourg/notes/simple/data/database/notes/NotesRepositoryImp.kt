@@ -1,6 +1,7 @@
 package brillembourg.notes.simple.data.database.notes
 
 import brillembourg.notes.simple.data.DateProvider
+import brillembourg.notes.simple.data.database.categories.toEntity
 import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.util.GetTaskException
@@ -58,7 +59,9 @@ class NotesRepositoryImp(
         }
     }
 
-    override fun getArchivedTasks(params: GetArchivedNotesUseCase.Params): Flow<Resource<GetArchivedNotesUseCase.Result>> {
+    override fun
+
+            getArchivedTasks(params: GetArchivedNotesUseCase.Params): Flow<Resource<GetArchivedNotesUseCase.Result>> {
         return database.getArchivedTasks()
             .debounce(200)
             .distinctUntilChanged()
@@ -72,6 +75,13 @@ class NotesRepositoryImp(
                     emit(Resource.Error(GetTaskException(e.message)))
                 }
             }
+    }
+
+    override suspend fun saveCategoryToNote(params: AddCategoryToNoteUseCase.Params): Resource<AddCategoryToNoteUseCase.Result> {
+        return safeCall {
+            database.addCategoryToNote(params.category.toEntity(), params.note.toEntity())
+            Resource.Success(AddCategoryToNoteUseCase.Result(UiText.NoteUpdated))
+        }
     }
 
     override fun getTaskList(params: GetNotesUseCase.Params): Flow<Resource<GetNotesUseCase.Result>> {
@@ -91,14 +101,14 @@ class NotesRepositoryImp(
 
     override suspend fun saveTask(params: SaveNoteUseCase.Params): Resource<SaveNoteUseCase.Result> {
         return safeCall {
-            database.saveTask(params.note.toData())
+            database.saveTask(params.note.toEntity())
             Resource.Success(SaveNoteUseCase.Result(UiText.NoteUpdated))
         }
     }
 
     override suspend fun reorderTaskList(params: ReorderNotesUseCase.Params): Resource<ReorderNotesUseCase.Result> {
         return safeCall {
-            database.saveTasksReordering(params.noteList.map { it.toData() })
+            database.saveTasksReordering(params.noteList.map { it.toEntity() })
             Resource.Success(ReorderNotesUseCase.Result(UiText.NotesReordered))
         }
     }

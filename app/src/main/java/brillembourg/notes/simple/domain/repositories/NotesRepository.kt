@@ -13,4 +13,5 @@ interface NotesRepository {
     suspend fun deleteTask(params: DeleteNotesUseCase.Params): Resource<DeleteNotesUseCase.Result>
     fun getTaskList(params: GetNotesUseCase.Params): Flow<Resource<GetNotesUseCase.Result>>
     fun getArchivedTasks(params: GetArchivedNotesUseCase.Params): Flow<Resource<GetArchivedNotesUseCase.Result>>
+    suspend fun saveCategoryToNote(params: AddCategoryToNoteUseCase.Params): Resource<AddCategoryToNoteUseCase.Result>
 }

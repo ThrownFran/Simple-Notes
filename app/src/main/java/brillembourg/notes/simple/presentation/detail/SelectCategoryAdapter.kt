@@ -8,6 +8,7 @@ import brillembourg.notes.simple.presentation.categories.CategoryPresentationMod
 import brillembourg.notes.simple.presentation.ui_utils.setupCategoryDiffCallback
 
 class SelectCategoryAdapter(
+    private val onCheckChanged: (category: CategoryPresentationModel, isChecked: Boolean) -> Unit
 ) : ListAdapter<CategoryPresentationModel, SelectCategoryViewHolder>(setupCategoryDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectCategoryViewHolder {
@@ -16,7 +17,13 @@ class SelectCategoryAdapter(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
-            )
+            ),
+            onCheckChanged = { categoryPosition, isChecked ->
+                onCheckChanged.invoke(
+                    currentList[categoryPosition],
+                    isChecked
+                )
+            }
         )
     }
 

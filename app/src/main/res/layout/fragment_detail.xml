@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -63,27 +62,28 @@
 
         </androidx.core.widget.NestedScrollView>
 
-        <FrameLayout
-            android:id="@+id/detail_bottomsheet_categories"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/Widget.Material3.BottomSheet"
-            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+        <!--        <FrameLayout-->
+        <!--            android:id="@+id/detail_bottomsheet_categories"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            style="@style/Widget.Material3.BottomSheet"-->
+        <!--            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">-->
 
-            <com.google.android.material.bottomsheet.BottomSheetDragHandleView
-                android:id="@+id/detail_bottomsheetdraghandle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/Widget.Material3.BottomSheet.DragHandle" />
+        <!--            <com.google.android.material.bottomsheet.BottomSheetDragHandleView-->
+        <!--                android:id="@+id/detail_bottomsheetdraghandle"-->
+        <!--                android:layout_width="match_parent"-->
+        <!--                android:layout_height="wrap_content"-->
+        <!--                style="@style/Widget.Material3.BottomSheet.DragHandle" />-->
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/detail_recycler_categories"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:listitem="@layout/item_category" />
+        <!--            <androidx.recyclerview.widget.RecyclerView-->
+        <!--                android:id="@+id/detail_recycler_categories"-->
+        <!--                android:layout_width="match_parent"-->
+        <!--                android:layout_height="match_parent"-->
+        <!--                tools:listitem="@layout/item_category"-->
+        <!--                android:nestedScrollingEnabled="false"/>-->
 
 
-        </FrameLayout>
+        <!--        </FrameLayout>-->
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

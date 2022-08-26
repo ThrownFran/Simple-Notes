@@ -7,6 +7,8 @@ import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
+import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
+import brillembourg.notes.simple.presentation.categories.toDomain
 import brillembourg.notes.simple.presentation.categories.toPresentation
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toDomain
@@ -30,6 +32,7 @@ class DetailViewModel @Inject constructor(
     private val getCategoriesUseCase: GetCategoriesUseCase,
     private val dateProvider: DateProvider,
     private val messageManager: MessageManager,
+    private val addCategoryUseCase: AddCategoryToNoteUseCase
 ) : ViewModel() {
 
     private val uiStateKey = "detail_ui_state"
@@ -63,30 +66,6 @@ class DetailViewModel @Inject constructor(
             newTaskState()
         }
         saveStateInSavedStateHandler()
-    }
-
-    private fun getCategories() {
-        getCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        _uiDetailState.update { uiState ->
-                            uiState.copy(
-                                selectCategories = _uiDetailState.value.selectCategories.copy(
-                                    categories = result.data.categoryList
-                                        .map { it.toPresentation() }
-                                        .sortedBy { it.order }
-                                        .reversed()
-                                )
-                            )
-                        }
-                    }
-                    is Resource.Error -> showErrorMessage(result.exception)
-                    is Resource.Loading -> Unit
-
-                }
-            }
-            .launchIn(viewModelScope)
     }
 
     //region Helpers
@@ -361,6 +340,32 @@ class DetailViewModel @Inject constructor(
 
     //endregion
 
+    //region Categories
+
+    private fun getCategories() {
+        getCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _uiDetailState.update { uiState ->
+                            uiState.copy(
+                                selectCategories = _uiDetailState.value.selectCategories.copy(
+                                    categories = result.data.categoryList
+                                        .map { it.toPresentation() }
+                                        .sortedBy { it.order }
+                                        .reversed()
+                                )
+                            )
+                        }
+                    }
+                    is Resource.Error -> showErrorMessage(result.exception)
+                    is Resource.Loading -> Unit
+
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
     fun onShowCategories() {
         _uiDetailState.update {
             it.copy(
@@ -380,5 +385,24 @@ class DetailViewModel @Inject constructor(
             )
         }
     }
+
+    fun onCategoryChecked(category: CategoryPresentationModel, isChecked: Boolean) {
+        category.isSelected = isChecked
+
+        viewModelScope.launch {
+            val params = AddCategoryToNoteUseCase.Params(
+                currentNotePresentation!!.toDomain(dateProvider),
+                category.toDomain()
+            )
+
+            when (val result = addCategoryUseCase(params)) {
+                is Resource.Success -> showMessage(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
+    }
+
+    //endregion
 
 }

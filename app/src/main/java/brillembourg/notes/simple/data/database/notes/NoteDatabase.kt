@@ -1,6 +1,8 @@
 package brillembourg.notes.simple.data.database.notes
 
 import brillembourg.notes.simple.data.database.AppDatabase
+import brillembourg.notes.simple.data.database.CategoryNoteCrossRef
+import brillembourg.notes.simple.data.database.categories.CategoryEntity
 import kotlinx.coroutines.flow.Flow
 
 class NoteDatabase(
@@ -77,6 +79,11 @@ class NoteDatabase(
 
     suspend fun saveTasks(taskList: List<NoteEntity>) {
         roomDatabase.taskDao().saveTasks(ArrayList(taskList))
+    }
+
+    suspend fun addCategoryToNote(categoryEntity: CategoryEntity, noteEntity: NoteEntity) {
+        roomDatabase.taskDao()
+            .createNoteCrossCategory(CategoryNoteCrossRef(categoryEntity.id!!, noteEntity.id!!))
     }
 
 }

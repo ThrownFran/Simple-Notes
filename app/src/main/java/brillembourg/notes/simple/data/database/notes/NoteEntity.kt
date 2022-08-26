@@ -27,7 +27,7 @@ fun NoteEntity.toDomain(): Note {
     )
 }
 
-fun Note.toData(): NoteEntity =
+fun Note.toEntity(): NoteEntity =
     NoteEntity(
         id = id,
         title = title,
