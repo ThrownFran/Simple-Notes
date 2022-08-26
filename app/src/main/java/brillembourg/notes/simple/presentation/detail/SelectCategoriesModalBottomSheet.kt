@@ -20,7 +20,7 @@ class SelectCategoriesModalBottomSheet : BottomSheetDialogFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = ModalBottomSheetCategoriesBinding.inflate(inflater, container, false)
         renderStates()
         setupListeners()
@@ -49,12 +49,17 @@ class SelectCategoriesModalBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun setupCategories(
-        categories: List<CategoryPresentationModel>,
+        allCategories: List<CategoryPresentationModel>,
         noteCategories: List<CategoryPresentationModel>
     ) {
         val recycler = binding.detailRecyclerCategories
 
-        categories.forEach {
+
+        //copy to avoid modifying detailuistate
+        val selectCategories = allCategories.toMutableList().map { it.copy() }
+
+        //check categories from note
+        selectCategories.forEach {
             if (noteCategories.contains(it)) {
                 it.isSelected = true
             }
@@ -62,23 +67,28 @@ class SelectCategoriesModalBottomSheet : BottomSheetDialogFragment() {
 
         if (recycler.adapter == null) {
             recycler.apply {
-                adapter = SelectCategoryAdapter(
-                    onCheckChanged = { category, isChecked ->
-                        detailViewModel.onCategoryChecked(
-                            category,
-                            isChecked
-                        )
-                    }
-                )
+                adapter = SelectCategoryAdapter { category, isChecked ->
+                    onCheckedCategory(category, isChecked)
+                }
                     .apply {
-                        submitList(categories)
+                        submitList(selectCategories)
                     }
                 layoutManager = LinearLayoutManager(context)
             }
         } else {
             (recycler.adapter as SelectCategoryAdapter)
-                .submitList(categories)
+                .submitList(selectCategories)
         }
+    }
+
+    private fun onCheckedCategory(
+        category: CategoryPresentationModel,
+        isChecked: Boolean
+    ) {
+        detailViewModel.onCategoryChecked(
+            category,
+            isChecked
+        )
     }
 
 
