@@ -57,11 +57,17 @@
         </item>
 
         <!-- Snackbar  -->
-        <!--        <item name="snackbarStyle">@style/Widget.SimpleNotes.Snackbar</item>-->
         <item name="snackbarButtonStyle">@style/Widget.SimpleNotes.SnackbarButton</item>
 
+        <!-- Bottom sheet modal dialog  -->
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.SimpleNotes.BottomSheetDialog</item>
+
+        <!-- Dialog  -->
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.SimpleNotes.MaterialAlertDialog
         </item>
+
+        <!-- Chip -->
+        <item name="chipStyle">@style/Widget.SimpleNotes.Chip</item>
     </style>
 
 

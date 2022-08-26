@@ -5,6 +5,7 @@ import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -14,9 +15,11 @@ import androidx.navigation.fragment.findNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
+import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
+import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.debounce
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
@@ -243,7 +246,9 @@ class DetailFragment : Fragment(), MenuProvider {
                     finishView()
                 }
 
-                setupCategories(uiState.selectCategories)
+                selectCategoriesState(uiState.selectCategories)
+
+                setupCategories(uiState.noteCategories)
             }
         }
 
@@ -256,7 +261,24 @@ class DetailFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun setupCategories(selectCategories: SelectCategories) {
+    private fun setupCategories(noteCategories: List<CategoryPresentationModel>) {
+        if (noteCategories.size == binding.detailChipgroup.size) return
+
+        binding.detailChipgroup.removeAllViews()
+        noteCategories.forEach {
+            val chip = Chip(context)
+            chip.text = it.name
+            chip.id = it.id.toInt()
+            chip.isCloseIconVisible = true
+            binding.detailChipgroup.addView(chip)
+        }
+
+        binding.detailChipgroup.setOnCheckedStateChangeListener { group, checkedIds ->
+
+        }
+    }
+
+    private fun selectCategoriesState(selectCategories: SelectCategories) {
         if (selectCategories.navigate && !selectCategories.isShowing) {
             showCategoriesModalBottomSheet()
             viewModel.onCategoriesShowing()

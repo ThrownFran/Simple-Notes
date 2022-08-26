@@ -20,7 +20,7 @@
         app:cardCornerRadius="20dp"
         app:contentPadding="2dp"
         style="@style/Widget.Material3.CardView.Outlined"
-        app:cardElevation="0dp"
+        app:cardElevation="2dp"
         app:cardUseCompatPadding="true"
         app:checkedIcon="@null"
         app:cardBackgroundColor="@null"

@@ -72,4 +72,42 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="ThemeOverlay.SimpleNotes.BottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/ModalBottomSheetDialog</item>
+        <item name="android:elevation">0dp</item>
+    </style>
+
+    <style name="ModalBottomSheetDialog" parent="Widget.Material3.BottomSheet.Modal">
+        <item name="android:elevation">0dp</item>
+        <!--        <item name="backgroundTint">?colorSurface</item>-->
+        <item name="shapeAppearance">@style/ShapeAppearance.SimpleNotes.LargeComponent</item>
+    </style>
+
+    <style name="ShapeAppearance.SimpleNotes.LargeComponent" parent="ShapeAppearance.Material3.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">24dp</item>
+    </style>
+
+    <style name="Widget.SimpleNotes.Chip" parent="Widget.Material3.Chip.Input">
+        <item name="chipIconTint">?colorOnSurface</item>
+        <item name="chipBackgroundColor">?colorSurface</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipStartPadding">6dp</item>
+        <item name="chipStrokeColor">@color/md_theme_light_primary_transparent</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="chipIcon">@drawable/ic_outline_label_on_secondary_container_24</item>
+        <item name="android:textAppearance">@style/TextAppearance.SimpleNotes.BodyMedium</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.SimpleNotes.SmallComponent</item>
+    </style>
+
+    <style name="TextAppearance.SimpleNotes.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
+        <!--        <item name="fontFamily">@font/rubik_regular</item>-->
+        <!--        <item name="android:fontFamily">@font/rubik_regular</item>-->
+    </style>
+
+    <style name="ShapeAppearance.SimpleNotes.SmallComponent" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
 </resources>
