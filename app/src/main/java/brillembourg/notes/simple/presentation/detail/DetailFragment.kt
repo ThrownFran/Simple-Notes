@@ -270,8 +270,6 @@ class DetailFragment : Fragment(), MenuProvider {
             binding.detailChipgroup.addView(chip)
             chip.setOnClickListener {
                 viewModel.onNavigateToCategories()
-
-
 //                binding.detailChipgroup.removeView(chip)
 //                viewModel.onCategoryChecked(categoryPresentationModel,false)
             }

@@ -3,6 +3,9 @@ package brillembourg.notes.simple.presentation.models
 import android.os.Parcelable
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.models.Note
+import brillembourg.notes.simple.domain.models.NoteWithCategories
+import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
+import brillembourg.notes.simple.presentation.categories.toPresentation
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -13,7 +16,8 @@ data class NotePresentationModel(
     val dateInLocal: String,
     override var order: Int,
     var isArchived: Boolean = false,
-    override var isSelected: Boolean = false
+    override var isSelected: Boolean = false,
+    val categories: List<CategoryPresentationModel>
 ) : Parcelable, HasOrder, IsSelectable
 
 fun NotePresentationModel.toDomain(dateProvider: DateProvider): Note {
@@ -27,16 +31,28 @@ fun NotePresentationModel.toDomain(dateProvider: DateProvider): Note {
     )
 }
 
-fun Note.toPresentation(dateProvider: DateProvider): NotePresentationModel {
+fun NoteWithCategories.toPresentation(dateProvider: DateProvider): NotePresentationModel {
     return NotePresentationModel(
-        id = id,
-        title = title,
-        content = content,
-        order = order,
-        dateInLocal = dateProvider.formatTimeToLocalDate(date),
-        isArchived = isArchived
-    )
+        id = note.id,
+        title = note.title,
+        content = note.content,
+        dateInLocal = dateProvider.formatTimeToLocalDate(note.date),
+        order = note.order,
+        isArchived = note.isArchived,
+        isSelected = false,
+        categories = categories.map { it.toPresentation() })
 }
+
+//fun Note.toPresentation(dateProvider: DateProvider): NotePresentationModel {
+//    return NotePresentationModel(
+//        id = id,
+//        title = title,
+//        content = content,
+//        order = order,
+//        dateInLocal = dateProvider.formatTimeToLocalDate(date),
+//        isArchived = isArchived
+//    )
+//}
 
 interface HasOrder {
     var order: Int

@@ -3,6 +3,8 @@ package brillembourg.notes.simple.data.database.notes
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.data.database.categories.toDomain
 import brillembourg.notes.simple.data.database.categories.toEntity
+import brillembourg.notes.simple.data.database.toDomain
+import brillembourg.notes.simple.domain.models.NoteWithCategories
 import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.AddCategoryToNoteUseCase
@@ -51,7 +53,8 @@ class NotesRepositoryImp(
                 content = params.content,
                 dateCreated = dateCreated
             ).toDomain()
-            Resource.Success(CreateNoteUseCase.Result(task, UiText.NoteCreated))
+            val noteWithCategories = NoteWithCategories(task, emptyList())
+            Resource.Success(CreateNoteUseCase.Result(noteWithCategories, UiText.NoteCreated))
         }
     }
 

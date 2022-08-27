@@ -2,6 +2,7 @@ package brillembourg.notes.simple.data.database.notes
 
 import brillembourg.notes.simple.data.database.AppDatabase
 import brillembourg.notes.simple.data.database.CategoryNoteCrossRef
+import brillembourg.notes.simple.data.database.NoteWithCategoriesEntity
 import brillembourg.notes.simple.data.database.categories.CategoryEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.transform
@@ -44,9 +45,13 @@ class NoteDatabase(
         return roomDatabase.taskDao().getArchivedList()
     }
 
-    fun getTaskList(): Flow<List<NoteEntity>> {
-        return roomDatabase.taskDao().getList()
+    fun getTaskList(): Flow<List<NoteWithCategoriesEntity>> {
+        return roomDatabase.taskDao().getNotesWithCategories()
     }
+
+//    fun getTaskList(): Flow<List<NoteEntity>> {
+//        return roomDatabase.taskDao().getList()
+//    }
 
     suspend fun deleteTasks(ids: List<Long>) {
         return roomDatabase.taskDao().deleteTasks(ids)

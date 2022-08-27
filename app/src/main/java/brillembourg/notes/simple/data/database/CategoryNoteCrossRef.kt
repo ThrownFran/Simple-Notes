@@ -2,7 +2,10 @@ package brillembourg.notes.simple.data.database
 
 import androidx.room.*
 import brillembourg.notes.simple.data.database.categories.CategoryEntity
+import brillembourg.notes.simple.data.database.categories.toDomain
 import brillembourg.notes.simple.data.database.notes.NoteEntity
+import brillembourg.notes.simple.data.database.notes.toDomain
+import brillembourg.notes.simple.domain.models.NoteWithCategories
 
 
 @Entity(tableName = "category_note_cross_ref", primaryKeys = ["category_id", "note_id"])
@@ -21,7 +24,7 @@ data class CategoryWithNotes(
     val notes: List<NoteEntity>
 )
 
-data class NoteWithCategories(
+data class NoteWithCategoriesEntity(
     @Embedded val note: NoteEntity,
     @Relation(
         parentColumn = "note_id",
@@ -30,3 +33,7 @@ data class NoteWithCategories(
     )
     val categories: List<CategoryEntity>
 )
+
+fun NoteWithCategoriesEntity.toDomain(): NoteWithCategories {
+    return NoteWithCategories(note.toDomain(), categories.map { it.toDomain() })
+}

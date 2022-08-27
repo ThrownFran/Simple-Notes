@@ -1,7 +1,7 @@
 package brillembourg.notes.simple.domain.use_cases
 
 import brillembourg.notes.simple.domain.Schedulers
-import brillembourg.notes.simple.domain.models.Note
+import brillembourg.notes.simple.domain.models.NoteWithCategories
 import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.util.Resource
 import kotlinx.coroutines.flow.Flow
@@ -19,5 +19,5 @@ class GetNotesUseCase @Inject constructor(
     }
 
     class Params
-    class Result(val noteList: List<Note>)
+    class Result(val noteList: List<NoteWithCategories>)
 }

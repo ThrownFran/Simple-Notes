@@ -2,7 +2,7 @@ package brillembourg.notes.simple.data.database.notes
 
 import androidx.room.*
 import brillembourg.notes.simple.data.database.CategoryNoteCrossRef
-import brillembourg.notes.simple.data.database.NoteWithCategories
+import brillembourg.notes.simple.data.database.NoteWithCategoriesEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -51,11 +51,11 @@ abstract class TaskDao {
 
     @Transaction
     @Query("SELECT * FROM taskentity")
-    abstract suspend fun getNotesWithCategories(): List<NoteWithCategories>
+    abstract fun getNotesWithCategories(): Flow<List<NoteWithCategoriesEntity>>
 
     @Transaction
     @Query("SELECT * FROM taskentity WHERE note_id = :noteId")
-    abstract fun getNoteWithCategories(noteId: Long): Flow<NoteWithCategories>
+    abstract fun getNoteWithCategories(noteId: Long): Flow<NoteWithCategoriesEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun createNoteCrossCategory(noteCrossRef: CategoryNoteCrossRef)

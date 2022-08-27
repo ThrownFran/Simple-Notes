@@ -80,10 +80,13 @@ class HomeViewModel @Inject constructor(
                             uiState.copy(
                                 noteList = NoteList(
                                     notes = result.data.noteList
-                                        .map { note ->
-                                            note.toPresentation(dateProvider).apply {
+                                        .map { noteWithCategories ->
+                                            noteWithCategories.toPresentation(dateProvider).apply {
                                                 this.isSelected =
-                                                    isNoteSelectedInUi(uiState, note)
+                                                    isNoteSelectedInUi(
+                                                        uiState,
+                                                        noteWithCategories.note
+                                                    )
                                             }
                                         }
                                         .sortedBy { taskPresentationModel -> taskPresentationModel.order }

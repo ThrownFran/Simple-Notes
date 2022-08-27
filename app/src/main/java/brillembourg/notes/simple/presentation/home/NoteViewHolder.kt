@@ -7,6 +7,7 @@ import brillembourg.notes.simple.presentation.custom_views.fromDpToPixel
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.Selectable
 import brillembourg.notes.simple.presentation.ui_utils.SelectableImp
+import com.google.android.material.chip.Chip
 
 class NoteViewHolder(
     private val getCurrentList: () -> List<NotePresentationModel>,
@@ -45,6 +46,20 @@ class NoteViewHolder(
         bindContent(task)
         bindDate(task)
         bindSelection(task)
+        bindCategories(task)
+    }
+
+    private fun bindCategories(model: NotePresentationModel) {
+        if (model.categories.isEmpty()) binding.taskChipgroupCategories.removeAllViews()
+
+        val categories = model.categories
+        binding.taskChipgroupCategories.removeAllViews()
+        categories.forEach {
+            val chip = Chip(itemView.context)
+            chip.text = it.name
+            chip.id = it.id.toInt()
+            binding.taskChipgroupCategories.addView(chip)
+        }
     }
 
     private fun bindDate(task: NotePresentationModel) {

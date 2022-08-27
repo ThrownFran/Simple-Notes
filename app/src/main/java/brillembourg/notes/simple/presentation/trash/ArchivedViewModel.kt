@@ -10,7 +10,6 @@ import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toCopyString
-import brillembourg.notes.simple.presentation.models.toPresentation
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
@@ -73,14 +72,14 @@ class ArchivedViewModel @Inject constructor(
                     is Resource.Success -> {
                         _archivedUiState.update { uiState ->
                             uiState.copy(
-                                noteList = result.data.noteList.map { task ->
-                                    task.toPresentation(dateProvider)
-                                        .apply {
-                                            this.isSelected = isNoteSelectedInUi(uiState, this)
-                                        }
-                                }
-                                    .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                                    .asReversed()
+//                                noteList = result.data.noteList.map { task ->
+//                                    task.toPresentation(dateProvider)
+//                                        .apply {
+//                                            this.isSelected = isNoteSelectedInUi(uiState, this)
+//                                        }
+//                                }
+//                                    .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+//                                    .asReversed()
                             )
                         }
                     }
