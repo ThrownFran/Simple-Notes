@@ -8,3 +8,5 @@ data class Note(
     val order: Int,
     val isArchived: Boolean = false
 )
+
+data class NoteWithCategories(val note: Note, val categories: List<Category>)

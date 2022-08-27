@@ -44,7 +44,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         getPreferences()
-        observeTaskList()
+        observeNoteList()
         saveChangesInSavedStateObserver()
     }
 
@@ -71,7 +71,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun observeTaskList() {
+    private fun observeNoteList() {
         getNotesUseCase(GetNotesUseCase.Params())
             .onEach { result ->
                 when (result) {
