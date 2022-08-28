@@ -62,6 +62,8 @@ class DetailViewModel @Inject constructor(
 
     var messageToShowWhenNavBack: UiText? = null
 
+    fun isCategoryOptionAvailable() = currentNotePresentation != null
+
     init {
         getCategories()
 
@@ -130,11 +132,15 @@ class DetailViewModel @Inject constructor(
                         showMessage(result.data.message)
                     else messageToShowWhenNavBack = result.data.message
 
-                    _uiDetailState.update {
-                        it.copy(navigateBack = navigateBack)
-                    }
                     currentNotePresentation = result.data.note.toPresentation(dateProvider).apply {
                         getCategoriesInCurrentNote(this)
+                    }
+
+                    _uiDetailState.update {
+                        it.copy(
+                            navigateBack = navigateBack,
+                            selectCategories = it.selectCategories.copy(isCategoryMenuAvailable = true)
+                        )
                     }
                 }
                 is Resource.Error -> showErrorMessage(result.exception)
@@ -366,7 +372,8 @@ class DetailViewModel @Inject constructor(
                                     categories = result.data.categoryList
                                         .map { it.toPresentation() }
                                         .sortedBy { it.order }
-                                        .reversed()
+                                        .reversed(),
+                                    isCategoryMenuAvailable = isCategoryOptionAvailable()
                                 )
                             )
                         }

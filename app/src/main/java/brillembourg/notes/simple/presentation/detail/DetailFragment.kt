@@ -74,6 +74,16 @@ class DetailFragment : Fragment(), MenuProvider {
         menuArchiveVisibility(menu, isArchived, isNewTask)
         menuDeleteVisibilityAndOptions(menu, isNewTask, isArchived)
         menuShareAndCopyVisibility(menu)
+        menuCategoryVisibility(menu)
+    }
+
+    private fun menuCategoryVisibility(menu: Menu) {
+        val isMenuCategoryVisible =
+            viewModel.uiDetailUiState.value.selectCategories.isCategoryMenuAvailable
+
+        menu.findItem(R.id.menu_note_label).apply {
+            isVisible = isMenuCategoryVisible
+        }
     }
 
     private fun menuShareAndCopyVisibility(menu: Menu) {
