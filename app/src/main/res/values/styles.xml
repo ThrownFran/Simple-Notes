@@ -89,19 +89,33 @@
     </style>
 
     <style name="Widget.SimpleNotes.Chip" parent="Widget.Material3.Chip.Assist">
-        <item name="chipIconTint">?colorOnSurface</item>
-        <item name="chipBackgroundColor">?colorSurface</item>
-        <item name="chipStrokeWidth">1dp</item>
-        <item name="chipStartPadding">6dp</item>
-        <item name="chipMinHeight">30dp</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.SimpleNotes.Chip</item>
+        <item name="chipIconTint">?colorSecondary</item>
+        <item name="chipBackgroundColor">?colorSecondaryContainer</item>
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="chipStartPadding">1dp</item>
+        <item name="chipEndPadding">1dp</item>
+        <item name="chipMinHeight">25dp</item>
+        <item name="ensureMinTouchTargetSize">false</item>
+        <item name="iconStartPadding">0dp</item>
+        <item name="iconEndPadding">0dp</item>
+        <item name="chipIconSize">16dp</item>
         <item name="chipStrokeColor">@color/md_theme_light_primary_transparent</item>
         <item name="checkedIconVisible">false</item>
-        <item name="chipIcon">@drawable/ic_outline_label_on_secondary_container_24</item>
-        <item name="android:textAppearance">@style/TextAppearance.SimpleNotes.BodyMedium</item>
+        <item name="chipIcon">@null</item>
+        <item name="chipSpacing">0dp</item>
+        <item name="chipSpacingVertical">0dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.SimpleNotes.BodySmall</item>
         <item name="shapeAppearanceOverlay">@style/ShapeAppearance.SimpleNotes.SmallComponent</item>
     </style>
 
-    <style name="TextAppearance.SimpleNotes.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
+    <style name="ThemeOverlay.SimpleNotes.Chip" parent="">
+        <item name="colorPrimary">?colorSurface</item>
+        <!--        <item name="fontFamily">@font/rubik_regular</item>-->
+        <!--        <item name="android:fontFamily">@font/rubik_regular</item>-->
+    </style>
+
+    <style name="TextAppearance.SimpleNotes.BodySmall" parent="TextAppearance.Material3.BodySmall">
         <!--        <item name="fontFamily">@font/rubik_regular</item>-->
         <!--        <item name="android:fontFamily">@font/rubik_regular</item>-->
     </style>
@@ -110,5 +124,6 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">12dp</item>
     </style>
+
 
 </resources>

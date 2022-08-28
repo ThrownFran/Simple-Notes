@@ -50,8 +50,10 @@ class DetailViewModel @Inject constructor(
     private val _uiDetailState =
         MutableStateFlow(getSavedUiStateFromDeath() ?: DetailUiState())
             .apply {
-                observeInputChanges(value)
-                onEach { saveStateInSavedStateHandler(value) }
+                onEach {
+                    observeInputChanges(value)
+                    saveStateInSavedStateHandler(value)
+                }
                     .launchIn(viewModelScope)
             }
 
@@ -124,13 +126,16 @@ class DetailViewModel @Inject constructor(
             when (result) {
                 is Resource.Success -> {
 
-                    if (navigateBack) showMessage(result.data.message) else messageToShowWhenNavBack =
-                        result.data.message
+                    if (navigateBack)
+                        showMessage(result.data.message)
+                    else messageToShowWhenNavBack = result.data.message
 
                     _uiDetailState.update {
                         it.copy(navigateBack = navigateBack)
                     }
-                    currentNotePresentation = result.data.note.toPresentation(dateProvider)
+                    currentNotePresentation = result.data.note.toPresentation(dateProvider).apply {
+                        getCategoriesInCurrentNote(this)
+                    }
                 }
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
@@ -172,7 +177,8 @@ class DetailViewModel @Inject constructor(
                 ),
                 unFocusInput = true,
                 isNewTask = false,
-                isArchivedTask = note.isArchived
+                isArchivedTask = note.isArchived,
+                noteCategories = note.categories
             )
         }
     }
@@ -234,13 +240,6 @@ class DetailViewModel @Inject constructor(
     }
 
     //endregion
-
-//    fun onEditCategories () {
-//        viewModelScope.launch {
-//            when (getCategoriesUseCase)
-//        }
-//    }
-
 
     //region Archive/Unarchive
 
@@ -348,6 +347,15 @@ class DetailViewModel @Inject constructor(
     //region Categories
 
     private fun getCategories() {
+        getAvailableCategories()
+
+        currentNotePresentation?.let {
+            getCategoriesInCurrentNote(it)
+        }
+
+    }
+
+    private fun getAvailableCategories() {
         getCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
             .onEach { result ->
                 when (result) {
@@ -369,11 +377,6 @@ class DetailViewModel @Inject constructor(
                 }
             }
             .launchIn(viewModelScope)
-
-        currentNotePresentation?.let {
-            getCategoriesInCurrentNote(it)
-        }
-
     }
 
     private fun getCategoriesInCurrentNote(it: NotePresentationModel) =

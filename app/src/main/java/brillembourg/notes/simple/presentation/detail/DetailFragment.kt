@@ -5,6 +5,7 @@ import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.isVisible
 import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -260,7 +261,11 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     private fun setupCategories(noteCategories: List<CategoryPresentationModel>) {
-        if (noteCategories.size == binding.detailChipgroup.size) return
+        binding.detailChipgroup.isVisible = noteCategories.isNotEmpty()
+
+        if (noteCategories.size == binding.detailChipgroup.size) {
+            return
+        }
 
         binding.detailChipgroup.removeAllViews()
         noteCategories.forEach { categoryPresentationModel: CategoryPresentationModel ->
@@ -274,6 +279,7 @@ class DetailFragment : Fragment(), MenuProvider {
 //                viewModel.onCategoryChecked(categoryPresentationModel,false)
             }
         }
+
     }
 
     private fun selectCategoriesState(selectCategories: SelectCategories) {

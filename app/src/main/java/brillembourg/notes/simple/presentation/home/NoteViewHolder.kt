@@ -55,9 +55,15 @@ class NoteViewHolder(
         val categories = model.categories
         binding.taskChipgroupCategories.removeAllViews()
         categories.forEach {
-            val chip = Chip(itemView.context)
-            chip.text = it.name
-            chip.id = it.id.toInt()
+            val chip = Chip(itemView.context).apply {
+                id = it.id.toInt()
+                text = it.name
+//                val myLayoutParams = ChipGroup.LayoutParams(
+//                    25f.fromDpToPixel(itemView.context).toInt(),
+//                    25f.fromDpToPixel(itemView.context).toInt()
+//                )
+//                layoutParams = myLayoutParams
+            }
             binding.taskChipgroupCategories.addView(chip)
         }
     }

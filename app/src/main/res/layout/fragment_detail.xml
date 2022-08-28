@@ -24,32 +24,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="12dp">
 
-                android:orientation="vertical">
-
-                <HorizontalScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:scrollbars="none">
-
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/detail_chipgroup"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        app:singleLine="true">
-
-                        <!--                        &lt;!&ndash; Chips can be declared here, or added dynamically. &ndash;&gt;-->
-                        <!--                        <com.google.android.material.chip.Chip-->
-                        <!--                            android:layout_width="wrap_content"-->
-                        <!--                            android:layout_height="wrap_content"-->
-                        <!--                            android:text="My chip" />-->
-
-
-                    </com.google.android.material.chip.ChipGroup>
-                </HorizontalScrollView>
 
                 <LinearLayout
                     android:id="@+id/detail_linear"
@@ -65,7 +42,6 @@
                         android:id="@+id/detail_edit_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
                         android:gravity="top"
                         android:hint="@string/title"
                         android:importantForAutofill="no"
@@ -87,6 +63,53 @@
                         android:padding="4dp"
                         android:text="@={viewmodel.uiDetailUiState.component3().contentBinding}"
                         android:textSize="16sp" />
+
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="16dp"
+                        android:scrollbars="none">
+
+                        <com.google.android.material.chip.ChipGroup
+                            android:id="@+id/detail_chipgroup"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:visibility="gone"
+                            app:singleLine="true">
+
+                            <!--                        &lt;!&ndash; Chips can be declared here, or added dynamically. &ndash;&gt;-->
+                            <com.google.android.material.chip.Chip
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="My chip" />
+
+                            <com.google.android.material.chip.Chip
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="My chip" />
+
+                            <com.google.android.material.chip.Chip
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="My chip" />
+
+                            <com.google.android.material.chip.Chip
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="My chip" />
+
+                            <com.google.android.material.chip.Chip
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="My chip" />
+
+
+                        </com.google.android.material.chip.ChipGroup>
+                    </HorizontalScrollView>
 
 
                 </LinearLayout>
