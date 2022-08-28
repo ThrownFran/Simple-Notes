@@ -91,7 +91,7 @@
     <style name="Widget.SimpleNotes.Chip" parent="Widget.Material3.Chip.Assist">
         <item name="materialThemeOverlay">@style/ThemeOverlay.SimpleNotes.Chip</item>
         <item name="chipIconTint">?colorSecondary</item>
-        <item name="chipBackgroundColor">?colorSecondaryContainer</item>
+        <item name="chipBackgroundColor">?colorSecondaryVariant</item>
         <item name="chipStrokeWidth">0dp</item>
         <item name="chipStartPadding">1dp</item>
         <item name="chipEndPadding">1dp</item>

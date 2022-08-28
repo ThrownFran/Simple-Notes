@@ -11,6 +11,8 @@
 
         <item name="colorSecondary">@color/md_theme_light_secondary</item>
         <item name="colorOnSecondary">@color/md_theme_light_onSecondary</item>
+        <item name="colorSecondaryVariant">@color/md_theme_light_secondaryContainer_transparent
+        </item>
         <item name="colorSecondaryContainer">@color/md_theme_light_secondaryContainer</item>
         <item name="colorOnSecondaryContainer">@color/md_theme_light_onSecondaryContainer</item>
 

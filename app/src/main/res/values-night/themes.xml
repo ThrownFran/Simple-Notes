@@ -9,6 +9,8 @@
         <item name="colorPrimaryVariant">@color/md_theme_dark_primary_transparent</item>
 
         <item name="colorSecondary">@color/md_theme_dark_secondary</item>
+        <item name="colorSecondaryVariant">@color/md_theme_dark_secondaryContainer_transparent
+        </item>
         <item name="colorOnSecondary">@color/md_theme_dark_onSecondary</item>
         <item name="colorSecondaryContainer">@color/md_theme_dark_secondaryContainer</item>
         <item name="colorOnSecondaryContainer">@color/md_theme_dark_onSecondaryContainer</item>
