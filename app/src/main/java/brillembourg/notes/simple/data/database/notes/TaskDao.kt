@@ -50,8 +50,12 @@ abstract class TaskDao {
     abstract suspend fun unarchive(ids: List<Long>)
 
     @Transaction
-    @Query("SELECT * FROM taskentity")
+    @Query("SELECT * FROM taskentity WHERE is_archived = 0")
     abstract fun getNotesWithCategories(): Flow<List<NoteWithCategoriesEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM taskentity WHERE is_archived = 1")
+    abstract fun getArchivedNotesWithCategories(): Flow<List<NoteWithCategoriesEntity>>
 
     @Transaction
     @Query("SELECT * FROM taskentity WHERE note_id = :noteId")

@@ -41,8 +41,8 @@ class NoteDatabase(
         roomDatabase.taskDao().save(task)
     }
 
-    fun getArchivedTasks(): Flow<List<NoteEntity>> {
-        return roomDatabase.taskDao().getArchivedList()
+    fun getArchivedTasks(): Flow<List<NoteWithCategoriesEntity>> {
+        return roomDatabase.taskDao().getArchivedNotesWithCategories()
     }
 
     fun getTaskList(): Flow<List<NoteWithCategoriesEntity>> {
