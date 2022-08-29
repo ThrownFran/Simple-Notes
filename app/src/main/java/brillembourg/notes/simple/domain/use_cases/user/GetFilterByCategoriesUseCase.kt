@@ -5,10 +5,7 @@ import brillembourg.notes.simple.domain.models.Category
 import brillembourg.notes.simple.domain.repositories.UserPrefRepository
 import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
 import brillembourg.notes.simple.util.Resource
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 class GetFilterByCategoriesUseCase @Inject constructor(
@@ -21,19 +18,40 @@ class GetFilterByCategoriesUseCase @Inject constructor(
     class Result(val categories: List<Category>)
 
     operator fun invoke(params: Params): Flow<Resource<Result>> {
-        return repository.getFilter(params)
+
+        return params.getCategoriesFlow
             .flowOn(schedulers.defaultDispatcher())
-            .transform { categoriesIdsResult ->
-                if (categoriesIdsResult is Resource.Success) {
-                    params.getCategoriesFlow
-                        .flowOn(schedulers.defaultDispatcher())
-                        .collect { allCategoriesResult: Resource<GetCategoriesUseCase.Result> ->
-                            emitCategoryModel(allCategoriesResult, categoriesIdsResult)
+            .flatMapLatest { result: Resource<GetCategoriesUseCase.Result> ->
+                repository.getFilter(params)
+                    .transform { it: Resource<CategoriesIds> ->
+                        when (it) {
+                            is Resource.Success -> {
+                                emitCategoryModel(result, it)
+                            }
+                            is Resource.Error -> {
+                                Resource.Error<Result>(it.exception)
+                            }
+                            is Resource.Loading -> {
+                                Resource.Loading<Result>()
+                            }
                         }
-                } else {
-                    throw IllegalArgumentException("Category id not found")
-                }
+                    }
             }
+
+
+//        return repository.getFilter(params)
+//            .flowOn(schedulers.defaultDispatcher())
+//            .transform { categoriesIdsResult ->
+//                if (categoriesIdsResult is Resource.Success) {
+//                    params.getCategoriesFlow
+//                        .flowOn(schedulers.defaultDispatcher())
+//                        .collect { allCategoriesResult: Resource<GetCategoriesUseCase.Result> ->
+//                            emitCategoryModel(allCategoriesResult, categoriesIdsResult)
+//                        }
+//                } else {
+//                    throw IllegalArgumentException("Category id not found")
+//                }
+//            }
     }
 
     private suspend fun FlowCollector<Resource<Result>>.emitCategoryModel(

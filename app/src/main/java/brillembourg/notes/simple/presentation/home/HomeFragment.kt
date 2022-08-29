@@ -5,6 +5,7 @@ import android.os.Parcelable
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -107,6 +108,8 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun filteredCategoriesState(filteredCategories: List<CategoryPresentationModel>) {
         val mainActivityBinding = (activity as MainActivity).binding
+
+        mainActivityBinding.mainLinearCategories.isVisible = filteredCategories.isNotEmpty()
 
         if (mainActivityBinding.mainRecyclerCategoriesFilter.adapter == null) {
             mainActivityBinding.mainRecyclerCategoriesFilter.apply {

@@ -53,10 +53,9 @@ class HomeViewModel @Inject constructor(
     private val getAvailableCategoriesUseCase: GetCategoriesUseCase
 ) : ViewModel() {
 
+    private val uiStateKey = "home_ui_state"
     private val _homeUiState = MutableStateFlow(getSavedUiState() ?: HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
-
-    private val uiStateKey = "home_ui_state"
 
     //Job references to allow cancellation
     private var filteredCategoriesJob: Job? = null
@@ -66,21 +65,26 @@ class HomeViewModel @Inject constructor(
     init {
         observePreferences()
         saveChangesInSavedStateObserver()
-        observeCategories()
-        observeNoteList()
+        observeCategories {
+            observeNoteList()
+        }
     }
 
     //region Note list
 
     private fun observeNoteList() {
+        Log.e("HomeViewModel", "Start Observing List $getNotesJob")
         getNotesJob?.cancel()
         getNotesJob =
             getNotesUseCase(GetNotesUseCase.Params(_homeUiState.value.filteredCategories.map { it.toDomain() }))
                 .onEach { result ->
                     when (result) {
                         is Resource.Success -> {
-                            Log.e("aaaa", "Consumed $coroutineContext")
                             _homeUiState.update { uiState ->
+                                Log.e(
+                                    "HomeViewModel",
+                                    "Observe list $coroutineContext ${result.data.noteList.map { it.note.id }}"
+                                )
                                 uiState.copy(
                                     noteList = NoteList(
                                         notes = result.data.noteList
@@ -124,7 +128,7 @@ class HomeViewModel @Inject constructor(
 
     //region Categories
 
-    private fun observeCategories() {
+    private fun observeCategories(onFilteredCategoriesLoaded: (() -> Unit)? = null) {
 
         val availableCategoriesFlow =
             getAvailableCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
@@ -165,7 +169,10 @@ class HomeViewModel @Inject constructor(
                                     .toDiplayOrder()
                             )
                         }
-                        observeNoteList()
+                        Log.e(
+                            "HomeViewModel",
+                            "Filtered success : $coroutineContext ${result.data.categories.map { it.name }}"
+                        )
                     }
                     is Resource.Error -> {
                         showErrorMessage(result.exception)
@@ -174,6 +181,7 @@ class HomeViewModel @Inject constructor(
                         Unit
                     }
                 }
+                onFilteredCategoriesLoaded?.invoke()
             }
             .launchIn(viewModelScope)
     }
@@ -223,7 +231,9 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             val params = SaveFilterByCategoriesUseCase.Params(categoriesUpdated.map { it.id })
             saveFilterByCategoriesUseCase.invoke(params)
-            observeCategories()
+            observeCategories {
+                observeNoteList()
+            }
         }
     }
 

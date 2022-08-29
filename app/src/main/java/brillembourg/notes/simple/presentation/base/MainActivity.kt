@@ -2,10 +2,10 @@ package brillembourg.notes.simple.presentation.base
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -126,10 +126,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupDrawerListener() {
 
-        //TODO
-        binding.navView.menu.findItem(R.id.customMenu).actionView
-            .findViewById<TextView>(R.id.category_text_name)
-            .setText("Helloooo")
+//        //TODO
+//        binding.navView.menu.findItem(R.id.customMenu).actionView
+//            .findViewById<TextView>(R.id.category_text_name)
+//            .setText("Helloooo")
 
         binding.navView.setNavigationItemSelectedListener {
             when (it.itemId) {
@@ -175,7 +175,13 @@ class MainActivity : AppCompatActivity() {
     private fun setupNavControllerListener() {
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             binding.homeFab.apply {
-                if (destination.id == R.id.homeFragment) show() else hide()
+                if (destination.id == R.id.homeFragment) {
+                    show()
+                    binding.mainLinearCategories.isVisible = true
+                } else {
+                    hide()
+                    binding.mainLinearCategories.isVisible = false
+                }
             }
         }
     }
