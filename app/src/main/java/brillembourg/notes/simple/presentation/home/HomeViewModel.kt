@@ -53,21 +53,15 @@ class HomeViewModel @Inject constructor(
     private val getAvailableCategoriesUseCase: GetCategoriesUseCase
 ) : ViewModel() {
 
-    private var filteredCategoriesJob: Job? = null
-    private var categorieAvailableJob: Job? = null
-    private var getNotesJob: Job? = null
+    private val _homeUiState = MutableStateFlow(getSavedUiState() ?: HomeUiState())
+    val homeUiState = _homeUiState.asStateFlow()
 
     private val uiStateKey = "home_ui_state"
 
-    private val _homeUiState = MutableStateFlow(
-        getSavedUiState() ?: HomeUiState()
-    )
-    val homeUiState = _homeUiState.asStateFlow()
-
-    private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
-
-    val availableCategoriesFlow =
-        getAvailableCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
+    //Job references to allow cancellation
+    private var filteredCategoriesJob: Job? = null
+    private var categorieAvailableJob: Job? = null
+    private var getNotesJob: Job? = null
 
     init {
         observePreferences()
@@ -76,9 +70,64 @@ class HomeViewModel @Inject constructor(
         observeNoteList()
     }
 
+    //region Note list
+
+    private fun observeNoteList() {
+        getNotesJob?.cancel()
+        getNotesJob =
+            getNotesUseCase(GetNotesUseCase.Params(_homeUiState.value.filteredCategories.map { it.toDomain() }))
+                .onEach { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            Log.e("aaaa", "Consumed $coroutineContext")
+                            _homeUiState.update { uiState ->
+                                uiState.copy(
+                                    noteList = NoteList(
+                                        notes = result.data.noteList
+                                            .map { noteWithCategories ->
+                                                noteWithCategories.toPresentation(dateProvider)
+                                                    .apply {
+                                                        this.isSelected =
+                                                            isNoteSelectedInUi(
+                                                                uiState,
+                                                                noteWithCategories.note
+                                                            )
+                                                    }
+                                            }
+                                            .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+                                            .asReversed(),
+                                        mustRender = true)
+                                )
+                            }
+                        }
+                        is Resource.Error -> {
+                            Log.e("aaaa", "Cancelled ${kotlin.coroutines.coroutineContext}")
+                            showErrorMessage(result.exception)
+                        }
+                        is Resource.Loading -> Unit
+                    }
+                }
+                .launchIn(viewModelScope)
+    }
+
+    fun onNoteClick(it: NotePresentationModel) {
+        navigateToDetail(it)
+    }
+
+    private fun isNoteSelectedInUi(
+        uiState: HomeUiState,
+        note: Note
+    ) = (uiState.noteList.notes
+        .firstOrNull() { note.id == it.id }?.isSelected
+        ?: false)
+    //endregion
+
     //region Categories
 
     private fun observeCategories() {
+
+        val availableCategoriesFlow =
+            getAvailableCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
 
         categorieAvailableJob?.cancel()
         categorieAvailableJob = availableCategoriesFlow.onEach { result ->
@@ -180,6 +229,8 @@ class HomeViewModel @Inject constructor(
 
     //endregion
 
+    //region Saved state
+
     private fun saveChangesInSavedStateObserver() {
         viewModelScope.launch {
             homeUiState.collect {
@@ -187,6 +238,13 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
+
+
+    //endregion
+
+    //region Preferences
 
     private fun observePreferences() {
         viewModelScope.launch {
@@ -203,52 +261,15 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun observeNoteList() {
-        getNotesJob?.cancel()
-        getNotesJob =
-            getNotesUseCase(GetNotesUseCase.Params(_homeUiState.value.filteredCategories.map { it.toDomain() }))
-                .onEach { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            Log.e("aaaa", "Consumed $coroutineContext")
-                            _homeUiState.update { uiState ->
-                                uiState.copy(
-                                    noteList = NoteList(
-                                        notes = result.data.noteList
-                                            .map { noteWithCategories ->
-                                                noteWithCategories.toPresentation(dateProvider)
-                                                    .apply {
-                                                        this.isSelected =
-                                                            isNoteSelectedInUi(
-                                                                uiState,
-                                                                noteWithCategories.note
-                                                    )
-                                            }
-                                        }
-                                        .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                                        .asReversed(),
-                                        mustRender = true)
-                                )
-                            }
-                        }
-                        is Resource.Error -> {
-                            Log.e("aaaa", "Cancelled ${kotlin.coroutines.coroutineContext}")
-                            showErrorMessage(result.exception)
-                        }
-                        is Resource.Loading -> Unit
-                    }
-                }
-                .launchIn(viewModelScope)
-    }
+    //endregion
 
-    private fun isNoteSelectedInUi(
-        uiState: HomeUiState,
-        note: Note
-    ) = (uiState.noteList.notes
-        .firstOrNull() { note.id == it.id }?.isSelected
-        ?: false)
+    //region Navigation
 
     fun onAddNoteClick(content: String? = null) {
+        navigateToAddNote(content)
+    }
+
+    private fun navigateToAddNote(content: String?) {
         _homeUiState.update {
             it.copy(
                 navigateToAddNote = NavigateToAddNote(content),
@@ -260,6 +281,36 @@ class HomeViewModel @Inject constructor(
     fun onNavigateToAddNoteCompleted() {
         _homeUiState.update { it.copy(navigateToAddNote = null) }
     }
+
+
+    private fun navigateToDetail(note: NotePresentationModel) {
+        _homeUiState.update {
+            it.copy(
+                navigateToEditNote = NavigateToEditNote(
+                    mustConsume = true,
+                    taskIndex = _homeUiState.value.noteList.notes.indexOf(note),
+                    notePresentationModel = note
+                ),
+                selectionModeActive = null
+            )
+        }
+    }
+
+    fun onNavigateToDetailCompleted() {
+
+        val navState =
+            _homeUiState.value.navigateToEditNote.copy(mustConsume = false)
+
+        _homeUiState.update {
+            it.copy(
+                navigateToEditNote = navState
+            )
+        }
+    }
+
+    //endregion
+
+    //region Reordering
 
     fun onReorderedNotes(reorderedTaskList: List<NotePresentationModel>) {
         _homeUiState.update {
@@ -298,35 +349,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    //endregion
 
-    fun onNoteClick(it: NotePresentationModel) {
-        navigateToDetail(it)
-    }
-
-    private fun navigateToDetail(note: NotePresentationModel) {
-        _homeUiState.update {
-            it.copy(
-                navigateToEditNote = NavigateToEditNote(
-                    mustConsume = true,
-                    taskIndex = _homeUiState.value.noteList.notes.indexOf(note),
-                    notePresentationModel = note
-                ),
-                selectionModeActive = null
-            )
-        }
-    }
-
-    fun onNavigateToDetailCompleted() {
-
-        val navState =
-            _homeUiState.value.navigateToEditNote.copy(mustConsume = false)
-
-        _homeUiState.update {
-            it.copy(
-                navigateToEditNote = navState
-            )
-        }
-    }
+    //region Messaging
 
     private fun showErrorMessage(exception: Exception) {
         messageManager.showMessage(getMessageFromError(exception))
@@ -334,6 +359,35 @@ class HomeViewModel @Inject constructor(
 
     private fun showMessage(message: UiText) {
         messageManager.showMessage(message)
+    }
+
+    //endregion
+
+    //region Delete
+
+    private fun deleteNotes(tasksToDeleteIds: List<Long>) {
+        viewModelScope.launch {
+            val params = DeleteNotesUseCase.Params(tasksToDeleteIds)
+            when (val result = deleteNotesUseCase(params)) {
+                is Resource.Success -> showMessage(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
+    }
+
+    fun onDeleteConfirm() {
+        _homeUiState.update {
+            it.copy(
+                showDeleteNotesConfirmation = DeleteCategoriesConfirmation(
+                    tasksToDeleteSize = getSelectedTasks().size
+                )
+            )
+        }
+    }
+
+    fun onDismissConfirmDeleteShown() {
+        _homeUiState.update { it.copy(showDeleteNotesConfirmation = null) }
     }
 
     fun onDeleteNotes() {
@@ -348,17 +402,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun deleteNotes(tasksToDeleteIds: List<Long>) {
-        viewModelScope.launch {
-            val params = DeleteNotesUseCase.Params(tasksToDeleteIds)
-            when (val result = deleteNotesUseCase(params)) {
-                is Resource.Success -> showMessage(result.data.message)
-                is Resource.Error -> showErrorMessage(result.exception)
-                is Resource.Loading -> Unit
-            }
-        }
-    }
+    //endregion
 
+    //region Archive
     fun onArchiveNotes() {
 
         val tasksToDeleteIds = getSelectedTasks().map { it.id }
@@ -385,6 +431,25 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun onArchiveConfirmNotes() {
+
+        _homeUiState.update {
+            it.copy(
+                showArchiveNotesConfirmation = ShowArchiveNotesConfirmationState(
+                    tasksToArchiveSize = getSelectedTasks().size
+                )
+            )
+        }
+    }
+
+    fun onDismissConfirmArchiveShown() {
+        _homeUiState.update { it.copy(showArchiveNotesConfirmation = null) }
+    }
+
+    //endregion
+
+    //region Selection mode
+
     fun onSelection() {
         val sizeSelected = getSelectedTasks().size
 
@@ -404,24 +469,9 @@ class HomeViewModel @Inject constructor(
 
     private fun getSelectedTasks() = _homeUiState.value.noteList.notes.filter { it.isSelected }
 
-    fun onArchiveConfirmNotes() {
+    //endregion
 
-        _homeUiState.update {
-            it.copy(
-                showArchiveNotesConfirmation = ShowArchiveNotesConfirmationState(
-                    tasksToArchiveSize = getSelectedTasks().size
-                )
-            )
-        }
-    }
-
-    fun onDismissConfirmArchiveShown() {
-        _homeUiState.update { it.copy(showArchiveNotesConfirmation = null) }
-    }
-
-    fun onDismissConfirmDeleteShown() {
-        _homeUiState.update { it.copy(showDeleteNotesConfirmation = null) }
-    }
+    //region Layout change
 
     fun onLayoutChange(noteLayout: NoteLayout) {
         _homeUiState.update { it.copy(noteLayout = noteLayout) }
@@ -434,15 +484,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun onDeleteConfirm() {
-        _homeUiState.update {
-            it.copy(
-                showDeleteNotesConfirmation = DeleteCategoriesConfirmation(
-                    tasksToDeleteSize = getSelectedTasks().size
-                )
-            )
-        }
-    }
+    //endregion
+
+    //region Sharing
 
     fun onShare() {
         val tasksToCopy = getSelectedTasks()
@@ -458,6 +502,10 @@ class HomeViewModel @Inject constructor(
         _homeUiState.update { it.copy(shareNoteAsString = null) }
     }
 
+    //endregion
+
+    //region Copy
+
     fun onCopy() {
         val tasksToCopy = getSelectedTasks()
         _homeUiState.update {
@@ -472,6 +520,7 @@ class HomeViewModel @Inject constructor(
         _homeUiState.update { it.copy(copyToClipboard = null) }
     }
 
+    //endregion
 
 }
 
