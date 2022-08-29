@@ -118,6 +118,14 @@ class NotesRepositoryImp(
             .transform {
                 try {
                     val taskListDomain = it.map { taskEntity -> taskEntity.toDomain() }
+                        .filter { noteWithCategory ->
+                            params.filterByCategories.forEach {
+                                val contains =
+                                    noteWithCategory.categories.map { it.id }.contains(it.id)
+                                if (!contains) return@filter false
+                            }
+                            true
+                        }
                     val result = GetNotesUseCase.Result(taskListDomain)
                     emit(Resource.Success(result))
                 } catch (e: Exception) {

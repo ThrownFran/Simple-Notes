@@ -19,6 +19,7 @@ import brillembourg.notes.simple.domain.use_cases.user.SaveUserPrefUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
+import brillembourg.notes.simple.presentation.categories.toDomain
 import brillembourg.notes.simple.presentation.categories.toPresentation
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toCopyString
@@ -51,7 +52,13 @@ class HomeViewModel @Inject constructor(
 
     private val uiStateKey = "home_ui_state"
 
-    private val _homeUiState = MutableStateFlow(getSavedUiState() ?: HomeUiState())
+    private val _homeUiState = MutableStateFlow(
+        getSavedUiState() ?: HomeUiState(
+//        selectFilterCategories = SelectFilterCategories(
+//            categories =
+//        )
+        )
+    )
     val homeUiState = _homeUiState.asStateFlow()
 
     private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
@@ -61,7 +68,6 @@ class HomeViewModel @Inject constructor(
 
     init {
         observePreferences()
-        observeNoteList()
         saveChangesInSavedStateObserver()
         observeCategories()
     }
@@ -112,6 +118,7 @@ class HomeViewModel @Inject constructor(
                         Unit
                     }
                 }
+                observeNoteList()
             }
             .launchIn(viewModelScope)
     }
@@ -191,7 +198,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun observeNoteList() {
-        getNotesUseCase(GetNotesUseCase.Params())
+        getNotesUseCase(GetNotesUseCase.Params(_homeUiState.value.filteredCategories.map { it.toDomain() }))
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {

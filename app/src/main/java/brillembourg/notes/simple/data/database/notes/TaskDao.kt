@@ -53,6 +53,10 @@ abstract class TaskDao {
     @Query("SELECT * FROM taskentity WHERE is_archived = 0")
     abstract fun getNotesWithCategories(): Flow<List<NoteWithCategoriesEntity>>
 
+//    @Transaction
+//    @Query("SELECT * FROM taskentity WHERE is_archived = 0")
+//    abstract fun getFilteredNotesWithCategories(ids: List<Long>): Flow<List<NoteWithCategoriesEntity>>
+
     @Transaction
     @Query("SELECT * FROM taskentity WHERE is_archived = 1")
     abstract fun getArchivedNotesWithCategories(): Flow<List<NoteWithCategoriesEntity>>

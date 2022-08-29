@@ -1,6 +1,7 @@
 package brillembourg.notes.simple.domain.use_cases
 
 import brillembourg.notes.simple.domain.Schedulers
+import brillembourg.notes.simple.domain.models.Category
 import brillembourg.notes.simple.domain.models.NoteWithCategories
 import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.util.Resource
@@ -18,6 +19,6 @@ class GetNotesUseCase @Inject constructor(
             .flowOn(schedulers.defaultDispatcher())
     }
 
-    class Params
+    class Params(val filterByCategories: List<Category>)
     class Result(val noteList: List<NoteWithCategories>)
 }
