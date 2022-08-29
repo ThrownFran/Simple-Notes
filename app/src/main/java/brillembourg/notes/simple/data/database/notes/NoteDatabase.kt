@@ -100,8 +100,14 @@ class NoteDatabase(
     fun getCategoriesForNote(noteEntity: NoteEntity): Flow<List<CategoryEntity>> {
         return roomDatabase.taskDao().getNoteWithCategories(noteEntity.id!!)
             .transform {
-                emit(it.categories)
+                try {
+                    emit(it.categories)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    emit(emptyList())
+                }
             }
+
     }
 
 }

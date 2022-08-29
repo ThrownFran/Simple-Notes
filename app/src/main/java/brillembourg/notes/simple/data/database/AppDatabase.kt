@@ -13,7 +13,7 @@ import brillembourg.notes.simple.data.database.notes.TaskDao
 
 
 @Database(
-    entities = [NoteEntity::class, CategoryEntity::class, CategoryNoteCrossRef::class], version = 9
+    entities = [NoteEntity::class, CategoryEntity::class, CategoryNoteCrossRef::class], version = 10
 )
 abstract class AppDatabase : RoomDatabase() {
 
@@ -44,6 +44,7 @@ abstract class AppDatabase : RoomDatabase() {
             .addMigrations(MIGRATION_6_to_7)
             .addMigrations(MIGRATION_7_to_8)
             .addMigrations(MIGRATION_8_to_9)
+            .addMigrations(MIGRATION_9_to_10)
             .build()
 
 
@@ -72,6 +73,25 @@ abstract class AppDatabase : RoomDatabase() {
         private val MIGRATION_8_to_9: Migration = object : Migration(8, 9) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS `category_note_cross_ref` (`category_id` INTEGER NOT NULL, `note_id` INTEGER NOT NULL, PRIMARY KEY(`category_id`, `note_id`))")
+            }
+        }
+
+        private val MIGRATION_9_to_10: Migration = object : Migration(9, 10) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+
+                database.execSQL("CREATE TABLE IF NOT EXISTS `category_note_cross_ref_copy` (`category_id` INTEGER NOT NULL, `note_id` INTEGER NOT NULL, PRIMARY KEY(`category_id`, `note_id`), FOREIGN KEY(`category_id`) REFERENCES `categoryentity`(`category_id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY(`note_id`) REFERENCES `taskentity`(`note_id`) ON UPDATE NO ACTION ON DELETE CASCADE )")
+
+
+                // Copy the data
+                database.execSQL(
+                    "INSERT INTO `category_note_cross_ref_copy` (category_id, note_id, category_id,note_id) " +
+                            "SELECT category_id, note_id, category_id, note_id " +
+                            "FROM category_note_cross_ref"
+                )
+                // Remove old table
+                database.execSQL("DROP TABLE category_note_cross_ref")
+                // Change name of table to correct one
+                database.execSQL("ALTER TABLE category_note_cross_ref_copy RENAME TO category_note_cross_ref")
             }
         }
 

@@ -66,9 +66,7 @@ class NotesRepositoryImp(
         }
     }
 
-    override fun
-
-            getArchivedTasks(params: GetArchivedNotesUseCase.Params): Flow<Resource<GetArchivedNotesUseCase.Result>> {
+    override fun getArchivedTasks(params: GetArchivedNotesUseCase.Params): Flow<Resource<GetArchivedNotesUseCase.Result>> {
         return database.getArchivedTasks()
             .debounce(200)
             .distinctUntilChanged()

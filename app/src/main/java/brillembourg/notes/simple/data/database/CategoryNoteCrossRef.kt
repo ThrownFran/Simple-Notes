@@ -8,7 +8,22 @@ import brillembourg.notes.simple.data.database.notes.toDomain
 import brillembourg.notes.simple.domain.models.NoteWithCategories
 
 
-@Entity(tableName = "category_note_cross_ref", primaryKeys = ["category_id", "note_id"])
+@Entity(
+    tableName = "category_note_cross_ref", primaryKeys = ["category_id", "note_id"], foreignKeys = [
+        ForeignKey(
+            entity = CategoryEntity::class,
+            parentColumns = ["category_id"],
+            childColumns = ["category_id"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = NoteEntity::class,
+            parentColumns = ["note_id"],
+            childColumns = ["note_id"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
 class CategoryNoteCrossRef(
     @ColumnInfo(name = "category_id") val categoryId: Long,
     @ColumnInfo(name = "note_id") val noteId: Long
