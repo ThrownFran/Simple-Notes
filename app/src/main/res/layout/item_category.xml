@@ -6,10 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/category_cardview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -20,10 +17,9 @@
         app:cardCornerRadius="20dp"
         app:contentPadding="2dp"
         style="@style/Widget.Material3.CardView.Outlined"
-        app:cardElevation="2dp"
+        app:cardElevation="0dp"
         app:cardUseCompatPadding="true"
         app:checkedIcon="@null"
-        app:cardBackgroundColor="@null"
         app:cardForegroundColor="@drawable/selector_cardview_foreground_color"
         app:rippleColor="?colorPrimaryContainer"
         app:strokeColor="@drawable/selector_cardview_stroke_category_color">
@@ -39,6 +35,7 @@
                 android:id="@+id/category_image_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:tint="?colorSecondary"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_outline_label_on_secondary_container_24" />
 
