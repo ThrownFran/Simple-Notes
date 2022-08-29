@@ -113,18 +113,19 @@ class HomeFragment : Fragment(), MenuProvider {
 
         if (mainActivityBinding.mainRecyclerCategoriesFilter.adapter == null) {
             mainActivityBinding.mainRecyclerCategoriesFilter.apply {
+//                layoutManager = LinearLayoutManager(context,RecyclerView.HORIZONTAL,false)
                 layoutManager = FlexboxLayoutManager(context)
                     .apply {
                         flexDirection = FlexDirection.ROW
                         justifyContent = JustifyContent.FLEX_START
                         flexWrap = FlexWrap.WRAP
                     }
-                adapter = CategoryChipAdapter(onClick = {
+                adapter = CategoryChipColorSurfaceAdapter(onClick = {
                     viewModel.onNavigateToCategories()
                 }).apply { submitList(filteredCategories.toDiplayOrder()) }
             }
         } else {
-            (mainActivityBinding.mainRecyclerCategoriesFilter.adapter as CategoryChipAdapter)
+            (mainActivityBinding.mainRecyclerCategoriesFilter.adapter as CategoryChipColorSurfaceAdapter)
                 .submitList(filteredCategories)
         }
     }

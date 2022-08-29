@@ -17,7 +17,7 @@ import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.custom_views.*
-import brillembourg.notes.simple.presentation.home.CategoryChipAdapter
+import brillembourg.notes.simple.presentation.home.CategoryChipColorSecondaryAdapter
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import com.google.android.flexbox.FlexDirection
@@ -281,7 +281,7 @@ class DetailFragment : Fragment(), MenuProvider {
                     justifyContent = JustifyContent.FLEX_START
                     flexWrap = FlexWrap.WRAP
                 }
-            adapter = CategoryChipAdapter(onClick = {
+            adapter = CategoryChipColorSecondaryAdapter(onClick = {
                 viewModel.onNavigateToCategories()
             }).apply { submitList(noteCategories.toDiplayOrder()) }
         }

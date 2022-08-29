@@ -1,11 +1,11 @@
 package brillembourg.notes.simple.presentation.home
 
 import androidx.recyclerview.widget.RecyclerView
-import brillembourg.notes.simple.databinding.ItemCategoryChipBinding
+import brillembourg.notes.simple.databinding.ItemCategoryChipColorSurfaceBinding
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 
-class CategoryChipViewHolder(
-    private val binding: ItemCategoryChipBinding,
+class CategoryChipViewColorSurfaceHolder(
+    private val binding: ItemCategoryChipColorSurfaceBinding,
     private val onClick: ((position: Int) -> Unit)? = null,
     private val onLongClick: ((position: Int) -> Unit)? = null
 ) : RecyclerView.ViewHolder(binding.root) {

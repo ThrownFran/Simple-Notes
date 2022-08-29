@@ -74,7 +74,7 @@ class NoteViewHolder(
                 }
             isNestedScrollingEnabled = false
             isClickable = false
-            adapter = CategoryChipAdapter(
+            adapter = CategoryChipColorSecondaryAdapter(
                 onClick = { setClick() },
                 onLongClick = { setLongClick() }
             ).apply { submitList(categories) }

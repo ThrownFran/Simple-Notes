@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.chip.Chip xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/category_chip"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:chipStrokeColor="?colorSecondary"
+    app:chipBackgroundColor="?colorSurface"
+    app:chipStrokeWidth="1dp"
+    app:chipIconSize="22dp"
+    android:layout_margin="4dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:text="Category name" />
+
+
+

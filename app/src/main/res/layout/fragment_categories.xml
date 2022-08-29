@@ -54,7 +54,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toStartOf="@id/categories_image_add_success"
-                android:hint="Add category"
+                android:hint="@string/add_category"
                 android:text="@={viewmodel.categoryUiState.component4().createCategoryNameBinding}"
                 android:importantForAutofill="no"
                 android:inputType="text"

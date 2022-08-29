@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_home_categories"
+        android:icon="@drawable/ic_outline_label_on_primary"
+        android:title="@string/categories"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/menu_home_vertical"
         android:icon="@drawable/ic_baseline_stack_24px"
@@ -12,9 +19,5 @@
         android:title="@string/all_staggered"
         app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/menu_home_categories"
-        android:icon="@drawable/ic_outline_label_on_primary"
-        android:title="@string/categories"
-        app:showAsAction="always" />
+
 </menu>
