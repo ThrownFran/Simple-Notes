@@ -229,10 +229,10 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     private fun showCategoriesModalBottomSheet() {
-        val selectCategoriesModalBottomSheet = SelectCategoriesModalBottomSheet()
+        val selectCategoriesModalBottomSheet = SelectNoteCategoriesModal()
         selectCategoriesModalBottomSheet.show(
             childFragmentManager,
-            SelectCategoriesModalBottomSheet.TAG
+            SelectNoteCategoriesModal.TAG
         )
     }
 
@@ -260,7 +260,7 @@ class DetailFragment : Fragment(), MenuProvider {
 
                 selectCategoriesState(uiState.selectCategories)
 
-                setupCategories(uiState.noteCategories)
+                setupNoteCategories(uiState.noteCategories)
             }
         }
 
@@ -273,7 +273,7 @@ class DetailFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun setupCategories(noteCategories: List<CategoryPresentationModel>) {
+    private fun setupNoteCategories(noteCategories: List<CategoryPresentationModel>) {
         binding.detailRecyclerCategories.apply {
             layoutManager = FlexboxLayoutManager(context)
                 .apply {
@@ -281,31 +281,10 @@ class DetailFragment : Fragment(), MenuProvider {
                     justifyContent = JustifyContent.FLEX_START
                     flexWrap = FlexWrap.WRAP
                 }
-            adapter = CategoryChipAdapter {
+            adapter = CategoryChipAdapter(onClick = {
                 viewModel.onNavigateToCategories()
-            }.apply { submitList(noteCategories.toDiplayOrder()) }
+            }).apply { submitList(noteCategories.toDiplayOrder()) }
         }
-
-
-//        binding.detailChipgroup.isVisible = noteCategories.isNotEmpty()
-//
-//        if (noteCategories.size == binding.detailChipgroup.size) {
-//            return
-//        }
-//
-//        binding.detailChipgroup.removeAllViews()
-//        noteCategories.forEach { categoryPresentationModel: CategoryPresentationModel ->
-//            val chip = Chip(context)
-//            chip.text = categoryPresentationModel.name
-//            chip.id = categoryPresentationModel.id.toInt()
-//            binding.detailChipgroup.addView(chip)
-//            chip.setOnClickListener {
-//                viewModel.onNavigateToCategories()
-////                binding.detailChipgroup.removeView(chip)
-////                viewModel.onCategoryChecked(categoryPresentationModel,false)
-//            }
-//        }
-
     }
 
     private fun selectCategoriesState(selectCategories: SelectCategories) {

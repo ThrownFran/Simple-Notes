@@ -10,5 +10,4 @@ interface CategoryRepository {
     suspend fun deleteMultiple(params: DeleteCategoriesUseCase.Params): Resource<DeleteCategoriesUseCase.Result>
     suspend fun reorderList(params: ReorderCategoriesUseCase.Params): Resource<ReorderCategoriesUseCase.Result>
     fun getList(params: GetCategoriesUseCase.Params): Flow<Resource<GetCategoriesUseCase.Result>>
-
 }

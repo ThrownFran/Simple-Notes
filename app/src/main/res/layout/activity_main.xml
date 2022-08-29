@@ -39,6 +39,30 @@
                     android:theme="@style/Widget.Material3.ActionBar.Solid"
                     app:popupTheme="@style/ThemeOverlay.Material3.Light" />
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="6dp"
+                        android:textColor="?colorOnSurface"
+                        android:text="Categories: " />
+
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/main_recycler_categories_filter"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:itemCount="3"
+                        tools:listitem="@layout/item_category_chip" />
+
+
+                </LinearLayout>
+
             </com.google.android.material.appbar.AppBarLayout>
 
             <androidx.fragment.app.FragmentContainerView

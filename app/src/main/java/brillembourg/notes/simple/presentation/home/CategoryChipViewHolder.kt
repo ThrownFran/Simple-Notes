@@ -6,11 +6,19 @@ import brillembourg.notes.simple.presentation.categories.CategoryPresentationMod
 
 class CategoryChipViewHolder(
     private val binding: ItemCategoryChipBinding,
-    private val onClick: (position: Int) -> Unit
+    private val onClick: ((position: Int) -> Unit)? = null,
+    private val onLongClick: ((position: Int) -> Unit)? = null
 ) : RecyclerView.ViewHolder(binding.root) {
 
     init {
-        binding.categoryChip.setOnClickListener { onClick.invoke(bindingAdapterPosition) }
+        binding.categoryChip.apply {
+            setOnClickListener { onClick?.invoke(bindingAdapterPosition) }
+
+            setOnLongClickListener {
+                onLongClick?.invoke(bindingAdapterPosition)
+                true
+            }
+        }
     }
 
     fun bind(category: CategoryPresentationModel) {

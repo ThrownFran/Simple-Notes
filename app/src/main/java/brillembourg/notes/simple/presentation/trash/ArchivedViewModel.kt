@@ -6,7 +6,11 @@ import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
-import brillembourg.notes.simple.domain.use_cases.*
+import brillembourg.notes.simple.domain.use_cases.DeleteNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.GetArchivedNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.UnArchiveNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.user.GetUserPrefUseCase
+import brillembourg.notes.simple.domain.use_cases.user.SaveUserPrefUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toCopyString

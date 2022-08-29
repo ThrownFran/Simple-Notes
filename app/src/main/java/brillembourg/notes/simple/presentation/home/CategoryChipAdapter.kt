@@ -8,12 +8,14 @@ import brillembourg.notes.simple.presentation.categories.CategoryPresentationMod
 import brillembourg.notes.simple.presentation.ui_utils.setupCategoryDiffCallback
 
 class CategoryChipAdapter(
-    val onClick: ((position: CategoryPresentationModel) -> Unit)? = null,
+    private val onClick: ((position: CategoryPresentationModel) -> Unit)? = null,
+    private val onLongClick: ((position: CategoryPresentationModel) -> Unit)? = null,
 ) : ListAdapter<CategoryPresentationModel, CategoryChipViewHolder>(setupCategoryDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryChipViewHolder {
         return CategoryChipViewHolder(
             onClick = { position: Int -> onClick?.invoke(currentList[position]) },
+            onLongClick = { position: Int -> onLongClick?.invoke(currentList[position]) },
             binding = ItemCategoryChipBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,

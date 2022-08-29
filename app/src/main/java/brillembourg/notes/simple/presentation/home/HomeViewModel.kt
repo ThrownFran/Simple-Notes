@@ -7,8 +7,19 @@ import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.models.Note
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
-import brillembourg.notes.simple.domain.use_cases.*
+import brillembourg.notes.simple.domain.use_cases.ArchiveNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.DeleteNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.GetNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.ReorderNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
+import brillembourg.notes.simple.domain.use_cases.user.GetFilterByCategoriesUseCase
+import brillembourg.notes.simple.domain.use_cases.user.GetUserPrefUseCase
+import brillembourg.notes.simple.domain.use_cases.user.SaveFilterByCategoriesUseCase
+import brillembourg.notes.simple.domain.use_cases.user.SaveUserPrefUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
+import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
+import brillembourg.notes.simple.presentation.categories.toDiplayOrder
+import brillembourg.notes.simple.presentation.categories.toPresentation
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toCopyString
 import brillembourg.notes.simple.presentation.models.toDomain
@@ -33,6 +44,9 @@ class HomeViewModel @Inject constructor(
     private val saveUserPrefUseCase: SaveUserPrefUseCase,
     private val dateProvider: DateProvider,
     private val messageManager: MessageManager,
+    private val saveFilterByCategoriesUseCase: SaveFilterByCategoriesUseCase,
+    private val getFilteredCategoriesUseCase: GetFilterByCategoriesUseCase,
+    private val getAvailableCategoriesUseCase: GetCategoriesUseCase
 ) : ViewModel() {
 
     private val uiStateKey = "home_ui_state"
@@ -42,11 +56,116 @@ class HomeViewModel @Inject constructor(
 
     private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
 
+    val availableCategoriesFlow =
+        getAvailableCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
+
     init {
-        getPreferences()
+        observePreferences()
         observeNoteList()
         saveChangesInSavedStateObserver()
+        observeCategories()
     }
+
+    //region Categories
+
+    private fun observeCategories() {
+
+        availableCategoriesFlow.onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    _homeUiState.update { uiState ->
+                        uiState.copy(
+                            selectFilterCategories = _homeUiState.value.selectFilterCategories.copy(
+                                categories = result.data.categoryList
+                                    .map { it.toPresentation() }
+                                    .toDiplayOrder(),
+                                isFilterCategoryMenuAvailable = true
+                            )
+                        )
+                    }
+                }
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+
+            }
+        }
+            .launchIn(viewModelScope)
+
+        getFilteredCategoriesUseCase.invoke(
+            GetFilterByCategoriesUseCase.Params(availableCategoriesFlow)
+        )
+            .onEach { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        _homeUiState.update { uiState ->
+                            uiState.copy(
+                                filteredCategories = result.data.categories
+                                    .map { it.toPresentation() }
+                                    .toDiplayOrder()
+                            )
+                        }
+                    }
+                    is Resource.Error -> {
+                        showErrorMessage(result.exception)
+                    }
+                    is Resource.Loading -> {
+                        Unit
+                    }
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+
+    fun onNavigateToCategories() {
+        _homeUiState.update {
+            it.copy(
+                selectFilterCategories = it.selectFilterCategories.copy(
+                    navigate = true,
+                )
+            )
+        }
+    }
+
+    fun onHideCategories() {
+        _homeUiState.update {
+            it.copy(
+                selectFilterCategories = it.selectFilterCategories.copy(
+                    isShowing = false
+                )
+            )
+        }
+    }
+
+    fun onCategoriesShowing() {
+        _homeUiState.update {
+            it.copy(
+                selectFilterCategories = it.selectFilterCategories.copy(
+                    isShowing = true,
+                    navigate = false
+                )
+            )
+        }
+    }
+
+    fun onCategoryChecked(category: CategoryPresentationModel, isChecked: Boolean) {
+        val categoryUpdated = category.copy(isSelected = isChecked)
+
+        val currentCategories: List<CategoryPresentationModel> =
+            _homeUiState.value.filteredCategories
+
+        val categoriesUpdated =
+            if (isChecked) currentCategories + categoryUpdated
+            else currentCategories - categoryUpdated
+
+        viewModelScope.launch {
+            val params = SaveFilterByCategoriesUseCase.Params(categoriesUpdated.map { it.id })
+            saveFilterByCategoriesUseCase.invoke(params)
+            observeCategories()
+        }
+    }
+
+    //endregion
 
     private fun saveChangesInSavedStateObserver() {
         viewModelScope.launch {
@@ -56,7 +175,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun getPreferences() {
+    private fun observePreferences() {
         viewModelScope.launch {
             getUserPrefUseCase(GetUserPrefUseCase.Params())
                 .collect { result ->

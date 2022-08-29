@@ -17,6 +17,8 @@ import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.base.MainViewModel
+import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
+import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
@@ -25,6 +27,10 @@ import brillembourg.notes.simple.presentation.ui_utils.recycler_view.*
 import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -57,89 +63,6 @@ class HomeFragment : Fragment(), MenuProvider {
         return binding.root
     }
 
-    private fun setupListeners() {
-        val activityBinding = (activity as MainActivity?)?.binding
-
-        safeUiLaunch {
-            activityBinding?.homeFab?.onClickFlow?.collect {
-                viewModel.onAddNoteClick()
-            }
-        }
-    }
-
-    private fun animateFabWithRecycler() {
-        val activityBinding = (activity as MainActivity?)?.binding
-        activityBinding?.homeFab?.animateWithRecycler(binding.homeRecycler)
-    }
-
-    private fun setupMenu() {
-        val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-    }
-
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        menuInflater.inflate(R.menu.menu_home, menu)
-    }
-
-    override fun onPrepareMenu(menu: Menu) {
-        super.onPrepareMenu(menu)
-        val layoutType = viewModel.homeUiState.value.noteLayout.toLayoutType()
-        menu.findItem(R.id.menu_home_vertical)
-            .apply { isVisible = layoutType == LayoutType.Staggered }
-        menu.findItem(R.id.menu_home_staggered)
-            .apply { isVisible = layoutType == LayoutType.LinearVertical }
-    }
-
-    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        val menuHost = requireActivity()
-        when (menuItem.itemId) {
-            R.id.menu_home_vertical -> {
-                clickVerticalLayout()
-                menuHost.invalidateMenu()
-                return true
-            }
-            R.id.menu_home_staggered -> {
-                clickStaggeredLayout()
-                menuHost.invalidateMenu()
-                return true
-            }
-        }
-        return false
-    }
-
-    private fun clickChangeLayout(
-        recyclerView: RecyclerView,
-        layoutType: LayoutType
-    ) {
-        val noteAdapter = recyclerView.adapter as NoteAdapter? ?: return
-
-        changeLayout(
-            recyclerView,
-            layoutType,
-            noteAdapter.currentList
-        )
-
-        noteAdapter.changeDragDirections(recyclerView, getDragDirs(layoutType))
-    }
-
-    private fun clickStaggeredLayout() {
-        viewModel.onLayoutChange(NoteLayout.Grid)
-    }
-
-    private fun clickVerticalLayout() {
-        viewModel.onLayoutChange(NoteLayout.Vertical)
-    }
-
-//    override fun onSaveInstanceState(outState: Bundle) {
-//        saveRecyclerState()
-//        super.onSaveInstanceState(outState)
-//    }
-
-    override fun onDestroyView() {
-        saveRecyclerState()
-        super.onDestroyView()
-    }
-
     private fun renderStates() {
 
         safeUiLaunch {
@@ -162,6 +85,10 @@ class HomeFragment : Fragment(), MenuProvider {
                 copyClipboardState(homeUiState.copyToClipboard)
 
                 shareNotesAsStringState(homeUiState.shareNoteAsString)
+
+                filteredCategoriesState(homeUiState.filteredCategories)
+
+                selectCategoriesState(homeUiState.selectFilterCategories)
             }
         }
 
@@ -175,93 +102,48 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun shareNotesAsStringState(shareNoteAsString: String?) {
-        shareNoteAsString?.let {
-            shareText(shareNoteAsString)
-            viewModel.onShareCompleted()
+
+    //region Categories
+
+    private fun filteredCategoriesState(filteredCategories: List<CategoryPresentationModel>) {
+        val mainActivityBinding = (activity as MainActivity).binding
+
+        if (mainActivityBinding.mainRecyclerCategoriesFilter.adapter == null) {
+            mainActivityBinding.mainRecyclerCategoriesFilter.apply {
+                layoutManager = FlexboxLayoutManager(context)
+                    .apply {
+                        flexDirection = FlexDirection.ROW
+                        justifyContent = JustifyContent.FLEX_START
+                        flexWrap = FlexWrap.WRAP
+                    }
+                adapter = CategoryChipAdapter(onClick = {
+                    viewModel.onNavigateToCategories()
+                }).apply { submitList(filteredCategories.toDiplayOrder()) }
+            }
+        } else {
+            (mainActivityBinding.mainRecyclerCategoriesFilter.adapter as CategoryChipAdapter)
+                .submitList(filteredCategories)
         }
     }
 
-    private fun copyClipboardState(copyToClipboard: String?) {
-        copyToClipboard?.let {
-            copy(it)
-            viewModel.onCopiedCompleted()
+    private fun selectCategoriesState(selectCategories: SelectFilterCategories) {
+        if (selectCategories.navigate && !selectCategories.isShowing) {
+            showCategoriesModalBottomSheet()
+            viewModel.onCategoriesShowing()
         }
     }
 
-
-    private fun noteListLayoutState(noteLayout: NoteLayout) {
-        clickChangeLayout(
-            binding.homeRecycler,
-            noteLayout.toLayoutType()
+    private fun showCategoriesModalBottomSheet() {
+        val selectCategoriesModalBottomSheet = SelectHomeFilterCategoriesModal()
+        selectCategoriesModalBottomSheet.show(
+            childFragmentManager,
+            SelectHomeFilterCategoriesModal.TAG
         )
     }
 
-    private fun showDeleteConfirmationState(showDeleteConfirmationState: DeleteCategoriesConfirmation?) {
-        if (showDeleteConfirmationState != null) {
-            showDeleteTasksDialog(this, showDeleteConfirmationState.tasksToDeleteSize,
-                onPositive = {
-                    viewModel.onDeleteNotes()
-                },
-                onDismiss = {
-                    viewModel.onDismissConfirmDeleteShown()
-                })
-        }
-    }
+    //endregion
 
-    private fun showArchiveConfirmationState(showArchiveConfirmationState: ShowArchiveNotesConfirmationState?) {
-        if (showArchiveConfirmationState != null) {
-            showArchiveConfirmationDialog(this, showArchiveConfirmationState.tasksToArchiveSize,
-                onPositive = {
-                    viewModel.onArchiveNotes()
-                },
-                onDismiss = {
-                    viewModel.onDismissConfirmArchiveShown()
-                })
-        }
-    }
-
-    private fun navigateToAddNoteState(navigateToAddNote: NavigateToAddNote?) {
-        navigateToAddNote?.let {
-            navigateToCreateTask(navigateToAddNote.content)
-            viewModel.onNavigateToAddNoteCompleted()
-        }
-    }
-
-    private fun selectionModeState(selectionModeActive: SelectionModeActive?) {
-        if (selectionModeActive == null) {
-            actionMode?.finish()
-            actionMode = null
-            return
-        }
-        launchContextualActionBar(selectionModeActive.size)
-    }
-
-
-    private fun navigateToDetailState(navigateToDetail: NavigateToEditNote) {
-        if (navigateToDetail.mustConsume) {
-            val view =
-                binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
-            navigateToDetail(navigateToDetail.notePresentationModel!!, view)
-            viewModel.onNavigateToDetailCompleted()
-        }
-    }
-
-    private fun navigateToCreateTask(content: String? = null) {
-        val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
-        directions.contentOptional = content
-        setTransitionToCreateNote()
-        findNavController().navigate(directions)
-    }
-
-    private fun navigateToDetail(it: NotePresentationModel, view: View) {
-        //navigate to detail fragment
-        val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
-        directions.task = it
-
-        setTransitionToEditNote()
-        findNavController().navigate(directions, setupExtrasToDetail(view))
-    }
+    //region Note list
 
     private fun setupNoteState(noteList: NoteList) {
         if (noteList.mustRender) setupNoteList(noteList.notes)
@@ -337,6 +219,39 @@ class HomeFragment : Fragment(), MenuProvider {
         viewModel.onSelection()
     }
 
+    private fun onNoteClicked(it: NotePresentationModel) {
+        viewModel.onNoteClick(it)
+    }
+
+    private fun onReorderedNotes(tasks: List<NotePresentationModel>) {
+        viewModel.onReorderedNotes(tasks)
+    }
+
+    private fun onReorderNotesCancelled() {
+        viewModel.onReorderNotesCancelled()
+    }
+
+    private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {
+        recyclerViewState?.let { layoutManager.onRestoreInstanceState(it) }
+    }
+
+    private fun saveRecyclerState() {
+        recyclerViewState = binding.homeRecycler.layoutManager?.onSaveInstanceState()
+    }
+
+    //endregion
+
+    //region Selection Mode
+
+    private fun selectionModeState(selectionModeActive: SelectionModeActive?) {
+        if (selectionModeActive == null) {
+            actionMode?.finish()
+            actionMode = null
+            return
+        }
+        launchContextualActionBar(selectionModeActive.size)
+    }
+
     private fun launchContextualActionBar(sizeSelected: Int) {
         actionMode = setupContextualActionBar(
             toolbar = requireActivity().findViewById(R.id.toolbar),
@@ -379,40 +294,228 @@ class HomeFragment : Fragment(), MenuProvider {
         else -> false
     }
 
-    private fun onShareNotes() {
-        viewModel.onShare()
+    //endregion
+
+    //region Note layout
+
+    private fun noteListLayoutState(noteLayout: NoteLayout) {
+        onChangeLayout(
+            binding.homeRecycler,
+            noteLayout.toLayoutType()
+        )
     }
 
-    private fun onCopyNotes() {
-        viewModel.onCopy()
+    private fun onChangeLayout(
+        recyclerView: RecyclerView,
+        layoutType: LayoutType
+    ) {
+        val noteAdapter = recyclerView.adapter as NoteAdapter? ?: return
+
+        changeLayout(
+            recyclerView,
+            layoutType,
+            noteAdapter.currentList
+        )
+
+        noteAdapter.setDragDirections(recyclerView, getDragDirs(layoutType))
+    }
+
+    private fun onClickStaggeredLayout() {
+        viewModel.onLayoutChange(NoteLayout.Grid)
+    }
+
+    private fun onClickVerticalLayout() {
+        viewModel.onLayoutChange(NoteLayout.Vertical)
+    }
+
+    //endregion
+
+    //region Menu
+
+    private fun setupMenu() {
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.menu_home, menu)
+    }
+
+    override fun onPrepareMenu(menu: Menu) {
+        super.onPrepareMenu(menu)
+        val layoutType = viewModel.homeUiState.value.noteLayout.toLayoutType()
+        menu.findItem(R.id.menu_home_vertical)
+            .apply { isVisible = layoutType == LayoutType.Staggered }
+        menu.findItem(R.id.menu_home_staggered)
+            .apply { isVisible = layoutType == LayoutType.LinearVertical }
+    }
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        val menuHost = requireActivity()
+        when (menuItem.itemId) {
+            R.id.menu_home_vertical -> {
+                onClickVerticalLayout()
+                menuHost.invalidateMenu()
+                return true
+            }
+            R.id.menu_home_staggered -> {
+                onClickStaggeredLayout()
+                menuHost.invalidateMenu()
+                return true
+            }
+            R.id.menu_home_categories -> {
+                viewModel.onNavigateToCategories()
+            }
+        }
+        return false
+    }
+
+    //endregion
+
+    //region Navigation
+
+    private fun navigateToAddNoteState(navigateToAddNote: NavigateToAddNote?) {
+        navigateToAddNote?.let {
+            navigateToCreateTask(navigateToAddNote.content)
+            viewModel.onNavigateToAddNoteCompleted()
+        }
+    }
+
+    private fun navigateToDetailState(navigateToDetail: NavigateToEditNote) {
+        if (navigateToDetail.mustConsume) {
+            val view =
+                binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
+            navigateToDetail(navigateToDetail.notePresentationModel!!, view)
+            viewModel.onNavigateToDetailCompleted()
+        }
+    }
+
+    private fun navigateToCreateTask(content: String? = null) {
+        val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
+        directions.contentOptional = content
+        setTransitionToCreateNote()
+        findNavController().navigate(directions)
+    }
+
+    private fun navigateToDetail(it: NotePresentationModel, view: View) {
+        //navigate to detail fragment
+        val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
+        directions.task = it
+
+        setTransitionToEditNote()
+        findNavController().navigate(directions, setupExtrasToDetail(view))
+    }
+
+    //endregion
+
+    //region Delete
+
+    private fun showDeleteConfirmationState(showDeleteConfirmationState: DeleteCategoriesConfirmation?) {
+        if (showDeleteConfirmationState != null) {
+            showDeleteTasksDialog(this, showDeleteConfirmationState.tasksToDeleteSize,
+                onPositive = {
+                    viewModel.onDeleteNotes()
+                },
+                onDismiss = {
+                    viewModel.onDismissConfirmDeleteShown()
+                })
+        }
     }
 
     private fun onDeleteNotesConfirm() {
         viewModel.onDeleteConfirm()
     }
 
-    private fun onReorderedNotes(tasks: List<NotePresentationModel>) {
-        viewModel.onReorderedNotes(tasks)
-    }
+    //endregion
 
-    private fun onReorderNotesCancelled() {
-        viewModel.onReorderNotesCancelled()
-    }
+    //region Archive
 
-    private fun onNoteClicked(it: NotePresentationModel) {
-        viewModel.onNoteClick(it)
+    private fun showArchiveConfirmationState(showArchiveConfirmationState: ShowArchiveNotesConfirmationState?) {
+        if (showArchiveConfirmationState != null) {
+            showArchiveConfirmationDialog(this, showArchiveConfirmationState.tasksToArchiveSize,
+                onPositive = {
+                    viewModel.onArchiveNotes()
+                },
+                onDismiss = {
+                    viewModel.onDismissConfirmArchiveShown()
+                })
+        }
     }
 
     private fun onArchiveTasks() {
         viewModel.onArchiveConfirmNotes()
     }
 
-    private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {
-        recyclerViewState?.let { layoutManager.onRestoreInstanceState(it) }
+    //endregion
+
+    //region Share
+
+    private fun shareNotesAsStringState(shareNoteAsString: String?) {
+        shareNoteAsString?.let {
+            shareText(shareNoteAsString)
+            viewModel.onShareCompleted()
+        }
     }
 
-    private fun saveRecyclerState() {
-        recyclerViewState = binding.homeRecycler.layoutManager?.onSaveInstanceState()
+    private fun onShareNotes() {
+        viewModel.onShare()
     }
+
+    //endregion
+
+    //region Copy
+
+    private fun copyClipboardState(copyToClipboard: String?) {
+        copyToClipboard?.let {
+            copy(it)
+            viewModel.onCopiedCompleted()
+        }
+    }
+
+    private fun onCopyNotes() {
+        viewModel.onCopy()
+    }
+
+    //endregion
+
+    private fun setupListeners() {
+        val activityBinding = (activity as MainActivity?)?.binding
+
+        safeUiLaunch {
+            activityBinding?.homeFab?.onClickFlow?.collect {
+                viewModel.onAddNoteClick()
+            }
+        }
+    }
+
+    private fun animateFabWithRecycler() {
+        val activityBinding = (activity as MainActivity?)?.binding
+        activityBinding?.homeFab?.animateWithRecycler(binding.homeRecycler)
+    }
+
+    override fun onDestroyView() {
+        saveRecyclerState()
+        super.onDestroyView()
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

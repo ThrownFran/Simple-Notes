@@ -10,7 +10,6 @@ import brillembourg.notes.simple.presentation.ui_utils.Selectable
 import brillembourg.notes.simple.presentation.ui_utils.SelectableImp
 
 class CategoryViewHolder(
-    private val isEditing: () -> Boolean,
     private val onRename: (newName: String, CategoryPresentationModel) -> Unit,
     private val getCurrentList: () -> List<CategoryPresentationModel>,
     private val binding: ItemCategoryBinding,
@@ -36,10 +35,8 @@ class CategoryViewHolder(
     }
 
     private fun editCategoryAndUnfocusOthers(presentationModel: CategoryPresentationModel) {
-        if (isEditing()) {
-            unFocusAnyEditingCategory()
-            editCategory(presentationModel)
-        }
+        unFocusAnyEditingCategory()
+        editCategory(presentationModel)
     }
 
     private fun editCategory(presentationModel: CategoryPresentationModel) {

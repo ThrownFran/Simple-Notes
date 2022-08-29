@@ -2,7 +2,6 @@ package brillembourg.notes.simple.presentation.categories
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemCategoryBinding
@@ -11,7 +10,6 @@ import brillembourg.notes.simple.presentation.ui_utils.ItemTouchDraggableImp
 import brillembourg.notes.simple.presentation.ui_utils.setupCategoryDiffCallback
 
 class CategoryAdapter(
-    private val isEditing: () -> Boolean,
     private val recyclerView: RecyclerView,
     private val onRename: (name: String, CategoryPresentationModel) -> Unit,
     private val onClick: (task: CategoryPresentationModel) -> Unit,
@@ -19,11 +17,10 @@ class CategoryAdapter(
     private val onReorderSuccess: (reorderedTaskList: List<CategoryPresentationModel>) -> Unit,
     private val onReorderCanceled: () -> Unit
 ) : ListAdapter<CategoryPresentationModel, CategoryViewHolder>(setupCategoryDiffCallback()),
-    Draggable<CategoryPresentationModel> by ItemTouchDraggableImp(ItemTouchHelper.UP or ItemTouchHelper.DOWN) {
+    Draggable<CategoryPresentationModel> by ItemTouchDraggableImp() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
         return CategoryViewHolder(
-            isEditing = isEditing,
             onRename = onRename,
             binding = ItemCategoryBinding.inflate(
                 LayoutInflater.from(parent.context),

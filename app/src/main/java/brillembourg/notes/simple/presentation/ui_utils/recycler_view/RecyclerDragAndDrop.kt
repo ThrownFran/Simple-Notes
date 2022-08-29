@@ -18,11 +18,11 @@ interface Draggable<T : HasOrder> {
         onReorderCanceled: () -> Unit
     )
 
-    fun changeDragDirections(recyclerView: RecyclerView, dragDirs: Int)
+    fun setDragDirections(recyclerView: RecyclerView, dragDirs: Int)
 }
 
 class ItemTouchDraggableImp<T : HasOrder>(
-    dragAndDropDirs: Int,
+    dragAndDropDirs: Int = ItemTouchHelper.UP or ItemTouchHelper.DOWN,
 ) : Draggable<T> {
 
     var itemTouchHelper = setupDragAndDropTouchHelper(dragAndDropDirs)
@@ -36,7 +36,7 @@ class ItemTouchDraggableImp<T : HasOrder>(
     private var onReorderSuccess: ((List<T>) -> Unit)? = null
     private var onReorderCanceled: (() -> Unit)? = null
 
-    override fun changeDragDirections(recyclerView: RecyclerView, dragDirs: Int) {
+    override fun setDragDirections(recyclerView: RecyclerView, dragDirs: Int) {
         itemTouchHelper = setupDragAndDropTouchHelper(dragDirs).apply {
             attachToRecyclerView(recyclerView)
         }

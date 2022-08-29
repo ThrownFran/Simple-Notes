@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.domain.use_cases
+package brillembourg.notes.simple.domain.use_cases.user
 
 import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.models.UserPreferences

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
@@ -226,8 +227,6 @@ class CategoriesFragment : Fragment() {
     ): CategoryAdapter {
         return CategoryAdapter(
             onRename = { it, model -> onSaveRenaming(it, model) },
-//            isEditing = { viewModel.categoryUiState.value.isEditing },
-            isEditing = { true },
             recyclerView = recyclerView,
             onClick = { category -> onCategoryClicked(category) },
             onReorderSuccess = { categories -> onReorderedCategories(categories) },
@@ -235,6 +234,7 @@ class CategoriesFragment : Fragment() {
             onSelection = { onSelection() }
         ).apply {
             submitList(list)
+            setDragDirections(recyclerView, ItemTouchHelper.UP or ItemTouchHelper.DOWN)
         }
     }
 

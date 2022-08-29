@@ -11,6 +11,7 @@ import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.GetCate
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.RemoveCategoryToNoteUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
+import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.categories.toDomain
 import brillembourg.notes.simple.presentation.categories.toPresentation
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
@@ -371,8 +372,7 @@ class DetailViewModel @Inject constructor(
                                 selectCategories = _uiDetailState.value.selectCategories.copy(
                                     categories = result.data.categoryList
                                         .map { it.toPresentation() }
-                                        .sortedBy { it.order }
-                                        .reversed(),
+                                        .toDiplayOrder(),
                                     isCategoryMenuAvailable = isCategoryOptionAvailable()
                                 )
                             )

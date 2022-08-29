@@ -17,7 +17,7 @@ import com.google.android.flexbox.JustifyContent
 class NoteViewHolder(
     private val getCurrentList: () -> List<NotePresentationModel>,
     private val binding: ItemNoteBinding,
-    private val onClick: ((NotePresentationModel) -> Unit)? = null,
+    onClick: ((NotePresentationModel) -> Unit)? = null,
     private val onSelected: (() -> Unit)? = null,
     private val onReadyToDrag: ((NoteViewHolder) -> Unit)? = null
 ) : RecyclerView.ViewHolder(binding.root),
@@ -36,13 +36,21 @@ class NoteViewHolder(
     private fun setupClickListeners() {
 
         binding.taskCardview.setOnClickListener {
-            onItemClick(bindingAdapterPosition, getCurrentList()[bindingAdapterPosition])
+            setClick()
         }
 
         binding.taskCardview.setOnLongClickListener {
-            onItemSelection(bindingAdapterPosition, getCurrentList()[bindingAdapterPosition])
+            setLongClick()
             true
         }
+    }
+
+    private fun setLongClick() {
+        onItemSelection(bindingAdapterPosition, getCurrentList()[bindingAdapterPosition])
+    }
+
+    private fun setClick() {
+        onItemClick(bindingAdapterPosition, getCurrentList()[bindingAdapterPosition])
     }
 
     fun bind(task: NotePresentationModel) {
@@ -51,10 +59,7 @@ class NoteViewHolder(
         bindContent(task)
         bindDate(task)
         bindSelection(task)
-
         bindCategories(task)
-
-//        bindCategories(task)
     }
 
     private fun bindCategories(task: NotePresentationModel) {
@@ -69,31 +74,18 @@ class NoteViewHolder(
                 }
             isNestedScrollingEnabled = false
             isClickable = false
-            adapter = CategoryChipAdapter {
-                onClick?.invoke(task)
-            }.apply { submitList(categories) }
+            adapter = CategoryChipAdapter(
+                onClick = { setClick() },
+                onLongClick = { setLongClick() }
+            ).apply { submitList(categories) }
         }
     }
-
-//    private fun bindCategories(model: NotePresentationModel) {
-//        if (model.categories.isEmpty()) binding.taskChipgroupCategories.removeAllViews()
-//
-//        val categories = model.categories
-//        binding.taskChipgroupCategories.removeAllViews()
-//        categories.forEach {
-//            val chip = Chip(itemView.context).apply {
-//                id = it.id.toInt()
-//                text = it.name
-//            }
-//            binding.taskChipgroupCategories.addView(chip)
-//        }
-//    }
 
     private fun bindDate(task: NotePresentationModel) {
         binding.taskTextDate.text = task.dateInLocal
     }
 
-    fun bindContent(task: NotePresentationModel) {
+    private fun bindContent(task: NotePresentationModel) {
 //            binding.taskTextContent.text = "${task.order}. ${task.content}"
         binding.taskTextContent.apply {
             text = task.content
@@ -101,7 +93,7 @@ class NoteViewHolder(
         }
     }
 
-    fun bindSelection(task: NotePresentationModel) {
+    private fun bindSelection(task: NotePresentationModel) {
         if (task.isSelected) {
             setBackgroundSelected()
         } else {
@@ -109,19 +101,19 @@ class NoteViewHolder(
         }
     }
 
-    fun setBackgroundTransparent() {
+    private fun setBackgroundTransparent() {
         binding.taskCardview.isChecked = false
         binding.taskCardview.strokeWidth =
             1f.fromDpToPixel(binding.taskCardview.context).toInt()
     }
 
-    fun setBackgroundSelected() {
+    private fun setBackgroundSelected() {
         binding.taskCardview.isChecked = true
         binding.taskCardview.strokeWidth =
             3f.fromDpToPixel(binding.taskCardview.context).toInt()
     }
 
-    fun bindTitle(task: NotePresentationModel) {
+    private fun bindTitle(task: NotePresentationModel) {
         with(binding.taskTextTitle) {
             isVisible = !task.title.isNullOrEmpty()
             text = task.title

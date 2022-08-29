@@ -5,13 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.LinearLayoutManager
 import brillembourg.notes.simple.databinding.ModalBottomSheetCategoriesBinding
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-class SelectCategoriesModalBottomSheet : BottomSheetDialogFragment() {
+class SelectNoteCategoriesModal : BottomSheetDialogFragment() {
 
     private val detailViewModel: DetailViewModel by viewModels(ownerProducer = { requireParentFragment() })
     private lateinit var binding: ModalBottomSheetCategoriesBinding
@@ -35,7 +34,13 @@ class SelectCategoriesModalBottomSheet : BottomSheetDialogFragment() {
         safeUiLaunch {
             detailViewModel.uiDetailUiState.collect {
                 if (it.selectCategories.isShowing) {
-                    setupCategories(it.selectCategories.categories, it.noteCategories)
+                    setupSelectCategoriesAdapter(
+                        binding.detailRecyclerCategories,
+                        it.selectCategories.categories,
+                        it.noteCategories.map { it.id }
+                    ) { category, isChecked ->
+                        onCheckedCategory(category, isChecked)
+                    }
                 } else {
                     dismiss()
                 }
@@ -48,38 +53,6 @@ class SelectCategoriesModalBottomSheet : BottomSheetDialogFragment() {
         super.onDestroy()
     }
 
-    private fun setupCategories(
-        allCategories: List<CategoryPresentationModel>,
-        noteCategories: List<CategoryPresentationModel>
-    ) {
-        val recycler = binding.detailRecyclerCategories
-
-
-        //copy to avoid modifying detailuistate
-        val selectCategories = allCategories.toMutableList().map { it.copy() }
-
-        //check categories from note
-        selectCategories.forEach {
-            if (noteCategories.contains(it)) {
-                it.isSelected = true
-            }
-        }
-
-        if (recycler.adapter == null) {
-            recycler.apply {
-                adapter = SelectCategoryAdapter { category, isChecked ->
-                    onCheckedCategory(category, isChecked)
-                }
-                    .apply {
-                        submitList(selectCategories)
-                    }
-                layoutManager = LinearLayoutManager(context)
-            }
-        } else {
-            (recycler.adapter as SelectCategoryAdapter)
-                .submitList(selectCategories)
-        }
-    }
 
     private fun onCheckedCategory(
         category: CategoryPresentationModel,
