@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.presentation.home
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,9 +30,11 @@ import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.coroutineContext
 
 
 @HiltViewModel
@@ -50,14 +53,14 @@ class HomeViewModel @Inject constructor(
     private val getAvailableCategoriesUseCase: GetCategoriesUseCase
 ) : ViewModel() {
 
+    private var filteredCategoriesJob: Job? = null
+    private var categorieAvailableJob: Job? = null
+    private var getNotesJob: Job? = null
+
     private val uiStateKey = "home_ui_state"
 
     private val _homeUiState = MutableStateFlow(
-        getSavedUiState() ?: HomeUiState(
-//        selectFilterCategories = SelectFilterCategories(
-//            categories =
-//        )
-        )
+        getSavedUiState() ?: HomeUiState()
     )
     val homeUiState = _homeUiState.asStateFlow()
 
@@ -70,13 +73,15 @@ class HomeViewModel @Inject constructor(
         observePreferences()
         saveChangesInSavedStateObserver()
         observeCategories()
+        observeNoteList()
     }
 
     //region Categories
 
     private fun observeCategories() {
 
-        availableCategoriesFlow.onEach { result ->
+        categorieAvailableJob?.cancel()
+        categorieAvailableJob = availableCategoriesFlow.onEach { result ->
             when (result) {
                 is Resource.Success -> {
                     _homeUiState.update { uiState ->
@@ -97,7 +102,8 @@ class HomeViewModel @Inject constructor(
         }
             .launchIn(viewModelScope)
 
-        getFilteredCategoriesUseCase.invoke(
+        filteredCategoriesJob?.cancel()
+        filteredCategoriesJob = getFilteredCategoriesUseCase.invoke(
             GetFilterByCategoriesUseCase.Params(availableCategoriesFlow)
         )
             .onEach { result ->
@@ -110,6 +116,7 @@ class HomeViewModel @Inject constructor(
                                     .toDiplayOrder()
                             )
                         }
+                        observeNoteList()
                     }
                     is Resource.Error -> {
                         showErrorMessage(result.exception)
@@ -118,7 +125,6 @@ class HomeViewModel @Inject constructor(
                         Unit
                     }
                 }
-                observeNoteList()
             }
             .launchIn(viewModelScope)
     }
@@ -198,35 +204,41 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun observeNoteList() {
-        getNotesUseCase(GetNotesUseCase.Params(_homeUiState.value.filteredCategories.map { it.toDomain() }))
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        _homeUiState.update { uiState ->
-                            uiState.copy(
-                                noteList = NoteList(
-                                    notes = result.data.noteList
-                                        .map { noteWithCategories ->
-                                            noteWithCategories.toPresentation(dateProvider).apply {
-                                                this.isSelected =
-                                                    isNoteSelectedInUi(
-                                                        uiState,
-                                                        noteWithCategories.note
+        getNotesJob?.cancel()
+        getNotesJob =
+            getNotesUseCase(GetNotesUseCase.Params(_homeUiState.value.filteredCategories.map { it.toDomain() }))
+                .onEach { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            Log.e("aaaa", "Consumed $coroutineContext")
+                            _homeUiState.update { uiState ->
+                                uiState.copy(
+                                    noteList = NoteList(
+                                        notes = result.data.noteList
+                                            .map { noteWithCategories ->
+                                                noteWithCategories.toPresentation(dateProvider)
+                                                    .apply {
+                                                        this.isSelected =
+                                                            isNoteSelectedInUi(
+                                                                uiState,
+                                                                noteWithCategories.note
                                                     )
                                             }
                                         }
                                         .sortedBy { taskPresentationModel -> taskPresentationModel.order }
                                         .asReversed(),
-                                    mustRender = true)
-                            )
+                                        mustRender = true)
+                                )
+                            }
                         }
+                        is Resource.Error -> {
+                            Log.e("aaaa", "Cancelled ${kotlin.coroutines.coroutineContext}")
+                            showErrorMessage(result.exception)
+                        }
+                        is Resource.Loading -> Unit
                     }
-                    is Resource.Error -> {
-                        showErrorMessage(result.exception)
-                    }
-                    is Resource.Loading -> Unit
                 }
-            }.launchIn(viewModelScope)
+                .launchIn(viewModelScope)
     }
 
     private fun isNoteSelectedInUi(

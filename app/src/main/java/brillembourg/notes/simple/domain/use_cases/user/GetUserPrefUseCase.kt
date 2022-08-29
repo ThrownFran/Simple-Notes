@@ -6,6 +6,7 @@ import brillembourg.notes.simple.domain.repositories.UserPrefRepository
 import brillembourg.notes.simple.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.transform
 import javax.inject.Inject
 
 class GetUserPrefUseCase @Inject constructor(
@@ -16,6 +17,16 @@ class GetUserPrefUseCase @Inject constructor(
     operator fun invoke(params: Params): Flow<Resource<Result>> {
         return repository.getUserPreferences(params)
             .flowOn(schedulers.defaultDispatcher())
+    }
+
+    fun asResult(params: Params): Flow<Result> {
+        return invoke(params).transform {
+            when (it) {
+                is Resource.Error -> throw it.exception
+                is Resource.Loading -> Unit
+                is Resource.Success -> emit(it.data)
+            }
+        }
     }
 
     class Params

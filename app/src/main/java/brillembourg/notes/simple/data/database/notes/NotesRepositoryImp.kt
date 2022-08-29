@@ -113,18 +113,24 @@ class NotesRepositoryImp(
 
     override fun getTaskList(params: GetNotesUseCase.Params): Flow<Resource<GetNotesUseCase.Result>> {
         return database.getTaskList()
-            .debounce(200)
+            .debounce(100)
             .distinctUntilChanged()
             .transform {
                 try {
                     val taskListDomain = it.map { taskEntity -> taskEntity.toDomain() }
                         .filter { noteWithCategory ->
-                            params.filterByCategories.forEach {
-                                val contains =
-                                    noteWithCategory.categories.map { it.id }.contains(it.id)
-                                if (!contains) return@filter false
+
+                            //Empty
+                            if (params.filterByCategories.isEmpty()) return@filter true
+
+                            //My filtered id is in Model
+                            noteWithCategory.categories.forEach {
+                                if (params.filterByCategories.map { it.id }.contains(it.id)) {
+                                    return@filter true
+                                }
                             }
-                            true
+
+                            false
                         }
                     val result = GetNotesUseCase.Result(taskListDomain)
                     emit(Resource.Success(result))
