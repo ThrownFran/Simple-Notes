@@ -5,8 +5,6 @@ import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
-import androidx.core.view.isVisible
-import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -17,10 +15,15 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
+import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.custom_views.*
+import brillembourg.notes.simple.presentation.home.CategoryChipAdapter
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
-import com.google.android.material.chip.Chip
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.debounce
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
@@ -271,24 +274,37 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     private fun setupCategories(noteCategories: List<CategoryPresentationModel>) {
-        binding.detailChipgroup.isVisible = noteCategories.isNotEmpty()
-
-        if (noteCategories.size == binding.detailChipgroup.size) {
-            return
-        }
-
-        binding.detailChipgroup.removeAllViews()
-        noteCategories.forEach { categoryPresentationModel: CategoryPresentationModel ->
-            val chip = Chip(context)
-            chip.text = categoryPresentationModel.name
-            chip.id = categoryPresentationModel.id.toInt()
-            binding.detailChipgroup.addView(chip)
-            chip.setOnClickListener {
+        binding.detailRecyclerCategories.apply {
+            layoutManager = FlexboxLayoutManager(context)
+                .apply {
+                    flexDirection = FlexDirection.ROW
+                    justifyContent = JustifyContent.FLEX_START
+                    flexWrap = FlexWrap.WRAP
+                }
+            adapter = CategoryChipAdapter {
                 viewModel.onNavigateToCategories()
-//                binding.detailChipgroup.removeView(chip)
-//                viewModel.onCategoryChecked(categoryPresentationModel,false)
-            }
+            }.apply { submitList(noteCategories.toDiplayOrder()) }
         }
+
+
+//        binding.detailChipgroup.isVisible = noteCategories.isNotEmpty()
+//
+//        if (noteCategories.size == binding.detailChipgroup.size) {
+//            return
+//        }
+//
+//        binding.detailChipgroup.removeAllViews()
+//        noteCategories.forEach { categoryPresentationModel: CategoryPresentationModel ->
+//            val chip = Chip(context)
+//            chip.text = categoryPresentationModel.name
+//            chip.id = categoryPresentationModel.id.toInt()
+//            binding.detailChipgroup.addView(chip)
+//            chip.setOnClickListener {
+//                viewModel.onNavigateToCategories()
+////                binding.detailChipgroup.removeView(chip)
+////                viewModel.onCategoryChecked(categoryPresentationModel,false)
+//            }
+//        }
 
     }
 
@@ -356,7 +372,7 @@ class DetailFragment : Fragment(), MenuProvider {
 fun setupExtrasToDetail(sharedView: View): FragmentNavigator.Extras {
     return FragmentNavigatorExtras(
         //View from item list
-        sharedView.findViewById<View>(R.id.task_roundcontraint)
+        sharedView.findViewById<View>(R.id.task_cardview)
                 //String mapping detail view (transition_name)
                 to sharedView.context.getString(R.string.home_shared_detail_container),
     )

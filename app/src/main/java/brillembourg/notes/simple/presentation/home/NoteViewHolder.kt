@@ -3,16 +3,21 @@ package brillembourg.notes.simple.presentation.home
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemNoteBinding
+import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.custom_views.fromDpToPixel
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.Selectable
 import brillembourg.notes.simple.presentation.ui_utils.SelectableImp
-import com.google.android.material.chip.Chip
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
+
 
 class NoteViewHolder(
     private val getCurrentList: () -> List<NotePresentationModel>,
     private val binding: ItemNoteBinding,
-    onClick: ((NotePresentationModel) -> Unit)? = null,
+    private val onClick: ((NotePresentationModel) -> Unit)? = null,
     private val onSelected: (() -> Unit)? = null,
     private val onReadyToDrag: ((NoteViewHolder) -> Unit)? = null
 ) : RecyclerView.ViewHolder(binding.root),
@@ -46,27 +51,43 @@ class NoteViewHolder(
         bindContent(task)
         bindDate(task)
         bindSelection(task)
+
         bindCategories(task)
+
+//        bindCategories(task)
     }
 
-    private fun bindCategories(model: NotePresentationModel) {
-        if (model.categories.isEmpty()) binding.taskChipgroupCategories.removeAllViews()
+    private fun bindCategories(task: NotePresentationModel) {
+        val categories = task.categories.toDiplayOrder()
 
-        val categories = model.categories
-        binding.taskChipgroupCategories.removeAllViews()
-        categories.forEach {
-            val chip = Chip(itemView.context).apply {
-                id = it.id.toInt()
-                text = it.name
-//                val myLayoutParams = ChipGroup.LayoutParams(
-//                    25f.fromDpToPixel(itemView.context).toInt(),
-//                    25f.fromDpToPixel(itemView.context).toInt()
-//                )
-//                layoutParams = myLayoutParams
-            }
-            binding.taskChipgroupCategories.addView(chip)
+        binding.taskRecyclerCategories.apply {
+            layoutManager = FlexboxLayoutManager(context)
+                .apply {
+                    flexDirection = FlexDirection.ROW
+                    justifyContent = JustifyContent.FLEX_START
+                    flexWrap = FlexWrap.WRAP
+                }
+            isNestedScrollingEnabled = false
+            isClickable = false
+            adapter = CategoryChipAdapter {
+                onClick?.invoke(task)
+            }.apply { submitList(categories) }
         }
     }
+
+//    private fun bindCategories(model: NotePresentationModel) {
+//        if (model.categories.isEmpty()) binding.taskChipgroupCategories.removeAllViews()
+//
+//        val categories = model.categories
+//        binding.taskChipgroupCategories.removeAllViews()
+//        categories.forEach {
+//            val chip = Chip(itemView.context).apply {
+//                id = it.id.toInt()
+//                text = it.name
+//            }
+//            binding.taskChipgroupCategories.addView(chip)
+//        }
+//    }
 
     private fun bindDate(task: NotePresentationModel) {
         binding.taskTextDate.text = task.dateInLocal

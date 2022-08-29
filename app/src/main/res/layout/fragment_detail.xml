@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -64,52 +63,58 @@
                         android:text="@={viewmodel.uiDetailUiState.component3().contentBinding}"
                         android:textSize="16sp" />
 
-
-                    <HorizontalScrollView
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/detail_recycler_categories"
+                        android:layout_marginTop="16dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingTop="16dp"
-                        android:paddingEnd="16dp"
-                        android:scrollbars="none">
+                        tools:listitem="@layout/item_category_chip" />
 
-                        <com.google.android.material.chip.ChipGroup
-                            android:id="@+id/detail_chipgroup"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:layout_marginBottom="4dp"
-                            android:visibility="gone"
-                            app:singleLine="true">
+                    <!--                    <HorizontalScrollView-->
+                    <!--                        android:layout_width="match_parent"-->
+                    <!--                        android:layout_height="wrap_content"-->
+                    <!--                        android:paddingTop="16dp"-->
+                    <!--                        android:paddingEnd="16dp"-->
+                    <!--                        android:scrollbars="none">-->
 
-                            <!--                        &lt;!&ndash; Chips can be declared here, or added dynamically. &ndash;&gt;-->
-                            <com.google.android.material.chip.Chip
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="My chip" />
+                    <!--                        <com.google.android.material.chip.ChipGroup-->
+                    <!--                            android:id="@+id/detail_chipgroup"-->
+                    <!--                            android:layout_width="wrap_content"-->
+                    <!--                            android:layout_height="wrap_content"-->
+                    <!--                            android:layout_marginTop="4dp"-->
+                    <!--                            android:layout_marginBottom="4dp"-->
+                    <!--                            android:visibility="gone"-->
+                    <!--                            app:singleLine="true">-->
 
-                            <com.google.android.material.chip.Chip
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="My chip" />
+                    <!--                            &lt;!&ndash;                        &lt;!&ndash; Chips can be declared here, or added dynamically. &ndash;&gt;&ndash;&gt;-->
+                    <!--                            <com.google.android.material.chip.Chip-->
+                    <!--                                android:layout_width="wrap_content"-->
+                    <!--                                android:layout_height="wrap_content"-->
+                    <!--                                android:text="My chip" />-->
 
-                            <com.google.android.material.chip.Chip
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="My chip" />
+                    <!--                            <com.google.android.material.chip.Chip-->
+                    <!--                                android:layout_width="wrap_content"-->
+                    <!--                                android:layout_height="wrap_content"-->
+                    <!--                                android:text="My chip" />-->
 
-                            <com.google.android.material.chip.Chip
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="My chip" />
+                    <!--                            <com.google.android.material.chip.Chip-->
+                    <!--                                android:layout_width="wrap_content"-->
+                    <!--                                android:layout_height="wrap_content"-->
+                    <!--                                android:text="My chip" />-->
 
-                            <com.google.android.material.chip.Chip
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="My chip" />
+                    <!--                            <com.google.android.material.chip.Chip-->
+                    <!--                                android:layout_width="wrap_content"-->
+                    <!--                                android:layout_height="wrap_content"-->
+                    <!--                                android:text="My chip" />-->
+
+                    <!--                            <com.google.android.material.chip.Chip-->
+                    <!--                                android:layout_width="wrap_content"-->
+                    <!--                                android:layout_height="wrap_content"-->
+                    <!--                                android:text="My chip" />-->
 
 
-                        </com.google.android.material.chip.ChipGroup>
-                    </HorizontalScrollView>
+                    <!--                        </com.google.android.material.chip.ChipGroup>-->
+                    <!--                    </HorizontalScrollView>-->
 
 
                 </LinearLayout>

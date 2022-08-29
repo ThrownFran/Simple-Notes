@@ -23,3 +23,7 @@ fun Category.toPresentation(): CategoryPresentationModel {
 fun CategoryPresentationModel.toDomain(): Category {
     return Category(id, name, order)
 }
+
+fun List<CategoryPresentationModel>.toDiplayOrder(): List<CategoryPresentationModel> {
+    return this.sortedBy { it.order }.asReversed()
+}

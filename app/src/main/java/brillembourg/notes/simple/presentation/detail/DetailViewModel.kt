@@ -120,8 +120,8 @@ class DetailViewModel @Inject constructor(
 
             val result = createNoteUseCase(
                 CreateNoteUseCase.Params(
-                    content = userInputState.content,
-                    title = userInputState.title
+                    content = userInputState.content.trim(),
+                    title = userInputState.title.trim()
                 )
             )
 
@@ -205,8 +205,8 @@ class DetailViewModel @Inject constructor(
         navigateBack: Boolean = true
     ) {
 
-        task.content = _uiDetailState.value.userInput.content
-        task.title = _uiDetailState.value.userInput.title
+        task.content = _uiDetailState.value.userInput.content.trim()
+        task.title = _uiDetailState.value.userInput.title.trim()
 
         viewModelScope.launch {
 
