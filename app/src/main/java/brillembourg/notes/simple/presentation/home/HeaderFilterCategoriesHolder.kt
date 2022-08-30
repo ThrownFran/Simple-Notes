@@ -17,6 +17,8 @@ class HeaderFilterCategoriesHolder(
 ) : RecyclerView.ViewHolder(binding.root) {
 
     init {
+        (itemView.layoutParams as? StaggeredGridLayoutManager.LayoutParams)?.isFullSpan = true
+
         binding.root.setOnClickListener {
             onClick?.invoke()
         }

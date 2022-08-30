@@ -19,6 +19,7 @@ import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.base.MainViewModel
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
+import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
@@ -102,23 +103,32 @@ class HomeFragment : Fragment(), MenuProvider {
     //region Categories
 
     private fun filteredCategoriesState(filteredCategories: List<CategoryPresentationModel>) {
+
+
         val headerAdapter =
             (binding.homeRecycler.adapter as? ConcatAdapter?)?.adapters?.filterIsInstance<HeaderAdapter>()
                 ?.firstOrNull()
 
-        if (filteredCategories.isEmpty()) {
-            headerAdapter?.let { (binding.homeRecycler.adapter as? ConcatAdapter?)?.removeAdapter(it) }
-            return
-        }
+//        if (filteredCategories.isEmpty()) {
+//            headerAdapter?.let { (binding.homeRecycler.adapter as? ConcatAdapter?)?.removeAdapter(it) }
+//            return
+//        }
+
+        if (headerAdapter?.filteredCategories?.size == filteredCategories.size) return
 
         if (headerAdapter != null) {
             headerAdapter.filteredCategories.clear()
             headerAdapter.filteredCategories.addAll(filteredCategories)
-            headerAdapter.notifyDataSetChanged()
+            headerAdapter.notifyItemRangeChanged(
+                0,
+                filteredCategories.size,
+                filteredCategories.toDiplayOrder()
+            )
+//            headerAdapter.notifyDataSetChanged()
         } else {
             (binding.homeRecycler.adapter as? ConcatAdapter?)?.addAdapter(
                 0,
-                HeaderAdapter(filteredCategories.toMutableList()) {
+                HeaderAdapter(filteredCategories.toDiplayOrder().toMutableList()) {
                     viewModel.onNavigateToCategories()
                 })
         }
@@ -242,7 +252,9 @@ class HomeFragment : Fragment(), MenuProvider {
             }
 
         return ConcatAdapter(
-//            HeaderAdapter(emptyList<CategoryPresentationModel>().toMutableList()),
+            HeaderAdapter(emptyList<CategoryPresentationModel>().toMutableList()) {
+                viewModel.onNavigateToCategories()
+            },
             noteAdapter
         )
     }
@@ -536,25 +548,6 @@ class HomeFragment : Fragment(), MenuProvider {
         saveRecyclerState()
         super.onDestroyView()
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }
