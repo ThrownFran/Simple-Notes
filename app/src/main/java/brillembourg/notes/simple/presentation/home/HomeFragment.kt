@@ -105,26 +105,27 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun filteredCategoriesState(filteredCategories: List<CategoryPresentationModel>) {
 
 
-        val headerAdapter =
-            (binding.homeRecycler.adapter as? ConcatAdapter?)?.adapters?.filterIsInstance<HeaderAdapter>()
-                ?.firstOrNull()
+//        val headerAdapter =
+//            (binding.homeRecycler.adapter as? ConcatAdapter?)?.adapters?.filterIsInstance<HeaderAdapter>()
+//                ?.firstOrNull()
+        val headerAdapter = getHeaderAdapter()
 
-//        if (filteredCategories.isEmpty()) {
-//            headerAdapter?.let { (binding.homeRecycler.adapter as? ConcatAdapter?)?.removeAdapter(it) }
-//            return
-//        }
+        if (filteredCategories.isEmpty()) {
+            headerAdapter?.let { getConcatAdapter()?.removeAdapter(it) }
+            return
+        }
 
         if (headerAdapter?.filteredCategories?.size == filteredCategories.size) return
 
         if (headerAdapter != null) {
             headerAdapter.filteredCategories.clear()
             headerAdapter.filteredCategories.addAll(filteredCategories)
-            headerAdapter.notifyItemRangeChanged(
-                0,
-                filteredCategories.size,
-                filteredCategories.toDiplayOrder()
-            )
-//            headerAdapter.notifyDataSetChanged()
+            headerAdapter.notifyItemChanged(0, Any())
+//            headerAdapter.notifyItemRangeChanged(
+//                0,
+//                filteredCategories.size,
+//                filteredCategories.toDiplayOrder()
+//            )
         } else {
             (binding.homeRecycler.adapter as? ConcatAdapter?)?.addAdapter(
                 0,
@@ -298,7 +299,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun getAdapter(): NoteAdapter? = try {
-        (binding.homeRecycler.adapter as ConcatAdapter).adapters.first { it is NoteAdapter } as NoteAdapter
+        getConcatAdapter()?.adapters?.first { it is NoteAdapter } as NoteAdapter
     } catch (e: Exception) {
         null
     }
@@ -434,12 +435,18 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun navigateToDetailState(navigateToDetail: NavigateToEditNote) {
         if (navigateToDetail.mustConsume) {
+            val headers = if (getHeaderAdapter() == null) 0 else 1
             val view =
-                binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!! + 1)!!.itemView
+                binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!! + headers)!!.itemView
             navigateToDetail(navigateToDetail.notePresentationModel!!, view)
             viewModel.onNavigateToDetailCompleted()
         }
     }
+
+    private fun getHeaderAdapter() =
+        getConcatAdapter()?.adapters?.filterIsInstance<HeaderAdapter>()?.firstOrNull()
+
+    private fun getConcatAdapter() = (binding.homeRecycler.adapter as? ConcatAdapter?)
 
     private fun navigateToCreateTask(content: String? = null) {
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()

@@ -175,10 +175,8 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             if (destination.id == R.id.homeFragment) {
                 binding.homeFab.show()
-//                binding.mainLinearCategories.isVisible = true
             } else {
                 binding.homeFab.hide()
-//                binding.mainLinearCategories.isVisible = false
             }
         }
     }
