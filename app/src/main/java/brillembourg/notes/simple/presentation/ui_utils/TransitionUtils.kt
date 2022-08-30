@@ -18,7 +18,7 @@ fun Fragment.prepareTransition(rootView: View) {
 fun DetailFragment.setEditNoteEnteringTransition() {
     sharedElementEnterTransition = MaterialContainerTransform().apply {
         drawingViewId = R.id.fragment_container_view
-        duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
+        duration = resources.getInteger(R.integer.reply_motion_duration_medium).toLong()
         scrimColor = Color.TRANSPARENT
         setAllContainerColors(requireContext().themeColor(com.google.android.material.R.attr.colorSurface))
     }
@@ -41,7 +41,7 @@ fun DetailFragment.setCreateNoteEnterTransition(myStartView: View, myEndView: Vi
 
 fun Fragment.setTransitionToEditNote() {
     exitTransition = MaterialElevationScale(false).apply {
-        duration = resources.getInteger(R.integer.reply_motion_duration_medium).toLong()
+        duration = resources.getInteger(R.integer.reply_motion_duration_small).toLong()
     }
     reenterTransition = MaterialElevationScale(true).apply {
         duration = resources.getInteger(R.integer.reply_motion_duration_medium).toLong()

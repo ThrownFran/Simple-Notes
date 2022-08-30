@@ -21,7 +21,7 @@ class HeaderFilterCategoriesHolder(
             onClick?.invoke()
         }
 
-        (itemView.layoutParams as StaggeredGridLayoutManager.LayoutParams).isFullSpan = true
+        (itemView.layoutParams as? StaggeredGridLayoutManager.LayoutParams)?.isFullSpan = true
     }
 
     fun bind(filteredCategories: List<CategoryPresentationModel>) {

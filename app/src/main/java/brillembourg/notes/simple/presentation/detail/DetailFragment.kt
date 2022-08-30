@@ -220,10 +220,13 @@ class DetailFragment : Fragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         prepareTransition(view)
-        setCreateNoteEnterTransition(
-            myStartView = requireActivity().findViewById(R.id.home_fab),
-            myEndView = binding.detailLinear
-        )
+
+        if (viewModel.uiDetailUiState.value.isNewTask) {
+            setCreateNoteEnterTransition(
+                myStartView = requireActivity().findViewById(R.id.home_fab),
+                myEndView = binding.detailLinear
+            )
+        }
         renderState()
     }
 
@@ -238,7 +241,7 @@ class DetailFragment : Fragment(), MenuProvider {
     private fun renderState() {
         safeUiLaunch {
 
-        viewModel.uiDetailUiState.collect { uiState ->
+            viewModel.uiDetailUiState.collect { uiState ->
 
                 setToolbarTitle(uiState.isNewTask)
 

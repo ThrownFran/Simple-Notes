@@ -242,7 +242,7 @@ class HomeFragment : Fragment(), MenuProvider {
             }
 
         return ConcatAdapter(
-            HeaderAdapter(emptyList<CategoryPresentationModel>().toMutableList()),
+//            HeaderAdapter(emptyList<CategoryPresentationModel>().toMutableList()),
             noteAdapter
         )
     }
