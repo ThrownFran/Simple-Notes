@@ -34,7 +34,7 @@ abstract class TaskDao {
 
     //UPDATE
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun save(task: NoteEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

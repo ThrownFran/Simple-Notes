@@ -459,7 +459,7 @@ class DetailViewModel @Inject constructor(
                 )
 
                 when (val result = addCategoryUseCase(params)) {
-                    is Resource.Success -> showMessage(result.data.message)
+                    is Resource.Success -> messageToShowWhenNavBack = result.data.message
                     is Resource.Error -> showErrorMessage(result.exception)
                     is Resource.Loading -> Unit
                 }
@@ -472,7 +472,7 @@ class DetailViewModel @Inject constructor(
                 )
 
                 when (val result = removeCategoryToNoteUseCase(params)) {
-                    is Resource.Success -> showMessage(result.data.message)
+                    is Resource.Success -> messageToShowWhenNavBack = result.data.message
                     is Resource.Error -> showErrorMessage(result.exception)
                     is Resource.Loading -> Unit
                 }
