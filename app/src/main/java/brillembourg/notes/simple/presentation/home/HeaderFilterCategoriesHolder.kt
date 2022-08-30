@@ -21,10 +21,12 @@ class HeaderFilterCategoriesHolder(
             onClick?.invoke()
         }
 
-        (itemView.layoutParams as? StaggeredGridLayoutManager.LayoutParams)?.isFullSpan = true
+
     }
 
     fun bind(filteredCategories: List<CategoryPresentationModel>) {
+        (itemView.layoutParams as? StaggeredGridLayoutManager.LayoutParams)?.isFullSpan = true
+
         if (binding.mainRecyclerCategoriesFilter.adapter == null) {
             binding.mainRecyclerCategoriesFilter.apply {
                 layoutManager = FlexboxLayoutManager(context)
