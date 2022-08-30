@@ -174,14 +174,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupNavControllerListener() {
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
-            binding.homeFab.apply {
-                if (destination.id == R.id.homeFragment) {
-                    show()
-                    binding.mainLinearCategories.isVisible = true
-                } else {
-                    hide()
-                    binding.mainLinearCategories.isVisible = false
-                }
+            if (destination.id == R.id.homeFragment) {
+                binding.homeFab.show()
+                binding.mainLinearCategories.isVisible = true
+            } else {
+                binding.homeFab.hide()
+                binding.mainLinearCategories.isVisible = false
             }
         }
     }

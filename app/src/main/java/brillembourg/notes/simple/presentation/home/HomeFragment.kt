@@ -109,7 +109,6 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun filteredCategoriesState(filteredCategories: List<CategoryPresentationModel>) {
         val mainActivityBinding = (activity as MainActivity).binding
 
-        mainActivityBinding.mainLinearCategories.isVisible = filteredCategories.isNotEmpty()
 
         if (mainActivityBinding.mainRecyclerCategoriesFilter.adapter == null) {
             mainActivityBinding.mainRecyclerCategoriesFilter.apply {
@@ -128,6 +127,12 @@ class HomeFragment : Fragment(), MenuProvider {
             (mainActivityBinding.mainRecyclerCategoriesFilter.adapter as CategoryChipColorSurfaceAdapter)
                 .submitList(filteredCategories)
         }
+
+
+        mainActivityBinding.mainLinearCategories.isVisible =
+            filteredCategories.isNotEmpty() && findNavController().currentDestination?.id == R.id.homeFragment
+
+
     }
 
     private fun selectCategoriesState(selectCategories: SelectFilterCategories) {
