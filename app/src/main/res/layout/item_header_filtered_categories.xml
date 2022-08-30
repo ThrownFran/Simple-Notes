@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/main_linear_categories"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="8dp"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="0dp"
+    android:orientation="horizontal"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:drawableStart="@drawable/ic_outline_label_on_secondary_container_24"
+        android:drawableTint="?colorSecondary"
+        android:drawablePadding="4dp"
+        android:gravity="center"
+        android:layout_gravity="start"
+        android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
+        android:textColor="?colorOnSurface"
+        android:text="@string/categories_dot" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/main_recycler_categories_filter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="horizontal"
+        android:layout_gravity="center"
+        android:foregroundGravity="center"
+        android:fadeScrollbars="true"
+        android:scrollbarStyle="insideInset"
+        tools:itemCount="3"
+        tools:listitem="@layout/item_category_chip_color_secondary" />
+
+
+</LinearLayout>
+
+
+

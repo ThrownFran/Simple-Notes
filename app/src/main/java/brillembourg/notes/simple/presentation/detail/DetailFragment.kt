@@ -225,7 +225,6 @@ class DetailFragment : Fragment(), MenuProvider {
             myEndView = binding.detailLinear
         )
         renderState()
-
     }
 
     private fun showCategoriesModalBottomSheet() {
@@ -238,7 +237,8 @@ class DetailFragment : Fragment(), MenuProvider {
 
     private fun renderState() {
         safeUiLaunch {
-            viewModel.uiDetailUiState.collect { uiState ->
+
+        viewModel.uiDetailUiState.collect { uiState ->
 
                 setToolbarTitle(uiState.isNewTask)
 

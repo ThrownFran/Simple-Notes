@@ -5,12 +5,12 @@ import android.os.Parcelable
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
@@ -19,7 +19,6 @@ import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.base.MainViewModel
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
-import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
@@ -28,10 +27,6 @@ import brillembourg.notes.simple.presentation.ui_utils.recycler_view.*
 import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
-import com.google.android.flexbox.FlexDirection
-import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayoutManager
-import com.google.android.flexbox.JustifyContent
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -107,30 +102,54 @@ class HomeFragment : Fragment(), MenuProvider {
     //region Categories
 
     private fun filteredCategoriesState(filteredCategories: List<CategoryPresentationModel>) {
-        val mainActivityBinding = (activity as MainActivity).binding
+        val headerAdapter =
+            (binding.homeRecycler.adapter as? ConcatAdapter?)?.adapters?.filterIsInstance<HeaderAdapter>()
+                ?.firstOrNull()
 
+        if (filteredCategories.isEmpty()) {
+            headerAdapter?.let { (binding.homeRecycler.adapter as? ConcatAdapter?)?.removeAdapter(it) }
+            return
+        }
 
-        if (mainActivityBinding.mainRecyclerCategoriesFilter.adapter == null) {
-            mainActivityBinding.mainRecyclerCategoriesFilter.apply {
-//                layoutManager = LinearLayoutManager(context,RecyclerView.HORIZONTAL,false)
-                layoutManager = FlexboxLayoutManager(context)
-                    .apply {
-                        flexDirection = FlexDirection.ROW
-                        justifyContent = JustifyContent.FLEX_START
-                        flexWrap = FlexWrap.WRAP
-                    }
-                adapter = CategoryChipColorSurfaceAdapter(onClick = {
-                    viewModel.onNavigateToCategories()
-                }).apply { submitList(filteredCategories.toDiplayOrder()) }
-            }
+        if (headerAdapter != null) {
+            headerAdapter.filteredCategories.clear()
+            headerAdapter.filteredCategories.addAll(filteredCategories)
+            headerAdapter.notifyDataSetChanged()
         } else {
-            (mainActivityBinding.mainRecyclerCategoriesFilter.adapter as CategoryChipColorSurfaceAdapter)
-                .submitList(filteredCategories)
+            (binding.homeRecycler.adapter as? ConcatAdapter?)?.addAdapter(
+                0,
+                HeaderAdapter(filteredCategories.toMutableList()) {
+                    viewModel.onNavigateToCategories()
+                })
         }
 
 
-        mainActivityBinding.mainLinearCategories.isVisible =
-            filteredCategories.isNotEmpty() && findNavController().currentDestination?.id == R.id.homeFragment
+//        val mainActivityBinding = (activity as MainActivity).binding
+//
+//        if (mainActivityBinding.mainRecyclerCategoriesFilter.adapter == null) {
+//            mainActivityBinding.mainRecyclerCategoriesFilter.apply {
+////                layoutManager = LinearLayoutManager(context,RecyclerView.HORIZONTAL,false)
+//                layoutManager = FlexboxLayoutManager(context)
+//                    .apply {
+//                        flexDirection = FlexDirection.ROW
+//                        justifyContent = JustifyContent.FLEX_START
+//                        flexWrap = FlexWrap.WRAP
+//                    }
+//
+//                adapter = CategoryChipColorSurfaceAdapter(onClick = {
+//                    viewModel.onNavigateToCategories()
+//                }).apply { submitList(filteredCategories.toDiplayOrder()) }
+//
+//
+//            }
+//        } else {
+//            (mainActivityBinding.mainRecyclerCategoriesFilter.adapter as CategoryChipColorSurfaceAdapter)
+//                .submitList(filteredCategories)
+//        }
+//
+//
+//        mainActivityBinding.mainLinearCategories.isVisible =
+//            filteredCategories.isNotEmpty() && findNavController().currentDestination?.id == R.id.homeFragment
 
 
     }
@@ -162,7 +181,7 @@ class HomeFragment : Fragment(), MenuProvider {
         if (binding.homeRecycler.adapter == null) {
             setupTaskRecycler(taskList)
         } else {
-            updateListAndNotify(binding.homeRecycler.adapter as NoteAdapter, taskList)
+            updateListAndNotify(getAdapter()!!, taskList)
         }
     }
 
@@ -201,9 +220,9 @@ class HomeFragment : Fragment(), MenuProvider {
         recyclerView: RecyclerView,
         noteList: List<NotePresentationModel>,
         dragDirs: Int
-    ): NoteAdapter {
+    ): ConcatAdapter {
 
-        return NoteAdapter(
+        val noteAdapter = NoteAdapter(
             dragDirs,
             recyclerView,
             onSelection = {
@@ -221,6 +240,11 @@ class HomeFragment : Fragment(), MenuProvider {
             .apply {
                 submitList(noteList)
             }
+
+        return ConcatAdapter(
+            HeaderAdapter(emptyList<CategoryPresentationModel>().toMutableList()),
+            noteAdapter
+        )
     }
 
 
@@ -261,12 +285,18 @@ class HomeFragment : Fragment(), MenuProvider {
         launchContextualActionBar(selectionModeActive.size)
     }
 
+    private fun getAdapter(): NoteAdapter? = try {
+        (binding.homeRecycler.adapter as ConcatAdapter).adapters.first { it is NoteAdapter } as NoteAdapter
+    } catch (e: Exception) {
+        null
+    }
+
     private fun launchContextualActionBar(sizeSelected: Int) {
         actionMode = setupContextualActionBar(
             toolbar = requireActivity().findViewById(R.id.toolbar),
             menuId = R.menu.menu_contextual_home,
             currentActionMode = actionMode,
-            adapter = binding.homeRecycler.adapter as NoteAdapter,
+            adapter = getAdapter()!!,
             onActionClick = { onContextualActionItem(menuId = it) },
             onSetTitle = { selectedSize: Int ->
                 getNoteSelectedTitle(
@@ -318,7 +348,7 @@ class HomeFragment : Fragment(), MenuProvider {
         recyclerView: RecyclerView,
         layoutType: LayoutType
     ) {
-        val noteAdapter = recyclerView.adapter as NoteAdapter? ?: return
+        val noteAdapter = getAdapter() ?: return
 
         changeLayout(
             recyclerView,
@@ -393,7 +423,7 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun navigateToDetailState(navigateToDetail: NavigateToEditNote) {
         if (navigateToDetail.mustConsume) {
             val view =
-                binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
+                binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!! + 1)!!.itemView
             navigateToDetail(navigateToDetail.notePresentationModel!!, view)
             viewModel.onNavigateToDetailCompleted()
         }

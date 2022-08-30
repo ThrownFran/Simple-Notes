@@ -1,9 +1,6 @@
 package brillembourg.notes.simple.presentation.ui_utils
 
-import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.*
 import brillembourg.notes.simple.presentation.models.HasOrder
 import java.util.*
 
@@ -75,9 +72,13 @@ class ItemTouchDraggableImp<T : HasOrder>(
                     target: RecyclerView.ViewHolder
                 ): Boolean {
 
-                    val recyclerviewAdapter = recyclerView.adapter as ListAdapter<*, *>
-                    val fromPosition = viewHolder.adapterPosition
-                    val toPosition = target.adapterPosition
+//                    val recyclerviewAdapter = recyclerView.adapter as ListAdapter<*, *>
+                    val recyclerviewAdapter = (recyclerView.adapter as ConcatAdapter).adapters
+                        .first { it is ListAdapter<*, *> }
+
+
+                    val fromPosition = viewHolder.bindingAdapterPosition
+                    val toPosition = target.bindingAdapterPosition
                     isDragging = true
 
                     dragAndDropList = getListToSwap()
