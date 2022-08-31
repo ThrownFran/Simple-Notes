@@ -104,13 +104,13 @@ class NoteViewHolder(
     private fun setBackgroundTransparent() {
         binding.taskCardview.isChecked = false
         binding.taskCardview.strokeWidth =
-            1f.fromDpToPixel(binding.taskCardview.context).toInt()
+            1.5f.fromDpToPixel(binding.taskCardview.context).toInt()
     }
 
     private fun setBackgroundSelected() {
         binding.taskCardview.isChecked = true
         binding.taskCardview.strokeWidth =
-            3f.fromDpToPixel(binding.taskCardview.context).toInt()
+            2.5f.fromDpToPixel(binding.taskCardview.context).toInt()
     }
 
     private fun bindTitle(task: NotePresentationModel) {

@@ -37,7 +37,7 @@
         android:layout_margin="6dp"
         android:checkable="true"
         android:transitionName="@{@string/home_shared_item_container(task.id)}"
-        app:cardElevation="2dp"
+        app:cardElevation="0dp"
         app:cardForegroundColor="@drawable/selector_cardview_foreground_color"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -93,7 +93,8 @@ In nulla voluptas ut voluptatem modi qui consectetur quos. Ut sunt quibusdam non
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/task_recycler_categories"
-                android:layout_width="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:focusableInTouchMode="false"
                 android:focusable="false"
