@@ -42,7 +42,12 @@ class MainActivity : AppCompatActivity() {
         setupToolbar()
         renderStates()
         backupModel = roomBackupBuilder.prepareBackupInLocalStorage()
-        handleIntentReceiver()
+        handleIntentReceiver(intent)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        handleIntentReceiver(intent)
     }
 
     private fun renderStates() {
@@ -55,9 +60,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleIntentReceiver() {
+    private fun handleIntentReceiver(intent: Intent?) {
         when (intent?.action) {
-            Intent.ACTION_SEND -> {
+            Intent.ACTION_SEND, Intent.ACTION_VIEW -> {
                 if ("text/plain" == intent.type) {
                     onIncomingContentIntent(intent) // Handle text being sent
                 }

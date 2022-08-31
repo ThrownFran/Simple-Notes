@@ -1,6 +1,5 @@
 package brillembourg.notes.simple.presentation.home
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -34,7 +33,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.coroutines.coroutineContext
 
 
 @HiltViewModel
@@ -73,7 +71,6 @@ class HomeViewModel @Inject constructor(
     //region Note list
 
     private fun observeNoteList() {
-        Log.e("HomeViewModel", "Start Observing List $getNotesJob")
         getNotesJob?.cancel()
         getNotesJob =
             getNotesUseCase(GetNotesUseCase.Params(_homeUiState.value.filteredCategories.map { it.toDomain() }))
@@ -81,11 +78,8 @@ class HomeViewModel @Inject constructor(
                     when (result) {
                         is Resource.Success -> {
                             _homeUiState.update { uiState ->
-                                Log.e(
-                                    "HomeViewModel",
-                                    "Observe list $coroutineContext ${result.data.noteList.map { it.note.id }}"
-                                )
-                                uiState.copy(
+
+                            uiState.copy(
                                     noteList = NoteList(
                                         notes = result.data.noteList
                                             .map { noteWithCategories ->
@@ -105,7 +99,6 @@ class HomeViewModel @Inject constructor(
                             }
                         }
                         is Resource.Error -> {
-                            Log.e("aaaa", "Cancelled ${kotlin.coroutines.coroutineContext}")
                             showErrorMessage(result.exception)
                         }
                         is Resource.Loading -> Unit
@@ -169,10 +162,7 @@ class HomeViewModel @Inject constructor(
                                     .toDiplayOrder()
                             )
                         }
-                        Log.e(
-                            "HomeViewModel",
-                            "Filtered success : $coroutineContext ${result.data.categories.map { it.name }}"
-                        )
+
                     }
                     is Resource.Error -> {
                         showErrorMessage(result.exception)

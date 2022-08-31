@@ -40,4 +40,5 @@
     <string name="add_categories">Add labels</string>
     <string name="add_category">Add label</string>
     <string name="categories_dot">"Labels: "</string>
+    <string name="filter_by_category">Filter by labels</string>
 </resources>

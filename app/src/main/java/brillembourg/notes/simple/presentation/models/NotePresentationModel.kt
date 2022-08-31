@@ -55,7 +55,8 @@ fun NoteWithCategories.toPresentation(dateProvider: DateProvider): NotePresentat
 //}
 
 interface HasOrder {
-    var order: Int
+//    val id: Long
+var order: Int
 }
 
 interface IsSelectable {

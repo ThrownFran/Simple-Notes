@@ -22,7 +22,7 @@
         android:padding="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="12dp"
-        android:text="Select categories"
+        android:text="@string/filter_by_category"
         android:textAppearance="@style/TextAppearance.Material3.TitleLarge"
         app:layout_constraintEnd_toStartOf="@+id/select_categories_image_clear"
         app:layout_constraintStart_toStartOf="parent"

@@ -26,6 +26,9 @@ class ItemTouchDraggableImp<T : HasOrder>(
     private var isDragging: Boolean = false
     private var dragAndDropList: List<T>? = null
 
+    val originalOrder: MutableList<Int> = ArrayList()
+//    val orderMap: MutableMap<Long,Int> = HashMap<Long,Int>()
+
     //Adapter callbacks
     private var onGetCurrentList: (() -> List<T>)? = null
     private var onSubmitList: ((noteList: (List<T>)?, submitSuccess: () -> Unit) -> Unit)? =
@@ -73,8 +76,14 @@ class ItemTouchDraggableImp<T : HasOrder>(
                 ): Boolean {
 
 //                    val recyclerviewAdapter = recyclerView.adapter as ListAdapter<*, *>
-                    val recyclerviewAdapter = (recyclerView.adapter as ConcatAdapter).adapters
-                        .first { it is ListAdapter<*, *> }
+
+                    val listAdapter: ListAdapter<*, *> = when (val adapter = recyclerView.adapter) {
+                        is ConcatAdapter -> adapter.adapters.find { it is ListAdapter<*, *> } as ListAdapter<*, *>
+                        is ListAdapter<*, *> -> adapter
+                        else -> throw IllegalArgumentException("Adapter $adapter is not a ListAdapter")
+                    }
+//                    val recyclerviewAdapter = (recyclerView.adapter as ConcatAdapter).adapters
+//                        .first { it is ListAdapter<*, *> }
 
 
                     val fromPosition = viewHolder.bindingAdapterPosition
@@ -82,8 +91,14 @@ class ItemTouchDraggableImp<T : HasOrder>(
                     isDragging = true
 
                     dragAndDropList = getListToSwap()
+                    setOrderMap()
+
+                    //0:0 , 1:1, 2:2, 3:3
+
+                    //2:2, 1:1, 0:0, 3:3
+
                     swapListIndexPositions(dragAndDropList!!, fromPosition, toPosition)
-                    recyclerviewAdapter.notifyItemMoved(fromPosition, toPosition)
+                    listAdapter.notifyItemMoved(fromPosition, toPosition)
                     return true
                 }
 
@@ -115,6 +130,14 @@ class ItemTouchDraggableImp<T : HasOrder>(
             }
 
         return ItemTouchHelper(itemTouchCallback)
+    }
+
+    private fun setOrderMap() {
+        //Save note order in from each index. So we can swap orders after dragging.
+        dragAndDropList?.reversed()?.forEachIndexed { index, task ->
+            originalOrder.add(task.order)
+//            orderMap[task.id] = task.order
+        }
     }
 
     private fun getListToSwap(): List<T> {
@@ -156,9 +179,14 @@ class ItemTouchDraggableImp<T : HasOrder>(
     }
 
     private fun changeOrderInListWithIndexPositions() {
-        dragAndDropList?.forEachIndexed { index, taskPresentationModel ->
-            taskPresentationModel.order = dragAndDropList!!.size - index - 1
+
+        dragAndDropList?.reversed()?.forEachIndexed { index, taskPresentationModel ->
+//            val newOrder = orderMap[index]?:throw IllegalArgumentException("Invalid order")
+            val newOrder = originalOrder[index]
+            taskPresentationModel.order = newOrder
         }
+
+
     }
 
 }
