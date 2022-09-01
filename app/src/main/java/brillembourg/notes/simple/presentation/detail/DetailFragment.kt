@@ -354,7 +354,7 @@ class DetailFragment : Fragment(), MenuProvider {
 fun setupExtrasToDetail(sharedView: View): FragmentNavigator.Extras {
     return FragmentNavigatorExtras(
         //View from item list
-        sharedView.findViewById<View>(R.id.task_cardview)
+        sharedView
                 //String mapping detail view (transition_name)
                 to sharedView.context.getString(R.string.home_shared_detail_container),
     )

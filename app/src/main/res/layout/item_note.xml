@@ -4,31 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="task"
             type="brillembourg.notes.simple.presentation.models.NotePresentationModel" />
     </data>
-
-    <!--    <androidx.constraintlayout.widget.ConstraintLayout-->
-    <!--        android:id="@+id/task_roundcontraint"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_marginStart="4dp"-->
-    <!--        android:layout_marginTop="4dp"-->
-    <!--        android:layout_marginEnd="4dp"-->
-    <!--        android:layout_marginBottom="4dp"-->
-    <!--        android:padding="2dp"-->
-    <!--        android:transitionName="@{@string/home_shared_item_container(task.id)}">-->
-
-    <!--    <brillembourg.notes.simple.ui.CanvasBrushView-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:checkable="true"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent"-->
-    <!--        android:padding="2dp">-->
-
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/task_cardview"
@@ -100,83 +79,6 @@ In nulla voluptas ut voluptatem modi qui consectetur quos. Ut sunt quibusdam non
                 android:focusable="false"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/task_text_content" />
-
-            <!--                <FrameLayout-->
-            <!--                    android:layout_width="match_parent"-->
-            <!--                    android:layout_height="wrap_content"-->
-            <!--                    app:layout_constraintBottom_toBottomOf="parent"-->
-            <!--                    app:layout_constraintStart_toStartOf="parent"-->
-            <!--                    android:scrollbars="none"-->
-            <!--                    app:layout_constraintTop_toBottomOf="@id/task_text_content">-->
-
-            <!--                    <com.google.android.material.chip.ChipGroup-->
-            <!--                        android:id="@+id/task_chipgroup_categories"-->
-            <!--                        android:layout_width="wrap_content"-->
-            <!--                        android:layout_height="wrap_content"-->
-            <!--                        android:layout_marginBottom="4dp"-->
-            <!--                        android:layout_marginTop="8dp"-->
-            <!--                        android:visibility="gone"-->
-            <!--                        app:chipSpacing="0dp"-->
-
-            <!--                        app:singleLine="false">-->
-
-
-            <!--                        &lt;!&ndash; Chips can be declared here, or added dynamically. &ndash;&gt;-->
-            <!--                        <com.google.android.material.chip.Chip-->
-            <!--                            android:text="My chip"-->
-            <!--                            android:layout_width="match_parent"-->
-            <!--                            android:layout_height="wrap_content"-->
-            <!--                            style="@style/Widget.SimpleNotes.Chip" />-->
-
-            <!--                        <com.google.android.material.chip.Chip-->
-            <!--                            android:text="My chip"-->
-            <!--                            android:layout_width="match_parent"-->
-            <!--                            android:layout_height="wrap_content"-->
-            <!--                            style="@style/Widget.SimpleNotes.Chip" />-->
-
-            <!--                        <com.google.android.material.chip.Chip-->
-            <!--                            android:text="My chip"-->
-            <!--                            android:layout_width="match_parent"-->
-            <!--                            android:layout_height="wrap_content"-->
-            <!--                            style="@style/Widget.SimpleNotes.Chip" />-->
-
-            <!--                        <com.google.android.material.chip.Chip-->
-            <!--                            android:text="My chip"-->
-            <!--                            android:layout_width="match_parent"-->
-            <!--                            android:layout_height="wrap_content"-->
-            <!--                            style="@style/Widget.SimpleNotes.Chip" />-->
-
-            <!--                        <com.google.android.material.chip.Chip-->
-            <!--                            android:text="My chip"-->
-            <!--                            android:layout_width="match_parent"-->
-            <!--                            android:layout_height="wrap_content"-->
-            <!--                            style="@style/Widget.SimpleNotes.Chip" />-->
-
-            <!--                        <com.google.android.material.chip.Chip-->
-            <!--                            android:text="My chip"-->
-            <!--                            android:layout_width="match_parent"-->
-            <!--                            android:layout_height="wrap_content"-->
-            <!--                            style="@style/Widget.SimpleNotes.Chip" />-->
-
-            <!--                        <com.google.android.material.chip.Chip-->
-            <!--                            android:text="My chip"-->
-            <!--                            android:layout_width="match_parent"-->
-            <!--                            android:layout_height="wrap_content"-->
-            <!--                            style="@style/Widget.SimpleNotes.Chip" />-->
-
-            <!--                        &lt;!&ndash;                    <com.google.android.material.chip.Chip&ndash;&gt;-->
-            <!--                        &lt;!&ndash;                        android:layout_width="wrap_content"&ndash;&gt;-->
-            <!--                        &lt;!&ndash;                        android:layout_height="wrap_content"&ndash;&gt;-->
-            <!--                        &lt;!&ndash;                        android:layout_marginTop="0dp"&ndash;&gt;-->
-            <!--                        &lt;!&ndash;                        android:elevation="0dp"&ndash;&gt;-->
-            <!--                        &lt;!&ndash;                        app:chipBackgroundColor="?colorSurface"&ndash;&gt;-->
-            <!--                        &lt;!&ndash;                        android:paddingTop="0dp"&ndash;&gt;-->
-            <!--                        &lt;!&ndash;                        app:chipMinHeight="22dp"&ndash;&gt;-->
-            <!--                        &lt;!&ndash;                        android:text="My chip" />&ndash;&gt;-->
-
-
-            <!--                    </com.google.android.material.chip.ChipGroup>-->
-            <!--                </FrameLayout>-->
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/task_text_date"
