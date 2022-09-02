@@ -5,7 +5,6 @@ import android.view.ActionMode
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -13,9 +12,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentCategoriesBinding
-import brillembourg.notes.simple.presentation.custom_views.hideKeyboard
-import brillembourg.notes.simple.presentation.custom_views.onClickFlow
-import brillembourg.notes.simple.presentation.custom_views.onFocusFlow
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
 import brillembourg.notes.simple.presentation.home.DeleteCategoriesConfirmation
 import brillembourg.notes.simple.presentation.ui_utils.getCategoriesSelectedTitle
@@ -52,34 +48,8 @@ class CategoriesFragment : Fragment() {
     }
 
     private fun setupListeners() {
-        safeUiLaunch {
-            binding.categoriesImageAddStart.onClickFlow.collect {
-                viewModel.onShowCreateCategory()
-            }
-        }
-
-        safeUiLaunch {
-            binding.categoriesImageAddClear.onClickFlow.collect {
-                viewModel.onShowCreateCategoryDismiss()
-            }
-        }
-
-        safeUiLaunch {
-            binding.categoriesImageAddSuccess.onClickFlow.collect {
-                viewModel.onCreateCategory()
-            }
-        }
-
-        safeUiLaunch {
-            binding.categoriesEditAdd.onClickFlow.collect {
-                if (!it.isFocused) viewModel.onShowCreateCategory()
-            }
-        }
-
-        safeUiLaunch {
-            binding.categoriesEditAdd.onFocusFlow.collect {
-                if (it) viewModel.onShowCreateCategory()
-            }
+        binding.categoriesCreateitemview.onReadyToCreateItem = {
+            viewModel.onCreateCategory(it)
         }
     }
 
@@ -95,14 +65,10 @@ class CategoriesFragment : Fragment() {
 
                 showDeleteCategoriesState(it.deleteConfirmation)
 
-//                toolbarMenu(it.isEditing)
             }
         }
     }
 
-//    private fun toolbarMenu(editing: Boolean) {
-//        requireActivity().invalidateMenu()
-//    }
 
     private fun showDeleteCategoriesState(state: DeleteCategoriesConfirmation?) {
         if (state != null) {
@@ -126,22 +92,8 @@ class CategoriesFragment : Fragment() {
     }
 
     private fun enableOrDisableCreateCategory(createCategory: CreateCategory) {
-
-        val isCreatingCategory = createCategory.isEnabled
-        binding.categoriesImageAddStart.visibility =
-            if (isCreatingCategory) View.INVISIBLE else View.VISIBLE
-        binding.categoriesImageAddSuccess.isVisible = isCreatingCategory
-        binding.categoriesImageAddClear.isVisible = isCreatingCategory
-
-        binding.categoriesEditAdd.apply {
-            if (isCreatingCategory) {
-                requestFocus()
-            } else {
-                setText("")
-                clearFocus()
-                binding.categoriesEditAdd.hideKeyboard()
-            }
-        }
+        if (createCategory.isEnabled) binding.categoriesCreateitemview.setCreatingMode()
+        else binding.categoriesCreateitemview.setIdleMode()
     }
 
     private fun setupCategoryList(categoryList: CategoryList) {
@@ -162,17 +114,6 @@ class CategoriesFragment : Fragment() {
     ) {
         val isInsertingInList = currentList.size < taskList.size
         noteAdapter.submitList(taskList.toMutableList()) { if (isInsertingInList) scrollToTop() }
-
-//        currentList.forEachIndexed { index, categoryPresentationModel ->
-//            if(categoryPresentationModel.isEditing) {
-//                noteAdapter.notifyItemChanged(index)
-//            }
-//        }
-
-//        binding.categoriesRecycler.post {
-//            noteAdapter.notifyDataSetChanged()
-//        }
-
     }
 
     private fun setupCategoryRecycler(list: List<CategoryPresentationModel>) {
