@@ -6,14 +6,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import brillembourg.notes.simple.databinding.ModalBottomSheetCategoriesBinding
+import brillembourg.notes.simple.presentation.categories.CategoriesViewModel
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
 import brillembourg.notes.simple.presentation.detail.setupSelectCategoriesAdapter
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
 
     private val detailViewModel: HomeViewModel by viewModels(ownerProducer = { requireParentFragment() })
+    private val categoryViewModel: CategoriesViewModel by viewModels()
     private lateinit var binding: ModalBottomSheetCategoriesBinding
 
     override fun onCreateView(
@@ -29,9 +33,30 @@ class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
 
     private fun setupListeners() {
         binding.selectCategoriesImageClear.setOnClickListener { dismiss() }
+
+        binding.selectCategoriesCreateitem.onReadyToCreateItem = { name ->
+            categoryViewModel.onCreateCategory(name)
+        }
     }
 
     private fun renderStates() {
+        renderHomeSelectCategoryState()
+        renderCategoryCreateState()
+    }
+
+    private fun renderCategoryCreateState() {
+        safeUiLaunch {
+            categoryViewModel.categoryUiState.collect {
+                if (it.createCategory.isEnabled) {
+                    binding.selectCategoriesCreateitem.setCreatingMode()
+                } else {
+                    binding.selectCategoriesCreateitem.setIdleMode()
+                }
+            }
+        }
+    }
+
+    private fun renderHomeSelectCategoryState() {
         safeUiLaunch {
             detailViewModel.homeUiState.collect {
                 if (it.selectFilterCategories.isShowing) {
