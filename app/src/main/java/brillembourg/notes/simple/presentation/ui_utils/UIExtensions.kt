@@ -11,16 +11,18 @@ import android.os.Build
 import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.ActionBar
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.res.use
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -30,7 +32,6 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.ui_utils.asString
 import brillembourg.notes.simple.util.UiText
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -56,6 +57,16 @@ val View.onFocusFlow: Flow<Boolean>
             trySend(b)
         }
         awaitClose { onFocusChangeListener = null }
+    }.conflate()
+
+val TextView.onTextChangedFlow: Flow<String>
+    get() = callbackFlow<String> {
+        addTextChangedListener { editable ->
+            doAfterTextChanged {
+                trySend(it.toString())
+            }
+        }
+        awaitClose { addTextChangedListener(null) }
     }.conflate()
 
 fun ComponentActivity.safeUiLaunch(block: suspend CoroutineScope.() -> Unit) {
@@ -101,9 +112,6 @@ fun MainActivity.showMessage(message: String, onMessageShown: (() -> Unit)? = nu
     }
 }
 
-/**
- * Retrieve a color from the current [android.content.res.Resources.Theme].
- */
 @ColorInt
 @SuppressLint("Recycle")
 fun Context.themeColor(
@@ -203,18 +211,18 @@ fun ExtendedFloatingActionButton.animateWithRecycler(recyclerView: RecyclerView)
     })
 }
 
-fun Toolbar.lockScroll() {
-    val params: AppBarLayout.LayoutParams = this.layoutParams as AppBarLayout.LayoutParams
-    params.scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
-    requestLayout()
-}
-
-fun Toolbar.unLockScroll() {
-    val params: AppBarLayout.LayoutParams = this.layoutParams as AppBarLayout.LayoutParams
-    params.scrollFlags =
-        AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
-    requestLayout()
-}
+//fun Toolbar.lockScroll() {
+//    val params: AppBarLayout.LayoutParams = this.layoutParams as AppBarLayout.LayoutParams
+//    params.scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
+//    requestLayout()
+//}
+//
+//fun Toolbar.unLockScroll() {
+//    val params: AppBarLayout.LayoutParams = this.layoutParams as AppBarLayout.LayoutParams
+//    params.scrollFlags =
+//        AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+//    requestLayout()
+//}
 
 fun Activity.restartApp() {
     val intent = packageManager.getLaunchIntentForPackage(packageName)

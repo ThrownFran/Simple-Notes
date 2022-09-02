@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--    <declare-styleable name="PromptButtons">-->
+    <!--        <attr name="setPositiveText" format="string"/>-->
+    <!--        <attr name="setNegativeText" format="string"/>-->
+    <!--        <attr name="setSubtitleText" format="string"/>-->
+    <!--        <attr name="cancelVisibility" format="boolean"/>-->
+    <!--        <attr name="setPositiveDrawable" format="reference"/>-->
+    <!--        <attr name="setNegativeDrawable" format="reference"/>-->
+    <!--        <attr name="buttonTextSize" format="dimension" />-->
+
+    <!--        <attr name="promptButtonStyle" format="enum">-->
+    <!--            <enum name="horizontal" value="0"/>-->
+    <!--            <enum name="vertical" value="1"/>-->
+    <!--        </attr>-->
+    <!--    </declare-styleable>-->
+
+    <declare-styleable name="CreateItemView">
+        <attr name="createItemText" format="string" />
+
+    </declare-styleable>
+
+</resources>

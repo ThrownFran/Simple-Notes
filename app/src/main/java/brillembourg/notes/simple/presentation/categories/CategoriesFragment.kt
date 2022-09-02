@@ -46,45 +46,10 @@ class CategoriesFragment : Fragment() {
             FragmentCategoriesBinding.inflate(inflater, container, false)
         binding = _binding as FragmentCategoriesBinding
         binding.viewmodel = viewModel
-//        setupMenu()
         renderStates()
         setupListeners()
         return binding.root
     }
-
-//    private fun setupMenu() {
-//        val menuHost: MenuHost = requireActivity()
-//        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.STARTED)
-//    }
-
-//    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-//        menuInflater.inflate(R.menu.menu_categories, menu)
-//    }
-
-//    override fun onPrepareMenu(menu: Menu) {
-//        super.onPrepareMenu(menu)
-//        menu.findItem(R.id.menu_categories_edit).apply {
-//            isVisible = viewModel.categoryUiState.value.editIconVisibility()
-//        }
-//        menu.findItem(R.id.menu_categories_save).apply {
-//            isVisible = viewModel.categoryUiState.value.saveIconVisibility()
-//        }
-//    }
-
-
-//    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-//        when (menuItem.itemId) {
-//            R.id.menu_categories_edit -> {
-//                viewModel.onEdit()
-//                return true
-//            }
-//            R.id.menu_categories_save -> {
-//                viewModel.onSave()
-//                return true
-//            }
-//        }
-//        return false
-//    }
 
     private fun setupListeners() {
         safeUiLaunch {

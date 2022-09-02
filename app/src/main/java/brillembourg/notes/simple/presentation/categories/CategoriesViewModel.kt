@@ -72,8 +72,8 @@ class CategoriesViewModel @Inject constructor(
         }
     }
 
-    fun onCreateCategory() {
-        val name = categoryUiState.value.createCategory?.name
+    fun onCreateCategory(providedName: String? = null) {
+        val name = providedName ?: categoryUiState.value.createCategory.name
 
         if (name.isNullOrEmpty()) {
             showMessage(UiText.DynamicString("No name"))

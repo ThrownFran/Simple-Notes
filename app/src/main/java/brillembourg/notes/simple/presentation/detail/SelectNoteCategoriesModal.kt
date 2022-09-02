@@ -6,13 +6,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import brillembourg.notes.simple.databinding.ModalBottomSheetCategoriesBinding
+import brillembourg.notes.simple.presentation.categories.CategoriesViewModel
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SelectNoteCategoriesModal : BottomSheetDialogFragment() {
 
     private val detailViewModel: DetailViewModel by viewModels(ownerProducer = { requireParentFragment() })
+    private val categoryViewModel: CategoriesViewModel by viewModels()
     private lateinit var binding: ModalBottomSheetCategoriesBinding
 
     override fun onCreateView(
@@ -28,6 +32,9 @@ class SelectNoteCategoriesModal : BottomSheetDialogFragment() {
 
     private fun setupListeners() {
         binding.selectCategoriesImageClear.setOnClickListener { dismiss() }
+        binding.selectCategoriesCreateitem.onReadyToCreateItem = { name ->
+            categoryViewModel.onCreateCategory(name)
+        }
     }
 
     private fun renderStates() {
@@ -43,6 +50,16 @@ class SelectNoteCategoriesModal : BottomSheetDialogFragment() {
                     }
                 } else {
                     dismiss()
+                }
+            }
+        }
+
+        safeUiLaunch {
+            categoryViewModel.categoryUiState.collect {
+                if (it.createCategory.isEnabled) {
+                    binding.selectCategoriesCreateitem.setCreatingMode()
+                } else {
+                    binding.selectCategoriesCreateitem.setIdleMode()
                 }
             }
         }
