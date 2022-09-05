@@ -1,6 +1,7 @@
 package brillembourg.notes.simple.presentation.base
 
 import brillembourg.notes.simple.util.UiText
+import brillembourg.notes.simple.util.getMessageFromError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,27 +13,25 @@ import kotlinx.coroutines.flow.update
 interface MessageManager {
     val message: StateFlow<UiText?>
     fun showMessage(message: UiText)
+    fun showError(exception: Exception)
     fun onMessageShown(message: UiText)
 }
 
 class MessageManagerImp : MessageManager {
 
-    //    private val _messages: MutableStateFlow<List<UiText>> = MutableStateFlow(emptyList())
     private val _message: MutableStateFlow<UiText?> = MutableStateFlow(null)
     override val message = _message.asStateFlow()
 
     override fun showMessage(message: UiText) {
         _message.update { message }
-//        _messages.update { currentMessages ->
-//            currentMessages + message
-//        }
     }
 
     override fun onMessageShown(message: UiText) {
         _message.update { null }
-//        _messages.update { currentMessages ->
-//            currentMessages - message
-//        }
+    }
+
+    override fun showError(exception: Exception) {
+        showMessage(getMessageFromError(exception))
     }
 }
 

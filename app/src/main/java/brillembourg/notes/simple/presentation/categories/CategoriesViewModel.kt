@@ -8,7 +8,6 @@ import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.home.DeleteCategoriesConfirmation
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
-import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -26,18 +25,16 @@ class CategoriesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _categoryUiState = MutableStateFlow(CategoriesUiState())
+        .apply { observeCategoryList() }
     val categoryUiState = _categoryUiState.asStateFlow()
 
-    init {
-        observeCategoryList()
-    }
 
     private fun observeCategoryList() {
         getCategoriesUseCase(GetCategoriesUseCase.Params())
             .onEach { result ->
                 when (result) {
-                    is Resource.Success -> _categoryUiState.update {
-                        it.copy(
+                    is Resource.Success -> _categoryUiState.update { uiState ->
+                        uiState.copy(
                             categoryList = CategoryList(
                                 data = result.data.categoryList
                                     .map { category -> category.toPresentation() }
@@ -47,21 +44,24 @@ class CategoriesViewModel @Inject constructor(
                             )
                         )
                     }
+
                     is Resource.Error -> showErrorMessage(result.exception)
-                    is Resource.Loading -> TODO()
+                    is Resource.Loading -> Unit
                 }
             }
             .launchIn(viewModelScope)
     }
 
     private fun showErrorMessage(exception: Exception) {
-        messageManager.showMessage(getMessageFromError(exception))
+        messageManager.showError(exception)
     }
 
     private fun showMessage(uiText: UiText) = messageManager.showMessage(uiText)
 
 
     //////////////// CREATE
+
+    //region Create
 
     fun onShowCreateCategory() {
         _categoryUiState.update {
@@ -105,6 +105,8 @@ class CategoriesViewModel @Inject constructor(
             }
         }
     }
+
+    //endregion
 
     fun onSelection() {
         val sizeSelected = getSelectedCategories().size
@@ -205,9 +207,6 @@ class CategoriesViewModel @Inject constructor(
         onSelectionDismissed()
     }
 
-//    fun onEdit() {
-//        _categoryUiState.update { it.copy(isEditing = true) }
-//    }
 
     fun onSave(newName: String, categoryPresentationModel: CategoryPresentationModel) {
         val categoryRenamed = categoryPresentationModel.copy(name = newName).toDomain()
@@ -221,23 +220,6 @@ class CategoriesViewModel @Inject constructor(
             }
         }
     }
-
-//    fun onSave() {
-//        val categoryList = categoryUiState.value.categoryList.data
-//            .onEach { it.isEditing = false }
-//
-//        _categoryUiState.update { uiState ->
-//            uiState.copy(
-//                isEditing = false,
-//                categoryList = uiState.categoryList.copy(
-//                    data = categoryList,
-//                    mustRender = true
-//                )
-//            )
-//        }
-
-    //TODO SAVE ACTUAL
-//    }
 
 
 }
