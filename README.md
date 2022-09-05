@@ -1,6 +1,9 @@
 # Simple-Notes 
-
 UNDER DEVELOPMENT
+
+Coding approach: Clean arquitecture and clean code.
+MVVM, Kotlin coroutines, Kotlin Flow, Room, Material design 3, Unit testing
+
 
 <p float="left">
 <img width="392" alt="SN_screenshot_home_light" src="https://user-images.githubusercontent.com/17883253/188503694-13e01c6a-4c17-4cb4-a4ba-c774b70e2ae4.png">
