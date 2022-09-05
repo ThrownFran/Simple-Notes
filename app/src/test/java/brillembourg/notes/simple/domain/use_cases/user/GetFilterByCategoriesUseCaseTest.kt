@@ -1,5 +1,7 @@
 package brillembourg.notes.simple.domain.use_cases.user
 
+import brillembourg.notes.simple.CoroutineTestRule
+import brillembourg.notes.simple.TestSchedulers
 import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.models.Category
 import brillembourg.notes.simple.domain.repositories.UserPrefRepository
@@ -23,17 +25,17 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(JUnit4::class)
 class GetFilterByCategoriesUseCaseTest {
 
     @get:Rule
     val mockkRule = MockKRule(this)
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @MockK
     private lateinit var repository: UserPrefRepository
-
-    @MockK
-    private lateinit var schedulers: Schedulers
 
     @MockK
     private lateinit var getCategoriesUseCase: GetCategoriesUseCase
@@ -42,13 +44,7 @@ class GetFilterByCategoriesUseCaseTest {
 
     @Before
     fun setUp() {
-        SUT = GetFilterByCategoriesUseCase(repository, getCategoriesUseCase, schedulers)
-        mockSchedulers()
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun mockSchedulers() {
-        coEvery { schedulers.defaultDispatcher() } returns UnconfinedTestDispatcher()
+        SUT = GetFilterByCategoriesUseCase(repository, getCategoriesUseCase, TestSchedulers())
     }
 
     private fun mockGetFilterRepositorySuccess() {

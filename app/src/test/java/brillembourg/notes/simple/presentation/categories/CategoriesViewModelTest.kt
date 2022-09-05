@@ -1,6 +1,7 @@
 package brillembourg.notes.simple.presentation.categories
 
 import androidx.lifecycle.SavedStateHandle
+import brillembourg.notes.simple.CoroutineTestRule
 import brillembourg.notes.simple.domain.models.Category
 import brillembourg.notes.simple.domain.use_cases.categories.*
 import brillembourg.notes.simple.presentation.base.MessageManager
@@ -12,10 +13,7 @@ import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -30,6 +28,9 @@ class CategoriesViewModelTest {
 
     @get:Rule
     val rule = MockKRule(this)
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(StandardTestDispatcher())
 
     @MockK
     private lateinit var savedStateHandle: SavedStateHandle
@@ -62,17 +63,7 @@ class CategoriesViewModelTest {
         Category(5L, "Cat 5", 0),
     )
 
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
-
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(StandardTestDispatcher())
-    }
-
-    private fun buildSUT() {
+    private fun setupSUT() {
         SUT = CategoriesViewModel(
             savedStateHandle = savedStateHandle,
             getCategoriesUseCase = getCategoriesUseCase,
@@ -110,7 +101,7 @@ class CategoriesViewModelTest {
     fun `on init observe get categories use case`() = runTest {
         //Arrange
         mockGetCategoriesSuccess()
-        buildSUT()
+        setupSUT()
         //Act
 
         //Assert
@@ -121,7 +112,7 @@ class CategoriesViewModelTest {
     fun `get categories is success, update list state with sorted and reversed list`() = runTest {
         //Arrange
         mockGetCategoriesSuccess()
-        buildSUT()
+        setupSUT()
         //Act
         testScheduler.advanceUntilIdle()
         //Assert
@@ -138,10 +129,15 @@ class CategoriesViewModelTest {
     fun `get categories error, show message`() = runTest {
         //Arrange
         mockGetCategoriesError()
-        buildSUT()
+        setupSUT()
         //Act
         testScheduler.advanceUntilIdle()
         //Assert
         coVerify { messageManager.showError(any()) }
+    }
+
+    @Test
+    fun `on create categories, if messa`() {
+        TODO("Not yet implemented")
     }
 }

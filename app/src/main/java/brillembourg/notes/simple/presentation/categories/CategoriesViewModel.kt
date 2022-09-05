@@ -63,35 +63,19 @@ class CategoriesViewModel @Inject constructor(
 
     //region Create
 
-    fun onShowCreateCategory() {
-        _categoryUiState.update {
-            it.copy(
-                createCategory = it.createCategory.copy(isEnabled = true),
-                selectionMode = null
-            )
-        }
-    }
+    fun onCreateCategory(providedName: String?) {
 
-    fun onCreateCategory(providedName: String? = null) {
-        val name = providedName ?: categoryUiState.value.createCategory.name
-
-        if (name.isNullOrEmpty()) {
+        if (providedName.isNullOrEmpty()) {
             showMessage(UiText.DynamicString("No name"))
             return
         }
 
-        createCategory(name)
+        createCategory(providedName)
 
         _categoryUiState.update {
             it.copy(createCategory = it.createCategory.copy(isEnabled = false, name = ""))
         }
         _categoryUiState.value.createCategory.clear()
-    }
-
-    fun onShowCreateCategoryDismiss() {
-        _categoryUiState.update {
-            it.copy(createCategory = it.createCategory.copy(isEnabled = false, name = ""))
-        }
     }
 
     private fun createCategory(name: String) {

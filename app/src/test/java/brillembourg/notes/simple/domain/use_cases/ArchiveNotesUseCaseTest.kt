@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.domain.use_cases
 
+import brillembourg.notes.simple.CoroutineTestRule
 import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.util.Resource
@@ -8,6 +9,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -16,11 +18,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(JUnit4::class)
 class ArchiveNotesUseCaseTest {
 
     @get:Rule
     val mockkRule = MockKRule(this)
+
+    @get:Rule
+    val coroutineRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @MockK
     private lateinit var repository: NotesRepository
@@ -33,7 +39,7 @@ class ArchiveNotesUseCaseTest {
     @Before
     fun setUp() {
         mockRepositorySuccess()
-        coEvery { schedulers.defaultDispatcher() }.returns(UnconfinedTestDispatcher())
+        coEvery { schedulers.defaultDispatcher() }.returns(coroutineRule.testDispatcher)
         SUT = ArchiveNotesUseCase(repository, schedulers)
     }
 

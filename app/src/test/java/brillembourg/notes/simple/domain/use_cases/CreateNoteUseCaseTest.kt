@@ -1,5 +1,7 @@
 package brillembourg.notes.simple.domain.use_cases
 
+import brillembourg.notes.simple.CoroutineTestRule
+import brillembourg.notes.simple.TestSchedulers
 import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.models.Note
 import brillembourg.notes.simple.domain.models.NoteWithCategories
@@ -20,28 +22,23 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(JUnit4::class)
 class CreateNoteUseCaseTest {
 
     @get:Rule
     val mockkRule = MockKRule(this)
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @MockK
     private lateinit var repository: NotesRepository
 
-    @MockK
-    private lateinit var schedulers: Schedulers
-
     private lateinit var SUT: CreateNoteUseCase
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
-        SUT = CreateNoteUseCase(repository, schedulers)
-        every { schedulers.defaultDispatcher() }.returns(
-            UnconfinedTestDispatcher()
-//            Executors.newSingleThreadExecutor().asCoroutineDispatcher()
-        )
+        SUT = CreateNoteUseCase(repository, TestSchedulers(coroutineTestRule.testDispatcher))
     }
 
     private fun mockRepositorySuccess(params: CreateNoteUseCase.Params) {
@@ -60,6 +57,8 @@ class CreateNoteUseCaseTest {
 
     @Test
     fun `create note, repository invoked with correct params`() = runTest {
+        print(this.testScheduler)
+        print(coroutineTestRule.testDispatcher)
         //Arrange
         val title = "My new note"
         val content = "My content"
