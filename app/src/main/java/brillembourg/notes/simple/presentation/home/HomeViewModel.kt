@@ -79,7 +79,7 @@ class HomeViewModel @Inject constructor(
                         is Resource.Success -> {
                             _homeUiState.update { uiState ->
 
-                            uiState.copy(
+                                uiState.copy(
                                     noteList = NoteList(
                                         notes = result.data.noteList
                                             .map { noteWithCategories ->
@@ -123,57 +123,57 @@ class HomeViewModel @Inject constructor(
 
     private fun observeCategories(onFilteredCategoriesLoaded: (() -> Unit)? = null) {
 
-        val availableCategoriesFlow =
-            getAvailableCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
+//        val availableCategoriesFlow =
+//            getAvailableCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
 
         categorieAvailableJob?.cancel()
-        categorieAvailableJob = availableCategoriesFlow.onEach { result ->
-            when (result) {
-                is Resource.Success -> {
-                    _homeUiState.update { uiState ->
-                        uiState.copy(
-                            selectFilterCategories = _homeUiState.value.selectFilterCategories.copy(
-                                categories = result.data.categoryList
-                                    .map { it.toPresentation() }
-                                    .toDiplayOrder(),
-                                isFilterCategoryMenuAvailable = true
-                            )
-                        )
-                    }
-                }
-                is Resource.Error -> showErrorMessage(result.exception)
-                is Resource.Loading -> Unit
-
-            }
-        }
-            .launchIn(viewModelScope)
-
-        filteredCategoriesJob?.cancel()
-        filteredCategoriesJob = getFilteredCategoriesUseCase.invoke(
-            GetFilterByCategoriesUseCase.Params(availableCategoriesFlow)
-        )
-            .onEach { result ->
+        categorieAvailableJob =
+            getAvailableCategoriesUseCase.invoke(GetCategoriesUseCase.Params()).onEach { result ->
                 when (result) {
                     is Resource.Success -> {
                         _homeUiState.update { uiState ->
                             uiState.copy(
-                                filteredCategories = result.data.categories
-                                    .map { it.toPresentation() }
-                                    .toDiplayOrder()
+                                selectFilterCategories = _homeUiState.value.selectFilterCategories.copy(
+                                    categories = result.data.categoryList
+                                        .map { it.toPresentation() }
+                                        .toDiplayOrder(),
+                                    isFilterCategoryMenuAvailable = true
+                                )
                             )
                         }
+                    }
+                    is Resource.Error -> showErrorMessage(result.exception)
+                    is Resource.Loading -> Unit
 
-                    }
-                    is Resource.Error -> {
-                        showErrorMessage(result.exception)
-                    }
-                    is Resource.Loading -> {
-                        Unit
-                    }
                 }
-                onFilteredCategoriesLoaded?.invoke()
             }
-            .launchIn(viewModelScope)
+                .launchIn(viewModelScope)
+
+        filteredCategoriesJob?.cancel()
+        filteredCategoriesJob =
+            getFilteredCategoriesUseCase.invoke(GetFilterByCategoriesUseCase.Params())
+                .onEach { result ->
+                    when (result) {
+                        is Resource.Success -> {
+                            _homeUiState.update { uiState ->
+                                uiState.copy(
+                                    filteredCategories = result.data.categories
+                                        .map { it.toPresentation() }
+                                        .toDiplayOrder()
+                                )
+                            }
+
+                        }
+                        is Resource.Error -> {
+                            showErrorMessage(result.exception)
+                        }
+                        is Resource.Loading -> {
+                            Unit
+                        }
+                    }
+                    onFilteredCategoriesLoaded?.invoke()
+                }
+                .launchIn(viewModelScope)
     }
 
 

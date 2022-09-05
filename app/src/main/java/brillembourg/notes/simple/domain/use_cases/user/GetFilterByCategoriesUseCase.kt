@@ -10,16 +10,17 @@ import javax.inject.Inject
 
 class GetFilterByCategoriesUseCase @Inject constructor(
     private val repository: UserPrefRepository,
+    private val getCategoriesUseCase: GetCategoriesUseCase,
     private val schedulers: Schedulers
 ) {
 
-    class Params(val getCategoriesFlow: Flow<Resource<GetCategoriesUseCase.Result>>)
+    class Params()
     class CategoriesIds(val categoryIds: List<Long>)
     class Result(val categories: List<Category>)
 
     operator fun invoke(params: Params): Flow<Resource<Result>> {
 
-        return params.getCategoriesFlow
+        return getCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
             .flowOn(schedulers.defaultDispatcher())
             .flatMapLatest { result: Resource<GetCategoriesUseCase.Result> ->
                 repository.getFilter(params)
@@ -29,29 +30,14 @@ class GetFilterByCategoriesUseCase @Inject constructor(
                                 emitCategoryModel(result, it)
                             }
                             is Resource.Error -> {
-                                Resource.Error<Result>(it.exception)
+                                emit(Resource.Error(it.exception))
                             }
                             is Resource.Loading -> {
-                                Resource.Loading<Result>()
+                                emit(Resource.Loading())
                             }
                         }
                     }
             }
-
-
-//        return repository.getFilter(params)
-//            .flowOn(schedulers.defaultDispatcher())
-//            .transform { categoriesIdsResult ->
-//                if (categoriesIdsResult is Resource.Success) {
-//                    params.getCategoriesFlow
-//                        .flowOn(schedulers.defaultDispatcher())
-//                        .collect { allCategoriesResult: Resource<GetCategoriesUseCase.Result> ->
-//                            emitCategoryModel(allCategoriesResult, categoriesIdsResult)
-//                        }
-//                } else {
-//                    throw IllegalArgumentException("Category id not found")
-//                }
-//            }
     }
 
     private suspend fun FlowCollector<Resource<Result>>.emitCategoryModel(
@@ -77,8 +63,7 @@ class GetFilterByCategoriesUseCase @Inject constructor(
         filteredIds: List<Long>,
         availableCategories: List<Category>
     ): Result {
-        return Result(availableCategories.filter { category -> filteredIds.contains(category.id) }
-        )
+        return Result(availableCategories.filter { category -> filteredIds.contains(category.id) })
     }
 
 
