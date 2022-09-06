@@ -77,26 +77,7 @@ class HomeViewModel @Inject constructor(
                 .onEach { result ->
                     when (result) {
                         is Resource.Success -> {
-                            _homeUiState.update { uiState ->
-
-                                uiState.copy(
-                                    noteList = NoteList(
-                                        notes = result.data.noteList
-                                            .map { noteWithCategories ->
-                                                noteWithCategories.toPresentation(dateProvider)
-                                                    .apply {
-                                                        this.isSelected =
-                                                            isNoteSelectedInUi(
-                                                                uiState,
-                                                                noteWithCategories.note
-                                                            )
-                                                    }
-                                            }
-                                            .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                                            .asReversed(),
-                                        mustRender = true)
-                                )
-                            }
+                            updateNoteListState(result)
                         }
                         is Resource.Error -> {
                             showErrorMessage(result.exception)
@@ -105,6 +86,25 @@ class HomeViewModel @Inject constructor(
                     }
                 }
                 .launchIn(viewModelScope)
+    }
+
+    private fun updateNoteListState(result: Resource.Success<GetNotesUseCase.Result>) {
+        _homeUiState.update { uiState ->
+            uiState.copy(
+                noteList = NoteList(
+                    notes = result.data.noteList
+                        .map { noteWithCategories ->
+                            noteWithCategories.toPresentation(dateProvider)
+                                .apply {
+                                    this.isSelected =
+                                        isNoteSelectedInUi(uiState, noteWithCategories.note)
+                                }
+                        }
+                        .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+                        .asReversed(),
+                    mustRender = true)
+            )
+        }
     }
 
     fun onNoteClick(it: NotePresentationModel) {

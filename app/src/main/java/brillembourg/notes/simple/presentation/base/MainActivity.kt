@@ -2,6 +2,7 @@ package brillembourg.notes.simple.presentation.base
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -43,10 +44,12 @@ class MainActivity : AppCompatActivity() {
         renderStates()
         backupModel = roomBackupBuilder.prepareBackupInLocalStorage()
         handleIntentReceiver(intent)
+        Log.e("MainActivity", "onCreate $this")
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        Log.e("MainActivity", "onNewIntent $this")
         handleIntentReceiver(intent)
     }
 

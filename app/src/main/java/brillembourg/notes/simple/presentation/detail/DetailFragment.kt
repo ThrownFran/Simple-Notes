@@ -1,11 +1,13 @@
 package brillembourg.notes.simple.presentation.detail
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.FragmentNavigator
@@ -14,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentDetailBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
+import brillembourg.notes.simple.presentation.base.MainViewModel
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.custom_views.*
@@ -39,6 +42,7 @@ class DetailFragment : Fragment(), MenuProvider {
 
     private lateinit var binding: FragmentDetailBinding
     private val viewModel: DetailViewModel by viewModels()
+    private val activityViewModel: MainViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +59,7 @@ class DetailFragment : Fragment(), MenuProvider {
         setHasOptionsMenu(true)
         unfocusScreenWhenKeyboardHidden()
         setupMenu()
+        Log.e("DetailFragment", "OnCreateView: $this")
         return binding.root
     }
 
@@ -273,6 +278,14 @@ class DetailFragment : Fragment(), MenuProvider {
                 .collect {
                     updateToolbarIcons()
                 }
+        }
+
+        safeUiLaunch {
+            activityViewModel.incomingContentFromExternalApp.collect { content ->
+                content?.let {
+                    clickBack()
+                }
+            }
         }
     }
 
