@@ -28,6 +28,7 @@ sealed class UiText {
     object CategoryDeleted : UiText()
     object CategoriesDeleted : UiText()
     object CategoriesReordered : UiText()
+    object CategoryNameEmpty : UiText()
 }
 
 

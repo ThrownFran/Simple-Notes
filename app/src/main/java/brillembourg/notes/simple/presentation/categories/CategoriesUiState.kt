@@ -31,10 +31,6 @@ data class CategoryList(
 data class CreateCategory(var isEnabled: Boolean = false, var name: String = "") : Parcelable,
     BaseObservable() {
 
-    fun clear() {
-        isEnabled = false
-        name = ""
-    }
 
     @Bindable
     fun getCreateCategoryNameBinding(): String {

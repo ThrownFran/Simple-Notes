@@ -28,6 +28,7 @@ class CategoriesViewModel @Inject constructor(
         .apply { observeCategoryList() }
     val categoryUiState = _categoryUiState.asStateFlow()
 
+    //region List
 
     private fun observeCategoryList() {
         getCategoriesUseCase(GetCategoriesUseCase.Params())
@@ -52,12 +53,17 @@ class CategoriesViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    //endregion
+
+    //region Messages
+
     private fun showErrorMessage(exception: Exception) {
         messageManager.showError(exception)
     }
 
     private fun showMessage(uiText: UiText) = messageManager.showMessage(uiText)
 
+    //endregion
 
     //////////////// CREATE
 
@@ -66,7 +72,7 @@ class CategoriesViewModel @Inject constructor(
     fun onCreateCategory(providedName: String?) {
 
         if (providedName.isNullOrEmpty()) {
-            showMessage(UiText.DynamicString("No name"))
+            showMessage(UiText.CategoryNameEmpty)
             return
         }
 
@@ -75,14 +81,12 @@ class CategoriesViewModel @Inject constructor(
         _categoryUiState.update {
             it.copy(createCategory = it.createCategory.copy(isEnabled = false, name = ""))
         }
-        _categoryUiState.value.createCategory.clear()
     }
 
     private fun createCategory(name: String) {
 
         viewModelScope.launch {
-            val result = createCategoryUseCase(CreateCategoryUseCase.Params(name))
-            when (result) {
+            when (val result = createCategoryUseCase(CreateCategoryUseCase.Params(name))) {
                 is Resource.Success -> showMessage(result.data.message)
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
@@ -91,6 +95,8 @@ class CategoriesViewModel @Inject constructor(
     }
 
     //endregion
+
+    //region Selection
 
     fun onSelection() {
         val sizeSelected = getSelectedCategories().size
@@ -111,6 +117,10 @@ class CategoriesViewModel @Inject constructor(
     private fun getSelectedCategories(): List<CategoryPresentationModel> {
         return categoryUiState.value.categoryList.data.filter { it.isSelected }
     }
+
+    //endregion
+
+    //region Delete
 
     fun onDeleteConfirmCategories() {
         _categoryUiState.update {
@@ -153,6 +163,10 @@ class CategoriesViewModel @Inject constructor(
         }
     }
 
+    //endregion
+
+    //region Reordered
+
     fun onReorderedCategories(reorderedCategoryList: List<CategoryPresentationModel>) {
         _categoryUiState.update {
 
@@ -191,6 +205,9 @@ class CategoriesViewModel @Inject constructor(
         onSelectionDismissed()
     }
 
+    //endregion
+
+    //region Save
 
     fun onSave(newName: String, categoryPresentationModel: CategoryPresentationModel) {
         val categoryRenamed = categoryPresentationModel.copy(name = newName).toDomain()
@@ -204,6 +221,8 @@ class CategoriesViewModel @Inject constructor(
             }
         }
     }
+
+    //endregion
 
 
 }

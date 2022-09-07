@@ -21,10 +21,11 @@ fun UiText.asString(context: Context): String {
         is UiText.RestoreSuccess -> "Restore success"
         is UiText.UnknownError -> "We are sorry, we got an error!"
         is UiText.GetNotesError -> "Error loading notes"
-        UiText.CategoriesDeleted -> "Categories deleted"
-        UiText.CategoriesReordered -> "Categories reordered"
-        UiText.CategoryCreated -> "Category created"
-        UiText.CategoryDeleted -> "Category deleted"
-        UiText.CategoryUpdated -> "Category updated"
+        is UiText.CategoriesDeleted -> "Labels deleted"
+        is UiText.CategoriesReordered -> "Labels reordered"
+        is UiText.CategoryCreated -> "Label created"
+        is UiText.CategoryDeleted -> "Label deleted"
+        is UiText.CategoryUpdated -> "Label updated"
+        is UiText.CategoryNameEmpty -> "Label Name is empty"
     }
 }
