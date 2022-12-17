@@ -1,6 +1,6 @@
 package brillembourg.notes.simple.domain.repositories
 
-import brillembourg.notes.simple.domain.use_cases.BackupAndRestoreNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.BackupAndRestoreNotesUseCase
 import brillembourg.notes.simple.util.Resource
 
 interface BackupAndRestoreRepository {

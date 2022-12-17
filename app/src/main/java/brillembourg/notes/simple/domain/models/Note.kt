@@ -9,4 +9,7 @@ data class Note(
     val isArchived: Boolean = false
 )
 
-data class NoteWithCategories(val note: Note, val categories: List<Category>)
+data class NoteWithCategories(
+    val note: Note,
+    val categories: List<Category>
+)

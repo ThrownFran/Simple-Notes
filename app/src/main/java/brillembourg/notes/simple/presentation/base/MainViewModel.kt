@@ -2,8 +2,8 @@ package brillembourg.notes.simple.presentation.base
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import brillembourg.notes.simple.domain.use_cases.BackupAndRestoreNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.BackupModel
+import brillembourg.notes.simple.domain.use_cases.notes.BackupAndRestoreNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.BackupModel
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError

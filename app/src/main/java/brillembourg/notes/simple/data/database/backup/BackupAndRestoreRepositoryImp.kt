@@ -2,7 +2,7 @@ package brillembourg.notes.simple.data.database.backup
 
 import brillembourg.notes.simple.data.database.RoomBackupHandler
 import brillembourg.notes.simple.domain.repositories.BackupAndRestoreRepository
-import brillembourg.notes.simple.domain.use_cases.BackupAndRestoreNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.BackupAndRestoreNotesUseCase
 import brillembourg.notes.simple.util.*
 
 class BackupAndRestoreRepositoryImp(

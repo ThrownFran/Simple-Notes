@@ -3,6 +3,7 @@ package brillembourg.notes.simple.domain.use_cases
 import brillembourg.notes.simple.CoroutineTestRule
 import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.repositories.NotesRepository
+import brillembourg.notes.simple.domain.use_cases.notes.ArchiveNotesUseCase
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import io.mockk.coEvery

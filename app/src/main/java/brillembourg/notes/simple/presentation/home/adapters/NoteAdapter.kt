@@ -1,13 +1,14 @@
-package brillembourg.notes.simple.presentation.home
+package brillembourg.notes.simple.presentation.home.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemNoteBinding
+import brillembourg.notes.simple.presentation.home.NoteViewHolder
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
-import brillembourg.notes.simple.presentation.ui_utils.Draggable
-import brillembourg.notes.simple.presentation.ui_utils.ItemTouchDraggableImp
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.Draggable
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.ItemTouchDraggableImp
 import brillembourg.notes.simple.presentation.ui_utils.setupTaskDiffCallback
 
 class NoteAdapter(

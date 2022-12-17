@@ -7,10 +7,10 @@ import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.models.Note
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
-import brillembourg.notes.simple.domain.use_cases.ArchiveNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.DeleteNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.GetNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.ReorderNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.ArchiveNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.DeleteNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.GetNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.ReorderNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
 import brillembourg.notes.simple.domain.use_cases.user.GetFilterByCategoriesUseCase
 import brillembourg.notes.simple.domain.use_cases.user.GetUserPrefUseCase
@@ -122,9 +122,6 @@ class HomeViewModel @Inject constructor(
     //region Categories
 
     private fun observeCategories(onFilteredCategoriesLoaded: (() -> Unit)? = null) {
-
-//        val availableCategoriesFlow =
-//            getAvailableCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
 
         categorieAvailableJob?.cancel()
         categorieAvailableJob =

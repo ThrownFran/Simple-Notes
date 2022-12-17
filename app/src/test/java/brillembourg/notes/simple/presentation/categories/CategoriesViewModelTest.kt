@@ -88,85 +88,6 @@ class CategoriesViewModelTest {
         )
     }
 
-    private fun mockReorderSuccess() {
-        coEvery { reorderCategoriesUseCase.invoke(any()) }.returns(
-            Resource.Success(ReorderCategoriesUseCase.Result(UiText.NotesReordered))
-        )
-    }
-
-    private fun mockSaveSuccess() {
-        coEvery { saveCategoriesUseCase.invoke(any()) }.returns(
-            Resource.Success(SaveCategoryUseCase.Result(UiText.NoteUpdated))
-        )
-    }
-
-    private fun mockSaveError() {
-        coEvery { saveCategoriesUseCase.invoke(any()) }.returns(
-            Resource.Error(Exception())
-        )
-    }
-
-    private fun mockReorderError() {
-        coEvery { reorderCategoriesUseCase.invoke(any()) }.returns(
-            Resource.Error(Exception())
-        )
-    }
-
-    private fun mockDeleteCategorySuccess(ids: List<Long>) {
-        coEvery { deleteCategoriesUseCase.invoke(match { params -> ids == params.ids }) }.returns(
-            Resource.Success(
-                DeleteCategoriesUseCase.Result(
-                    if (ids.size > 1) UiText.CategoriesDeleted else UiText.CategoryDeleted
-                )
-            )
-        )
-    }
-
-    private fun mockDeleteCategoryError() {
-        coEvery { deleteCategoriesUseCase.invoke(any()) }
-            .returns(Resource.Error(Exception("error")))
-    }
-
-    private fun mockCreateCategorySuccess(categoryName: String) {
-
-        coEvery { createCategoryUseCase.invoke(any()) }
-            .returns(
-                Resource.Success(
-                    CreateCategoryUseCase.Result(
-                        Category(Math.random().toLong(), categoryName, 20),
-                        UiText.CategoryCreated
-                    )
-                )
-            )
-    }
-
-    private fun mockCreateCategoryError() {
-        coEvery { createCategoryUseCase.invoke(any()) }
-            .returns(Resource.Error(Exception("error")))
-    }
-
-    private fun mockGetCategoriesSuccess() {
-        coEvery { getCategoriesUseCase.invoke(any()) }
-            .coAnswers {
-                flow {
-                    emit(
-                        Resource.Success(
-                            GetCategoriesUseCase.Result(
-                                CATEGORIES
-                            )
-                        )
-                    )
-                }
-            }
-    }
-
-    private fun mockGetCategoriesError() {
-        coEvery { getCategoriesUseCase.invoke(any()) }
-            .coAnswers {
-                flow { emit(Resource.Error(Exception("Error"))) }
-            }
-    }
-
     @Test
     fun `on init observe get categories use case`() = runTest {
         //Arrange
@@ -580,6 +501,89 @@ class CategoriesViewModelTest {
         //Assert
         coVerify { messageManager.showError(any()) }
     }
+
+    //region Mocks
+
+    private fun mockReorderSuccess() {
+        coEvery { reorderCategoriesUseCase.invoke(any()) }.returns(
+            Resource.Success(ReorderCategoriesUseCase.Result(UiText.NotesReordered))
+        )
+    }
+
+    private fun mockSaveSuccess() {
+        coEvery { saveCategoriesUseCase.invoke(any()) }.returns(
+            Resource.Success(SaveCategoryUseCase.Result(UiText.NoteUpdated))
+        )
+    }
+
+    private fun mockSaveError() {
+        coEvery { saveCategoriesUseCase.invoke(any()) }.returns(
+            Resource.Error(Exception())
+        )
+    }
+
+    private fun mockReorderError() {
+        coEvery { reorderCategoriesUseCase.invoke(any()) }.returns(
+            Resource.Error(Exception())
+        )
+    }
+
+    private fun mockDeleteCategorySuccess(ids: List<Long>) {
+        coEvery { deleteCategoriesUseCase.invoke(match { params -> ids == params.ids }) }.returns(
+            Resource.Success(
+                DeleteCategoriesUseCase.Result(
+                    if (ids.size > 1) UiText.CategoriesDeleted else UiText.CategoryDeleted
+                )
+            )
+        )
+    }
+
+    private fun mockDeleteCategoryError() {
+        coEvery { deleteCategoriesUseCase.invoke(any()) }
+            .returns(Resource.Error(Exception("error")))
+    }
+
+    private fun mockCreateCategorySuccess(categoryName: String) {
+
+        coEvery { createCategoryUseCase.invoke(any()) }
+            .returns(
+                Resource.Success(
+                    CreateCategoryUseCase.Result(
+                        Category(Math.random().toLong(), categoryName, 20),
+                        UiText.CategoryCreated
+                    )
+                )
+            )
+    }
+
+    private fun mockCreateCategoryError() {
+        coEvery { createCategoryUseCase.invoke(any()) }
+            .returns(Resource.Error(Exception("error")))
+    }
+
+    private fun mockGetCategoriesSuccess() {
+        coEvery { getCategoriesUseCase.invoke(any()) }
+            .coAnswers {
+                flow {
+                    emit(
+                        Resource.Success(
+                            GetCategoriesUseCase.Result(
+                                CATEGORIES
+                            )
+                        )
+                    )
+                }
+            }
+    }
+
+    private fun mockGetCategoriesError() {
+        coEvery { getCategoriesUseCase.invoke(any()) }
+            .coAnswers {
+                flow { emit(Resource.Error(Exception("Error"))) }
+            }
+    }
+
+    //endregion
 
 
 }

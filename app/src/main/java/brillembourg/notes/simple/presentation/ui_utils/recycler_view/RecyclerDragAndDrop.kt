@@ -1,4 +1,4 @@
-package brillembourg.notes.simple.presentation.ui_utils
+package brillembourg.notes.simple.presentation.ui_utils.recycler_view
 
 import androidx.recyclerview.widget.*
 import brillembourg.notes.simple.presentation.models.HasOrder
@@ -27,12 +27,10 @@ class ItemTouchDraggableImp<T : HasOrder>(
     private var dragAndDropList: List<T>? = null
 
     val originalOrder: MutableList<Int> = ArrayList()
-//    val orderMap: MutableMap<Long,Int> = HashMap<Long,Int>()
 
     //Adapter callbacks
     private var onGetCurrentList: (() -> List<T>)? = null
-    private var onSubmitList: ((noteList: (List<T>)?, submitSuccess: () -> Unit) -> Unit)? =
-        null
+    private var onSubmitList: ((noteList: (List<T>)?, submitSuccess: () -> Unit) -> Unit)? = null
     private var onReorderSuccess: ((List<T>) -> Unit)? = null
     private var onReorderCanceled: (() -> Unit)? = null
 

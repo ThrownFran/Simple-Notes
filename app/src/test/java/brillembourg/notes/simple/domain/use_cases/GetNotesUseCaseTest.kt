@@ -2,6 +2,7 @@ package brillembourg.notes.simple.domain.use_cases
 
 import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.repositories.NotesRepository
+import brillembourg.notes.simple.domain.use_cases.notes.GetNotesUseCase
 import brillembourg.notes.simple.util.Resource
 import io.mockk.coEvery
 import io.mockk.coVerify

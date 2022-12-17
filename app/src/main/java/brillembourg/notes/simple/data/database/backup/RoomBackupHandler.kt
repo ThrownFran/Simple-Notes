@@ -1,6 +1,6 @@
 package brillembourg.notes.simple.data.database
 
-import brillembourg.notes.simple.domain.use_cases.BackupModel
+import brillembourg.notes.simple.domain.use_cases.notes.BackupModel
 
 
 interface RoomBackupHandler {

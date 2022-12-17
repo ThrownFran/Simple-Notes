@@ -25,17 +25,6 @@ data class HomeUiState(
     val selectFilterCategories: SelectFilterCategories = SelectFilterCategories()
 ) : Parcelable
 
-//@Parcelize
-//data class FilteredCategories (val ids: List<CategoryPresentationModel>)
-
-@Parcelize
-data class SelectFilterCategories(
-    val isFilterCategoryMenuAvailable: Boolean = false,
-    val navigate: Boolean = false,
-    val isShowing: Boolean = false,
-    val categories: List<CategoryPresentationModel> = emptyList()
-) : Parcelable
-
 @Parcelize
 data class NavigateToAddNote(val content: String? = null) : Parcelable
 
@@ -68,4 +57,12 @@ data class NavigateToEditNote(
 @Parcelize
 data class SelectionModeActive(
     val size: Int
+) : Parcelable
+
+@Parcelize
+data class SelectFilterCategories(
+    val isFilterCategoryMenuAvailable: Boolean = false,
+    val navigate: Boolean = false,
+    val isShowing: Boolean = false,
+    val categories: List<CategoryPresentationModel> = emptyList()
 ) : Parcelable

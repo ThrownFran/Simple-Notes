@@ -1,9 +1,9 @@
 package brillembourg.notes.simple.domain.repositories
 
-import brillembourg.notes.simple.domain.use_cases.*
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.AddCategoryToNoteUseCase
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.GetCategoriesForNoteUseCase
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.RemoveCategoryToNoteUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.*
 import brillembourg.notes.simple.util.Resource
 import kotlinx.coroutines.flow.Flow
 

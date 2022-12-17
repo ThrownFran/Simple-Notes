@@ -2,7 +2,6 @@ package brillembourg.notes.simple.presentation.base
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -15,7 +14,7 @@ import androidx.navigation.ui.setupWithNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.data.database.RoomBackupBuilder
 import brillembourg.notes.simple.databinding.ActivityMainBinding
-import brillembourg.notes.simple.domain.use_cases.BackupModel
+import brillembourg.notes.simple.domain.use_cases.notes.BackupModel
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.ui_utils.asString
 import brillembourg.notes.simple.presentation.ui_utils.contentViews
@@ -44,12 +43,10 @@ class MainActivity : AppCompatActivity() {
         renderStates()
         backupModel = roomBackupBuilder.prepareBackupInLocalStorage()
         handleIntentReceiver(intent)
-        Log.e("MainActivity", "onCreate $this")
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        Log.e("MainActivity", "onNewIntent $this")
         handleIntentReceiver(intent)
     }
 
@@ -126,17 +123,11 @@ class MainActivity : AppCompatActivity() {
         )
 
         binding.navView.setupWithNavController(navController)
-        //TODO
         setupNavControllerListener()
         setupDrawerListener()
     }
 
     private fun setupDrawerListener() {
-
-//        //TODO
-//        binding.navView.menu.findItem(R.id.customMenu).actionView
-//            .findViewById<TextView>(R.id.category_text_name)
-//            .setText("Helloooo")
 
         binding.navView.setNavigationItemSelectedListener {
             when (it.itemId) {
@@ -195,27 +186,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun navigateToTrash() {
         if (navController.currentDestination?.id == R.id.trashFragment) return
-
-//        when (navController.currentDestination?.id) {
-//            R.id.trashFragment -> return
-//            R.id.categoriesFragment -> navController.navigate()
-//        }
-
-
-//        navController.navigate(HomeFragmentDirections.actionHomeFragmentToTrashFragment())
         navController.navigate(R.id.trashFragment)
     }
 
     private fun navigateToHome() {
         if (navController.currentDestination?.id == R.id.homeFragment) return
         navController.navigate(R.id.homeFragment)
-//        navController.navigateUp()
     }
 
     private fun navigateToCategories() {
         if (navController.currentDestination?.id == R.id.categoriesFragment) return
         navController.navigate(R.id.categoriesFragment)
-//        navController.navigate(HomeFragmentDirections.actionHomeFragmentToCategoriesFragment())
     }
 
     private fun backupNotes() {

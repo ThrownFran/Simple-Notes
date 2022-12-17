@@ -1,7 +1,7 @@
 package brillembourg.notes.simple.data.database
 
 import android.content.Context
-import brillembourg.notes.simple.domain.use_cases.BackupModel
+import brillembourg.notes.simple.domain.use_cases.notes.BackupModel
 import de.raphaelebner.roomdatabasebackup.core.RoomBackup
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine

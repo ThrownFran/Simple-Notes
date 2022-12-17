@@ -3,7 +3,7 @@ package brillembourg.notes.simple.presentation.ui_utils
 import android.view.MotionEvent
 import androidx.recyclerview.selection.*
 import androidx.recyclerview.widget.RecyclerView
-import brillembourg.notes.simple.presentation.home.NoteAdapter
+import brillembourg.notes.simple.presentation.home.adapters.NoteAdapter
 import brillembourg.notes.simple.presentation.home.NoteViewHolder
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 

@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemCategoryBinding
-import brillembourg.notes.simple.presentation.ui_utils.Draggable
-import brillembourg.notes.simple.presentation.ui_utils.ItemTouchDraggableImp
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.Draggable
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.ItemTouchDraggableImp
 import brillembourg.notes.simple.presentation.ui_utils.setupCategoryDiffCallback
 
 class CategoryAdapter(

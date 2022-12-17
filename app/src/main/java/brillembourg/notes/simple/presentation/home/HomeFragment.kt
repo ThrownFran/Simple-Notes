@@ -22,6 +22,7 @@ import brillembourg.notes.simple.presentation.categories.CategoryPresentationMod
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
+import brillembourg.notes.simple.presentation.home.adapters.NoteAdapter
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.*
@@ -29,6 +30,7 @@ import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(), MenuProvider {
@@ -440,6 +442,7 @@ class HomeFragment : Fragment(), MenuProvider {
                 binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!! + headers)!!.itemView
             navigateToDetail(navigateToDetail.notePresentationModel!!, view)
             viewModel.onNavigateToDetailCompleted()
+            runBlocking {  }
         }
     }
 
