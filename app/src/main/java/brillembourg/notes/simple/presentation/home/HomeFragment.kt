@@ -5,6 +5,7 @@ import android.os.Parcelable
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -165,6 +166,8 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun setupNoteState(noteList: NoteList) {
         if (noteList.mustRender) setupNoteList(noteList.notes)
+
+        binding.homeWizard.isVisible = noteList.notes.isEmpty()
     }
 
     private fun setupNoteList(taskList: List<NotePresentationModel>) {
@@ -517,6 +520,12 @@ class HomeFragment : Fragment(), MenuProvider {
 
         safeUiLaunch {
             activityBinding?.homeFab?.onClickFlow?.collect {
+                viewModel.onAddNoteClick()
+            }
+        }
+
+        safeUiLaunch {
+            binding.homeWizard.onClickFlow.collect {
                 viewModel.onAddNoteClick()
             }
         }

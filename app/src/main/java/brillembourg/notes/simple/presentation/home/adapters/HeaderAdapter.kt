@@ -74,7 +74,6 @@ class HeaderFilterCategoriesHolder(
         } else {
             (binding.mainRecyclerCategoriesFilter.adapter as CategoryChipColorSurfaceAdapter).apply {
                 submitList(filteredCategories.toDiplayOrder())
-//                notifyItemRangeChanged(0,filteredCategories.size,filteredCategories)
             }
         }
     }
