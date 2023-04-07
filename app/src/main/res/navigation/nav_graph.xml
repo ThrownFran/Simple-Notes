@@ -75,9 +75,9 @@
     <fragment
         android:id="@+id/aboutFragment"
         android:name="brillembourg.notes.simple.presentation.about.AboutFragment"
-        android:label="AboutFragment" />
+        android:label="@string/about" />
     <fragment
         android:id="@+id/licensesFragment"
         android:name="brillembourg.notes.simple.presentation.license.LicensesFragment"
-        android:label="LicensesFragment" />
+        android:label="@string/licences" />
 </navigation>

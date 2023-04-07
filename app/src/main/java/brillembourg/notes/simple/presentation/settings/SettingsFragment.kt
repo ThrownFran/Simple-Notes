@@ -18,6 +18,9 @@ import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
 import brillembourg.notes.simple.presentation.settings.IsOption
 import brillembourg.notes.simple.presentation.settings.SettingsState
 import brillembourg.notes.simple.presentation.settings.SettingsViewModel
+import brillembourg.notes.simple.presentation.ui_utils.MyLogger
+import brillembourg.notes.simple.util.GenericException
+import com.google.android.play.core.review.ReviewManagerFactory
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -61,13 +64,39 @@ class SettingsFragment : Fragment() {
     }
 
     private fun clickRateApp() {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(
-                "https://play.google.com/store/apps/details?id=brillembourg.forecast.weather.simple"
-            )
-            setPackage("com.android.vending")
+        val manager = ReviewManagerFactory.create(requireContext())
+        val request = manager.requestReviewFlow()
+        request.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                // We got the ReviewInfo object
+                val reviewInfo = task.result
+                val flow = manager.launchReviewFlow(requireActivity(), reviewInfo)
+                flow.addOnCompleteListener { _ ->
+                    // The flow has finished. The API does not indicate whether the user
+                    // reviewed or not, or even whether the review dialog was shown. Thus, no
+                    // matter the result, we continue our app flow.
+                }
+            } else {
+                // There was some problem, log or handle the error code.
+                task.exception?.let { MyLogger.record(it) }
+                navigateToPlayStore()
+            }
         }
-        startActivity(intent)
+    }
+
+    private fun navigateToPlayStore() {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse(
+                    "https://play.google.com/store/apps/details?id=brillembourg.notes.simple"
+                )
+                setPackage("com.android.vending")
+            }
+            activity?.startActivity(intent)
+        } catch (e: Exception) {
+            val exception = GenericException("Error rating App")
+            MyLogger.record(exception)
+        }
     }
 
     private fun clickNavigateToAbout() {
@@ -170,10 +199,4 @@ class SettingsFragment : Fragment() {
     private fun clickChooseTheme() {
         viewModel.clickShowTheme()
     }
-
-//    @SuppressLint("RestrictedApi")
-//    private fun showToolbar() {
-//        (activity as AppCompatActivity?)?.supportActionBar?.setShowHideAnimationEnabled(false)
-//        (activity as AppCompatActivity?)?.supportActionBar?.show()
-//    }
 }
