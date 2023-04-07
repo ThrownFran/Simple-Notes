@@ -1,4 +1,6 @@
-package brillembourg.notes.simple.presentation.settings
+package brillembourg.notes.simple.domain.models
+
+import brillembourg.notes.simple.presentation.settings.IsOption
 
 enum class ThemeMode(var type: String) : IsOption {
     Light("0"), Dark("1"), System("2");

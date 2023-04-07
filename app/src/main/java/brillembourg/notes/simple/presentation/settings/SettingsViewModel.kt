@@ -3,7 +3,9 @@ package brillembourg.notes.simple.presentation.settings
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import brillembourg.notes.simple.domain.models.ThemeMode
 import brillembourg.notes.simple.domain.models.UserPreferences
+import brillembourg.notes.simple.domain.use_cases.theme.GetThemeUseCase
 import brillembourg.notes.simple.domain.use_cases.user.GetUserPrefUseCase
 import brillembourg.notes.simple.domain.use_cases.user.SaveUserPrefUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
@@ -57,7 +59,7 @@ class SettingsViewModel @Inject constructor(
         job = CoroutineScope(Dispatchers.Default + errorHandler).launch {
 
             //Theme
-            val result = getThemeUseCase.invoke(GetThemeUseCase.Params())
+            val result = getThemeUseCase()
             themeList = result.themeList
 
             state.update { SettingsState.Success(currentTheme) }

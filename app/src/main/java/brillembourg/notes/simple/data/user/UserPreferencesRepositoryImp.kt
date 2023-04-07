@@ -14,13 +14,13 @@ import brillembourg.notes.simple.data.user.UserPreferencesRepositoryImp.Preferen
 import brillembourg.notes.simple.data.user.UserPreferencesRepositoryImp.PreferencesKeys.THEME_LIGHT
 import brillembourg.notes.simple.data.user.UserPreferencesRepositoryImp.PreferencesKeys.THEME_SYSTEM
 import brillembourg.notes.simple.domain.models.NoteLayout
+import brillembourg.notes.simple.domain.models.ThemeMode
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.repositories.UserPrefRepository
 import brillembourg.notes.simple.domain.use_cases.user.GetFilterByCategoriesUseCase
 import brillembourg.notes.simple.domain.use_cases.user.GetUserPrefUseCase
 import brillembourg.notes.simple.domain.use_cases.user.SaveFilterByCategoriesUseCase
 import brillembourg.notes.simple.domain.use_cases.user.SaveUserPrefUseCase
-import brillembourg.notes.simple.presentation.settings.ThemeMode
 import brillembourg.notes.simple.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch

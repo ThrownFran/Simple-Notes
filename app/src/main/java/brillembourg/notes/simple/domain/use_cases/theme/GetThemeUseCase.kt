@@ -1,5 +1,6 @@
-package brillembourg.notes.simple.presentation.settings
+package brillembourg.notes.simple.domain.use_cases.theme
 
+import brillembourg.notes.simple.domain.models.ThemeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +12,7 @@ class GetThemeUseCase @Inject constructor(
     private val themeManager: ThemeManager,
 ) {
 
-    suspend operator fun invoke(params: Params): Result {
+    suspend operator fun invoke(): Result {
 
         val result: Deferred<Result> = CoroutineScope(coroutineContext).async(Dispatchers.IO) {
             Result(themeManager.themeList)

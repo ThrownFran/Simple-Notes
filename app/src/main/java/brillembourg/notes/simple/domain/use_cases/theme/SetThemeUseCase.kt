@@ -1,5 +1,6 @@
-package brillembourg.notes.simple.presentation.settings
+package brillembourg.notes.simple.domain.use_cases.theme
 
+import brillembourg.notes.simple.domain.models.ThemeMode
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import kotlin.coroutines.coroutineContext

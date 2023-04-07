@@ -3,7 +3,7 @@ package brillembourg.notes.simple.domain.use_cases.user
 import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.repositories.UserPrefRepository
-import brillembourg.notes.simple.presentation.settings.SetThemeUseCase
+import brillembourg.notes.simple.domain.use_cases.theme.SetThemeUseCase
 import brillembourg.notes.simple.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn

@@ -1,5 +1,7 @@
 package brillembourg.notes.simple.presentation.settings
 
+import brillembourg.notes.simple.domain.models.ThemeMode
+
 sealed class SettingsState {
 
     data class Success(

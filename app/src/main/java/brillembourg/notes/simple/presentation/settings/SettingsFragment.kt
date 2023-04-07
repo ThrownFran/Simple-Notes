@@ -12,11 +12,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentSettingsBinding
+import brillembourg.notes.simple.domain.models.ThemeMode
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
 import brillembourg.notes.simple.presentation.settings.IsOption
 import brillembourg.notes.simple.presentation.settings.SettingsState
 import brillembourg.notes.simple.presentation.settings.SettingsViewModel
-import brillembourg.notes.simple.presentation.settings.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

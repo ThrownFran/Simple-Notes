@@ -1,4 +1,6 @@
-package brillembourg.notes.simple.presentation.settings
+package brillembourg.notes.simple.domain.use_cases.theme
+
+import brillembourg.notes.simple.domain.models.ThemeMode
 
 interface ThemeManager {
     fun changeTheme(theme: ThemeMode?)

@@ -1,7 +1,9 @@
-package brillembourg.notes.simple.presentation.settings
+package brillembourg.notes.simple.presentation
 
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
+import brillembourg.notes.simple.domain.models.ThemeMode
+import brillembourg.notes.simple.domain.use_cases.theme.ThemeManager
 
 class ThemeManagerImp : ThemeManager {
     override fun changeTheme(theme: ThemeMode?) {
