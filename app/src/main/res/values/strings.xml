@@ -55,4 +55,6 @@
     <string name="about">About</string>
     <string name="licences">Licenses</string>
     <string name="wizard_text">Write your first note!</string>
+    <string name="trash_empty">No archived notes yet</string>
+    <string name="categories_wizard">Labels are used to categorize your notes so you can filter your homepage</string>
 </resources>

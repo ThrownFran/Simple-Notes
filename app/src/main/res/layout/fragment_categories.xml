@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -23,62 +24,39 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:orientation="horizontal">-->
+        <FrameLayout
+            android:id="@+id/categories_frame_wizard"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
 
-        <!--            <com.google.android.material.imageview.ShapeableImageView-->
-        <!--                android:id="@+id/categories_image_add_start"-->
-        <!--                android:layout_width="wrap_content"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:layout_gravity="center"-->
-        <!--                android:padding="8dp"-->
-        <!--                android:tint="?colorSecondary"-->
-        <!--                android:src="@drawable/ic_baseline_add_on_surface_24"-->
-        <!--                app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--                app:layout_constraintStart_toStartOf="parent"-->
-        <!--                app:layout_constraintTop_toTopOf="parent" />-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical">
 
-        <!--            <com.google.android.material.imageview.ShapeableImageView-->
-        <!--                android:id="@+id/categories_image_add_clear"-->
-        <!--                android:layout_width="wrap_content"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                tools:visibility="invisible"-->
-        <!--                android:layout_gravity="center"-->
-        <!--                android:padding="8dp"-->
-        <!--                android:src="@drawable/ic_baseline_clear_on_surface_24"-->
-        <!--                app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--                app:layout_constraintStart_toStartOf="parent"-->
-        <!--                app:layout_constraintTop_toTopOf="parent" />-->
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_outline_label_on_secondary_container_24"
+                    app:tint="@color/secondaryColor" />
 
-        <!--            <EditText-->
-        <!--                android:id="@+id/categories_edit_add"-->
-        <!--                style="@style/Widget.Material3.TextInputEditText.OutlinedBox"-->
-        <!--                android:layout_width="0dp"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                app:layout_constraintEnd_toStartOf="@id/categories_image_add_success"-->
-        <!--                android:hint="@string/add_category"-->
-        <!--                android:text="@={viewmodel.categoryUiState.component4().createCategoryNameBinding}"-->
-        <!--                android:importantForAutofill="no"-->
-        <!--                android:inputType="text"-->
-        <!--                app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--                app:layout_constraintStart_toEndOf="@id/categories_image_add_start"-->
-        <!--                app:layout_constraintTop_toTopOf="parent" />-->
+                <TextView
+                    android:id="@+id/categories_text_empty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="32dp"
+                    android:text="@string/categories_wizard"
+                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+            </LinearLayout>
 
-        <!--            <com.google.android.material.imageview.ShapeableImageView-->
-        <!--                android:id="@+id/categories_image_add_success"-->
-        <!--                android:layout_width="wrap_content"-->
-        <!--                android:layout_height="wrap_content"-->
-        <!--                android:layout_gravity="center"-->
-        <!--                android:padding="8dp"-->
-        <!--                android:src="@drawable/ic_baseline_check_on_surface_24"-->
-        <!--                app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--                app:layout_constraintEnd_toEndOf="parent"-->
-        <!--                app:layout_constraintTop_toTopOf="parent" />-->
 
-        <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
-
+        </FrameLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/categories_recycler"

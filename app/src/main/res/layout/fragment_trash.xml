@@ -31,6 +31,19 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
 
+        <TextView
+            android:id="@+id/trash_text_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:padding="16dp"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
+            android:text="@string/trash_empty" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

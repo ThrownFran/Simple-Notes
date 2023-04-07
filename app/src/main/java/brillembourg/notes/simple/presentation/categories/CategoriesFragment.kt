@@ -5,6 +5,7 @@ import android.view.ActionMode
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -105,6 +106,8 @@ class CategoriesFragment : Fragment() {
             val adapter = binding.categoriesRecycler.adapter as CategoryAdapter
             submitListAndScrollIfApplies(adapter, adapter.currentList, categoryList.data)
         }
+
+        binding.categoriesFrameWizard.isVisible = categoryList.data.isEmpty()
     }
 
     private fun submitListAndScrollIfApplies(

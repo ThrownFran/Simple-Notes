@@ -5,6 +5,7 @@ import android.os.Parcelable
 import android.view.*
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -202,6 +203,8 @@ class ArchivedFragment : Fragment(), MenuProvider {
         } else {
             updateListAndNotify(binding.trashRecycler.adapter as ArchivedTaskAdapter, taskList)
         }
+
+        binding.trashTextEmpty.isVisible = taskList.isEmpty()
     }
 
     private fun setupTaskRecycler(taskList: List<NotePresentationModel>) {
