@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentSettingsBinding
 import brillembourg.notes.simple.domain.models.ThemeMode
@@ -70,11 +71,11 @@ class SettingsFragment : Fragment() {
     }
 
     private fun clickNavigateToAbout() {
-//        findNavController().navigate(SettingsFragmentDirections.actionNavSettingsToAboutFragment())
+        findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToAboutFragment())
     }
 
     private fun clickNavigateToLicenses() {
-//        findNavController().navigate(SettingsFragmentDirections.actionSettingsToNavSourceLicenses())
+        findNavController().navigate(SettingsFragmentDirections.actionSettingsFragmentToLicensesFragment())
     }
 
     private fun setupObservers() {

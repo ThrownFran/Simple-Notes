@@ -47,4 +47,9 @@
     <string name="settings_review">Review App</string>
     <string name="all_ok">Ok</string>
     <string name="settings_choose_theme">Choose theme</string>
+
+    <string name="about_developer">If you want to contact developer to provide feedback or any suggestion, please use this email <a href="mailto:franbrillembourg@gmail.com?subject=Feedback Simple Notes App"> franbrillembourg@gmail.com</a></string>
+    <string name="about_copyright">©2023 Francisco Brillembourg</string>
+    <string name="about_title">About</string>
+    <string name="about_version">Version</string>
 </resources>

@@ -5,15 +5,16 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id 'androidx.navigation.safeargs'
     id 'kotlin-parcelize'
+    id 'com.mikepenz.aboutlibraries.plugin'
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "brillembourg.notes.simple"
         minSdk 21
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -55,6 +56,8 @@ android {
 
 dependencies {
 
+    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.appcompat:appcompat:1.5.0'
     implementation 'com.google.android.material:material:1.7.0-beta01'
@@ -63,7 +66,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
 
     //Navigation
-    def nav_version = "2.5.1"
+    def nav_version = "2.5.3"
     implementation 'androidx.recyclerview:recyclerview-selection:1.1.0'
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
@@ -77,12 +80,12 @@ dependencies {
     implementation "com.google.dagger:hilt-android:2.42"
     kapt "com.google.dagger:hilt-compiler:2.42"
 
-    def room_version = "2.4.3"
+    def room_version = "2.5.1"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 
-    implementation 'de.raphaelebner:roomdatabasebackup:1.0.0-beta10'
+    implementation 'de.raphaelebner:roomdatabasebackup:1.0.0-beta12'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation "io.mockk:mockk:1.12.7"
@@ -92,6 +95,9 @@ dependencies {
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    implementation "com.mikepenz:aboutlibraries-core:10.6.1"
+    implementation "com.mikepenz:aboutlibraries:10.6.1"
 
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
 }
