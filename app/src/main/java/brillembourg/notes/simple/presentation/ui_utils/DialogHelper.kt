@@ -47,7 +47,6 @@ fun showDeleteTasksDialog(
     )
         .setTitle(title)
         .setIcon(R.drawable.ic_baseline_delete_on_surface_24)
-//            .setMessage(resources.getString(R.string.supporting_text))
         .setNegativeButton(fragment.resources.getString(R.string.all_cancel)) { dialog, which ->
         }
         .setPositiveButton(fragment.resources.getString(R.string.all_delete)) { dialog, which ->

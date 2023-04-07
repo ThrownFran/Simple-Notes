@@ -62,7 +62,7 @@ class ArchivedViewModel @Inject constructor(
             .onEach { result ->
                 when (result) {
                     is Resource.Success -> {
-                        _archivedUiState.update { it.copy(noteLayout = result.data.preferences.notesLayout) }
+                        _archivedUiState.update { it.copy(noteLayout = result.data.preferences.noteLayout) }
                     }
                     is Resource.Error -> showErrorMessage(result.exception)
                     is Resource.Loading -> Unit

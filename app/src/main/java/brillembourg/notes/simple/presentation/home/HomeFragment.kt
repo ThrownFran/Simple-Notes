@@ -65,19 +65,35 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun renderStates() {
 
         safeUiLaunch {
+            viewModel.navigates.collect { navigates ->
+                when (navigates) {
+                    is HomeUiNavigates.NavigateToAddNote -> navigateToAddNoteState(navigates)
+                    is HomeUiNavigates.NavigateToEditNote -> navigateToDetailState(navigates)
+                    HomeUiNavigates.Idle -> Unit
+                }
+            }
+        }
+
+        safeUiLaunch {
+            viewModel.dialogs.collect { dialogState ->
+                when (dialogState) {
+                    is HomeDialogState.DeleteCategoriesConfirmation -> showDeleteConfirmationState(
+                        dialogState
+                    )
+                    is HomeDialogState.ShowArchiveNotesConfirmationState -> showArchiveConfirmationState(
+                        dialogState
+                    )
+                    HomeDialogState.Idle -> Unit
+                }
+            }
+        }
+
+        safeUiLaunch {
             viewModel.homeUiState.collect { homeUiState: HomeUiState ->
 
                 setupNoteState(homeUiState.noteList)
 
                 selectionModeState(homeUiState.selectionModeActive)
-
-                navigateToDetailState(homeUiState.navigateToEditNote)
-
-                navigateToAddNoteState(homeUiState.navigateToAddNote)
-
-                showArchiveConfirmationState(homeUiState.showArchiveNotesConfirmation)
-
-                showDeleteConfirmationState(homeUiState.showDeleteNotesConfirmation)
 
                 noteListLayoutState(homeUiState.noteLayout)
 
@@ -106,10 +122,6 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun filteredCategoriesState(filteredCategories: List<CategoryPresentationModel>) {
 
-
-//        val headerAdapter =
-//            (binding.homeRecycler.adapter as? ConcatAdapter?)?.adapters?.filterIsInstance<HeaderAdapter>()
-//                ?.firstOrNull()
         val headerAdapter = getHeaderAdapter()
 
         if (filteredCategories.isEmpty()) {
@@ -123,11 +135,6 @@ class HomeFragment : Fragment(), MenuProvider {
             headerAdapter.filteredCategories.clear()
             headerAdapter.filteredCategories.addAll(filteredCategories)
             headerAdapter.notifyItemChanged(0, Any())
-//            headerAdapter.notifyItemRangeChanged(
-//                0,
-//                filteredCategories.size,
-//                filteredCategories.toDiplayOrder()
-//            )
         } else {
             (binding.homeRecycler.adapter as? ConcatAdapter?)?.addAdapter(
                 0,
@@ -135,36 +142,6 @@ class HomeFragment : Fragment(), MenuProvider {
                     viewModel.onNavigateToCategories()
                 })
         }
-
-
-//        val mainActivityBinding = (activity as MainActivity).binding
-//
-//        if (mainActivityBinding.mainRecyclerCategoriesFilter.adapter == null) {
-//            mainActivityBinding.mainRecyclerCategoriesFilter.apply {
-////                layoutManager = LinearLayoutManager(context,RecyclerView.HORIZONTAL,false)
-//                layoutManager = FlexboxLayoutManager(context)
-//                    .apply {
-//                        flexDirection = FlexDirection.ROW
-//                        justifyContent = JustifyContent.FLEX_START
-//                        flexWrap = FlexWrap.WRAP
-//                    }
-//
-//                adapter = CategoryChipColorSurfaceAdapter(onClick = {
-//                    viewModel.onNavigateToCategories()
-//                }).apply { submitList(filteredCategories.toDiplayOrder()) }
-//
-//
-//            }
-//        } else {
-//            (mainActivityBinding.mainRecyclerCategoriesFilter.adapter as CategoryChipColorSurfaceAdapter)
-//                .submitList(filteredCategories)
-//        }
-//
-//
-//        mainActivityBinding.mainLinearCategories.isVisible =
-//            filteredCategories.isNotEmpty() && findNavController().currentDestination?.id == R.id.homeFragment
-
-
     }
 
     private fun selectCategoriesState(selectCategories: SelectFilterCategories) {
@@ -428,21 +405,21 @@ class HomeFragment : Fragment(), MenuProvider {
 
     //region Navigation
 
-    private fun navigateToAddNoteState(navigateToAddNote: NavigateToAddNote?) {
-        navigateToAddNote?.let {
+    private fun navigateToAddNoteState(navigateToAddNote: HomeUiNavigates.NavigateToAddNote) {
+        navigateToAddNote.let {
             navigateToCreateTask(navigateToAddNote.content)
             viewModel.onNavigateToAddNoteCompleted()
         }
     }
 
-    private fun navigateToDetailState(navigateToDetail: NavigateToEditNote) {
+    private fun navigateToDetailState(navigateToDetail: HomeUiNavigates.NavigateToEditNote) {
         if (navigateToDetail.mustConsume) {
             val headers = if (getHeaderAdapter() == null) 0 else 1
             val view =
                 binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!! + headers)!!.itemView
             navigateToDetail(navigateToDetail.notePresentationModel!!, view)
             viewModel.onNavigateToDetailCompleted()
-            runBlocking {  }
+            runBlocking { }
         }
     }
 
@@ -471,16 +448,14 @@ class HomeFragment : Fragment(), MenuProvider {
 
     //region Delete
 
-    private fun showDeleteConfirmationState(showDeleteConfirmationState: DeleteCategoriesConfirmation?) {
-        if (showDeleteConfirmationState != null) {
-            showDeleteTasksDialog(this, showDeleteConfirmationState.tasksToDeleteSize,
-                onPositive = {
-                    viewModel.onDeleteNotes()
-                },
-                onDismiss = {
-                    viewModel.onDismissConfirmDeleteShown()
-                })
-        }
+    private fun showDeleteConfirmationState(showDeleteConfirmationState: HomeDialogState.DeleteCategoriesConfirmation) {
+        showDeleteTasksDialog(this, showDeleteConfirmationState.tasksToDeleteSize,
+            onPositive = {
+                viewModel.onDeleteNotes()
+            },
+            onDismiss = {
+                viewModel.onDismissConfirmDeleteShown()
+            })
     }
 
     private fun onDeleteNotesConfirm() {
@@ -491,16 +466,14 @@ class HomeFragment : Fragment(), MenuProvider {
 
     //region Archive
 
-    private fun showArchiveConfirmationState(showArchiveConfirmationState: ShowArchiveNotesConfirmationState?) {
-        if (showArchiveConfirmationState != null) {
-            showArchiveConfirmationDialog(this, showArchiveConfirmationState.tasksToArchiveSize,
-                onPositive = {
-                    viewModel.onArchiveNotes()
-                },
-                onDismiss = {
-                    viewModel.onDismissConfirmArchiveShown()
-                })
-        }
+    private fun showArchiveConfirmationState(showArchiveConfirmationState: HomeDialogState.ShowArchiveNotesConfirmationState) {
+        showArchiveConfirmationDialog(this, showArchiveConfirmationState.tasksToArchiveSize,
+            onPositive = {
+                viewModel.onArchiveNotes()
+            },
+            onDismiss = {
+                viewModel.onDismissConfirmArchiveShown()
+            })
     }
 
     private fun onArchiveTasks() {

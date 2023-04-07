@@ -7,11 +7,11 @@ import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.domain.models.Note
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
+import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.ArchiveNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.DeleteNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.GetNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.ReorderNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
 import brillembourg.notes.simple.domain.use_cases.user.GetFilterByCategoriesUseCase
 import brillembourg.notes.simple.domain.use_cases.user.GetUserPrefUseCase
 import brillembourg.notes.simple.domain.use_cases.user.SaveFilterByCategoriesUseCase
@@ -54,6 +54,13 @@ class HomeViewModel @Inject constructor(
     private val uiStateKey = "home_ui_state"
     private val _homeUiState = MutableStateFlow(getSavedUiState() ?: HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
+
+    private val _navigates: MutableStateFlow<HomeUiNavigates> =
+        MutableStateFlow(HomeUiNavigates.Idle)
+    val navigates = _navigates.asStateFlow()
+
+    private val _dialogs: MutableStateFlow<HomeDialogState> = MutableStateFlow(HomeDialogState.Idle)
+    val dialogs = _dialogs.asStateFlow()
 
     //Job references to allow cancellation
     private var filteredCategoriesJob: Job? = null
@@ -249,7 +256,7 @@ class HomeViewModel @Inject constructor(
                 .collect { result ->
                     when (result) {
                         is Resource.Success -> {
-                            _homeUiState.update { it.copy(noteLayout = result.data.preferences.notesLayout) }
+                            _homeUiState.update { it.copy(noteLayout = result.data.preferences.noteLayout) }
                         }
                         is Resource.Error -> showErrorMessage(result.exception)
                         is Resource.Loading -> Unit
@@ -267,42 +274,30 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun navigateToAddNote(content: String?) {
-        _homeUiState.update {
-            it.copy(
-                navigateToAddNote = NavigateToAddNote(content),
-                selectionModeActive = null
-            )
-        }
+        _navigates.update { HomeUiNavigates.NavigateToAddNote(content) }
+        _homeUiState.update { it.copy(selectionModeActive = null) }
     }
 
     fun onNavigateToAddNoteCompleted() {
-        _homeUiState.update { it.copy(navigateToAddNote = null) }
+        _navigates.update { HomeUiNavigates.Idle }
     }
 
-
     private fun navigateToDetail(note: NotePresentationModel) {
-        _homeUiState.update {
-            it.copy(
-                navigateToEditNote = NavigateToEditNote(
-                    mustConsume = true,
-                    taskIndex = _homeUiState.value.noteList.notes.indexOf(note),
-                    notePresentationModel = note
-                ),
-                selectionModeActive = null
+        _navigates.update {
+            HomeUiNavigates.NavigateToEditNote(
+                mustConsume = true,
+                taskIndex = _homeUiState.value.noteList.notes.indexOf(note),
+                notePresentationModel = note
             )
+        }
+
+        _homeUiState.update {
+            it.copy(selectionModeActive = null)
         }
     }
 
     fun onNavigateToDetailCompleted() {
-
-        val navState =
-            _homeUiState.value.navigateToEditNote.copy(mustConsume = false)
-
-        _homeUiState.update {
-            it.copy(
-                navigateToEditNote = navState
-            )
-        }
+        _navigates.update { HomeUiNavigates.Idle }
     }
 
     //endregion
@@ -374,28 +369,23 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onDeleteConfirm() {
-        _homeUiState.update {
-            it.copy(
-                showDeleteNotesConfirmation = DeleteCategoriesConfirmation(
-                    tasksToDeleteSize = getSelectedTasks().size
-                )
-            )
+        _dialogs.update {
+            HomeDialogState.DeleteCategoriesConfirmation(tasksToDeleteSize = getSelectedTasks().size)
         }
     }
 
     fun onDismissConfirmDeleteShown() {
-        _homeUiState.update { it.copy(showDeleteNotesConfirmation = null) }
+        _dialogs.update { HomeDialogState.Idle }
+//        _homeUiState.update { it.copy(showDeleteNotesConfirmation = null) }
     }
 
     fun onDeleteNotes() {
         val tasksToDeleteIds = getSelectedTasks().map { it.id }
         deleteNotes(tasksToDeleteIds)
 
+        _dialogs.update { HomeDialogState.Idle }
         _homeUiState.update {
-            it.copy(
-                showDeleteNotesConfirmation = null,
-                selectionModeActive = null
-            )
+            it.copy(selectionModeActive = null)
         }
     }
 
@@ -407,11 +397,10 @@ class HomeViewModel @Inject constructor(
         val tasksToDeleteIds = getSelectedTasks().map { it.id }
         archiveNotes(tasksToDeleteIds)
 
+        _dialogs.update { HomeDialogState.Idle }
+
         _homeUiState.update {
-            it.copy(
-                showArchiveNotesConfirmation = null,
-                selectionModeActive = null
-            )
+            it.copy(selectionModeActive = null)
         }
 
     }
@@ -429,18 +418,15 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onArchiveConfirmNotes() {
-
-        _homeUiState.update {
-            it.copy(
-                showArchiveNotesConfirmation = ShowArchiveNotesConfirmationState(
-                    tasksToArchiveSize = getSelectedTasks().size
-                )
+        _dialogs.update {
+            HomeDialogState.ShowArchiveNotesConfirmationState(
+                tasksToArchiveSize = getSelectedTasks().size
             )
         }
     }
 
     fun onDismissConfirmArchiveShown() {
-        _homeUiState.update { it.copy(showArchiveNotesConfirmation = null) }
+        _dialogs.update { HomeDialogState.Idle }
     }
 
     //endregion

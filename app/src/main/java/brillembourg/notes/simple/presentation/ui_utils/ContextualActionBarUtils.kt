@@ -34,7 +34,6 @@ inline fun <T : IsSelectable, VH : RecyclerView.ViewHolder> setupContextualActio
         return currentActionMode
     }
 
-
     val actionMode = toolbar.startActionMode(object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             val inflater: MenuInflater = mode.menuInflater

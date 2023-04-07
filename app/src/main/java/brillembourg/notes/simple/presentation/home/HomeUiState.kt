@@ -12,11 +12,8 @@ data class HomeUiState(
     val noteLayout: NoteLayout = NoteLayout.Vertical,
     val selectionModeActive: SelectionModeActive? = null,
 
-    val navigateToAddNote: NavigateToAddNote? = null,
-    var navigateToEditNote: NavigateToEditNote = NavigateToEditNote(false),
-
-    val showArchiveNotesConfirmation: ShowArchiveNotesConfirmationState? = null,
-    val showDeleteNotesConfirmation: DeleteCategoriesConfirmation? = null,
+//    val showArchiveNotesConfirmation: ShowArchiveNotesConfirmationState? = null,
+//    val showDeleteNotesConfirmation: DeleteCategoriesConfirmation? = null,
 
     val copyToClipboard: String? = null,
     val shareNoteAsString: String? = null,
@@ -26,32 +23,30 @@ data class HomeUiState(
 ) : Parcelable
 
 @Parcelize
-data class NavigateToAddNote(val content: String? = null) : Parcelable
-
-@Parcelize
 data class NoteList(
     val notes: List<NotePresentationModel> = ArrayList(),
     val mustRender: Boolean = false //To avoid rendering set false
 ) : Parcelable
 
-/*Show confirm to archive notes*/
-@Parcelize
-data class ShowArchiveNotesConfirmationState(
-    val tasksToArchiveSize: Int
-) : Parcelable
 
 /*Show confirm to archive notes*/
-@Parcelize
-data class DeleteCategoriesConfirmation(
-    val tasksToDeleteSize: Int
-) : Parcelable
+//@Parcelize
+//data class ShowArchiveNotesConfirmationState(
+//    val tasksToArchiveSize: Int
+//) : Parcelable
+//
+///*Show confirm to archive notes*/
+//@Parcelize
+//data class DeleteCategoriesConfirmation(
+//    val tasksToDeleteSize: Int
+//) : Parcelable
 
-@Parcelize
-data class NavigateToEditNote(
-    val mustConsume: Boolean = false,
-    val taskIndex: Int? = null,
-    val notePresentationModel: NotePresentationModel? = null,
-) : Parcelable
+//@Parcelize
+//data class NavigateToEditNote(
+//    val mustConsume: Boolean = false,
+//    val taskIndex: Int? = null,
+//    val notePresentationModel: NotePresentationModel? = null,
+//) : Parcelable
 
 /*Notes are selected and contextual bar is shown*/
 @Parcelize

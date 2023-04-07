@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.domain.use_cases.categories.*
 import brillembourg.notes.simple.presentation.base.MessageManager
-import brillembourg.notes.simple.presentation.home.DeleteCategoriesConfirmation
+import brillembourg.notes.simple.presentation.home.HomeDialogState
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -125,7 +125,7 @@ class CategoriesViewModel @Inject constructor(
     fun onDeleteConfirmCategories() {
         _categoryUiState.update {
             it.copy(
-                deleteConfirmation = DeleteCategoriesConfirmation(
+                deleteConfirmation = HomeDialogState.DeleteCategoriesConfirmation(
                     getSelectedCategories().size
                 )
             )

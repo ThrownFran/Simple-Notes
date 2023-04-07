@@ -6,6 +6,8 @@ import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.SchedulersImp
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.base.MessageManagerImp
+import brillembourg.notes.simple.presentation.settings.ThemeManager
+import brillembourg.notes.simple.presentation.settings.ThemeManagerImp
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,6 +32,12 @@ class AppModule {
     @Singleton
     @Provides
     fun dateProvider(): DateProvider = DateProviderImp()
+
+    @Singleton
+    @Provides
+    fun getThemeManager(): ThemeManager {
+        return ThemeManagerImp()
+    }
 
 }
 

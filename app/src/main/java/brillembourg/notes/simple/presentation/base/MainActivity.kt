@@ -159,6 +159,8 @@ class MainActivity : AppCompatActivity() {
                     false
                 }
                 R.id.menu_settings -> {
+                    navigateToSettings()
+                    closeDrawer()
                     true
                 }
 //                R.id.menu_privacy -> {
@@ -197,6 +199,11 @@ class MainActivity : AppCompatActivity() {
     private fun navigateToCategories() {
         if (navController.currentDestination?.id == R.id.categoriesFragment) return
         navController.navigate(R.id.categoriesFragment)
+    }
+
+    private fun navigateToSettings() {
+        if (navController.currentDestination?.id == R.id.settingsFragment) return
+        navController.navigate(R.id.settingsFragment)
     }
 
     private fun backupNotes() {

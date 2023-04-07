@@ -9,14 +9,6 @@
             type="brillembourg.notes.simple.presentation.home.HomeViewModel" />
     </data>
 
-
-    <!--    <androidx.constraintlayout.widget.ConstraintLayout-->
-    <!--        android:id="@+id/home_contraint"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="match_parent"-->
-    <!--        tools:context=".presentation.home.HomeFragment">-->
-
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/home_recycler"
         android:layout_width="match_parent"
@@ -24,8 +16,5 @@
         android:transitionGroup="true"
         tools:listitem="@layout/item_note"
         tools:itemCount="3" />
-
-    <!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
-
 
 </layout>

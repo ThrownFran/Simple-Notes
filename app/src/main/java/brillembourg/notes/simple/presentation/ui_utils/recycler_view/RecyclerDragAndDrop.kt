@@ -73,16 +73,11 @@ class ItemTouchDraggableImp<T : HasOrder>(
                     target: RecyclerView.ViewHolder
                 ): Boolean {
 
-//                    val recyclerviewAdapter = recyclerView.adapter as ListAdapter<*, *>
-
                     val listAdapter: ListAdapter<*, *> = when (val adapter = recyclerView.adapter) {
                         is ConcatAdapter -> adapter.adapters.find { it is ListAdapter<*, *> } as ListAdapter<*, *>
                         is ListAdapter<*, *> -> adapter
                         else -> throw IllegalArgumentException("Adapter $adapter is not a ListAdapter")
                     }
-//                    val recyclerviewAdapter = (recyclerView.adapter as ConcatAdapter).adapters
-//                        .first { it is ListAdapter<*, *> }
-
 
                     val fromPosition = viewHolder.bindingAdapterPosition
                     val toPosition = target.bindingAdapterPosition
@@ -134,7 +129,6 @@ class ItemTouchDraggableImp<T : HasOrder>(
         //Save note order in from each index. So we can swap orders after dragging.
         dragAndDropList?.reversed()?.forEachIndexed { index, task ->
             originalOrder.add(task.order)
-//            orderMap[task.id] = task.order
         }
     }
 
@@ -179,17 +173,9 @@ class ItemTouchDraggableImp<T : HasOrder>(
     private fun changeOrderInListWithIndexPositions() {
 
         dragAndDropList?.reversed()?.forEachIndexed { index, taskPresentationModel ->
-//            val newOrder = orderMap[index]?:throw IllegalArgumentException("Invalid order")
             val newOrder = originalOrder[index]
             taskPresentationModel.order = newOrder
         }
-
-
     }
 
 }
-
-
-
-
-
