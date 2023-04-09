@@ -1,21 +1,21 @@
-package brillembourg.notes.simple.presentation.home
+package brillembourg.notes.simple.presentation.home.delete
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
-sealed class HomeDialogState {
+sealed class DeleteNoteState {
 
     /*Show confirm to archive notes*/
     @Parcelize
     data class DeleteCategoriesConfirmation(
         val tasksToDeleteSize: Int
-    ) : HomeDialogState(), Parcelable
+    ) : DeleteNoteState(), Parcelable
 
     /*Show confirm to archive notes*/
     @Parcelize
     data class ShowArchiveNotesConfirmationState(
         val tasksToArchiveSize: Int
-    ) : HomeDialogState(), Parcelable
+    ) : DeleteNoteState(), Parcelable
 
-    object Idle : HomeDialogState()
+    object Idle : DeleteNoteState()
 }

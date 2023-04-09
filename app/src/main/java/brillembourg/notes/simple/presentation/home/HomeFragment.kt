@@ -13,7 +13,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.domain.models.NoteLayout
@@ -24,9 +23,14 @@ import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.home.adapters.NoteAdapter
+import brillembourg.notes.simple.presentation.home.delete.DeleteNoteState
+import brillembourg.notes.simple.presentation.home.delete.DeleteNotesViewModel
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.*
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.LayoutType
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.changeLayout
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.getDragDirs
+import brillembourg.notes.simple.presentation.ui_utils.recycler_view.toLayoutType
 import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
@@ -41,6 +45,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private val viewModel: HomeViewModel by viewModels()
+    private val deleteNotesViewModel: DeleteNotesViewModel by viewModels()
     private val activityViewModel: MainViewModel by activityViewModels()
 
     private var _binding: FragmentHomeBinding? = null
@@ -48,6 +53,20 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private var recyclerViewState: Parcelable? = null
     private var actionMode: ActionMode? = null
+
+    private val noteRenderer by lazy {
+        NoteUiRenderer(
+            binding.homeRecycler,
+            recyclerViewState,
+            onLayoutType = { viewModel.homeUiState.value.noteLayout.toLayoutType() },
+            onNavigateToCategories = { viewModel.onNavigateToCategories() },
+            onSelection = { viewModel.onSelection() },
+            onNoteClick = { viewModel.onNoteClick(it) },
+            onReorderedNotes = { viewModel.onReorderedNotes(it) },
+            onReorderedNotesCancelled = { viewModel.onReorderNotesCancelled() },
+            onWizardVisibility = { binding.homeWizard.isVisible = it }
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,15 +95,15 @@ class HomeFragment : Fragment(), MenuProvider {
         }
 
         safeUiLaunch {
-            viewModel.dialogs.collect { dialogState ->
+            deleteNotesViewModel.dialogs.collect { dialogState ->
                 when (dialogState) {
-                    is HomeDialogState.DeleteCategoriesConfirmation -> showDeleteConfirmationState(
+                    is DeleteNoteState.DeleteCategoriesConfirmation -> showDeleteConfirmationState(
                         dialogState
                     )
-                    is HomeDialogState.ShowArchiveNotesConfirmationState -> showArchiveConfirmationState(
+                    is DeleteNoteState.ShowArchiveNotesConfirmationState -> showArchiveConfirmationState(
                         dialogState
                     )
-                    HomeDialogState.Idle -> Unit
+                    DeleteNoteState.Idle -> Unit
                 }
             }
         }
@@ -92,7 +111,7 @@ class HomeFragment : Fragment(), MenuProvider {
         safeUiLaunch {
             viewModel.homeUiState.collect { homeUiState: HomeUiState ->
 
-                setupNoteState(homeUiState.noteList)
+                noteRenderer.setupNoteState(homeUiState.noteList)
 
                 selectionModeState(homeUiState.selectionModeActive)
 
@@ -158,113 +177,6 @@ class HomeFragment : Fragment(), MenuProvider {
             childFragmentManager,
             SelectHomeFilterCategoriesModal.TAG
         )
-    }
-
-    //endregion
-
-    //region Note list
-
-    private fun setupNoteState(noteList: NoteList) {
-        if (noteList.mustRender) setupNoteList(noteList.notes)
-
-        binding.homeWizard.isVisible = noteList.notes.isEmpty()
-    }
-
-    private fun setupNoteList(taskList: List<NotePresentationModel>) {
-        if (binding.homeRecycler.adapter == null) {
-            setupTaskRecycler(taskList)
-        } else {
-            updateListAndNotify(getAdapter()!!, taskList)
-        }
-    }
-
-    private fun setupTaskRecycler(taskList: List<NotePresentationModel>) {
-        binding.homeRecycler.apply {
-            val layoutType = viewModel.homeUiState.value.noteLayout.toLayoutType()
-            adapter = buildNoteAdapter(this, taskList, getDragDirs(layoutType))
-            layoutManager = buildLayoutManager(context, layoutType).also { layoutManager ->
-                retrieveRecyclerStateIfApplies(layoutManager)
-            }
-            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        }
-    }
-
-    private fun updateListAndNotify(
-        noteAdapter: NoteAdapter,
-        taskList: List<NotePresentationModel>
-    ) {
-        submitListAndScrollIfApplies(noteAdapter, noteAdapter.currentList, taskList)
-    }
-
-    private fun submitListAndScrollIfApplies(
-        noteAdapter: NoteAdapter,
-        currentList: List<NotePresentationModel>,
-        taskList: List<NotePresentationModel>
-    ) {
-        val isInsertingInList = currentList.size < taskList.size
-        noteAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
-    }
-
-    private fun scrollToTop() {
-        binding.homeRecycler.scrollToPosition(0)
-    }
-
-    private fun buildNoteAdapter(
-        recyclerView: RecyclerView,
-        noteList: List<NotePresentationModel>,
-        dragDirs: Int
-    ): ConcatAdapter {
-
-        val noteAdapter = NoteAdapter(
-            dragDirs,
-            recyclerView,
-            onSelection = {
-                onNoteSelection()
-            },
-            onClick = { task ->
-                onNoteClicked(task)
-            },
-            onReorderSuccess = { tasks ->
-                onReorderedNotes(tasks)
-            },
-            onReorderCanceled = {
-                onReorderNotesCancelled()
-            })
-            .apply {
-                submitList(noteList)
-            }
-
-        return ConcatAdapter(
-            HeaderAdapter(emptyList<CategoryPresentationModel>().toMutableList()) {
-                viewModel.onNavigateToCategories()
-            },
-            noteAdapter
-        )
-    }
-
-
-    private fun onNoteSelection() {
-        viewModel.onSelection()
-    }
-
-    private fun onNoteClicked(it: NotePresentationModel) {
-        viewModel.onNoteClick(it)
-    }
-
-    private fun onReorderedNotes(tasks: List<NotePresentationModel>) {
-        viewModel.onReorderedNotes(tasks)
-    }
-
-    private fun onReorderNotesCancelled() {
-        viewModel.onReorderNotesCancelled()
-    }
-
-    private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {
-        recyclerViewState?.let { layoutManager.onRestoreInstanceState(it) }
-    }
-
-    private fun saveRecyclerState() {
-        recyclerViewState = binding.homeRecycler.layoutManager?.onSaveInstanceState()
     }
 
     //endregion
@@ -451,36 +363,36 @@ class HomeFragment : Fragment(), MenuProvider {
 
     //region Delete
 
-    private fun showDeleteConfirmationState(showDeleteConfirmationState: HomeDialogState.DeleteCategoriesConfirmation) {
+    private fun showDeleteConfirmationState(showDeleteConfirmationState: DeleteNoteState.DeleteCategoriesConfirmation) {
         showDeleteTasksDialog(this, showDeleteConfirmationState.tasksToDeleteSize,
             onPositive = {
-                viewModel.onDeleteNotes()
+                deleteNotesViewModel.onDeleteNotes()
             },
             onDismiss = {
-                viewModel.onDismissConfirmDeleteShown()
+                deleteNotesViewModel.onDismissConfirmDeleteShown()
             })
     }
 
     private fun onDeleteNotesConfirm() {
-        viewModel.onDeleteConfirm()
+        deleteNotesViewModel.onDeleteConfirm()
     }
 
     //endregion
 
     //region Archive
 
-    private fun showArchiveConfirmationState(showArchiveConfirmationState: HomeDialogState.ShowArchiveNotesConfirmationState) {
+    private fun showArchiveConfirmationState(showArchiveConfirmationState: DeleteNoteState.ShowArchiveNotesConfirmationState) {
         showArchiveConfirmationDialog(this, showArchiveConfirmationState.tasksToArchiveSize,
             onPositive = {
-                viewModel.onArchiveNotes()
+                deleteNotesViewModel.onArchiveNotes()
             },
             onDismiss = {
-                viewModel.onDismissConfirmArchiveShown()
+                deleteNotesViewModel.onDismissConfirmArchiveShown()
             })
     }
 
     private fun onArchiveTasks() {
-        viewModel.onArchiveConfirmNotes()
+        deleteNotesViewModel.onArchiveConfirmNotes()
     }
 
     //endregion
@@ -537,7 +449,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     override fun onDestroyView() {
-        saveRecyclerState()
+        noteRenderer.saveRecyclerState()
         super.onDestroyView()
     }
 

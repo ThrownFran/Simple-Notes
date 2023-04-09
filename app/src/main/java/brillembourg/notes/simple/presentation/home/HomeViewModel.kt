@@ -8,8 +8,6 @@ import brillembourg.notes.simple.domain.models.Note
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.ArchiveNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.DeleteNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.GetNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.ReorderNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.user.GetFilterByCategoriesUseCase
@@ -21,6 +19,7 @@ import brillembourg.notes.simple.presentation.categories.CategoryPresentationMod
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.categories.toDomain
 import brillembourg.notes.simple.presentation.categories.toPresentation
+import brillembourg.notes.simple.presentation.home.delete.UiState
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toCopyString
 import brillembourg.notes.simple.presentation.models.toDomain
@@ -39,8 +38,6 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getNotesUseCase: GetNotesUseCase,
-    private val archiveNotesUseCase: ArchiveNotesUseCase,
-    private val deleteNotesUseCase: DeleteNotesUseCase,
     private val reorderNotesUseCase: ReorderNotesUseCase,
     private val getUserPrefUseCase: GetUserPrefUseCase,
     private val saveUserPrefUseCase: SaveUserPrefUseCase,
@@ -48,19 +45,19 @@ class HomeViewModel @Inject constructor(
     private val messageManager: MessageManager,
     private val saveFilterByCategoriesUseCase: SaveFilterByCategoriesUseCase,
     private val getFilteredCategoriesUseCase: GetFilterByCategoriesUseCase,
-    private val getAvailableCategoriesUseCase: GetCategoriesUseCase
+    private val getAvailableCategoriesUseCase: GetCategoriesUseCase,
+    uiState: UiState
 ) : ViewModel() {
 
     private val uiStateKey = "home_ui_state"
-    private val _homeUiState = MutableStateFlow(getSavedUiState() ?: HomeUiState())
+    private val _homeUiState = uiState.homeUiState
     val homeUiState = _homeUiState.asStateFlow()
 
     private val _navigates: MutableStateFlow<HomeUiNavigates> =
         MutableStateFlow(HomeUiNavigates.Idle)
     val navigates = _navigates.asStateFlow()
 
-    private val _dialogs: MutableStateFlow<HomeDialogState> = MutableStateFlow(HomeDialogState.Idle)
-    val dialogs = _dialogs.asStateFlow()
+    private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
 
     //Job references to allow cancellation
     private var filteredCategoriesJob: Job? = null
@@ -68,6 +65,7 @@ class HomeViewModel @Inject constructor(
     private var getNotesJob: Job? = null
 
     init {
+        getSavedUiState()?.let { _homeUiState.value = it }
         observePreferences()
         saveChangesInSavedStateObserver()
         observeCategories {
@@ -76,6 +74,8 @@ class HomeViewModel @Inject constructor(
     }
 
     //region Note list
+
+    fun getStateForViewModels(): MutableStateFlow<HomeUiState> = _homeUiState
 
     private fun observeNoteList() {
         getNotesJob?.cancel()
@@ -243,7 +243,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
+//    private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
 
 
     //endregion
@@ -351,82 +351,6 @@ class HomeViewModel @Inject constructor(
 
     private fun showMessage(message: UiText) {
         messageManager.showMessage(message)
-    }
-
-    //endregion
-
-    //region Delete
-
-    private fun deleteNotes(tasksToDeleteIds: List<Long>) {
-        viewModelScope.launch {
-            val params = DeleteNotesUseCase.Params(tasksToDeleteIds)
-            when (val result = deleteNotesUseCase(params)) {
-                is Resource.Success -> showMessage(result.data.message)
-                is Resource.Error -> showErrorMessage(result.exception)
-                is Resource.Loading -> Unit
-            }
-        }
-    }
-
-    fun onDeleteConfirm() {
-        _dialogs.update {
-            HomeDialogState.DeleteCategoriesConfirmation(tasksToDeleteSize = getSelectedTasks().size)
-        }
-    }
-
-    fun onDismissConfirmDeleteShown() {
-        _dialogs.update { HomeDialogState.Idle }
-//        _homeUiState.update { it.copy(showDeleteNotesConfirmation = null) }
-    }
-
-    fun onDeleteNotes() {
-        val tasksToDeleteIds = getSelectedTasks().map { it.id }
-        deleteNotes(tasksToDeleteIds)
-
-        _dialogs.update { HomeDialogState.Idle }
-        _homeUiState.update {
-            it.copy(selectionModeActive = null)
-        }
-    }
-
-    //endregion
-
-    //region Archive
-    fun onArchiveNotes() {
-
-        val tasksToDeleteIds = getSelectedTasks().map { it.id }
-        archiveNotes(tasksToDeleteIds)
-
-        _dialogs.update { HomeDialogState.Idle }
-
-        _homeUiState.update {
-            it.copy(selectionModeActive = null)
-        }
-
-    }
-
-    private fun archiveNotes(tasksToDeleteIds: List<Long>) {
-        viewModelScope.launch {
-            val params = ArchiveNotesUseCase.Params(tasksToDeleteIds)
-            when (val result = archiveNotesUseCase(params)) {
-                is Resource.Success -> showMessage(result.data.message)
-                is Resource.Error -> showErrorMessage(result.exception)
-                is Resource.Loading -> Unit
-            }
-
-        }
-    }
-
-    fun onArchiveConfirmNotes() {
-        _dialogs.update {
-            HomeDialogState.ShowArchiveNotesConfirmationState(
-                tasksToArchiveSize = getSelectedTasks().size
-            )
-        }
-    }
-
-    fun onDismissConfirmArchiveShown() {
-        _dialogs.update { HomeDialogState.Idle }
     }
 
     //endregion

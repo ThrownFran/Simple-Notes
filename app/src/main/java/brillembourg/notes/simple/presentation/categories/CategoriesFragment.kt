@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentCategoriesBinding
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
-import brillembourg.notes.simple.presentation.home.HomeDialogState
+import brillembourg.notes.simple.presentation.home.delete.DeleteNoteState
 import brillembourg.notes.simple.presentation.ui_utils.getCategoriesSelectedTitle
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.buildVerticalManager
 import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
@@ -71,7 +71,7 @@ class CategoriesFragment : Fragment() {
     }
 
 
-    private fun showDeleteCategoriesState(state: HomeDialogState.DeleteCategoriesConfirmation?) {
+    private fun showDeleteCategoriesState(state: DeleteNoteState.DeleteCategoriesConfirmation?) {
         if (state != null) {
             showDeleteCategoriesDialog(this, state.tasksToDeleteSize,
                 onPositive = {
