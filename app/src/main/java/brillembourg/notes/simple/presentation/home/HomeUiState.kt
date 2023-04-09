@@ -4,6 +4,7 @@ import android.os.Parcelable
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
+import brillembourg.notes.simple.presentation.trash.SelectionModeActive
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -26,10 +27,10 @@ data class NoteList(
 ) : Parcelable
 
 /*Notes are selected and contextual bar is shown*/
-@Parcelize
-data class SelectionModeActive(
-    val size: Int
-) : Parcelable
+//@Parcelize
+//data class SelectionModeActive(
+//    val size: Int
+//) : Parcelable
 
 @Parcelize
 data class SelectFilterCategories(

@@ -192,7 +192,7 @@ class ArchivedViewModel @Inject constructor(
         val sizeSelected = getSelectedTasks().size
         _archivedUiState.update {
             it.copy(
-                selectionModeActive = ArchivedUiState.SelectionModeActive(sizeSelected)
+                selectionModeActive = SelectionModeActive(sizeSelected)
             )
         }
     }

@@ -10,21 +10,20 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
+import androidx.recyclerview.widget.ConcatAdapter
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentTrashBinding
-import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
+import brillembourg.notes.simple.presentation.home.HeaderAdapter
+import brillembourg.notes.simple.presentation.home.NoteList
+import brillembourg.notes.simple.presentation.home.renderers.LayoutChangeRenderer
+import brillembourg.notes.simple.presentation.home.renderers.NoteUiRenderer
+import brillembourg.notes.simple.presentation.home.renderers.SelectionRenderer
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
-import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.LayoutType
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.buildLayoutManager
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.changeLayout
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.toLayoutType
-import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -42,7 +41,57 @@ class ArchivedFragment : Fragment(), MenuProvider {
     private lateinit var binding: FragmentTrashBinding
 
     private var recylerViewState: Parcelable? = null
-    private var actionMode: ActionMode? = null
+
+    private val noteRenderer by lazy {
+        NoteUiRenderer(
+            binding.trashRecycler,
+            recylerViewState,
+            onLayoutType = { viewModel.archivedUiState.value.noteLayout.toLayoutType() },
+            onNavigateToCategories = { },
+            onSelection = { viewModel.onSelection() },
+            onNoteClick = { viewModel.onNoteClick(it) },
+            onReorderedNotes = { },
+            onReorderedNotesCancelled = { },
+            onWizardVisibility = { binding.trashTextEmpty.isVisible = it }
+        )
+    }
+
+    private val changeLayoutRenderer by lazy {
+        LayoutChangeRenderer(
+            binding.trashRecycler,
+            onLayoutChange = { viewModel.onLayoutChange(it) }
+        )
+    }
+
+    private val selectionRenderer by lazy {
+        SelectionRenderer(
+            toolbar = requireActivity().findViewById(R.id.toolbar),
+            menuId = R.menu.menu_contextual_trash,
+            recyclerView = binding.trashRecycler,
+            onSelectionDismissed = { viewModel.onSelectionDismissed() },
+            onActionClick = {
+                when (it) {
+                    R.id.menu_context_menu_delete -> {
+                        viewModel.onShowConfirmDeleteNotes()
+                        true
+                    }
+                    R.id.menu_context_menu_unarchive -> {
+                        onUnarchiveTasks()
+                        true
+                    }
+                    R.id.menu_context_share -> {
+                        onShareNotes()
+                        true
+                    }
+                    R.id.menu_context_copy -> {
+                        viewModel.onCopy()
+                        true
+                    }
+                    else -> false
+                }
+            }
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -82,18 +131,19 @@ class ArchivedFragment : Fragment(), MenuProvider {
             .apply { isVisible = layoutType == LayoutType.Staggered }
         menu.findItem(R.id.menu_home_staggered)
             .apply { isVisible = layoutType == LayoutType.LinearVertical }
+        menu.findItem(R.id.menu_home_categories).isVisible = false
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         val menuHost = requireActivity()
         when (menuItem.itemId) {
             R.id.menu_home_vertical -> {
-                viewModel.onLayoutChange(NoteLayout.Vertical)
+                changeLayoutRenderer.onClickVerticalLayout()
                 menuHost.invalidateMenu()
                 return true
             }
             R.id.menu_home_staggered -> {
-                viewModel.onLayoutChange(NoteLayout.Grid)
+                changeLayoutRenderer.onClickStaggeredLayout()
                 menuHost.invalidateMenu()
                 return true
             }
@@ -102,29 +152,33 @@ class ArchivedFragment : Fragment(), MenuProvider {
     }
 
     override fun onDestroyView() {
-        saveRecyclerState()
+        noteRenderer.saveRecyclerState()
         super.onDestroyView()
     }
+
+    private fun getHeaderAdapter() =
+        getConcatAdapter()?.adapters?.filterIsInstance<HeaderAdapter>()?.firstOrNull()
 
     private fun renderStates() {
 
         safeUiLaunch {
             viewModel.archivedUiState.collect { uiState: ArchivedUiState ->
 
-                setupNoteList(uiState.noteList)
+                noteRenderer.render(NoteList(uiState.noteList, true)).also {
+                    getHeaderAdapter()?.let { getConcatAdapter()?.removeAdapter(it) }
+                }
 
-                selectionModeState(uiState.selectionModeActive)
+                selectionRenderer.render(uiState.selectionModeActive)
 
                 navigateToDetailState(uiState.navigateToEditNote)
 
                 showArchiveConfirmationState(uiState.showArchiveNotesConfirmation)
 
-                noteLayoutState(uiState.noteLayout)
+                changeLayoutRenderer.render(uiState.noteLayout)
 
                 copyClipboardState(uiState.copyToClipboard)
 
                 shareNotesAsStringState(uiState.shareNoteAsString)
-
             }
         }
     }
@@ -143,16 +197,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun noteLayoutState(noteLayout: NoteLayout) {
-        val taskAdapter: ArchivedTaskAdapter? =
-            binding.trashRecycler.adapter as ArchivedTaskAdapter?
-
-        changeLayout(
-            binding.trashRecycler,
-            noteLayout.toLayoutType(),
-            taskAdapter?.currentList
-        )
-    }
+    private fun getConcatAdapter() = (binding.trashRecycler.adapter as? ConcatAdapter?)
 
     private fun showArchiveConfirmationState(showDeleteConfirmationState: ArchivedUiState.ShowDeleteNotesConfirmation?) {
         showDeleteConfirmationState?.let {
@@ -166,17 +211,6 @@ class ArchivedFragment : Fragment(), MenuProvider {
                     viewModel.onDismissConfirmDeleteShown()
                 })
         }
-    }
-
-
-    private fun selectionModeState(selectionModeActive: ArchivedUiState.SelectionModeActive?) {
-        if (selectionModeActive == null) {
-            actionMode?.finish()
-            actionMode = null
-            return
-        }
-
-        launchContextualActionBar(selectionModeActive.size)
     }
 
     private fun navigateToDetailState(navigateToDetail: ArchivedUiState.NavigateToEditNote) {
@@ -197,110 +231,6 @@ class ArchivedFragment : Fragment(), MenuProvider {
         findNavController().navigate(directions, setupExtrasToDetail(view))
     }
 
-    private fun setupNoteList(taskList: List<NotePresentationModel>) {
-        if (binding.trashRecycler.adapter == null) {
-            setupTaskRecycler(taskList)
-        } else {
-            updateListAndNotify(binding.trashRecycler.adapter as ArchivedTaskAdapter, taskList)
-        }
-
-        binding.trashTextEmpty.isVisible = taskList.isEmpty()
-    }
-
-    private fun setupTaskRecycler(taskList: List<NotePresentationModel>) {
-        binding.trashRecycler.apply {
-            adapter = buildTaskAdapter(this, taskList)
-
-            val layoutType = viewModel.archivedUiState.value.noteLayout.toLayoutType()
-            layoutManager = buildLayoutManager(context, layoutType).also { layoutManager ->
-                retrieveRecyclerStateIfApplies(layoutManager)
-            }
-            (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-            isNestedScrollingEnabled = true
-            adapter?.stateRestorationPolicy =
-                RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-        }
-    }
-
-    private fun updateListAndNotify(
-        taskAdapter: ArchivedTaskAdapter,
-        taskList: List<NotePresentationModel>
-    ) {
-        submitListAndScrollIfApplies(taskAdapter, taskList)
-    }
-
-    private fun submitListAndScrollIfApplies(
-        taskAdapter: ArchivedTaskAdapter,
-        taskList: List<NotePresentationModel>
-    ) {
-        val currentList = taskAdapter.currentList
-        val isInsertingInList = currentList.size < taskList.size
-        taskAdapter.submitList(taskList) { if (isInsertingInList) scrollToTop() }
-    }
-
-    private fun scrollToTop() {
-        binding.trashRecycler.scrollToPosition(0)
-    }
-
-    private fun buildTaskAdapter(
-        recyclerView: RecyclerView,
-        taskList: List<NotePresentationModel>
-    ): ArchivedTaskAdapter {
-
-        return ArchivedTaskAdapter(
-            recyclerView,
-            onSelection = {
-                onNoteSelection()
-            },
-            onClick = { task ->
-                onNoteClicked(task)
-            })
-            .apply {
-                submitList(taskList)
-            }
-    }
-
-    private fun onNoteSelection() {
-        viewModel.onSelection()
-    }
-
-    private fun launchContextualActionBar(sizeSelected: Int) {
-        actionMode = setupContextualActionBar(
-            toolbar = requireActivity().findViewById(R.id.toolbar),
-            menuId = R.menu.menu_contextual_trash,
-            currentActionMode = actionMode,
-            adapter = binding.trashRecycler.adapter as ArchivedTaskAdapter,
-            onActionClick = { onContextualActionItem(menuId = it) },
-            onSetTitle = { selectedSize: Int ->
-                getNoteSelectedTitle(
-                    resources = resources,
-                    selectedSize = selectedSize
-                )
-            },
-            onDestroyMyActionMode = { viewModel.onSelectionDismissed() }
-        )
-    }
-
-    private fun onContextualActionItem(menuId: Int) = when (menuId) {
-        R.id.menu_context_menu_delete -> {
-            viewModel.onShowConfirmDeleteNotes()
-            true
-        }
-        R.id.menu_context_menu_unarchive -> {
-            onUnarchiveTasks()
-            true
-        }
-
-        R.id.menu_context_share -> {
-            onShareNotes()
-            true
-        }
-
-
-        else -> false
-    }
-
-
     private fun onShareNotes() {
         viewModel.onShare()
     }
@@ -312,19 +242,5 @@ class ArchivedFragment : Fragment(), MenuProvider {
     private fun onUnarchiveTasks() {
         viewModel.onUnarchiveTasks()
     }
-
-
-    private fun onNoteClicked(it: NotePresentationModel) {
-        viewModel.onNoteClick(it)
-    }
-
-    private fun retrieveRecyclerStateIfApplies(layoutManager: RecyclerView.LayoutManager) {
-        recylerViewState?.let { layoutManager.onRestoreInstanceState(it) }
-    }
-
-    private fun saveRecyclerState() {
-        recylerViewState = binding.trashRecycler.layoutManager?.onSaveInstanceState()
-    }
-
 
 }

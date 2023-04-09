@@ -29,11 +29,5 @@ data class ArchivedUiState(
         val notePresentationModel: NotePresentationModel? = null,
     ) : Parcelable
 
-    /*Notes are selected and contextual bar is shown*/
-    @Parcelize
-    data class SelectionModeActive(
-        val size: Int
-    ) : Parcelable
-
 }
 

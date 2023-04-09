@@ -24,6 +24,7 @@ import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toCopyString
 import brillembourg.notes.simple.presentation.models.toDomain
 import brillembourg.notes.simple.presentation.models.toPresentation
+import brillembourg.notes.simple.presentation.trash.SelectionModeActive
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError

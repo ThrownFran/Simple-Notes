@@ -1,10 +1,12 @@
-package brillembourg.notes.simple.presentation.home
+package brillembourg.notes.simple.presentation.home.renderers
 
 import android.os.Parcelable
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
+import brillembourg.notes.simple.presentation.home.HeaderAdapter
+import brillembourg.notes.simple.presentation.home.NoteList
 import brillembourg.notes.simple.presentation.home.adapters.NoteAdapter
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.LayoutType
@@ -31,7 +33,7 @@ class NoteUiRenderer(
 
     private fun getConcatAdapter() = (recyclerView.adapter as? ConcatAdapter?)
 
-    fun setupNoteState(noteList: NoteList) {
+    fun render(noteList: NoteList) {
         if (noteList.mustRender) setupNoteList(noteList.notes)
     }
 

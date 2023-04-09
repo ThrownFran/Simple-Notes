@@ -12,26 +12,22 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
-import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.base.MainViewModel
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
-import brillembourg.notes.simple.presentation.home.adapters.NoteAdapter
 import brillembourg.notes.simple.presentation.home.delete.DeleteNoteState
 import brillembourg.notes.simple.presentation.home.delete.DeleteNotesViewModel
+import brillembourg.notes.simple.presentation.home.renderers.LayoutChangeRenderer
+import brillembourg.notes.simple.presentation.home.renderers.NoteUiRenderer
+import brillembourg.notes.simple.presentation.home.renderers.SelectionRenderer
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
-import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.LayoutType
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.changeLayout
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.getDragDirs
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.toLayoutType
-import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
@@ -65,6 +61,43 @@ class HomeFragment : Fragment(), MenuProvider {
             onReorderedNotes = { viewModel.onReorderedNotes(it) },
             onReorderedNotesCancelled = { viewModel.onReorderNotesCancelled() },
             onWizardVisibility = { binding.homeWizard.isVisible = it }
+        )
+    }
+
+    private val selectionRenderer by lazy {
+        SelectionRenderer(
+            toolbar = requireActivity().findViewById(R.id.toolbar),
+            menuId = R.menu.menu_contextual_home,
+            recyclerView = binding.homeRecycler,
+            onSelectionDismissed = { viewModel.onSelectionDismissed() },
+            onActionClick = { menuId ->
+                when (menuId) {
+                    R.id.menu_context_menu_archive -> {
+                        onArchiveTasks()
+                        true
+                    }
+                    R.id.menu_context_menu_delete -> {
+                        onDeleteNotesConfirm()
+                        true
+                    }
+                    R.id.menu_context_copy -> {
+                        onCopyNotes()
+                        true
+                    }
+                    R.id.menu_context_share -> {
+                        onShareNotes()
+                        true
+                    }
+                    else -> false
+                }
+            }
+        )
+    }
+
+    private val changeLayoutRenderer by lazy {
+        LayoutChangeRenderer(
+            binding.homeRecycler,
+            onLayoutChange = { viewModel.onLayoutChange(it) }
         )
     }
 
@@ -111,11 +144,11 @@ class HomeFragment : Fragment(), MenuProvider {
         safeUiLaunch {
             viewModel.homeUiState.collect { homeUiState: HomeUiState ->
 
-                noteRenderer.setupNoteState(homeUiState.noteList)
+                noteRenderer.render(homeUiState.noteList)
 
-                selectionModeState(homeUiState.selectionModeActive)
+                selectionRenderer.render(homeUiState.selectionModeActive)
 
-                noteListLayoutState(homeUiState.noteLayout)
+                changeLayoutRenderer.render(homeUiState.noteLayout)
 
                 copyClipboardState(homeUiState.copyToClipboard)
 
@@ -181,101 +214,6 @@ class HomeFragment : Fragment(), MenuProvider {
 
     //endregion
 
-    //region Selection Mode
-
-    private fun selectionModeState(selectionModeActive: SelectionModeActive?) {
-        if (selectionModeActive == null) {
-            actionMode?.finish()
-            actionMode = null
-            return
-        }
-        launchContextualActionBar(selectionModeActive.size)
-    }
-
-    private fun getAdapter(): NoteAdapter? = try {
-        getConcatAdapter()?.adapters?.first { it is NoteAdapter } as NoteAdapter
-    } catch (e: Exception) {
-        null
-    }
-
-    private fun launchContextualActionBar(sizeSelected: Int) {
-        actionMode = setupContextualActionBar(
-            toolbar = requireActivity().findViewById(R.id.toolbar),
-            menuId = R.menu.menu_contextual_home,
-            currentActionMode = actionMode,
-            adapter = getAdapter()!!,
-            onActionClick = { onContextualActionItem(menuId = it) },
-            onSetTitle = { selectedSize: Int ->
-                getNoteSelectedTitle(
-                    resources = resources,
-                    selectedSize = selectedSize
-                )
-            },
-            onDestroyMyActionMode = {
-                viewModel.onSelectionDismissed()
-            }
-        )
-    }
-
-    private fun onContextualActionItem(menuId: Int) = when (menuId) {
-        R.id.menu_context_menu_archive -> {
-            onArchiveTasks()
-            true
-        }
-        R.id.menu_context_menu_delete -> {
-            onDeleteNotesConfirm()
-            true
-        }
-
-        R.id.menu_context_copy -> {
-            onCopyNotes()
-            true
-        }
-
-        R.id.menu_context_share -> {
-            onShareNotes()
-            true
-        }
-
-        else -> false
-    }
-
-    //endregion
-
-    //region Note layout
-
-    private fun noteListLayoutState(noteLayout: NoteLayout) {
-        onChangeLayout(
-            binding.homeRecycler,
-            noteLayout.toLayoutType()
-        )
-    }
-
-    private fun onChangeLayout(
-        recyclerView: RecyclerView,
-        layoutType: LayoutType
-    ) {
-        val noteAdapter = getAdapter() ?: return
-
-        changeLayout(
-            recyclerView,
-            layoutType,
-            noteAdapter.currentList
-        )
-
-        noteAdapter.setDragDirections(recyclerView, getDragDirs(layoutType))
-    }
-
-    private fun onClickStaggeredLayout() {
-        viewModel.onLayoutChange(NoteLayout.Grid)
-    }
-
-    private fun onClickVerticalLayout() {
-        viewModel.onLayoutChange(NoteLayout.Vertical)
-    }
-
-    //endregion
-
     //region Menu
 
     private fun setupMenu() {
@@ -300,12 +238,12 @@ class HomeFragment : Fragment(), MenuProvider {
         val menuHost = requireActivity()
         when (menuItem.itemId) {
             R.id.menu_home_vertical -> {
-                onClickVerticalLayout()
+                changeLayoutRenderer.onClickVerticalLayout()
                 menuHost.invalidateMenu()
                 return true
             }
             R.id.menu_home_staggered -> {
-                onClickStaggeredLayout()
+                changeLayoutRenderer.onClickStaggeredLayout()
                 menuHost.invalidateMenu()
                 return true
             }
