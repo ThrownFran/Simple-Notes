@@ -4,14 +4,14 @@ import android.os.Parcelable
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
 import androidx.databinding.library.baseAdapters.BR
-import brillembourg.notes.simple.presentation.home.delete.DeleteNoteState
+import brillembourg.notes.simple.presentation.home.delete.HomeDialogsState
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class CategoriesUiState(
     val categoryList: CategoryList = CategoryList(),
     val selectionMode: SelectionMode? = null,
-    val deleteConfirmation: DeleteNoteState.DeleteCategoriesConfirmation? = null,
+    val deleteConfirmation: HomeDialogsState.DeleteCategoriesConfirmation? = null,
     val createCategory: CreateCategory = CreateCategory(),
 //    val isEditing: Boolean = false
 ) : Parcelable {

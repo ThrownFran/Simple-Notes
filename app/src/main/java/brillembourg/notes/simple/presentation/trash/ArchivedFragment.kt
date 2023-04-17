@@ -47,11 +47,11 @@ class ArchivedFragment : Fragment(), MenuProvider {
             binding.trashRecycler,
             recylerViewState,
             onLayoutType = { viewModel.archivedUiState.value.noteLayout.toLayoutType() },
-            onNavigateToCategories = { },
+            onNavigateToCategories = {},
             onSelection = { viewModel.onSelection() },
             onNoteClick = { viewModel.onNoteClick(it) },
-            onReorderedNotes = { },
-            onReorderedNotesCancelled = { },
+            onReorderedNotes = {},
+            onReorderedNotesCancelled = {},
             onWizardVisibility = { binding.trashTextEmpty.isVisible = it }
         )
     }

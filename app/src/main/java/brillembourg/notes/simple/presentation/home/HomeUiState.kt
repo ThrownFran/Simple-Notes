@@ -26,12 +26,6 @@ data class NoteList(
     val mustRender: Boolean = false //To avoid rendering set false
 ) : Parcelable
 
-/*Notes are selected and contextual bar is shown*/
-//@Parcelize
-//data class SelectionModeActive(
-//    val size: Int
-//) : Parcelable
-
 @Parcelize
 data class SelectFilterCategories(
     val isFilterCategoryMenuAvailable: Boolean = false,

@@ -16,14 +16,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DeleteNotesViewModel @Inject constructor(
+class DeleteAndArchiveViewModel @Inject constructor(
     private val archiveNotesUseCase: ArchiveNotesUseCase,
     private val deleteNotesUseCase: DeleteNotesUseCase,
     private val messageManager: MessageManager,
     uiState: UiState
 ) : ViewModel() {
 
-    private val _dialogs: MutableStateFlow<DeleteNoteState> = MutableStateFlow(DeleteNoteState.Idle)
+    private val _dialogs: MutableStateFlow<HomeDialogsState> = MutableStateFlow(HomeDialogsState.Idle)
     val dialogs = _dialogs.asStateFlow()
     private val _homeUiState = uiState.homeUiState
 
@@ -50,19 +50,19 @@ class DeleteNotesViewModel @Inject constructor(
 
     fun onDeleteConfirm() {
         _dialogs.update {
-            DeleteNoteState.DeleteCategoriesConfirmation(tasksToDeleteSize = getSelectedTasks().size)
+            HomeDialogsState.DeleteCategoriesConfirmation(tasksToDeleteSize = getSelectedTasks().size)
         }
     }
 
     fun onDismissConfirmDeleteShown() {
-        _dialogs.update { DeleteNoteState.Idle }
+        _dialogs.update { HomeDialogsState.Idle }
     }
 
     fun onDeleteNotes() {
         val tasksToDeleteIds = getSelectedTasks().map { it.id }
         deleteNotes(tasksToDeleteIds)
 
-        _dialogs.update { DeleteNoteState.Idle }
+        _dialogs.update { HomeDialogsState.Idle }
         _homeUiState.update { it.copy(selectionModeActive = null) }
     }
 
@@ -74,7 +74,7 @@ class DeleteNotesViewModel @Inject constructor(
         val tasksToDeleteIds = getSelectedTasks().map { it.id }
         archiveNotes(tasksToDeleteIds)
 
-        _dialogs.update { DeleteNoteState.Idle }
+        _dialogs.update { HomeDialogsState.Idle }
 
         _homeUiState.update { it.copy(selectionModeActive = null) }
 
@@ -93,13 +93,13 @@ class DeleteNotesViewModel @Inject constructor(
 
     fun onArchiveConfirmNotes() {
         _dialogs.update {
-            DeleteNoteState.ShowArchiveNotesConfirmationState(
+            HomeDialogsState.ShowArchiveNotesConfirmationState(
                 tasksToArchiveSize = getSelectedTasks().size
             )
         }
     }
 
     fun onDismissConfirmArchiveShown() {
-        _dialogs.update { DeleteNoteState.Idle }
+        _dialogs.update { HomeDialogsState.Idle }
     }
 }
