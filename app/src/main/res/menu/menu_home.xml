@@ -19,5 +19,11 @@
         android:title="@string/all_staggered"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/menu_home_search"
+        android:icon="@drawable/ic_baseline_search_24"
+        android:title="@string/all_search"
+        app:showAsAction="ifRoom" />
+
 
 </menu>

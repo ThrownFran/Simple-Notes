@@ -3,6 +3,10 @@ package brillembourg.notes.simple.presentation.home
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.*
+import android.widget.EditText
+import androidx.appcompat.widget.SearchView
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
@@ -20,8 +24,8 @@ import brillembourg.notes.simple.presentation.categories.CategoryPresentationMod
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.custom_views.*
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
-import brillembourg.notes.simple.presentation.home.delete.HomeDialogsState
 import brillembourg.notes.simple.presentation.home.delete.DeleteAndArchiveViewModel
+import brillembourg.notes.simple.presentation.home.delete.HomeDialogsState
 import brillembourg.notes.simple.presentation.home.renderers.LayoutChangeRenderer
 import brillembourg.notes.simple.presentation.home.renderers.NoteUiRenderer
 import brillembourg.notes.simple.presentation.home.renderers.SelectionRenderer
@@ -40,6 +44,7 @@ class HomeFragment : Fragment(), MenuProvider {
         fun newInstance() = HomeFragment()
     }
 
+    private var actionMode: ActionMode? = null
     private val viewModel: HomeViewModel by viewModels()
     private val deleteAndArchiveViewModel: DeleteAndArchiveViewModel by viewModels()
     private val activityViewModel: MainViewModel by activityViewModels()
@@ -249,8 +254,67 @@ class HomeFragment : Fragment(), MenuProvider {
             R.id.menu_home_categories -> {
                 viewModel.onNavigateToCategories()
             }
+            R.id.menu_home_search -> {
+                search()
+            }
         }
         return false
+    }
+
+    private fun search() {
+        val toolbarMain: Toolbar = requireActivity().findViewById(R.id.toolbar)
+
+        actionMode = toolbarMain.startActionMode(object : ActionMode.Callback {
+            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+
+                val customView = LayoutInflater.from(context).inflate(R.layout.layout_search, null)
+                mode.customView = customView
+                val searchView = customView.findViewById<SearchView>(R.id.searchView)
+
+                val searchText =
+                    searchView.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
+                searchText.setTextColor(
+                    ContextCompat.getColor(
+                        searchView.context, R.color
+                            .md_theme_light_onPrimary
+                    )
+                )
+                searchText.setHintTextColor(
+                    ContextCompat.getColor(
+                        searchView.context, R.color
+                            .md_theme_light_secondaryContainer_transparent
+                    )
+                )
+                searchView.isIconified = false
+                searchView.requestFocus()
+                searchView.queryHint = "Search note ..."
+                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String): Boolean {
+                        // perform search
+                        return true
+                    }
+
+                    override fun onQueryTextChange(newText: String): Boolean {
+                        // update search suggestions
+                        return true
+                    }
+                })
+                return true
+            }
+
+            override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+                // customize action mode menu
+                return false
+            }
+
+            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+                return false
+            }
+
+            override fun onDestroyActionMode(mode: ActionMode) {
+                actionMode = null
+            }
+        })
     }
 
     //endregion
