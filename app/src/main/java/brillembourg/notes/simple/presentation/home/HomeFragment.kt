@@ -2,7 +2,13 @@ package brillembourg.notes.simple.presentation.home
 
 import android.os.Bundle
 import android.os.Parcelable
-import android.view.*
+import android.view.ActionMode
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
@@ -22,7 +28,13 @@ import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.base.MainViewModel
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
-import brillembourg.notes.simple.presentation.custom_views.*
+import brillembourg.notes.simple.presentation.custom_views.animateWithRecycler
+import brillembourg.notes.simple.presentation.custom_views.copy
+import brillembourg.notes.simple.presentation.custom_views.onClickFlow
+import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
+import brillembourg.notes.simple.presentation.custom_views.setTransitionToCreateNote
+import brillembourg.notes.simple.presentation.custom_views.setTransitionToEditNote
+import brillembourg.notes.simple.presentation.custom_views.shareText
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.home.delete.DeleteAndArchiveViewModel
 import brillembourg.notes.simple.presentation.home.delete.HomeDialogsState
@@ -296,6 +308,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
                     override fun onQueryTextChange(newText: String): Boolean {
                         // update search suggestions
+                        viewModel.onSearch(newText)
                         return true
                     }
                 })

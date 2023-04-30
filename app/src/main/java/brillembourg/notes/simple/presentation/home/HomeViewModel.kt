@@ -29,12 +29,14 @@ import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
@@ -58,6 +60,9 @@ class HomeViewModel @Inject constructor(
         MutableStateFlow(HomeUiNavigates.Idle)
     val navigates = _navigates.asStateFlow()
 
+    private val _key: MutableStateFlow<String> = MutableStateFlow("")
+    private val key: StateFlow<String> = _key.asStateFlow()
+
     private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
 
     //Job references to allow cancellation
@@ -72,6 +77,19 @@ class HomeViewModel @Inject constructor(
         observeCategories {
             observeNoteList()
         }
+        setupSearch()
+    }
+
+    private fun setupSearch() {
+        viewModelScope.launch {
+            _key.debounce(300)
+                .distinctUntilChanged()
+                .collectLatest {
+                    observeCategories {
+                        observeNoteList()
+                    }
+                }
+        }
     }
 
     //region Note list
@@ -81,15 +99,22 @@ class HomeViewModel @Inject constructor(
     private fun observeNoteList() {
         getNotesJob?.cancel()
         getNotesJob =
-            getNotesUseCase(GetNotesUseCase.Params(_homeUiState.value.filteredCategories.map { it.toDomain() }))
+            getNotesUseCase(
+                GetNotesUseCase.Params(
+                    filterByCategories = _homeUiState.value.filteredCategories.map { it.toDomain() },
+                    keySearch = _key.value
+                )
+            )
                 .onEach { result ->
                     when (result) {
                         is Resource.Success -> {
                             updateNoteListState(result)
                         }
+
                         is Resource.Error -> {
                             showErrorMessage(result.exception)
                         }
+
                         is Resource.Loading -> Unit
                     }
                 }
@@ -147,6 +172,7 @@ class HomeViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is Resource.Error -> showErrorMessage(result.exception)
                     is Resource.Loading -> Unit
 
@@ -169,9 +195,11 @@ class HomeViewModel @Inject constructor(
                             }
 
                         }
+
                         is Resource.Error -> {
                             showErrorMessage(result.exception)
                         }
+
                         is Resource.Loading -> {
                             Unit
                         }
@@ -259,6 +287,7 @@ class HomeViewModel @Inject constructor(
                         is Resource.Success -> {
                             _homeUiState.update { it.copy(noteLayout = result.data.preferences.noteLayout) }
                         }
+
                         is Resource.Error -> showErrorMessage(result.exception)
                         is Resource.Loading -> Unit
                     }
@@ -426,6 +455,10 @@ class HomeViewModel @Inject constructor(
 
     fun onCopiedCompleted() {
         _homeUiState.update { it.copy(copyToClipboard = null) }
+    }
+
+    fun onSearch(key: String) {
+        _key.update { key }
     }
 
     //endregion

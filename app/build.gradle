@@ -55,6 +55,7 @@ android {
     viewBinding {
         enabled = true
     }
+    namespace 'brillembourg.notes.simple'
 }
 
 dependencies {

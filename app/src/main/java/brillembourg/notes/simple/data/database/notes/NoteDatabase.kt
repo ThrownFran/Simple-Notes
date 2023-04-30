@@ -45,13 +45,13 @@ class NoteDatabase(
         return roomDatabase.taskDao().getArchivedNotesWithCategories()
     }
 
-    fun getTaskList(): Flow<List<NoteWithCategoriesEntity>> {
-        return roomDatabase.taskDao().getNotesWithCategories()
+    fun getTaskList(keySearch: String): Flow<List<NoteWithCategoriesEntity>> {
+        return if (keySearch.isEmpty()) {
+            roomDatabase.taskDao().getNotesWithCategories()
+        } else {
+            roomDatabase.taskDao().getNotesWithCategories(keySearch)
+        }
     }
-
-//    fun getTaskList(): Flow<List<NoteEntity>> {
-//        return roomDatabase.taskDao().getList()
-//    }
 
     suspend fun deleteTasks(ids: List<Long>) {
         return roomDatabase.taskDao().deleteTasks(ids)

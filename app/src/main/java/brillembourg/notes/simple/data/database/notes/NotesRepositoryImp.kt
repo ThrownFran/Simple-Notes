@@ -9,7 +9,14 @@ import brillembourg.notes.simple.domain.repositories.NotesRepository
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.AddCategoryToNoteUseCase
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.GetCategoriesForNoteUseCase
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.RemoveCategoryToNoteUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.*
+import brillembourg.notes.simple.domain.use_cases.notes.ArchiveNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.CreateNoteUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.DeleteNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.GetArchivedNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.GetNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.ReorderNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.SaveNoteUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.UnArchiveNotesUseCase
 import brillembourg.notes.simple.util.GetTaskException
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
@@ -112,7 +119,7 @@ class NotesRepositoryImp(
     }
 
     override fun getTaskList(params: GetNotesUseCase.Params): Flow<Resource<GetNotesUseCase.Result>> {
-        return database.getTaskList()
+        return database.getTaskList(params.keySearch)
             .debounce(100)
             .distinctUntilChanged()
             .transform {

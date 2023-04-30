@@ -19,6 +19,10 @@ class GetNotesUseCase @Inject constructor(
             .flowOn(schedulers.defaultDispatcher())
     }
 
-    class Params(val filterByCategories: List<Category>)
-    class Result(val noteList: List<NoteWithCategories>)
+    data class Params(
+        val filterByCategories: List<Category>,
+        val keySearch: String = ""
+    )
+
+    data class Result(val noteList: List<NoteWithCategories>)
 }
