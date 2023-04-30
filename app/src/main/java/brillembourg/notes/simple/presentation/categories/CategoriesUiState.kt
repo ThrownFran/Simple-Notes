@@ -13,13 +13,7 @@ data class CategoriesUiState(
     val selectionMode: SelectionMode? = null,
     val deleteConfirmation: HomeDialogsState.DeleteCategoriesConfirmation? = null,
     val createCategory: CreateCategory = CreateCategory(),
-//    val isEditing: Boolean = false
-) : Parcelable {
-
-//    fun saveIconVisibility() = isEditing
-//    fun editIconVisibility() = !isEditing
-}
-
+) : Parcelable
 
 @Parcelize
 data class CategoryList(

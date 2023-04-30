@@ -26,8 +26,9 @@ class DeleteAndArchiveViewModel @Inject constructor(
     private val _dialogs: MutableStateFlow<HomeDialogsState> = MutableStateFlow(HomeDialogsState.Idle)
     val dialogs = _dialogs.asStateFlow()
     private val _homeUiState = uiState.homeUiState
+    private val noteList = uiState.noteList
 
-    private fun getSelectedTasks() = _homeUiState.value.noteList.notes.filter { it.isSelected }
+    private fun getSelectedTasks() = noteList.value.notes.filter { it.isSelected }
 
     private fun showErrorMessage(exception: Exception) {
         messageManager.showMessage(getMessageFromError(exception))

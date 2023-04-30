@@ -12,6 +12,8 @@ import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
 import brillembourg.notes.simple.presentation.detail.setupSelectCategoriesAdapter
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 
 @AndroidEntryPoint
 class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
@@ -58,12 +60,22 @@ class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
 
     private fun renderHomeSelectCategoryState() {
         safeUiLaunch {
-            detailViewModel.homeUiState.collect {
-                if (it.selectFilterCategories.isShowing) {
+            combine(
+                detailViewModel.allCategories,
+                detailViewModel.filteredCategories,
+                detailViewModel.homeUiState
+            ) { a, b, c ->
+                Triple(a, b, c)
+            }.collectLatest {
+                val allCategories = it.first
+                val filteredCategories = it.second
+                val isShowing = it.third.selectFilterCategories.isShowing
+
+                if (isShowing) {
                     setupSelectCategoriesAdapter(
                         binding.detailRecyclerCategories,
-                        it.selectFilterCategories.categories,
-                        it.filteredCategories.map { categoryPresentationModel -> categoryPresentationModel.id }
+                        allCategories,
+                        filteredCategories.map { categoryPresentationModel -> categoryPresentationModel.id }
                     ) { category, isChecked ->
                         onCheckedCategory(category, isChecked)
                     }

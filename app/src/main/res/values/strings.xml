@@ -45,7 +45,7 @@
     <string name="settings_about">About</string>
     <string name="settings_source_licenses">Source license</string>
     <string name="settings_review">Review App</string>
-    <string name="all_ok">Ok</string>
+    <string name="all_ok">OK</string>
     <string name="settings_choose_theme">Choose theme</string>
 
     <string name="about_developer">If you want to contact developer to provide feedback or any suggestion, please use this email <a href="mailto:franbrillembourg@gmail.com?subject=Feedback Simple Notes App"> franbrillembourg@gmail.com</a></string>
@@ -54,7 +54,7 @@
     <string name="about_version">Version</string>
     <string name="about">About</string>
     <string name="licences">Licenses</string>
-    <string name="wizard_text">Write your first note!</string>
+    <string name="wizard_text">No notes have been found!</string>
     <string name="trash_empty">No archived notes yet</string>
     <string name="categories_wizard">Labels are used to categorize your notes so you can filter your homepage</string>
     <string name="all_search">Search</string>

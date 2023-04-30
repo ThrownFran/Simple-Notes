@@ -47,6 +47,7 @@ import brillembourg.notes.simple.presentation.ui_utils.recycler_view.toLayoutTyp
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
@@ -149,18 +150,24 @@ class HomeFragment : Fragment(), MenuProvider {
                     is HomeDialogsState.DeleteCategoriesConfirmation -> showDeleteConfirmationState(
                         dialogState
                     )
+
                     is HomeDialogsState.ShowArchiveNotesConfirmationState -> showArchiveConfirmationState(
                         dialogState
                     )
+
                     HomeDialogsState.Idle -> Unit
                 }
             }
         }
 
         safeUiLaunch {
-            viewModel.homeUiState.collect { homeUiState: HomeUiState ->
+            viewModel.noteList.collect {
+                noteRenderer.render(it)
+            }
+        }
 
-                noteRenderer.render(homeUiState.noteList)
+        safeUiLaunch {
+            viewModel.homeUiState.collect { homeUiState: HomeUiState ->
 
                 selectionRenderer.render(homeUiState.selectionModeActive)
 
@@ -170,9 +177,13 @@ class HomeFragment : Fragment(), MenuProvider {
 
                 shareNotesAsStringState(homeUiState.shareNoteAsString)
 
-                filteredCategoriesState(homeUiState.filteredCategories)
-
                 selectCategoriesState(homeUiState.selectFilterCategories)
+            }
+        }
+
+        safeUiLaunch {
+            viewModel.filteredCategories.collectLatest {
+                filteredCategoriesState(it)
             }
         }
 

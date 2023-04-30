@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package brillembourg.notes.simple.presentation.home
 
 import androidx.lifecycle.SavedStateHandle
@@ -29,8 +31,8 @@ import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -53,162 +55,114 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val uiStateKey = "home_ui_state"
+
     private val _homeUiState = uiState.homeUiState
     val homeUiState = _homeUiState.asStateFlow()
+
+    private val _key: MutableStateFlow<String> = MutableStateFlow("")
+
+    val allCategories: StateFlow<List<CategoryPresentationModel>> =
+        getAvailableCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
+            .transform { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        emit(result.data.categoryList
+                            .map { it.toPresentation() }
+                            .toDiplayOrder()
+                        )
+                    }
+
+                    is Resource.Error -> showErrorMessage(result.exception)
+                    is Resource.Loading -> Unit
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList()
+            )
+
+    val filteredCategories: StateFlow<List<CategoryPresentationModel>> =
+        getFilteredCategoriesUseCase.invoke(GetFilterByCategoriesUseCase.Params())
+            .transform { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        emit(result.data.categories
+                            .map { it.toPresentation() }
+                            .toDiplayOrder())
+                    }
+
+                    is Resource.Error -> showErrorMessage(result.exception)
+                    is Resource.Loading -> Unit
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList()
+            )
+
+    val noteList: StateFlow<NoteList> =
+        combine(_key, filteredCategories) { key, filteredCategories ->
+            GetNotesUseCase.Params(
+                filterByCategories = filteredCategories.map { it.toDomain() },
+                keySearch = key
+            )
+        }.distinctUntilChanged()
+            .debounce(300)
+            .flatMapLatest { params ->
+                getNotesUseCase(params)
+            }.transform { result ->
+                when (result) {
+                    is Resource.Success -> {
+                        emit(NoteList(
+                            notes = result.data.noteList
+                                .map { noteWithCategories ->
+                                    noteWithCategories.toPresentation(dateProvider)
+                                        .apply {
+                                            this.isSelected =
+                                                isNoteSelectedInUi(noteWithCategories.note)
+                                        }
+                                }
+                                .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+                                .asReversed(),
+                            mustRender = true
+                        ))
+                    }
+
+                    is Resource.Error -> showErrorMessage(result.exception)
+                    else -> Unit
+                }
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = NoteList()
+            )
 
     private val _navigates: MutableStateFlow<HomeUiNavigates> =
         MutableStateFlow(HomeUiNavigates.Idle)
     val navigates = _navigates.asStateFlow()
 
-    private val _key: MutableStateFlow<String> = MutableStateFlow("")
-    private val key: StateFlow<String> = _key.asStateFlow()
-
     private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
-
-    //Job references to allow cancellation
-    private var filteredCategoriesJob: Job? = null
-    private var categorieAvailableJob: Job? = null
-    private var getNotesJob: Job? = null
 
     init {
         getSavedUiState()?.let { _homeUiState.value = it }
         observePreferences()
         saveChangesInSavedStateObserver()
-        observeCategories {
-            observeNoteList()
-        }
-        setupSearch()
-    }
-
-    private fun setupSearch() {
-        viewModelScope.launch {
-            _key.debounce(300)
-                .distinctUntilChanged()
-                .collectLatest {
-                    observeCategories {
-                        observeNoteList()
-                    }
-                }
-        }
     }
 
     //region Note list
-
-    fun getStateForViewModels(): MutableStateFlow<HomeUiState> = _homeUiState
-
-    private fun observeNoteList() {
-        getNotesJob?.cancel()
-        getNotesJob =
-            getNotesUseCase(
-                GetNotesUseCase.Params(
-                    filterByCategories = _homeUiState.value.filteredCategories.map { it.toDomain() },
-                    keySearch = _key.value
-                )
-            )
-                .onEach { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            updateNoteListState(result)
-                        }
-
-                        is Resource.Error -> {
-                            showErrorMessage(result.exception)
-                        }
-
-                        is Resource.Loading -> Unit
-                    }
-                }
-                .launchIn(viewModelScope)
-    }
-
-    private fun updateNoteListState(result: Resource.Success<GetNotesUseCase.Result>) {
-        _homeUiState.update { uiState ->
-            uiState.copy(
-                noteList = NoteList(
-                    notes = result.data.noteList
-                        .map { noteWithCategories ->
-                            noteWithCategories.toPresentation(dateProvider)
-                                .apply {
-                                    this.isSelected =
-                                        isNoteSelectedInUi(uiState, noteWithCategories.note)
-                                }
-                        }
-                        .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                        .asReversed(),
-                    mustRender = true)
-            )
-        }
-    }
 
     fun onNoteClick(it: NotePresentationModel) {
         navigateToDetail(it)
     }
 
     private fun isNoteSelectedInUi(
-        uiState: HomeUiState,
         note: Note
-    ) = (uiState.noteList.notes
+    ) = (noteList.value.notes
         .firstOrNull() { note.id == it.id }?.isSelected
         ?: false)
     //endregion
 
     //region Categories
-
-    private fun observeCategories(onFilteredCategoriesLoaded: (() -> Unit)? = null) {
-
-        categorieAvailableJob?.cancel()
-        categorieAvailableJob =
-            getAvailableCategoriesUseCase.invoke(GetCategoriesUseCase.Params()).onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        _homeUiState.update { uiState ->
-                            uiState.copy(
-                                selectFilterCategories = _homeUiState.value.selectFilterCategories.copy(
-                                    categories = result.data.categoryList
-                                        .map { it.toPresentation() }
-                                        .toDiplayOrder(),
-                                    isFilterCategoryMenuAvailable = true
-                                )
-                            )
-                        }
-                    }
-
-                    is Resource.Error -> showErrorMessage(result.exception)
-                    is Resource.Loading -> Unit
-
-                }
-            }
-                .launchIn(viewModelScope)
-
-        filteredCategoriesJob?.cancel()
-        filteredCategoriesJob =
-            getFilteredCategoriesUseCase.invoke(GetFilterByCategoriesUseCase.Params())
-                .onEach { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            _homeUiState.update { uiState ->
-                                uiState.copy(
-                                    filteredCategories = result.data.categories
-                                        .map { it.toPresentation() }
-                                        .toDiplayOrder()
-                                )
-                            }
-
-                        }
-
-                        is Resource.Error -> {
-                            showErrorMessage(result.exception)
-                        }
-
-                        is Resource.Loading -> {
-                            Unit
-                        }
-                    }
-                    onFilteredCategoriesLoaded?.invoke()
-                }
-                .launchIn(viewModelScope)
-    }
-
 
     fun onNavigateToCategories() {
         _homeUiState.update {
@@ -244,8 +198,7 @@ class HomeViewModel @Inject constructor(
     fun onCategoryChecked(category: CategoryPresentationModel, isChecked: Boolean) {
         val categoryUpdated = category.copy(isSelected = isChecked)
 
-        val currentCategories: List<CategoryPresentationModel> =
-            _homeUiState.value.filteredCategories
+        val currentCategories: List<CategoryPresentationModel> = filteredCategories.value
 
         val categoriesUpdated =
             if (isChecked) currentCategories + categoryUpdated
@@ -254,9 +207,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             val params = SaveFilterByCategoriesUseCase.Params(categoriesUpdated.map { it.id })
             saveFilterByCategoriesUseCase.invoke(params)
-            observeCategories {
-                observeNoteList()
-            }
         }
     }
 
@@ -316,7 +266,7 @@ class HomeViewModel @Inject constructor(
         _navigates.update {
             HomeUiNavigates.NavigateToEditNote(
                 mustConsume = true,
-                taskIndex = _homeUiState.value.noteList.notes.indexOf(note),
+                taskIndex = noteList.value.notes.indexOf(note),
                 notePresentationModel = note
             )
         }
@@ -335,21 +285,17 @@ class HomeViewModel @Inject constructor(
     //region Reordering
 
     fun onReorderedNotes(reorderedTaskList: List<NotePresentationModel>) {
-        _homeUiState.update {
 
-            val noteList: List<NotePresentationModel> = _homeUiState.value.noteList.notes
-            noteList.forEach { it.isSelected = false }
+        //TODO fix
+//        _noteList.update {
+//            val noteList: List<NotePresentationModel> = _noteList.value.notes
+//            noteList.forEach { it.isSelected = false }
+//            it.copy(notes = noteList)
+//        }
 
-            it.copy(
-                selectionModeActive = null,
-                noteList = _homeUiState.value.noteList.copy(
-                    notes = noteList,
-                    mustRender = false
-                )
-            )
-        }
+        _homeUiState.update { it.copy(selectionModeActive = null) }
 
-        if (reorderedTaskList == _homeUiState.value.noteList.notes) return
+        if (reorderedTaskList == noteList.value.notes) return
         reorderTasks(reorderedTaskList)
     }
 
@@ -404,7 +350,7 @@ class HomeViewModel @Inject constructor(
         _homeUiState.update { it.copy(selectionModeActive = null) }
     }
 
-    private fun getSelectedTasks() = _homeUiState.value.noteList.notes.filter { it.isSelected }
+    private fun getSelectedTasks() = noteList.value.notes.filter { it.isSelected }
 
     //endregion
 
