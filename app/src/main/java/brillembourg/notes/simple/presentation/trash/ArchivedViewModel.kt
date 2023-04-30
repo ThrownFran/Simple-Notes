@@ -12,7 +12,6 @@ import brillembourg.notes.simple.domain.use_cases.notes.UnArchiveNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.user.GetUserPrefUseCase
 import brillembourg.notes.simple.domain.use_cases.user.SaveUserPrefUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
-import brillembourg.notes.simple.presentation.home.delete.UiState
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toCopyString
 import brillembourg.notes.simple.presentation.models.toPresentation
@@ -20,6 +19,7 @@ import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -37,12 +37,11 @@ class ArchivedViewModel @Inject constructor(
     private val saveUserPrefUseCase: SaveUserPrefUseCase,
     private val dateProvider: DateProvider,
     private val messageManager: MessageManager,
-    uiState: UiState
 ) : ViewModel() {
 
     private val uiStateKey = "archived_ui_state"
 
-    private val _archivedUiState = uiState.trashUiState
+    private val _archivedUiState = MutableStateFlow(ArchivedUiState())
     val archivedUiState = _archivedUiState.asStateFlow()
 
     private fun getSavedUiState(): ArchivedUiState? =

@@ -10,6 +10,8 @@ import brillembourg.notes.simple.domain.models.Note
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.ArchiveNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.DeleteNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.GetNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.ReorderNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.user.GetFilterByCategoriesUseCase
@@ -21,7 +23,7 @@ import brillembourg.notes.simple.presentation.categories.CategoryPresentationMod
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.categories.toDomain
 import brillembourg.notes.simple.presentation.categories.toPresentation
-import brillembourg.notes.simple.presentation.home.delete.UiState
+import brillembourg.notes.simple.presentation.home.delete.DeleteAndArchiveManager
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toCopyString
 import brillembourg.notes.simple.presentation.models.toDomain
@@ -38,6 +40,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+val stopTimeoutMillis: Long = 5_000
+
 @OptIn(FlowPreview::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -49,19 +53,86 @@ class HomeViewModel @Inject constructor(
     private val dateProvider: DateProvider,
     private val messageManager: MessageManager,
     private val saveFilterByCategoriesUseCase: SaveFilterByCategoriesUseCase,
-    private val getFilteredCategoriesUseCase: GetFilterByCategoriesUseCase,
-    private val getAvailableCategoriesUseCase: GetCategoriesUseCase,
-    uiState: UiState
+    archiveNotesUseCase: ArchiveNotesUseCase,
+    deleteNotesUseCase: DeleteNotesUseCase,
+    getFilteredCategoriesUseCase: GetFilterByCategoriesUseCase,
+    getAvailableCategoriesUseCase: GetCategoriesUseCase,
 ) : ViewModel() {
 
     private val uiStateKey = "home_ui_state"
 
-    private val _homeUiState = uiState.homeUiState
+    private val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
 
-    private val _key: MutableStateFlow<String> = MutableStateFlow("")
+    private val _navigates: MutableStateFlow<HomeUiNavigates> =
+        MutableStateFlow(HomeUiNavigates.Idle)
+    val navigates = _navigates.asStateFlow()
 
+    private val _key: MutableStateFlow<String> = MutableStateFlow("")
     val allCategories: StateFlow<List<CategoryPresentationModel>> =
+        initAllCategories(getAvailableCategoriesUseCase)
+
+    val filteredCategories: StateFlow<List<CategoryPresentationModel>> =
+        initFilteredCategories(getFilteredCategoriesUseCase)
+
+    val noteList: StateFlow<NoteList> = initNoteList()
+
+    val deleteAndArchiveManager = DeleteAndArchiveManager(
+        archiveNotesUseCase = archiveNotesUseCase,
+        deleteNotesUseCase = deleteNotesUseCase,
+        messageManager = messageManager,
+        noteList = noteList,
+        coroutineScope = viewModelScope,
+        onDismissSelectionMode = {
+            _homeUiState.update { it.copy(selectionModeActive = null) }
+        }
+    )
+
+    private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
+
+    init {
+        getSavedUiState()?.let { _homeUiState.value = it }
+        observePreferences()
+        saveChangesInSavedStateObserver()
+    }
+
+    private fun initNoteList() = combine(_key, filteredCategories) { key, filteredCategories ->
+        GetNotesUseCase.Params(
+            filterByCategories = filteredCategories.map { it.toDomain() },
+            keySearch = key
+        )
+    }.distinctUntilChanged()
+        .debounce(300)
+        .flatMapLatest { params ->
+            getNotesUseCase(params)
+        }.transform { result ->
+            when (result) {
+                is Resource.Success -> {
+                    emit(NoteList(
+                        notes = result.data.noteList
+                            .map { noteWithCategories ->
+                                noteWithCategories.toPresentation(dateProvider)
+                                    .apply {
+                                        this.isSelected =
+                                            isNoteSelectedInUi(noteWithCategories.note)
+                                    }
+                            }
+                            .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+                            .asReversed(),
+                        mustRender = true
+                    ))
+                }
+
+                is Resource.Error -> showErrorMessage(result.exception)
+                else -> Unit
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
+            initialValue = NoteList()
+        )
+
+    private fun initAllCategories(getAvailableCategoriesUseCase: GetCategoriesUseCase) =
         getAvailableCategoriesUseCase.invoke(GetCategoriesUseCase.Params())
             .transform { result ->
                 when (result) {
@@ -77,11 +148,11 @@ class HomeViewModel @Inject constructor(
                 }
             }.stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
+                started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
                 initialValue = emptyList()
             )
 
-    val filteredCategories: StateFlow<List<CategoryPresentationModel>> =
+    private fun initFilteredCategories(getFilteredCategoriesUseCase: GetFilterByCategoriesUseCase) =
         getFilteredCategoriesUseCase.invoke(GetFilterByCategoriesUseCase.Params())
             .transform { result ->
                 when (result) {
@@ -96,58 +167,9 @@ class HomeViewModel @Inject constructor(
                 }
             }.stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
+                started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
                 initialValue = emptyList()
             )
-
-    val noteList: StateFlow<NoteList> =
-        combine(_key, filteredCategories) { key, filteredCategories ->
-            GetNotesUseCase.Params(
-                filterByCategories = filteredCategories.map { it.toDomain() },
-                keySearch = key
-            )
-        }.distinctUntilChanged()
-            .debounce(300)
-            .flatMapLatest { params ->
-                getNotesUseCase(params)
-            }.transform { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        emit(NoteList(
-                            notes = result.data.noteList
-                                .map { noteWithCategories ->
-                                    noteWithCategories.toPresentation(dateProvider)
-                                        .apply {
-                                            this.isSelected =
-                                                isNoteSelectedInUi(noteWithCategories.note)
-                                        }
-                                }
-                                .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                                .asReversed(),
-                            mustRender = true
-                        ))
-                    }
-
-                    is Resource.Error -> showErrorMessage(result.exception)
-                    else -> Unit
-                }
-            }.stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = NoteList()
-            )
-
-    private val _navigates: MutableStateFlow<HomeUiNavigates> =
-        MutableStateFlow(HomeUiNavigates.Idle)
-    val navigates = _navigates.asStateFlow()
-
-    private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
-
-    init {
-        getSavedUiState()?.let { _homeUiState.value = it }
-        observePreferences()
-        saveChangesInSavedStateObserver()
-    }
 
     //region Note list
 
@@ -285,14 +307,6 @@ class HomeViewModel @Inject constructor(
     //region Reordering
 
     fun onReorderedNotes(reorderedTaskList: List<NotePresentationModel>) {
-
-        //TODO fix
-//        _noteList.update {
-//            val noteList: List<NotePresentationModel> = _noteList.value.notes
-//            noteList.forEach { it.isSelected = false }
-//            it.copy(notes = noteList)
-//        }
-
         _homeUiState.update { it.copy(selectionModeActive = null) }
 
         if (reorderedTaskList == noteList.value.notes) return

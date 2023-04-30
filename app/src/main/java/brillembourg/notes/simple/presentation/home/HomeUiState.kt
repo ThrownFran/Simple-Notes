@@ -8,14 +8,12 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class HomeUiState(
-//    val noteList: NoteList = NoteList(),
     val noteLayout: NoteLayout = NoteLayout.Vertical,
     val selectionModeActive: SelectionModeActive? = null,
 
     val copyToClipboard: String? = null,
     val shareNoteAsString: String? = null,
 
-//    val filteredCategories: List<CategoryPresentationModel> = emptyList(),
     val selectFilterCategories: SelectFilterCategories = SelectFilterCategories()
 ) : Parcelable
 
@@ -30,5 +28,4 @@ data class SelectFilterCategories(
     val isFilterCategoryMenuAvailable: Boolean = false,
     val navigate: Boolean = false,
     val isShowing: Boolean = false,
-//    val categories: List<CategoryPresentationModel> = emptyList()
 ) : Parcelable

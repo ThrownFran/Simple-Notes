@@ -1,32 +1,31 @@
 package brillembourg.notes.simple.presentation.home.delete
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.domain.use_cases.notes.ArchiveNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.DeleteNotesUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
+import brillembourg.notes.simple.presentation.home.NoteList
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
-import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class DeleteAndArchiveViewModel @Inject constructor(
+class DeleteAndArchiveManager constructor(
     private val archiveNotesUseCase: ArchiveNotesUseCase,
     private val deleteNotesUseCase: DeleteNotesUseCase,
     private val messageManager: MessageManager,
-    uiState: UiState
-) : ViewModel() {
+    private val noteList: StateFlow<NoteList>,
+    private val coroutineScope: CoroutineScope,
+    private val onDismissSelectionMode: () -> Unit
+) {
 
-    private val _dialogs: MutableStateFlow<HomeDialogsState> = MutableStateFlow(HomeDialogsState.Idle)
+    private val _dialogs: MutableStateFlow<HomeDialogsState> =
+        MutableStateFlow(HomeDialogsState.Idle)
     val dialogs = _dialogs.asStateFlow()
-    private val _homeUiState = uiState.homeUiState
-    private val noteList = uiState.noteList
 
     private fun getSelectedTasks() = noteList.value.notes.filter { it.isSelected }
 
@@ -39,7 +38,7 @@ class DeleteAndArchiveViewModel @Inject constructor(
     }
 
     private fun deleteNotes(tasksToDeleteIds: List<Long>) {
-        viewModelScope.launch {
+        coroutineScope.launch {
             val params = DeleteNotesUseCase.Params(tasksToDeleteIds)
             when (val result = deleteNotesUseCase(params)) {
                 is Resource.Success -> showMessage(result.data.message)
@@ -64,7 +63,7 @@ class DeleteAndArchiveViewModel @Inject constructor(
         deleteNotes(tasksToDeleteIds)
 
         _dialogs.update { HomeDialogsState.Idle }
-        _homeUiState.update { it.copy(selectionModeActive = null) }
+        onDismissSelectionMode()
     }
 
     //endregion
@@ -77,12 +76,11 @@ class DeleteAndArchiveViewModel @Inject constructor(
 
         _dialogs.update { HomeDialogsState.Idle }
 
-        _homeUiState.update { it.copy(selectionModeActive = null) }
-
+        onDismissSelectionMode()
     }
 
     private fun archiveNotes(tasksToDeleteIds: List<Long>) {
-        viewModelScope.launch {
+        coroutineScope.launch {
             val params = ArchiveNotesUseCase.Params(tasksToDeleteIds)
             when (val result = archiveNotesUseCase(params)) {
                 is Resource.Success -> showMessage(result.data.message)

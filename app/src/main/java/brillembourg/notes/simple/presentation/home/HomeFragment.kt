@@ -36,7 +36,6 @@ import brillembourg.notes.simple.presentation.custom_views.setTransitionToCreate
 import brillembourg.notes.simple.presentation.custom_views.setTransitionToEditNote
 import brillembourg.notes.simple.presentation.custom_views.shareText
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
-import brillembourg.notes.simple.presentation.home.delete.DeleteAndArchiveViewModel
 import brillembourg.notes.simple.presentation.home.delete.HomeDialogsState
 import brillembourg.notes.simple.presentation.home.renderers.LayoutChangeRenderer
 import brillembourg.notes.simple.presentation.home.renderers.NoteUiRenderer
@@ -59,7 +58,6 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private var actionMode: ActionMode? = null
     private val viewModel: HomeViewModel by viewModels()
-    private val deleteAndArchiveViewModel: DeleteAndArchiveViewModel by viewModels()
     private val activityViewModel: MainViewModel by activityViewModels()
 
     private var _binding: FragmentHomeBinding? = null
@@ -145,22 +143,6 @@ class HomeFragment : Fragment(), MenuProvider {
         }
 
         safeUiLaunch {
-            deleteAndArchiveViewModel.dialogs.collect { dialogState ->
-                when (dialogState) {
-                    is HomeDialogsState.DeleteCategoriesConfirmation -> showDeleteConfirmationState(
-                        dialogState
-                    )
-
-                    is HomeDialogsState.ShowArchiveNotesConfirmationState -> showArchiveConfirmationState(
-                        dialogState
-                    )
-
-                    HomeDialogsState.Idle -> Unit
-                }
-            }
-        }
-
-        safeUiLaunch {
             viewModel.noteList.collect {
                 noteRenderer.render(it)
             }
@@ -178,6 +160,22 @@ class HomeFragment : Fragment(), MenuProvider {
                 shareNotesAsStringState(homeUiState.shareNoteAsString)
 
                 selectCategoriesState(homeUiState.selectFilterCategories)
+            }
+        }
+
+        safeUiLaunch {
+            viewModel.deleteAndArchiveManager.dialogs.collect { dialogState ->
+                when (dialogState) {
+                    is HomeDialogsState.DeleteCategoriesConfirmation -> {
+                        showDeleteConfirmationState(dialogState)
+                    }
+
+                    is HomeDialogsState.ShowArchiveNotesConfirmationState -> {
+                        showArchiveConfirmationState(dialogState)
+                    }
+
+                    HomeDialogsState.Idle -> Unit
+                }
             }
         }
 
@@ -391,15 +389,15 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun showDeleteConfirmationState(showDeleteConfirmationState: HomeDialogsState.DeleteCategoriesConfirmation) {
         showDeleteTasksDialog(this, showDeleteConfirmationState.tasksToDeleteSize,
             onPositive = {
-                deleteAndArchiveViewModel.onDeleteNotes()
+                viewModel.deleteAndArchiveManager.onDeleteNotes()
             },
             onDismiss = {
-                deleteAndArchiveViewModel.onDismissConfirmDeleteShown()
+                viewModel.deleteAndArchiveManager.onDismissConfirmDeleteShown()
             })
     }
 
     private fun onDeleteNotesConfirm() {
-        deleteAndArchiveViewModel.onDeleteConfirm()
+        viewModel.deleteAndArchiveManager.onDeleteConfirm()
     }
 
     //endregion
@@ -409,15 +407,15 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun showArchiveConfirmationState(showArchiveConfirmationState: HomeDialogsState.ShowArchiveNotesConfirmationState) {
         showArchiveConfirmationDialog(this, showArchiveConfirmationState.tasksToArchiveSize,
             onPositive = {
-                deleteAndArchiveViewModel.onArchiveNotes()
+                viewModel.deleteAndArchiveManager.onArchiveNotes()
             },
             onDismiss = {
-                deleteAndArchiveViewModel.onDismissConfirmArchiveShown()
+                viewModel.deleteAndArchiveManager.onDismissConfirmArchiveShown()
             })
     }
 
     private fun onArchiveTasks() {
-        deleteAndArchiveViewModel.onArchiveConfirmNotes()
+        viewModel.deleteAndArchiveManager.onArchiveConfirmNotes()
     }
 
     //endregion
