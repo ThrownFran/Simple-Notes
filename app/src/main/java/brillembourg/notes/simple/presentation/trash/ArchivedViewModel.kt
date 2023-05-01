@@ -171,30 +171,7 @@ class ArchivedViewModel @Inject constructor(
         messageManager.showMessage(message)
     }
 
-    //    fun onDeleteNotes() {
-//        val tasksToDeleteIds = getSelectedTasks().map { it.id }
-//
-//        _archivedUiState.update {
-//            it.copy(
-//                showArchiveNotesConfirmation = null,
-//                selectionModeActive = null
-//            )
-//        }
-//
-//        deleteTasks(tasksToDeleteIds)
-//    }
     private fun getSelectedTasks() = noteList.value.notes.filter { it.isSelected }
-
-//    private fun deleteTasks(tasksToDeleteIds: List<Long>) {
-//        viewModelScope.launch {
-//            val params = DeleteNotesUseCase.Params(tasksToDeleteIds)
-//            when (val result = deleteNotesUseCase(params)) {
-//                is Resource.Success -> showMessage(result.data.message)
-//                is Resource.Error -> showErrorMessage(result.exception)
-//                is Resource.Loading -> Unit
-//            }
-//        }
-//    }
 
     fun onSelection() {
         val sizeSelected = getSelectedTasks().size
@@ -208,22 +185,6 @@ class ArchivedViewModel @Inject constructor(
     fun onSelectionDismissed() {
         _archivedUiState.update { it.copy(selectionModeActive = null) }
     }
-//
-//    fun onShowConfirmDeleteNotes() {
-//        _archivedUiState.update {
-//            it.copy(
-//                showArchiveNotesConfirmation = ArchivedUiState.ShowDeleteNotesConfirmation(
-//                    tasksToDeleteSize = getSelectedTasks().size
-//                )
-//            )
-//        }
-//    }
-//
-//    fun onDismissConfirmDeleteShown() {
-//        _archivedUiState.update {
-//            it.copy(showArchiveNotesConfirmation = null)
-//        }
-//    }
 
     fun onLayoutChange(noteLayout: NoteLayout) {
         _archivedUiState.update { it.copy(noteLayout = noteLayout) }
