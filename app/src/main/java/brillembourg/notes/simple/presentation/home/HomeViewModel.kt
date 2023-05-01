@@ -63,17 +63,37 @@ class HomeViewModel @Inject constructor(
 
     private val uiStateKey = "home_ui_state"
 
-    private val _homeUiState = MutableStateFlow(HomeUiState())
-    val homeUiState = _homeUiState.asStateFlow()
-
     private val _navigates: MutableStateFlow<HomeUiNavigates> =
         MutableStateFlow(HomeUiNavigates.Idle)
     val navigates = _navigates.asStateFlow()
 
     private val _key: MutableStateFlow<String> = MutableStateFlow("")
+    private val noteLayout: StateFlow<NoteLayout> = initPreferences()
+    private val selectionModeActive: MutableStateFlow<SelectionModeActive?> = MutableStateFlow(null)
+    private val noteActions: MutableStateFlow<NoteActions> = MutableStateFlow(NoteActions())
+    private val selectCategoriesState: MutableStateFlow<SelectCategoriesState> =
+        MutableStateFlow(SelectCategoriesState())
+
+    val homeUiState: StateFlow<HomeUiState> = combine(
+        flow = noteLayout,
+        flow2 = selectionModeActive,
+        flow3 = noteActions,
+        flow4 = selectCategoriesState
+    ) { noteLayout, selectionModeActive, noteActions, selectCategoriesState ->
+        HomeUiState(
+            noteLayout = noteLayout,
+            selectionModeActive = selectionModeActive,
+            noteActions = noteActions,
+            selectCategoriesState = selectCategoriesState
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
+        initialValue = HomeUiState()
+    )
+
     val allCategories: StateFlow<List<CategoryPresentationModel>> =
         initAllCategories(getAvailableCategoriesUseCase)
-
     val filteredCategories: StateFlow<List<CategoryPresentationModel>> =
         initFilteredCategories(getFilteredCategoriesUseCase)
 
@@ -87,15 +107,16 @@ class HomeViewModel @Inject constructor(
         noteList = noteList,
         coroutineScope = viewModelScope,
         onDismissSelectionMode = {
-            _homeUiState.update { it.copy(selectionModeActive = null) }
+            selectionModeActive.update { null }
         }
     )
 
     private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
 
     init {
-        getSavedUiState()?.let { _homeUiState.value = it }
-        observePreferences()
+        //TODO
+//        getSavedUiState()?.let { _homeUiState.value = it }
+//        observePreferences()
         saveChangesInSavedStateObserver()
     }
 
@@ -174,6 +195,19 @@ class HomeViewModel @Inject constructor(
                 initialValue = emptyList()
             )
 
+    private fun initPreferences() = getUserPrefUseCase(GetUserPrefUseCase.Params())
+        .transform { result ->
+            when (result) {
+                is Resource.Success -> emit(result.data.preferences.noteLayout)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
+            initialValue = NoteLayout.Vertical
+        )
+
     //region Note list
 
     fun onNoteClick(it: NotePresentationModel) {
@@ -190,32 +224,22 @@ class HomeViewModel @Inject constructor(
     //region Categories
 
     fun onNavigateToCategories() {
-        _homeUiState.update {
-            it.copy(
-                selectFilterCategories = it.selectFilterCategories.copy(
-                    navigate = true,
-                )
-            )
+        selectCategoriesState.update {
+            it.copy(navigate = true)
         }
     }
 
     fun onHideCategories() {
-        _homeUiState.update {
-            it.copy(
-                selectFilterCategories = it.selectFilterCategories.copy(
-                    isShowing = false
-                )
-            )
+        selectCategoriesState.update {
+            it.copy(isShowing = false)
         }
     }
 
     fun onCategoriesShowing() {
-        _homeUiState.update {
+        selectCategoriesState.update {
             it.copy(
-                selectFilterCategories = it.selectFilterCategories.copy(
-                    isShowing = true,
-                    navigate = false
-                )
+                isShowing = true,
+                navigate = false
             )
         }
     }
@@ -249,27 +273,6 @@ class HomeViewModel @Inject constructor(
 
 //    private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
 
-
-    //endregion
-
-    //region Preferences
-
-    private fun observePreferences() {
-        viewModelScope.launch {
-            getUserPrefUseCase(GetUserPrefUseCase.Params())
-                .collect { result ->
-                    when (result) {
-                        is Resource.Success -> {
-                            _homeUiState.update { it.copy(noteLayout = result.data.preferences.noteLayout) }
-                        }
-
-                        is Resource.Error -> showErrorMessage(result.exception)
-                        is Resource.Loading -> Unit
-                    }
-                }
-        }
-    }
-
     //endregion
 
     //region Navigation
@@ -280,7 +283,7 @@ class HomeViewModel @Inject constructor(
 
     private fun navigateToAddNote(content: String?) {
         _navigates.update { HomeUiNavigates.NavigateToAddNote(content) }
-        _homeUiState.update { it.copy(selectionModeActive = null) }
+        selectionModeActive.update { null }
     }
 
     fun onNavigateToAddNoteCompleted() {
@@ -296,9 +299,7 @@ class HomeViewModel @Inject constructor(
             )
         }
 
-        _homeUiState.update {
-            it.copy(selectionModeActive = null)
-        }
+        selectionModeActive.update { null }
     }
 
     fun onNavigateToDetailCompleted() {
@@ -310,7 +311,7 @@ class HomeViewModel @Inject constructor(
     //region Reordering
 
     fun onReorderedNotes(reorderedTaskList: List<NotePresentationModel>) {
-        _homeUiState.update { it.copy(selectionModeActive = null) }
+        selectionModeActive.update { null }
 
         if (reorderedTaskList == noteList.value.notes) return
         reorderTasks(reorderedTaskList)
@@ -353,18 +354,15 @@ class HomeViewModel @Inject constructor(
     fun onSelection() {
         val sizeSelected = getSelectedTasks().size
 
-        _homeUiState.update {
-            it.copy(
-                selectionModeActive = SelectionModeActive(
-                    size = sizeSelected
-                )
+        selectionModeActive.update {
+            SelectionModeActive(
+                size = sizeSelected
             )
         }
-
     }
 
     fun onSelectionDismissed() {
-        _homeUiState.update { it.copy(selectionModeActive = null) }
+        selectionModeActive.update { null }
     }
 
     private fun getSelectedTasks() = noteList.value.notes.filter { it.isSelected }
@@ -374,7 +372,6 @@ class HomeViewModel @Inject constructor(
     //region Layout change
 
     fun onLayoutChange(noteLayout: NoteLayout) {
-        _homeUiState.update { it.copy(noteLayout = noteLayout) }
         saveLayoutPreference(noteLayout)
     }
 
@@ -390,16 +387,16 @@ class HomeViewModel @Inject constructor(
 
     fun onShare() {
         val tasksToCopy = getSelectedTasks()
-        _homeUiState.update {
-            it.copy(
-                shareNoteAsString = tasksToCopy.toCopyString(),
-                selectionModeActive = null
-            )
+
+        noteActions.update {
+            it.copy(shareNoteAsString = tasksToCopy.toCopyString())
         }
+
+        selectionModeActive.update { null }
     }
 
     fun onShareCompleted() {
-        _homeUiState.update { it.copy(shareNoteAsString = null) }
+        noteActions.update { it.copy(shareNoteAsString = null) }
     }
 
     //endregion
@@ -408,16 +405,18 @@ class HomeViewModel @Inject constructor(
 
     fun onCopy() {
         val tasksToCopy = getSelectedTasks()
-        _homeUiState.update {
+
+        noteActions.update {
             it.copy(
                 copyToClipboard = tasksToCopy.toCopyString(),
-                selectionModeActive = null
             )
         }
+
+        selectionModeActive.update { null }
     }
 
     fun onCopiedCompleted() {
-        _homeUiState.update { it.copy(copyToClipboard = null) }
+        noteActions.update { it.copy(copyToClipboard = null) }
     }
 
     fun onSearch(key: String) {

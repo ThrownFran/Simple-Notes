@@ -155,11 +155,11 @@ class HomeFragment : Fragment(), MenuProvider {
 
                 changeLayoutRenderer.render(homeUiState.noteLayout)
 
-                copyClipboardState(homeUiState.copyToClipboard)
+                copyClipboardState(homeUiState.noteActions.copyToClipboard)
 
-                shareNotesAsStringState(homeUiState.shareNoteAsString)
+                shareNotesAsStringState(homeUiState.noteActions.shareNoteAsString)
 
-                selectCategoriesState(homeUiState.selectFilterCategories)
+                selectCategoriesState(homeUiState.selectCategoriesState)
             }
         }
 
@@ -222,7 +222,7 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun selectCategoriesState(selectCategories: SelectFilterCategories) {
+    private fun selectCategoriesState(selectCategories: SelectCategoriesState) {
         if (selectCategories.navigate && !selectCategories.isShowing) {
             showCategoriesModalBottomSheet()
             viewModel.onCategoriesShowing()

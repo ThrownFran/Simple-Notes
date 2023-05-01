@@ -69,7 +69,7 @@ class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
             }.collectLatest {
                 val allCategories = it.first
                 val filteredCategories = it.second
-                val isShowing = it.third.selectFilterCategories.isShowing
+                val isShowing = it.third.selectCategoriesState.isShowing
 
                 if (isShowing) {
                     setupSelectCategoriesAdapter(
