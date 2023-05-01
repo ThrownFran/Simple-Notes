@@ -36,7 +36,7 @@ import brillembourg.notes.simple.presentation.custom_views.setTransitionToCreate
 import brillembourg.notes.simple.presentation.custom_views.setTransitionToEditNote
 import brillembourg.notes.simple.presentation.custom_views.shareText
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
-import brillembourg.notes.simple.presentation.home.delete.HomeDialogsState
+import brillembourg.notes.simple.presentation.home.delete.NoteDeletionState
 import brillembourg.notes.simple.presentation.home.renderers.LayoutChangeRenderer
 import brillembourg.notes.simple.presentation.home.renderers.NoteUiRenderer
 import brillembourg.notes.simple.presentation.home.renderers.SelectionRenderer
@@ -164,17 +164,17 @@ class HomeFragment : Fragment(), MenuProvider {
         }
 
         safeUiLaunch {
-            viewModel.deleteAndArchiveManager.dialogs.collect { dialogState ->
+            viewModel.noteDeletionManager.dialogs.collect { dialogState ->
                 when (dialogState) {
-                    is HomeDialogsState.DeleteCategoriesConfirmation -> {
+                    is NoteDeletionState.ConfirmArchiveDialog -> {
                         showDeleteConfirmationState(dialogState)
                     }
 
-                    is HomeDialogsState.ShowArchiveNotesConfirmationState -> {
+                    is NoteDeletionState.ConfirmDeleteDialog -> {
                         showArchiveConfirmationState(dialogState)
                     }
 
-                    HomeDialogsState.Idle -> Unit
+                    else -> Unit
                 }
             }
         }
@@ -386,36 +386,36 @@ class HomeFragment : Fragment(), MenuProvider {
 
     //region Delete
 
-    private fun showDeleteConfirmationState(showDeleteConfirmationState: HomeDialogsState.DeleteCategoriesConfirmation) {
+    private fun showDeleteConfirmationState(showDeleteConfirmationState: NoteDeletionState.ConfirmArchiveDialog) {
         showDeleteTasksDialog(this, showDeleteConfirmationState.tasksToDeleteSize,
             onPositive = {
-                viewModel.deleteAndArchiveManager.onDeleteNotes()
+                viewModel.noteDeletionManager.onDeleteNotes()
             },
             onDismiss = {
-                viewModel.deleteAndArchiveManager.onDismissConfirmDeleteShown()
+                viewModel.noteDeletionManager.onDismissConfirmDeleteShown()
             })
     }
 
     private fun onDeleteNotesConfirm() {
-        viewModel.deleteAndArchiveManager.onDeleteConfirm()
+        viewModel.noteDeletionManager.onDeleteConfirm()
     }
 
     //endregion
 
     //region Archive
 
-    private fun showArchiveConfirmationState(showArchiveConfirmationState: HomeDialogsState.ShowArchiveNotesConfirmationState) {
+    private fun showArchiveConfirmationState(showArchiveConfirmationState: NoteDeletionState.ConfirmDeleteDialog) {
         showArchiveConfirmationDialog(this, showArchiveConfirmationState.tasksToArchiveSize,
             onPositive = {
-                viewModel.deleteAndArchiveManager.onArchiveNotes()
+                viewModel.noteDeletionManager.onArchiveNotes()
             },
             onDismiss = {
-                viewModel.deleteAndArchiveManager.onDismissConfirmArchiveShown()
+                viewModel.noteDeletionManager.onDismissConfirm()
             })
     }
 
     private fun onArchiveTasks() {
-        viewModel.deleteAndArchiveManager.onArchiveConfirmNotes()
+        viewModel.noteDeletionManager.onArchiveConfirmNotes()
     }
 
     //endregion

@@ -14,6 +14,7 @@ import brillembourg.notes.simple.domain.use_cases.notes.ArchiveNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.DeleteNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.GetNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.ReorderNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.UnArchiveNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.user.GetFilterByCategoriesUseCase
 import brillembourg.notes.simple.domain.use_cases.user.GetUserPrefUseCase
 import brillembourg.notes.simple.domain.use_cases.user.SaveFilterByCategoriesUseCase
@@ -23,7 +24,7 @@ import brillembourg.notes.simple.presentation.categories.CategoryPresentationMod
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.categories.toDomain
 import brillembourg.notes.simple.presentation.categories.toPresentation
-import brillembourg.notes.simple.presentation.home.delete.DeleteAndArchiveManager
+import brillembourg.notes.simple.presentation.home.delete.NoteDeletionManager
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toCopyString
 import brillembourg.notes.simple.presentation.models.toDomain
@@ -54,6 +55,7 @@ class HomeViewModel @Inject constructor(
     private val messageManager: MessageManager,
     private val saveFilterByCategoriesUseCase: SaveFilterByCategoriesUseCase,
     archiveNotesUseCase: ArchiveNotesUseCase,
+    unArchiveNotesUseCase: UnArchiveNotesUseCase,
     deleteNotesUseCase: DeleteNotesUseCase,
     getFilteredCategoriesUseCase: GetFilterByCategoriesUseCase,
     getAvailableCategoriesUseCase: GetCategoriesUseCase,
@@ -77,8 +79,9 @@ class HomeViewModel @Inject constructor(
 
     val noteList: StateFlow<NoteList> = initNoteList()
 
-    val deleteAndArchiveManager = DeleteAndArchiveManager(
+    val noteDeletionManager = NoteDeletionManager(
         archiveNotesUseCase = archiveNotesUseCase,
+        unArchiveNotesUseCase = unArchiveNotesUseCase,
         deleteNotesUseCase = deleteNotesUseCase,
         messageManager = messageManager,
         noteList = noteList,

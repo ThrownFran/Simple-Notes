@@ -2,6 +2,7 @@ package brillembourg.notes.simple.presentation.home.delete
 
 import brillembourg.notes.simple.domain.use_cases.notes.ArchiveNotesUseCase
 import brillembourg.notes.simple.domain.use_cases.notes.DeleteNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.UnArchiveNotesUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.home.NoteList
 import brillembourg.notes.simple.util.Resource
@@ -14,8 +15,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class DeleteAndArchiveManager constructor(
+class NoteDeletionManager constructor(
     private val archiveNotesUseCase: ArchiveNotesUseCase,
+    private val unArchiveNotesUseCase: UnArchiveNotesUseCase,
     private val deleteNotesUseCase: DeleteNotesUseCase,
     private val messageManager: MessageManager,
     private val noteList: StateFlow<NoteList>,
@@ -23,8 +25,8 @@ class DeleteAndArchiveManager constructor(
     private val onDismissSelectionMode: () -> Unit
 ) {
 
-    private val _dialogs: MutableStateFlow<HomeDialogsState> =
-        MutableStateFlow(HomeDialogsState.Idle)
+    private val _dialogs: MutableStateFlow<NoteDeletionState> =
+        MutableStateFlow(NoteDeletionState.Idle)
     val dialogs = _dialogs.asStateFlow()
 
     private fun getSelectedTasks() = noteList.value.notes.filter { it.isSelected }
@@ -50,19 +52,19 @@ class DeleteAndArchiveManager constructor(
 
     fun onDeleteConfirm() {
         _dialogs.update {
-            HomeDialogsState.DeleteCategoriesConfirmation(tasksToDeleteSize = getSelectedTasks().size)
+            NoteDeletionState.ConfirmDeleteDialog(tasksToArchiveSize = getSelectedTasks().size)
         }
     }
 
     fun onDismissConfirmDeleteShown() {
-        _dialogs.update { HomeDialogsState.Idle }
+        _dialogs.update { NoteDeletionState.Idle }
     }
 
     fun onDeleteNotes() {
         val tasksToDeleteIds = getSelectedTasks().map { it.id }
         deleteNotes(tasksToDeleteIds)
 
-        _dialogs.update { HomeDialogsState.Idle }
+        _dialogs.update { NoteDeletionState.Idle }
         onDismissSelectionMode()
     }
 
@@ -74,7 +76,7 @@ class DeleteAndArchiveManager constructor(
         val tasksToDeleteIds = getSelectedTasks().map { it.id }
         archiveNotes(tasksToDeleteIds)
 
-        _dialogs.update { HomeDialogsState.Idle }
+        _dialogs.update { NoteDeletionState.Idle }
 
         onDismissSelectionMode()
     }
@@ -92,13 +94,37 @@ class DeleteAndArchiveManager constructor(
 
     fun onArchiveConfirmNotes() {
         _dialogs.update {
-            HomeDialogsState.ShowArchiveNotesConfirmationState(
+            NoteDeletionState.ConfirmDeleteDialog(
                 tasksToArchiveSize = getSelectedTasks().size
             )
         }
     }
 
-    fun onDismissConfirmArchiveShown() {
-        _dialogs.update { HomeDialogsState.Idle }
+    fun onDismissConfirm() {
+        _dialogs.update { NoteDeletionState.Idle }
     }
+
+    //endregion
+
+    //region Unarchive
+
+    fun onUnarchiveTasks() {
+        val tasksSelectedIds = getSelectedTasks().map { it.id }
+
+        onDismissSelectionMode()
+        unarchiveTasks(tasksSelectedIds)
+    }
+
+    private fun unarchiveTasks(taskToUnarchiveIds: List<Long>) {
+        coroutineScope.launch {
+            val params = UnArchiveNotesUseCase.Params(taskToUnarchiveIds)
+            when (val result = unArchiveNotesUseCase(params)) {
+                is Resource.Success -> showMessage(result.data.message)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }
+    }
+
+    //endregion
 }

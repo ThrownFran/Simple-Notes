@@ -2,7 +2,12 @@ package brillembourg.notes.simple.presentation.trash
 
 import android.os.Bundle
 import android.os.Parcelable
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
@@ -14,10 +19,14 @@ import androidx.recyclerview.widget.ConcatAdapter
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentTrashBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
-import brillembourg.notes.simple.presentation.custom_views.*
+import brillembourg.notes.simple.presentation.custom_views.animateWithRecycler
+import brillembourg.notes.simple.presentation.custom_views.copy
+import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
+import brillembourg.notes.simple.presentation.custom_views.setTransitionToEditNote
+import brillembourg.notes.simple.presentation.custom_views.shareText
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.home.HeaderAdapter
-import brillembourg.notes.simple.presentation.home.NoteList
+import brillembourg.notes.simple.presentation.home.delete.NoteDeletionState
 import brillembourg.notes.simple.presentation.home.renderers.LayoutChangeRenderer
 import brillembourg.notes.simple.presentation.home.renderers.NoteUiRenderer
 import brillembourg.notes.simple.presentation.home.renderers.SelectionRenderer
@@ -72,7 +81,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
             onActionClick = {
                 when (it) {
                     R.id.menu_context_menu_delete -> {
-                        viewModel.onShowConfirmDeleteNotes()
+                        viewModel.noteDeletionManager.onDeleteConfirm()
                         true
                     }
                     R.id.menu_context_menu_unarchive -> {
@@ -162,23 +171,37 @@ class ArchivedFragment : Fragment(), MenuProvider {
     private fun renderStates() {
 
         safeUiLaunch {
-            viewModel.archivedUiState.collect { uiState: ArchivedUiState ->
-
-                noteRenderer.render(NoteList(uiState.noteList, true)).also {
+            viewModel.noteList.collect {
+                noteRenderer.render(it).also {
                     getHeaderAdapter()?.let { getConcatAdapter()?.removeAdapter(it) }
                 }
+            }
+        }
+
+        safeUiLaunch {
+            viewModel.archivedUiState.collect { uiState: ArchivedUiState ->
 
                 selectionRenderer.render(uiState.selectionModeActive)
 
                 navigateToDetailState(uiState.navigateToEditNote)
-
-                showArchiveConfirmationState(uiState.showArchiveNotesConfirmation)
 
                 changeLayoutRenderer.render(uiState.noteLayout)
 
                 copyClipboardState(uiState.copyToClipboard)
 
                 shareNotesAsStringState(uiState.shareNoteAsString)
+            }
+        }
+
+        safeUiLaunch {
+            viewModel.noteDeletionManager.dialogs.collect { dialogState ->
+                when (dialogState) {
+                    is NoteDeletionState.ConfirmDeleteDialog -> {
+                        showDeleteConfirmationState(dialogState)
+                    }
+
+                    else -> Unit
+                }
             }
         }
     }
@@ -199,16 +222,16 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
     private fun getConcatAdapter() = (binding.trashRecycler.adapter as? ConcatAdapter?)
 
-    private fun showArchiveConfirmationState(showDeleteConfirmationState: ArchivedUiState.ShowDeleteNotesConfirmation?) {
+    private fun showDeleteConfirmationState(showDeleteConfirmationState: NoteDeletionState.ConfirmDeleteDialog?) {
         showDeleteConfirmationState?.let {
             showDeleteTasksDialog(
                 fragment = this,
-                size = showDeleteConfirmationState.tasksToDeleteSize,
+                size = showDeleteConfirmationState.tasksToArchiveSize,
                 onPositive = {
                     onDeleteNotes()
                 },
                 onDismiss = {
-                    viewModel.onDismissConfirmDeleteShown()
+                    viewModel.noteDeletionManager.onDismissConfirm()
                 })
         }
     }
@@ -236,11 +259,11 @@ class ArchivedFragment : Fragment(), MenuProvider {
     }
 
     private fun onDeleteNotes() {
-        viewModel.onDeleteNotes()
+        viewModel.noteDeletionManager.onDeleteNotes()
     }
 
     private fun onUnarchiveTasks() {
-        viewModel.onUnarchiveTasks()
+        viewModel.noteDeletionManager.onUnarchiveTasks()
     }
 
 }

@@ -3,13 +3,21 @@ package brillembourg.notes.simple.presentation.categories
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import brillembourg.notes.simple.domain.use_cases.categories.*
+import brillembourg.notes.simple.domain.use_cases.categories.CreateCategoryUseCase
+import brillembourg.notes.simple.domain.use_cases.categories.DeleteCategoriesUseCase
+import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
+import brillembourg.notes.simple.domain.use_cases.categories.ReorderCategoriesUseCase
+import brillembourg.notes.simple.domain.use_cases.categories.SaveCategoryUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
-import brillembourg.notes.simple.presentation.home.delete.HomeDialogsState
+import brillembourg.notes.simple.presentation.home.delete.NoteDeletionState
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -125,7 +133,7 @@ class CategoriesViewModel @Inject constructor(
     fun onDeleteConfirmCategories() {
         _categoryUiState.update {
             it.copy(
-                deleteConfirmation = HomeDialogsState.DeleteCategoriesConfirmation(
+                deleteConfirmation = NoteDeletionState.ConfirmArchiveDialog(
                     getSelectedCategories().size
                 )
             )
