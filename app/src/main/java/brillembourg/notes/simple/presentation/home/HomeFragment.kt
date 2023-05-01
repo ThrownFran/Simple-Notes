@@ -2,6 +2,7 @@ package brillembourg.notes.simple.presentation.home
 
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import android.view.ActionMode
 import android.view.LayoutInflater
 import android.view.Menu
@@ -46,7 +47,6 @@ import brillembourg.notes.simple.presentation.ui_utils.recycler_view.toLayoutTyp
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
@@ -74,8 +74,7 @@ class HomeFragment : Fragment(), MenuProvider {
             onSelection = { viewModel.onSelection() },
             onNoteClick = { viewModel.onNoteClick(it) },
             onReorderedNotes = { viewModel.onReorderedNotes(it) },
-            onReorderedNotesCancelled = { viewModel.onReorderNotesCancelled() },
-            onWizardVisibility = { binding.homeWizard.isVisible = it }
+            onReorderedNotesCancelled = { viewModel.onReorderNotesCancelled() }
         )
     }
 
@@ -160,6 +159,8 @@ class HomeFragment : Fragment(), MenuProvider {
                 shareNotesAsStringState(homeUiState.noteActions.shareNoteAsString)
 
                 selectCategoriesState(homeUiState.selectCategoriesState)
+
+                binding.homeWizard.isVisible = homeUiState.isWizardVisible
             }
         }
 
@@ -179,11 +180,11 @@ class HomeFragment : Fragment(), MenuProvider {
             }
         }
 
-        safeUiLaunch {
-            viewModel.filteredCategories.collectLatest {
-                filteredCategoriesState(it)
-            }
-        }
+//        safeUiLaunch {
+//            viewModel.filteredCategories.collect {
+//                filteredCategoriesState(it)
+//            }
+//        }
 
         safeUiLaunch {
             activityViewModel.incomingContentFromExternalApp.collect { content ->
@@ -204,6 +205,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
         if (filteredCategories.isEmpty()) {
             headerAdapter?.let { getConcatAdapter()?.removeAdapter(it) }
+            Log.e("Error", "Removed header")
             return
         }
 
@@ -212,13 +214,15 @@ class HomeFragment : Fragment(), MenuProvider {
         if (headerAdapter != null) {
             headerAdapter.filteredCategories.clear()
             headerAdapter.filteredCategories.addAll(filteredCategories)
-            headerAdapter.notifyItemChanged(0, Any())
+            headerAdapter.notifyItemChanged(0)
+            Log.e("Error", "Updated header")
         } else {
             (binding.homeRecycler.adapter as? ConcatAdapter?)?.addAdapter(
                 0,
                 HeaderAdapter(filteredCategories.toDiplayOrder().toMutableList()) {
                     viewModel.onNavigateToCategories()
                 })
+            Log.e("Error", "Created header")
         }
     }
 

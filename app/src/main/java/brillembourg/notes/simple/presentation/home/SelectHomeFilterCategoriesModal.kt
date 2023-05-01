@@ -62,20 +62,20 @@ class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
         safeUiLaunch {
             combine(
                 detailViewModel.allCategories,
-                detailViewModel.filteredCategories,
+                detailViewModel.noteList,
                 detailViewModel.homeUiState
             ) { a, b, c ->
                 Triple(a, b, c)
             }.collectLatest {
                 val allCategories = it.first
-                val filteredCategories = it.second
+                val noteList = it.second
                 val isShowing = it.third.selectCategoriesState.isShowing
 
                 if (isShowing) {
                     setupSelectCategoriesAdapter(
                         binding.detailRecyclerCategories,
                         allCategories,
-                        filteredCategories.map { categoryPresentationModel -> categoryPresentationModel.id }
+                        noteList.filteredCategories.map { categoryPresentationModel -> categoryPresentationModel.id }
                     ) { category, isChecked ->
                         onCheckedCategory(category, isChecked)
                     }

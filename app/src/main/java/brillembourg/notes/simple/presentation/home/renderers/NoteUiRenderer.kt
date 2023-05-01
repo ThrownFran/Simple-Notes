@@ -1,10 +1,12 @@
 package brillembourg.notes.simple.presentation.home.renderers
 
 import android.os.Parcelable
+import android.util.Log
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
+import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.home.HeaderAdapter
 import brillembourg.notes.simple.presentation.home.NoteList
 import brillembourg.notes.simple.presentation.home.adapters.NoteAdapter
@@ -21,8 +23,7 @@ class NoteUiRenderer(
     private val onSelection: () -> Unit,
     private val onNoteClick: (NotePresentationModel) -> Unit,
     private val onReorderedNotes: (tasks: List<NotePresentationModel>) -> Unit,
-    private val onReorderedNotesCancelled: () -> Unit,
-    private val onWizardVisibility: (Boolean) -> Unit
+    private val onReorderedNotesCancelled: () -> Unit
 ) {
 
     private fun getAdapter(): NoteAdapter? = try {
@@ -31,27 +32,59 @@ class NoteUiRenderer(
         null
     }
 
+//    private fun getHeaderAdapter() =
+//        getConcatAdapter()?.adapters?.filterIsInstance<HeaderAdapter>()?.firstOrNull()
+
+
     private fun getConcatAdapter() = (recyclerView.adapter as? ConcatAdapter?)
 
     fun render(noteList: NoteList) {
-        if (noteList.mustRender) setupNoteList(noteList.notes)
+        if (noteList.mustRender) setupNoteList(noteList)
+        filteredCategoriesState(noteList.filteredCategories)
     }
 
-    private fun setupNoteList(taskList: List<NotePresentationModel>) {
-        if (recyclerView.adapter == null) {
-            setupTaskRecycler(taskList)
-        } else {
-            updateListAndNotify(getAdapter()!!, taskList)
+    private fun getHeaderAdapter() =
+        getConcatAdapter()?.adapters?.filterIsInstance<HeaderAdapter>()?.firstOrNull()
+
+    private fun filteredCategoriesState(filteredCategories: List<CategoryPresentationModel>) {
+
+        val headerAdapter = getHeaderAdapter()
+
+        if (filteredCategories.isEmpty()) {
+            headerAdapter?.let { getConcatAdapter()?.removeAdapter(it) }
+            Log.e("Error", "Removed header")
+            return
         }
 
-        onWizardVisibility(taskList.isEmpty())
-//        binding.homeWizard.isVisible = taskList.isEmpty()
+        if (headerAdapter?.filteredCategories?.size == filteredCategories.size) return
+
+        if (headerAdapter != null) {
+            headerAdapter.filteredCategories.clear()
+            headerAdapter.filteredCategories.addAll(filteredCategories)
+            headerAdapter.notifyItemChanged(0)
+            Log.e("Error", "Updated header")
+        } else {
+            (recyclerView.adapter as? ConcatAdapter?)?.addAdapter(
+                0,
+                HeaderAdapter(filteredCategories.toDiplayOrder().toMutableList()) {
+                    onNavigateToCategories()
+                })
+            Log.e("Error", "Created header")
+        }
     }
 
-    private fun setupTaskRecycler(taskList: List<NotePresentationModel>) {
+    private fun setupNoteList(noteList: NoteList) {
+        if (recyclerView.adapter == null) {
+            setupTaskRecycler(noteList)
+        } else {
+            updateListAndNotify(getAdapter()!!, noteList.notes)
+        }
+    }
+
+    private fun setupTaskRecycler(noteList: NoteList) {
         recyclerView.apply {
             val layoutType = onLayoutType.invoke()
-            adapter = buildNoteAdapter(this, taskList, getDragDirs(layoutType))
+            adapter = buildNoteAdapter(this, noteList, getDragDirs(layoutType))
             layoutManager = buildLayoutManager(context, layoutType).also { layoutManager ->
                 retrieveRecyclerStateIfApplies(layoutManager)
             }
@@ -81,7 +114,7 @@ class NoteUiRenderer(
 
     private fun buildNoteAdapter(
         recyclerView: RecyclerView,
-        noteList: List<NotePresentationModel>,
+        noteList: NoteList,
         dragDirs: Int
     ): ConcatAdapter {
 
@@ -101,11 +134,13 @@ class NoteUiRenderer(
                 onReorderNotesCancelled()
             })
             .apply {
-                submitList(noteList)
+                submitList(noteList.notes)
             }
 
+        Log.e("Error", "Created adapter for note state")
         return ConcatAdapter(
-            HeaderAdapter(emptyList<CategoryPresentationModel>().toMutableList()) {
+//            getHeaderAdapter()?:
+            HeaderAdapter(noteList.filteredCategories.toMutableList()) {
                 onNavigateToCategories()
             },
             noteAdapter

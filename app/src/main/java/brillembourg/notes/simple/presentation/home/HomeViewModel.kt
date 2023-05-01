@@ -67,37 +67,58 @@ class HomeViewModel @Inject constructor(
         MutableStateFlow(HomeUiNavigates.Idle)
     val navigates = _navigates.asStateFlow()
 
+    val allCategories: StateFlow<List<CategoryPresentationModel>> =
+        initAllCategories(getAvailableCategoriesUseCase)
+    private val filteredCategories: StateFlow<List<CategoryPresentationModel>> =
+        initFilteredCategories(getFilteredCategoriesUseCase)
+
     private val _key: MutableStateFlow<String> = MutableStateFlow("")
+    val noteList: StateFlow<NoteList> = initNoteList()
+
     private val noteLayout: StateFlow<NoteLayout> = initPreferences()
-    private val selectionModeActive: MutableStateFlow<SelectionModeActive?> = MutableStateFlow(null)
-    private val noteActions: MutableStateFlow<NoteActions> = MutableStateFlow(NoteActions())
+    private val selectionModeActive: MutableStateFlow<SelectionModeActive?> =
+        MutableStateFlow(getSavedUiState()?.selectionModeActive)
+    private val noteActions: MutableStateFlow<NoteActions> =
+        MutableStateFlow(
+            getSavedUiState()?.noteActions ?: NoteActions()
+        )
     private val selectCategoriesState: MutableStateFlow<SelectCategoriesState> =
         MutableStateFlow(SelectCategoriesState())
+
+    private val isWizardVisible: StateFlow<Boolean> =
+        noteList.combine(filteredCategories) { noteList, filteredCategories ->
+            noteList.notes.isEmpty() && filteredCategories.isEmpty()
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false
+        )
 
     val homeUiState: StateFlow<HomeUiState> = combine(
         flow = noteLayout,
         flow2 = selectionModeActive,
         flow3 = noteActions,
-        flow4 = selectCategoriesState
-    ) { noteLayout, selectionModeActive, noteActions, selectCategoriesState ->
+        flow4 = selectCategoriesState,
+        flow5 = isWizardVisible
+    ) { noteLayout, selectionModeActive, noteActions, selectCategoriesState, isWizardVisible ->
         HomeUiState(
             noteLayout = noteLayout,
             selectionModeActive = selectionModeActive,
             noteActions = noteActions,
-            selectCategoriesState = selectCategoriesState
+            selectCategoriesState = selectCategoriesState,
+            isWizardVisible = isWizardVisible
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
-        initialValue = HomeUiState()
-    )
+    }.distinctUntilChanged()
+        .onEach {
+            savedStateHandle[uiStateKey] = it
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
+            initialValue = getSavedUiState() ?: HomeUiState()
+        )
 
-    val allCategories: StateFlow<List<CategoryPresentationModel>> =
-        initAllCategories(getAvailableCategoriesUseCase)
-    val filteredCategories: StateFlow<List<CategoryPresentationModel>> =
-        initFilteredCategories(getFilteredCategoriesUseCase)
+    private fun getSavedUiState() = savedStateHandle.get<HomeUiState>(uiStateKey)
 
-    val noteList: StateFlow<NoteList> = initNoteList()
 
     val noteDeletionManager = NoteDeletionManager(
         archiveNotesUseCase = archiveNotesUseCase,
@@ -110,15 +131,6 @@ class HomeViewModel @Inject constructor(
             selectionModeActive.update { null }
         }
     )
-
-    private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
-
-    init {
-        //TODO
-//        getSavedUiState()?.let { _homeUiState.value = it }
-//        observePreferences()
-        saveChangesInSavedStateObserver()
-    }
 
     private fun initNoteList() = combine(_key, filteredCategories) { key, filteredCategories ->
         GetNotesUseCase.Params(
@@ -143,7 +155,8 @@ class HomeViewModel @Inject constructor(
                             }
                             .sortedBy { taskPresentationModel -> taskPresentationModel.order }
                             .asReversed(),
-                        mustRender = true
+                        mustRender = true,
+                        filteredCategories = filteredCategories.value
                     ))
                 }
 
@@ -262,14 +275,6 @@ class HomeViewModel @Inject constructor(
     //endregion
 
     //region Saved state
-
-    private fun saveChangesInSavedStateObserver() {
-        viewModelScope.launch {
-            homeUiState.collect {
-                savedStateHandle[uiStateKey] = it
-            }
-        }
-    }
 
 //    private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
 

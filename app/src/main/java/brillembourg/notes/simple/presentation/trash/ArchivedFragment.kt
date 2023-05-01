@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -60,8 +59,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
             onSelection = { viewModel.onSelection() },
             onNoteClick = { viewModel.onNoteClick(it) },
             onReorderedNotes = {},
-            onReorderedNotesCancelled = {},
-            onWizardVisibility = { binding.trashTextEmpty.isVisible = it }
+            onReorderedNotesCancelled = {}
         )
     }
 
