@@ -1,7 +1,6 @@
 package brillembourg.notes.simple.presentation.home.renderers
 
 import android.os.Parcelable
-import android.util.Log
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -32,10 +31,6 @@ class NoteUiRenderer(
         null
     }
 
-//    private fun getHeaderAdapter() =
-//        getConcatAdapter()?.adapters?.filterIsInstance<HeaderAdapter>()?.firstOrNull()
-
-
     private fun getConcatAdapter() = (recyclerView.adapter as? ConcatAdapter?)
 
     fun render(noteList: NoteList) {
@@ -52,7 +47,6 @@ class NoteUiRenderer(
 
         if (filteredCategories.isEmpty()) {
             headerAdapter?.let { getConcatAdapter()?.removeAdapter(it) }
-            Log.e("Error", "Removed header")
             return
         }
 
@@ -62,14 +56,12 @@ class NoteUiRenderer(
             headerAdapter.filteredCategories.clear()
             headerAdapter.filteredCategories.addAll(filteredCategories)
             headerAdapter.notifyItemChanged(0)
-            Log.e("Error", "Updated header")
         } else {
             (recyclerView.adapter as? ConcatAdapter?)?.addAdapter(
                 0,
                 HeaderAdapter(filteredCategories.toDiplayOrder().toMutableList()) {
                     onNavigateToCategories()
                 })
-            Log.e("Error", "Created header")
         }
     }
 
@@ -136,10 +128,7 @@ class NoteUiRenderer(
             .apply {
                 submitList(noteList.notes)
             }
-
-        Log.e("Error", "Created adapter for note state")
         return ConcatAdapter(
-//            getHeaderAdapter()?:
             HeaderAdapter(noteList.filteredCategories.toMutableList()) {
                 onNavigateToCategories()
             },

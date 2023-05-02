@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-val stopTimeoutMillis: Long = 5_000
+private const val stopTimeoutMillis: Long = 5_000
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
@@ -86,13 +86,16 @@ class HomeViewModel @Inject constructor(
         MutableStateFlow(SelectCategoriesState())
 
     private val isWizardVisible: StateFlow<Boolean> =
-        noteList.combine(filteredCategories) { noteList, filteredCategories ->
-            noteList.notes.isEmpty() && filteredCategories.isEmpty()
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = false
-        )
+        combine(noteList, filteredCategories, _key)
+        { noteList, filteredCategories, key ->
+            key.isEmpty() && noteList.notes.isEmpty() && filteredCategories.isEmpty()
+        }.distinctUntilChanged()
+            .debounce(600)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = false
+            )
 
     val homeUiState: StateFlow<HomeUiState> = combine(
         flow = noteLayout,
@@ -119,7 +122,6 @@ class HomeViewModel @Inject constructor(
 
     private fun getSavedUiState() = savedStateHandle.get<HomeUiState>(uiStateKey)
 
-
     val noteDeletionManager = NoteDeletionManager(
         archiveNotesUseCase = archiveNotesUseCase,
         unArchiveNotesUseCase = unArchiveNotesUseCase,
@@ -132,23 +134,26 @@ class HomeViewModel @Inject constructor(
         }
     )
 
-    private fun initNoteList() = combine(_key, filteredCategories) { key, filteredCategories ->
-        GetNotesUseCase.Params(
-            filterByCategories = filteredCategories.map { it.toDomain() },
-            keySearch = key
-        )
-    }.distinctUntilChanged()
-        .debounce(300)
+    private fun initNoteList() = _key
+        .debounce(100)
+        .distinctUntilChanged()
+        .combine(filteredCategories) { key, filteredCategories ->
+            GetNotesUseCase.Params(
+                filterByCategories = filteredCategories.map { it.toDomain() },
+                keySearch = key
+            )
+        }
         .flatMapLatest { params ->
             getNotesUseCase(params)
         }.transform { result ->
             when (result) {
                 is Resource.Success -> {
-                    emit(NoteList(
-                        notes = result.data.noteList
-                            .map { noteWithCategories ->
-                                noteWithCategories.toPresentation(dateProvider)
-                                    .apply {
+                    emit(
+                        NoteList(
+                            notes = result.data.noteList
+                                .map { noteWithCategories ->
+                                    noteWithCategories.toPresentation(dateProvider)
+                                        .apply {
                                         this.isSelected =
                                             isNoteSelectedInUi(noteWithCategories.note)
                                     }
@@ -174,9 +179,9 @@ class HomeViewModel @Inject constructor(
             .transform { result ->
                 when (result) {
                     is Resource.Success -> {
-                        emit(result.data.categoryList
-                            .map { it.toPresentation() }
-                            .toDiplayOrder()
+                        emit(
+                            result.data.categoryList
+                                .map { it.toPresentation() }.toDiplayOrder()
                         )
                     }
 
@@ -271,12 +276,6 @@ class HomeViewModel @Inject constructor(
             saveFilterByCategoriesUseCase.invoke(params)
         }
     }
-
-    //endregion
-
-    //region Saved state
-
-//    private fun getSavedUiState(): HomeUiState? = savedStateHandle.get<HomeUiState>(uiStateKey)
 
     //endregion
 
