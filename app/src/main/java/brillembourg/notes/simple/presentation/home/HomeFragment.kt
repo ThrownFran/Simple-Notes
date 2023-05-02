@@ -160,7 +160,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
                 selectCategoriesState(homeUiState.selectCategoriesState)
 
-                binding.homeWizard.isVisible = homeUiState.isWizardVisible
+                emptyNotesState(homeUiState.emptyNotesState)
             }
         }
 
@@ -192,6 +192,35 @@ class HomeFragment : Fragment(), MenuProvider {
                     viewModel.onAddNoteClick(it)
                     activityViewModel.onIncommingContentProcessed()
                 }
+            }
+        }
+    }
+
+    private fun emptyNotesState(emptyNotesState: HomeViewModel.EmptyNote) {
+        when (emptyNotesState) {
+            HomeViewModel.EmptyNote.Wizard -> {
+                binding.homeWizardText.setText(R.string.wizard_text)
+                binding.homeWizard.isVisible = true
+            }
+
+            HomeViewModel.EmptyNote.EmptyForLabel -> {
+                binding.homeWizardText.setText(R.string.label_empty_text)
+                binding.homeWizard.isVisible = true
+            }
+
+            HomeViewModel.EmptyNote.EmptyForSearch -> {
+                binding.homeWizardText.setText(R.string.search_no_notes_found)
+                binding.homeWizard.isVisible = true
+            }
+
+            HomeViewModel.EmptyNote.EmptyForMultipleLabels -> {
+                binding.homeWizardText.setText(R.string.labels_empty_text)
+                binding.homeWizard.isVisible = true
+            }
+
+            HomeViewModel.EmptyNote.None -> {
+                binding.homeWizard.isVisible = false
+                binding.homeWizardText.text = ""
             }
         }
     }

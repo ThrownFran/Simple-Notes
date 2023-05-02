@@ -40,7 +40,6 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 private const val stopTimeoutMillis: Long = 5_000
 
 @OptIn(FlowPreview::class)
@@ -72,7 +71,7 @@ class HomeViewModel @Inject constructor(
     private val filteredCategories: StateFlow<List<CategoryPresentationModel>> =
         initFilteredCategories(getFilteredCategoriesUseCase)
 
-    private val _key: MutableStateFlow<String> = MutableStateFlow("")
+    private val key: MutableStateFlow<String> = MutableStateFlow("")
     val noteList: StateFlow<NoteList> = initNoteList()
 
     private val noteLayout: StateFlow<NoteLayout> = initPreferences()
@@ -85,16 +84,25 @@ class HomeViewModel @Inject constructor(
     private val selectCategoriesState: MutableStateFlow<SelectCategoriesState> =
         MutableStateFlow(SelectCategoriesState())
 
-    private val isWizardVisible: StateFlow<Boolean> =
-        combine(noteList, filteredCategories, _key)
-        { noteList, filteredCategories, key ->
-            key.isEmpty() && noteList.notes.isEmpty() && filteredCategories.isEmpty()
-        }.distinctUntilChanged()
-            .debounce(600)
+    enum class EmptyNote {
+        Wizard, EmptyForLabel, EmptyForSearch, EmptyForMultipleLabels, None
+    }
+
+    private val isWizardVisible: StateFlow<EmptyNote> = combine(noteList, filteredCategories, key)
+    { noteList, filteredCategories, key ->
+        when {
+            key.isEmpty() && noteList.notes.isEmpty() && filteredCategories.isEmpty() -> EmptyNote.Wizard
+            key.isEmpty() && noteList.notes.isEmpty() && filteredCategories.size == 1 -> EmptyNote.EmptyForLabel
+            key.isEmpty() && noteList.notes.isEmpty() && filteredCategories.size > 1 -> EmptyNote.EmptyForMultipleLabels
+            key.isNotEmpty() && noteList.notes.isEmpty() -> EmptyNote.EmptyForSearch
+            else -> EmptyNote.None
+        }
+    }.distinctUntilChanged()
+        .debounce(300)
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = false
+                initialValue = EmptyNote.None
             )
 
     val homeUiState: StateFlow<HomeUiState> = combine(
@@ -109,7 +117,7 @@ class HomeViewModel @Inject constructor(
             selectionModeActive = selectionModeActive,
             noteActions = noteActions,
             selectCategoriesState = selectCategoriesState,
-            isWizardVisible = isWizardVisible
+            emptyNotesState = isWizardVisible
         )
     }.distinctUntilChanged()
         .onEach {
@@ -134,7 +142,7 @@ class HomeViewModel @Inject constructor(
         }
     )
 
-    private fun initNoteList() = _key
+    private fun initNoteList() = key
         .debounce(100)
         .distinctUntilChanged()
         .combine(filteredCategories) { key, filteredCategories ->
@@ -154,15 +162,15 @@ class HomeViewModel @Inject constructor(
                                 .map { noteWithCategories ->
                                     noteWithCategories.toPresentation(dateProvider)
                                         .apply {
-                                        this.isSelected =
-                                            isNoteSelectedInUi(noteWithCategories.note)
-                                    }
-                            }
-                            .sortedBy { taskPresentationModel -> taskPresentationModel.order }
-                            .asReversed(),
-                        mustRender = true,
-                        filteredCategories = filteredCategories.value
-                    ))
+                                            this.isSelected =
+                                                isNoteSelectedInUi(noteWithCategories.note)
+                                        }
+                                }
+                                .sortedBy { taskPresentationModel -> taskPresentationModel.order }
+                                .asReversed(),
+                            mustRender = true,
+                            filteredCategories = filteredCategories.value
+                        ))
                 }
 
                 is Resource.Error -> showErrorMessage(result.exception)
@@ -424,7 +432,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onSearch(key: String) {
-        _key.update { key }
+        this.key.update { key }
     }
 
     //endregion

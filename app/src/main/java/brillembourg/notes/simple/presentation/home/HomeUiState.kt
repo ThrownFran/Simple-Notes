@@ -13,7 +13,7 @@ data class HomeUiState(
     val selectionModeActive: SelectionModeActive? = null,
     val noteActions: NoteActions = NoteActions(),
     val selectCategoriesState: SelectCategoriesState = SelectCategoriesState(),
-    val isWizardVisible: Boolean = false
+    val emptyNotesState: HomeViewModel.EmptyNote = HomeViewModel.EmptyNote.None
 ) : Parcelable
 
 @Parcelize
