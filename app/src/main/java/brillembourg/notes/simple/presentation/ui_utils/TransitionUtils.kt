@@ -1,10 +1,11 @@
-package brillembourg.notes.simple.presentation.custom_views
+package brillembourg.notes.simple.presentation.ui_utils
 
 import android.graphics.Color
 import android.view.View
 import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import brillembourg.notes.simple.R
+import brillembourg.notes.simple.presentation.custom_views.themeColor
 import brillembourg.notes.simple.presentation.detail.DetailFragment
 import brillembourg.notes.simple.presentation.home.HomeFragment
 import com.google.android.material.transition.platform.MaterialContainerTransform

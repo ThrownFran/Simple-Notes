@@ -54,15 +54,18 @@ abstract class TaskDao {
     abstract fun getNotesWithCategories(): Flow<List<NoteWithCategoriesEntity>>
 
     @Transaction
-    @Query("SELECT * FROM taskentity WHERE is_archived = 0 AND (title LIKE '%' || :keySearch || '%' OR description LIKE '%' || :keySearch || '%')")
-    abstract fun getNotesWithCategories(keySearch: String): Flow<List<NoteWithCategoriesEntity>>
+    @Query("SELECT * FROM taskentity WHERE is_archived = :isArchived AND (title LIKE '%' || :keySearch || '%' OR description LIKE '%' || :keySearch || '%')")
+    abstract fun getNotesWithCategories(
+        isArchived: Int,
+        keySearch: String
+    ): Flow<List<NoteWithCategoriesEntity>>
 //    @Transaction
 //    @Query("SELECT * FROM taskentity WHERE is_archived = 0")
 //    abstract fun getFilteredNotesWithCategories(ids: List<Long>): Flow<List<NoteWithCategoriesEntity>>
 
-    @Transaction
-    @Query("SELECT * FROM taskentity WHERE is_archived = 1")
-    abstract fun getArchivedNotesWithCategories(): Flow<List<NoteWithCategoriesEntity>>
+//    @Transaction
+//    @Query("SELECT * FROM taskentity WHERE is_archived = 1")
+//    abstract fun getArchivedNotesWithCategories(): Flow<List<NoteWithCategoriesEntity>>
 
     @Transaction
     @Query("SELECT * FROM taskentity WHERE note_id = :noteId")

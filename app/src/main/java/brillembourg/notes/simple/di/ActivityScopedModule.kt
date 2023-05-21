@@ -2,7 +2,7 @@ package brillembourg.notes.simple.di
 
 import android.content.Context
 import brillembourg.notes.simple.data.database.RoomBackupBuilder
-import brillembourg.notes.simple.data.database.RoomBackupBuilderImp
+import brillembourg.notes.simple.data.database.backup.RoomBackupBuilderImp
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

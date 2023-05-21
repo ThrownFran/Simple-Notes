@@ -18,6 +18,6 @@ class GetArchivedNotesUseCase @Inject constructor(
             .flowOn(schedulers.defaultDispatcher())
     }
 
-    class Params()
+    class Params(val key: String)
     class Result(val noteList: List<NoteWithCategories>)
 }

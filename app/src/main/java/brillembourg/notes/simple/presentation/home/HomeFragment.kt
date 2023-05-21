@@ -2,18 +2,13 @@ package brillembourg.notes.simple.presentation.home
 
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
-import android.view.ActionMode
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
@@ -27,14 +22,10 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.base.MainViewModel
-import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
-import brillembourg.notes.simple.presentation.categories.toDiplayOrder
 import brillembourg.notes.simple.presentation.custom_views.animateWithRecycler
 import brillembourg.notes.simple.presentation.custom_views.copy
 import brillembourg.notes.simple.presentation.custom_views.onClickFlow
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
-import brillembourg.notes.simple.presentation.custom_views.setTransitionToCreateNote
-import brillembourg.notes.simple.presentation.custom_views.setTransitionToEditNote
 import brillembourg.notes.simple.presentation.custom_views.shareText
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.home.delete.NoteDeletionState
@@ -42,8 +33,11 @@ import brillembourg.notes.simple.presentation.home.renderers.LayoutChangeRendere
 import brillembourg.notes.simple.presentation.home.renderers.NoteUiRenderer
 import brillembourg.notes.simple.presentation.home.renderers.SelectionRenderer
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
+import brillembourg.notes.simple.presentation.ui_utils.SearchManager
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.LayoutType
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.toLayoutType
+import brillembourg.notes.simple.presentation.ui_utils.setTransitionToCreateNote
+import brillembourg.notes.simple.presentation.ui_utils.setTransitionToEditNote
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
@@ -56,7 +50,6 @@ class HomeFragment : Fragment(), MenuProvider {
         fun newInstance() = HomeFragment()
     }
 
-    private var actionMode: ActionMode? = null
     private val viewModel: HomeViewModel by viewModels()
     private val activityViewModel: MainViewModel by activityViewModels()
 
@@ -113,6 +106,11 @@ class HomeFragment : Fragment(), MenuProvider {
             binding.homeRecycler,
             onLayoutChange = { viewModel.onLayoutChange(it) }
         )
+    }
+
+    private val searchManager by lazy {
+        val toolbarMain: Toolbar = requireActivity().findViewById(R.id.toolbar)
+        SearchManager(this, toolbarMain) { viewModel.onSearch(key = it) }
     }
 
     override fun onCreateView(
@@ -180,12 +178,6 @@ class HomeFragment : Fragment(), MenuProvider {
             }
         }
 
-//        safeUiLaunch {
-//            viewModel.filteredCategories.collect {
-//                filteredCategoriesState(it)
-//            }
-//        }
-
         safeUiLaunch {
             activityViewModel.incomingContentFromExternalApp.collect { content ->
                 content?.let {
@@ -227,33 +219,6 @@ class HomeFragment : Fragment(), MenuProvider {
 
 
     //region Categories
-
-    private fun filteredCategoriesState(filteredCategories: List<CategoryPresentationModel>) {
-
-        val headerAdapter = getHeaderAdapter()
-
-        if (filteredCategories.isEmpty()) {
-            headerAdapter?.let { getConcatAdapter()?.removeAdapter(it) }
-            Log.e("Error", "Removed header")
-            return
-        }
-
-        if (headerAdapter?.filteredCategories?.size == filteredCategories.size) return
-
-        if (headerAdapter != null) {
-            headerAdapter.filteredCategories.clear()
-            headerAdapter.filteredCategories.addAll(filteredCategories)
-            headerAdapter.notifyItemChanged(0)
-            Log.e("Error", "Updated header")
-        } else {
-            (binding.homeRecycler.adapter as? ConcatAdapter?)?.addAdapter(
-                0,
-                HeaderAdapter(filteredCategories.toDiplayOrder().toMutableList()) {
-                    viewModel.onNavigateToCategories()
-                })
-            Log.e("Error", "Created header")
-        }
-    }
 
     private fun selectCategoriesState(selectCategories: SelectCategoriesState) {
         if (selectCategories.navigate && !selectCategories.isShowing) {
@@ -316,60 +281,7 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     private fun search() {
-        val toolbarMain: Toolbar = requireActivity().findViewById(R.id.toolbar)
-
-        actionMode = toolbarMain.startActionMode(object : ActionMode.Callback {
-            override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-
-                val customView = LayoutInflater.from(context).inflate(R.layout.layout_search, null)
-                mode.customView = customView
-                val searchView = customView.findViewById<SearchView>(R.id.searchView)
-
-                val searchText =
-                    searchView.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
-                searchText.setTextColor(
-                    ContextCompat.getColor(
-                        searchView.context, R.color
-                            .md_theme_light_onPrimary
-                    )
-                )
-                searchText.setHintTextColor(
-                    ContextCompat.getColor(
-                        searchView.context, R.color
-                            .md_theme_light_secondaryContainer_transparent
-                    )
-                )
-                searchView.isIconified = false
-                searchView.requestFocus()
-                searchView.queryHint = "Search note ..."
-                searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                    override fun onQueryTextSubmit(query: String): Boolean {
-                        // perform search
-                        return true
-                    }
-
-                    override fun onQueryTextChange(newText: String): Boolean {
-                        // update search suggestions
-                        viewModel.onSearch(newText)
-                        return true
-                    }
-                })
-                return true
-            }
-
-            override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-                // customize action mode menu
-                return false
-            }
-
-            override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-                return false
-            }
-
-            override fun onDestroyActionMode(mode: ActionMode) {
-                actionMode = null
-            }
-        })
+        searchManager.startSearch()
     }
 
     //endregion

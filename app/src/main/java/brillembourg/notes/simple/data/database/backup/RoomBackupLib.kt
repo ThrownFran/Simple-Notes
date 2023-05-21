@@ -1,6 +1,9 @@
-package brillembourg.notes.simple.data.database
+package brillembourg.notes.simple.data.database.backup
 
 import android.content.Context
+import brillembourg.notes.simple.data.database.AppDatabase
+import brillembourg.notes.simple.data.database.RoomBackupBuilder
+import brillembourg.notes.simple.data.database.RoomBackupHandler
 import brillembourg.notes.simple.domain.use_cases.notes.BackupModel
 import de.raphaelebner.roomdatabasebackup.core.RoomBackup
 import kotlin.coroutines.resume

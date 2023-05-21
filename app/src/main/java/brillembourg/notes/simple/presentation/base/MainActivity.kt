@@ -15,7 +15,11 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.data.database.RoomBackupBuilder
 import brillembourg.notes.simple.databinding.ActivityMainBinding
 import brillembourg.notes.simple.domain.use_cases.notes.BackupModel
-import brillembourg.notes.simple.presentation.custom_views.*
+import brillembourg.notes.simple.presentation.custom_views.restartApp
+import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
+import brillembourg.notes.simple.presentation.custom_views.setBackgroundDrawable
+import brillembourg.notes.simple.presentation.custom_views.showMessage
+import brillembourg.notes.simple.presentation.custom_views.showToast
 import brillembourg.notes.simple.presentation.ui_utils.asString
 import brillembourg.notes.simple.presentation.ui_utils.contentViews
 import brillembourg.notes.simple.util.UiText
@@ -34,6 +38,7 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var roomBackupBuilder: RoomBackupBuilder
+
     lateinit var backupModel: BackupModel
 
     override fun onCreate(savedInstanceState: Bundle?) {

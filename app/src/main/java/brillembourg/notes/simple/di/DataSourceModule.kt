@@ -3,7 +3,7 @@ package brillembourg.notes.simple.di
 import android.content.Context
 import brillembourg.notes.simple.data.database.AppDatabase
 import brillembourg.notes.simple.data.database.RoomBackupHandler
-import brillembourg.notes.simple.data.database.RoomBackupLib
+import brillembourg.notes.simple.data.database.backup.RoomBackupLib
 import brillembourg.notes.simple.data.database.categories.CategoriesDatabase
 import brillembourg.notes.simple.data.database.notes.NoteDatabase
 import dagger.Module

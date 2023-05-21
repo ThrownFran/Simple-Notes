@@ -40,7 +40,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-private const val stopTimeoutMillis: Long = 5_000
+const val stopTimeoutMillis: Long = 5_000
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
@@ -192,7 +192,6 @@ class HomeViewModel @Inject constructor(
                                 .map { it.toPresentation() }.toDiplayOrder()
                         )
                     }
-
                     is Resource.Error -> showErrorMessage(result.exception)
                     is Resource.Loading -> Unit
                 }

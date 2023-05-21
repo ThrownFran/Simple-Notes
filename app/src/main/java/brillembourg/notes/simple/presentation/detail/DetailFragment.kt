@@ -2,7 +2,12 @@ package brillembourg.notes.simple.presentation.detail
 
 import android.os.Bundle
 import android.util.Log
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -19,8 +24,15 @@ import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.base.MainViewModel
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
-import brillembourg.notes.simple.presentation.custom_views.*
+import brillembourg.notes.simple.presentation.custom_views.copy
+import brillembourg.notes.simple.presentation.custom_views.hideKeyboard
+import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
+import brillembourg.notes.simple.presentation.custom_views.shareText
+import brillembourg.notes.simple.presentation.custom_views.showSoftKeyboard
 import brillembourg.notes.simple.presentation.home.CategoryChipColorSecondaryAdapter
+import brillembourg.notes.simple.presentation.ui_utils.prepareTransition
+import brillembourg.notes.simple.presentation.ui_utils.setCreateNoteEnterTransition
+import brillembourg.notes.simple.presentation.ui_utils.setEditNoteEnteringTransition
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import com.google.android.flexbox.FlexDirection

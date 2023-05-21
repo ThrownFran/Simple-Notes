@@ -8,8 +8,10 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.Toolbar
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -21,17 +23,17 @@ import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.custom_views.animateWithRecycler
 import brillembourg.notes.simple.presentation.custom_views.copy
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
-import brillembourg.notes.simple.presentation.custom_views.setTransitionToEditNote
 import brillembourg.notes.simple.presentation.custom_views.shareText
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
-import brillembourg.notes.simple.presentation.home.HeaderAdapter
 import brillembourg.notes.simple.presentation.home.delete.NoteDeletionState
 import brillembourg.notes.simple.presentation.home.renderers.LayoutChangeRenderer
 import brillembourg.notes.simple.presentation.home.renderers.NoteUiRenderer
 import brillembourg.notes.simple.presentation.home.renderers.SelectionRenderer
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
+import brillembourg.notes.simple.presentation.ui_utils.SearchManager
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.LayoutType
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.toLayoutType
+import brillembourg.notes.simple.presentation.ui_utils.setTransitionToEditNote
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -94,10 +96,16 @@ class ArchivedFragment : Fragment(), MenuProvider {
                         viewModel.onCopy()
                         true
                     }
+
                     else -> false
                 }
             }
         )
+    }
+
+    private val searchManager by lazy {
+        val toolbarMain: Toolbar = requireActivity().findViewById(R.id.toolbar)
+        SearchManager(this, toolbarMain) { viewModel.onSearch(key = it) }
     }
 
     override fun onCreateView(
@@ -149,13 +157,22 @@ class ArchivedFragment : Fragment(), MenuProvider {
                 menuHost.invalidateMenu()
                 return true
             }
+
             R.id.menu_home_staggered -> {
                 changeLayoutRenderer.onClickStaggeredLayout()
                 menuHost.invalidateMenu()
                 return true
             }
+
+            R.id.menu_home_search -> {
+                search()
+            }
         }
         return false
+    }
+
+    private fun search() {
+        searchManager.startSearch()
     }
 
     override fun onDestroyView() {
@@ -163,15 +180,15 @@ class ArchivedFragment : Fragment(), MenuProvider {
         super.onDestroyView()
     }
 
-    private fun getHeaderAdapter() =
-        getConcatAdapter()?.adapters?.filterIsInstance<HeaderAdapter>()?.firstOrNull()
-
     private fun renderStates() {
 
+        safeUiLaunch { viewModel.noteList.collect(noteRenderer::render) }
+
         safeUiLaunch {
-            viewModel.noteList.collect {
-                noteRenderer.render(it).also {
-                    getHeaderAdapter()?.let { getConcatAdapter()?.removeAdapter(it) }
+            viewModel.navigates.collect { navigates ->
+                when (navigates) {
+                    is ArchivedUiNavigates.NavigateToEditNote -> navigateToDetailState(navigates)
+                    ArchivedUiNavigates.Idle -> Unit
                 }
             }
         }
@@ -181,13 +198,13 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
                 selectionRenderer.render(uiState.selectionModeActive)
 
-                navigateToDetailState(uiState.navigateToEditNote)
-
                 changeLayoutRenderer.render(uiState.noteLayout)
 
-                copyClipboardState(uiState.copyToClipboard)
+                copyClipboardState(uiState.noteActions.copyToClipboard)
 
-                shareNotesAsStringState(uiState.shareNoteAsString)
+                shareNotesAsStringState(uiState.noteActions.shareNoteAsString)
+
+                emptyNotesState(uiState.emptyNote)
             }
         }
 
@@ -200,6 +217,25 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
                     else -> Unit
                 }
+            }
+        }
+    }
+
+    private fun emptyNotesState(emptyNotesState: ArchivedViewModel.EmptyNote) {
+        when (emptyNotesState) {
+            ArchivedViewModel.EmptyNote.NoArchived -> {
+                binding.trashTextEmpty.setText(R.string.trash_empty)
+                binding.trashTextEmpty.isVisible = true
+            }
+
+            ArchivedViewModel.EmptyNote.EmptyForSearch -> {
+                binding.trashTextEmpty.setText(R.string.search_no_notes_found)
+                binding.trashTextEmpty.isVisible = true
+            }
+
+            ArchivedViewModel.EmptyNote.None -> {
+                binding.trashTextEmpty.isVisible = false
+                binding.trashTextEmpty.text = ""
             }
         }
     }
@@ -234,7 +270,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun navigateToDetailState(navigateToDetail: ArchivedUiState.NavigateToEditNote) {
+    private fun navigateToDetailState(navigateToDetail: ArchivedUiNavigates.NavigateToEditNote) {
         if (navigateToDetail.mustConsume) {
             val view =
                 binding.trashRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView

@@ -211,19 +211,6 @@ fun ExtendedFloatingActionButton.animateWithRecycler(recyclerView: RecyclerView)
     })
 }
 
-//fun Toolbar.lockScroll() {
-//    val params: AppBarLayout.LayoutParams = this.layoutParams as AppBarLayout.LayoutParams
-//    params.scrollFlags = AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
-//    requestLayout()
-//}
-//
-//fun Toolbar.unLockScroll() {
-//    val params: AppBarLayout.LayoutParams = this.layoutParams as AppBarLayout.LayoutParams
-//    params.scrollFlags =
-//        AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
-//    requestLayout()
-//}
-
 fun Activity.restartApp() {
     val intent = packageManager.getLaunchIntentForPackage(packageName)
     val componentName = intent!!.component

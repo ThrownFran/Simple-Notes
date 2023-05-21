@@ -15,6 +15,7 @@ import brillembourg.notes.simple.domain.use_cases.user.SaveUserPrefUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.home.NoteList
 import brillembourg.notes.simple.presentation.home.delete.NoteDeletionManager
+import brillembourg.notes.simple.presentation.home.stopTimeoutMillis
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import brillembourg.notes.simple.presentation.models.toCopyString
 import brillembourg.notes.simple.presentation.models.toPresentation
@@ -22,11 +23,16 @@ import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transform
@@ -34,6 +40,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class ArchivedViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
@@ -49,13 +56,60 @@ class ArchivedViewModel @Inject constructor(
 
     private val uiStateKey = "archived_ui_state"
 
-    private val _archivedUiState = MutableStateFlow(ArchivedUiState())
-    val archivedUiState = _archivedUiState.asStateFlow()
+    private val key: MutableStateFlow<String> = MutableStateFlow("")
 
     val noteList: StateFlow<NoteList> = initNoteList(getArchivedNotesUseCase)
 
+    private val noteLayout: StateFlow<NoteLayout> = initPreferences()
+    private val selectionModeActive: MutableStateFlow<SelectionModeActive?> =
+        MutableStateFlow(getSavedUiState()?.selectionModeActive)
+    private val noteActions: MutableStateFlow<ArchivedUiState.NoteActions> =
+        MutableStateFlow(
+            getSavedUiState()?.noteActions ?: ArchivedUiState.NoteActions()
+        )
+
+    private val _navigates: MutableStateFlow<ArchivedUiNavigates> =
+        MutableStateFlow(ArchivedUiNavigates.Idle)
+    val navigates = _navigates.asStateFlow()
+
+    private val isWizardVisible: StateFlow<EmptyNote> = combine(noteList, key) { noteList, key ->
+        when {
+            key.isEmpty() && noteList.notes.isEmpty() -> EmptyNote.NoArchived
+            key.isNotEmpty() && noteList.notes.isEmpty() -> EmptyNote.EmptyForSearch
+            else -> EmptyNote.None
+        }
+    }.distinctUntilChanged()
+        .debounce(400)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
+            initialValue = EmptyNote.None
+        )
+
     private fun getSavedUiState(): ArchivedUiState? =
         savedStateHandle.get<ArchivedUiState>(uiStateKey)
+
+    val archivedUiState: StateFlow<ArchivedUiState> = combine(
+        flow = noteList,
+        flow2 = noteLayout,
+        flow3 = isWizardVisible,
+        flow4 = selectionModeActive,
+        flow5 = noteActions
+    ) { noteList, noteLayout, isWizardVisible, selectionModeActive, noteActions ->
+        ArchivedUiState(
+            noteLayout = noteLayout,
+            selectionModeActive = selectionModeActive,
+            noteActions = noteActions,
+            emptyNote = isWizardVisible
+        )
+    }.distinctUntilChanged()
+        .onEach {
+            savedStateHandle[uiStateKey] = it
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
+            initialValue = getSavedUiState() ?: ArchivedUiState()
+        )
 
     val noteDeletionManager = NoteDeletionManager(
         archiveNotesUseCase = archiveNotesUseCase,
@@ -65,26 +119,20 @@ class ArchivedViewModel @Inject constructor(
         noteList = noteList,
         coroutineScope = viewModelScope,
         onDismissSelectionMode = {
-            _archivedUiState.update { it.copy(selectionModeActive = null) }
+            selectionModeActive.update { null }
         }
     )
 
-    init {
-        getSavedUiState()?.let { _archivedUiState.value = it }
-        getPreferences()
-        saveChangesInSavedStateObserver()
-    }
-
-    private fun saveChangesInSavedStateObserver() {
-        viewModelScope.launch {
-            archivedUiState.collect {
-                savedStateHandle[uiStateKey] = it
-            }
-        }
-    }
-
     private fun initNoteList(getArchivedNotesUseCase: GetArchivedNotesUseCase) =
-        getArchivedNotesUseCase(GetArchivedNotesUseCase.Params())
+        key
+            .debounce(100)
+            .distinctUntilChanged()
+            .map { key ->
+                GetArchivedNotesUseCase.Params(key)
+            }
+            .flatMapLatest { params ->
+                getArchivedNotesUseCase(params)
+            }
             .transform { result ->
                 when (result) {
                     is Resource.Success -> {
@@ -111,23 +159,22 @@ class ArchivedViewModel @Inject constructor(
                 }
             }.stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
+                started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
                 initialValue = NoteList()
             )
 
-    private fun getPreferences() {
-        getUserPrefUseCase(GetUserPrefUseCase.Params())
-            .onEach { result ->
-                when (result) {
-                    is Resource.Success -> {
-                        _archivedUiState.update { it.copy(noteLayout = result.data.preferences.noteLayout) }
-                    }
-
-                    is Resource.Error -> showErrorMessage(result.exception)
-                    is Resource.Loading -> Unit
-                }
-            }.launchIn(viewModelScope)
-    }
+    private fun initPreferences() = getUserPrefUseCase(GetUserPrefUseCase.Params())
+        .transform { result ->
+            when (result) {
+                is Resource.Success -> emit(result.data.preferences.noteLayout)
+                is Resource.Error -> showErrorMessage(result.exception)
+                is Resource.Loading -> Unit
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
+            initialValue = NoteLayout.Vertical
+        )
 
     private fun isNoteSelectedInUi(
         notes: List<NotePresentationModel>,
@@ -143,25 +190,19 @@ class ArchivedViewModel @Inject constructor(
     }
 
     private fun navigateToDetail(taskClicked: NotePresentationModel) {
-        _archivedUiState.update {
-            it.copy(
-                navigateToEditNote = ArchivedUiState.NavigateToEditNote(
-                    mustConsume = true,
-                    taskIndex = noteList.value.notes.indexOf(taskClicked),
-                    notePresentationModel = taskClicked
-                ),
-                selectionModeActive = null
+        _navigates.update {
+            ArchivedUiNavigates.NavigateToEditNote(
+                mustConsume = true,
+                taskIndex = noteList.value.notes.indexOf(taskClicked),
+                notePresentationModel = taskClicked
             )
         }
+        selectionModeActive.update { null }
     }
 
     fun onNavigateToDetailCompleted() {
-        val navState =
-            _archivedUiState.value.navigateToEditNote.copy(mustConsume = false)
-
-        _archivedUiState.update { it.copy(navigateToEditNote = navState) }
+        _navigates.update { ArchivedUiNavigates.Idle }
     }
-
 
     private fun showErrorMessage(exception: Exception) {
         showMessage(getMessageFromError(exception))
@@ -175,19 +216,14 @@ class ArchivedViewModel @Inject constructor(
 
     fun onSelection() {
         val sizeSelected = getSelectedTasks().size
-        _archivedUiState.update {
-            it.copy(
-                selectionModeActive = SelectionModeActive(sizeSelected)
-            )
-        }
+        selectionModeActive.update { SelectionModeActive(sizeSelected) }
     }
 
     fun onSelectionDismissed() {
-        _archivedUiState.update { it.copy(selectionModeActive = null) }
+        selectionModeActive.update { null }
     }
 
     fun onLayoutChange(noteLayout: NoteLayout) {
-        _archivedUiState.update { it.copy(noteLayout = noteLayout) }
         saveLayoutPreference(noteLayout)
     }
 
@@ -199,30 +235,41 @@ class ArchivedViewModel @Inject constructor(
 
     fun onShare() {
         val tasksToCopy = getSelectedTasks()
-        _archivedUiState.update {
-            it.copy(
-                shareNoteAsString = tasksToCopy.toString(),
-                selectionModeActive = null
+        noteActions.update {
+            ArchivedUiState.NoteActions(
+                shareNoteAsString = tasksToCopy.toString()
             )
         }
     }
 
     fun onShareCompleted() {
-        _archivedUiState.update { it.copy(shareNoteAsString = null) }
+        noteActions.update {
+            ArchivedUiState.NoteActions()
+        }
     }
 
     fun onCopy() {
         val tasksToCopy = getSelectedTasks()
-        _archivedUiState.update {
-            it.copy(
-                copyToClipboard = tasksToCopy.toCopyString(),
-                selectionModeActive = null
+        noteActions.update {
+            ArchivedUiState.NoteActions(
+                copyToClipboard = tasksToCopy.toCopyString()
             )
         }
+        selectionModeActive.update { null }
     }
 
     fun onCopiedCompleted() {
-        _archivedUiState.update { it.copy(copyToClipboard = null) }
+        noteActions.update {
+            ArchivedUiState.NoteActions()
+        }
     }
 
+    fun onSearch(key: String) {
+        this.key.update { key }
+    }
+
+    enum class EmptyNote {
+        None, EmptyForSearch, NoArchived
+    }
 }
+

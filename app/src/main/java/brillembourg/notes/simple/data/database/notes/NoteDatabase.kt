@@ -41,15 +41,15 @@ class NoteDatabase(
         roomDatabase.taskDao().save(task)
     }
 
-    fun getArchivedTasks(): Flow<List<NoteWithCategoriesEntity>> {
-        return roomDatabase.taskDao().getArchivedNotesWithCategories()
+    fun getArchivedTasks(key: String): Flow<List<NoteWithCategoriesEntity>> {
+        return roomDatabase.taskDao().getNotesWithCategories(isArchived = 1, key)
     }
 
     fun getTaskList(keySearch: String): Flow<List<NoteWithCategoriesEntity>> {
         return if (keySearch.isEmpty()) {
             roomDatabase.taskDao().getNotesWithCategories()
         } else {
-            roomDatabase.taskDao().getNotesWithCategories(keySearch)
+            roomDatabase.taskDao().getNotesWithCategories(isArchived = 0, keySearch = keySearch)
         }
     }
 
