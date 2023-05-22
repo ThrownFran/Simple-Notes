@@ -182,8 +182,6 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
     private fun renderStates() {
 
-        safeUiLaunch { viewModel.noteList.collect(noteRenderer::render) }
-
         safeUiLaunch {
             viewModel.navigates.collect { navigates ->
                 when (navigates) {
@@ -195,6 +193,8 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
         safeUiLaunch {
             viewModel.archivedUiState.collect { uiState: ArchivedUiState ->
+
+                noteRenderer.render(uiState.noteList)
 
                 selectionRenderer.render(uiState.selectionModeActive)
 

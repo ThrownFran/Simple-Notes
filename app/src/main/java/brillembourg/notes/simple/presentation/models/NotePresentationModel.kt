@@ -43,17 +43,6 @@ fun NoteWithCategories.toPresentation(dateProvider: DateProvider): NotePresentat
         categories = categories.map { it.toPresentation() })
 }
 
-//fun Note.toPresentation(dateProvider: DateProvider): NotePresentationModel {
-//    return NotePresentationModel(
-//        id = id,
-//        title = title,
-//        content = content,
-//        order = order,
-//        dateInLocal = dateProvider.formatTimeToLocalDate(date),
-//        isArchived = isArchived
-//    )
-//}
-
 interface HasOrder {
 //    val id: Long
 var order: Int
@@ -62,7 +51,6 @@ var order: Int
 interface IsSelectable {
     var isSelected: Boolean
 }
-
 
 fun NotePresentationModel.toCopyString(): String {
     return StringBuilder(title ?: "")

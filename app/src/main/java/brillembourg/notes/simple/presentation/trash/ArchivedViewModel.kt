@@ -58,7 +58,7 @@ class ArchivedViewModel @Inject constructor(
 
     private val key: MutableStateFlow<String> = MutableStateFlow("")
 
-    val noteList: StateFlow<NoteList> = initNoteList(getArchivedNotesUseCase)
+    private val noteList: StateFlow<NoteList> = initNoteList(getArchivedNotesUseCase)
 
     private val noteLayout: StateFlow<NoteLayout> = initPreferences()
     private val selectionModeActive: MutableStateFlow<SelectionModeActive?> =
@@ -79,7 +79,6 @@ class ArchivedViewModel @Inject constructor(
             else -> EmptyNote.None
         }
     }.distinctUntilChanged()
-        .debounce(400)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
@@ -97,6 +96,7 @@ class ArchivedViewModel @Inject constructor(
         flow5 = noteActions
     ) { noteList, noteLayout, isWizardVisible, selectionModeActive, noteActions ->
         ArchivedUiState(
+            noteList = noteList,
             noteLayout = noteLayout,
             selectionModeActive = selectionModeActive,
             noteActions = noteActions,
@@ -216,7 +216,7 @@ class ArchivedViewModel @Inject constructor(
 
     fun onSelection() {
         val sizeSelected = getSelectedTasks().size
-        selectionModeActive.update { SelectionModeActive(sizeSelected) }
+        selectionModeActive.update { SelectionModeActive(size = sizeSelected) }
     }
 
     fun onSelectionDismissed() {

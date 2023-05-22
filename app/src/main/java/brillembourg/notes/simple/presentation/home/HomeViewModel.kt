@@ -36,6 +36,7 @@ import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -72,52 +73,28 @@ class HomeViewModel @Inject constructor(
         initFilteredCategories(getFilteredCategoriesUseCase)
 
     private val key: MutableStateFlow<String> = MutableStateFlow("")
-    val noteList: StateFlow<NoteList> = initNoteList()
-
+    private val selectionModeActive: MutableStateFlow<SelectionModeActive> =
+        MutableStateFlow(getSavedUiState()?.selectionModeActive ?: SelectionModeActive())
+    private val noteList: StateFlow<NoteList> = initNoteList()
     private val noteLayout: StateFlow<NoteLayout> = initPreferences()
-    private val selectionModeActive: MutableStateFlow<SelectionModeActive?> =
-        MutableStateFlow(getSavedUiState()?.selectionModeActive)
     private val noteActions: MutableStateFlow<NoteActions> =
-        MutableStateFlow(
-            getSavedUiState()?.noteActions ?: NoteActions()
-        )
+        MutableStateFlow(getSavedUiState()?.noteActions ?: NoteActions())
     private val selectCategoriesState: MutableStateFlow<SelectCategoriesState> =
         MutableStateFlow(SelectCategoriesState())
 
-    enum class EmptyNote {
-        Wizard, EmptyForLabel, EmptyForSearch, EmptyForMultipleLabels, None
-    }
-
-    private val isWizardVisible: StateFlow<EmptyNote> = combine(noteList, filteredCategories, key)
-    { noteList, filteredCategories, key ->
-        when {
-            key.isEmpty() && noteList.notes.isEmpty() && filteredCategories.isEmpty() -> EmptyNote.Wizard
-            key.isEmpty() && noteList.notes.isEmpty() && filteredCategories.size == 1 -> EmptyNote.EmptyForLabel
-            key.isEmpty() && noteList.notes.isEmpty() && filteredCategories.size > 1 -> EmptyNote.EmptyForMultipleLabels
-            key.isNotEmpty() && noteList.notes.isEmpty() -> EmptyNote.EmptyForSearch
-            else -> EmptyNote.None
-        }
-    }.distinctUntilChanged()
-        .debounce(300)
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = EmptyNote.None
-            )
-
     val homeUiState: StateFlow<HomeUiState> = combine(
-        flow = noteLayout,
-        flow2 = selectionModeActive,
-        flow3 = noteActions,
-        flow4 = selectCategoriesState,
-        flow5 = isWizardVisible
-    ) { noteLayout, selectionModeActive, noteActions, selectCategoriesState, isWizardVisible ->
+        noteList,
+        noteLayout,
+        selectionModeActive,
+        noteActions,
+        selectCategoriesState
+    ) { noteList, noteLayout, selectionModeActive, noteActions, selectCategoriesState ->
         HomeUiState(
+            noteList = noteList,
             noteLayout = noteLayout,
             selectionModeActive = selectionModeActive,
             noteActions = noteActions,
-            selectCategoriesState = selectCategoriesState,
-            emptyNotesState = isWizardVisible
+            selectCategoriesState = selectCategoriesState
         )
     }.distinctUntilChanged()
         .onEach {
@@ -138,7 +115,7 @@ class HomeViewModel @Inject constructor(
         noteList = noteList,
         coroutineScope = viewModelScope,
         onDismissSelectionMode = {
-            selectionModeActive.update { null }
+            onSelectionEnd()
         }
     )
 
@@ -153,7 +130,13 @@ class HomeViewModel @Inject constructor(
         }
         .flatMapLatest { params ->
             getNotesUseCase(params)
-        }.transform { result ->
+        }
+        .combine(selectionModeActive) { result, selectionMode ->
+            Pair(result, selectionMode)
+        }
+        .transform { pair ->
+            val result = pair.first
+            val selectionMode = pair.second
             when (result) {
                 is Resource.Success -> {
                     emit(
@@ -163,13 +146,16 @@ class HomeViewModel @Inject constructor(
                                     noteWithCategories.toPresentation(dateProvider)
                                         .apply {
                                             this.isSelected =
-                                                isNoteSelectedInUi(noteWithCategories.note)
+                                                selectionMode.selectedIds.contains(
+                                                    noteWithCategories.note.id
+                                                )
                                         }
                                 }
                                 .sortedBy { taskPresentationModel -> taskPresentationModel.order }
                                 .asReversed(),
                             mustRender = true,
-                            filteredCategories = filteredCategories.value
+                            filteredCategories = filteredCategories.value,
+                            key = key.value
                         ))
                 }
 
@@ -241,9 +227,9 @@ class HomeViewModel @Inject constructor(
 
     private fun isNoteSelectedInUi(
         note: Note
-    ) = (noteList.value.notes
-        .firstOrNull() { note.id == it.id }?.isSelected
-        ?: false)
+    ): Boolean {
+        return selectionModeActive.value?.selectedIds?.contains(note.id) ?: false
+    }
     //endregion
 
     //region Categories
@@ -294,7 +280,7 @@ class HomeViewModel @Inject constructor(
 
     private fun navigateToAddNote(content: String?) {
         _navigates.update { HomeUiNavigates.NavigateToAddNote(content) }
-        selectionModeActive.update { null }
+        onSelectionEnd()
     }
 
     fun onNavigateToAddNoteCompleted() {
@@ -310,7 +296,7 @@ class HomeViewModel @Inject constructor(
             )
         }
 
-        selectionModeActive.update { null }
+        onSelectionEnd()
     }
 
     fun onNavigateToDetailCompleted() {
@@ -322,9 +308,7 @@ class HomeViewModel @Inject constructor(
     //region Reordering
 
     fun onReorderedNotes(reorderedTaskList: List<NotePresentationModel>) {
-        selectionModeActive.update { null }
-
-        if (reorderedTaskList == noteList.value.notes) return
+//        if (reorderedTaskList == noteList.value.notes) return
         reorderTasks(reorderedTaskList)
     }
 
@@ -343,6 +327,8 @@ class HomeViewModel @Inject constructor(
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
             }
+            delay(100) //Give time to database to have new values.
+            onSelectionEnd()
         }
     }
 
@@ -367,13 +353,18 @@ class HomeViewModel @Inject constructor(
 
         selectionModeActive.update {
             SelectionModeActive(
-                size = sizeSelected
+                size = sizeSelected,
+                selectedIds = getSelectedTasks().map { it.id }
             )
         }
     }
 
+    private fun onSelectionEnd() {
+        selectionModeActive.update { SelectionModeActive() }
+    }
+
     fun onSelectionDismissed() {
-        selectionModeActive.update { null }
+        onSelectionEnd()
     }
 
     private fun getSelectedTasks() = noteList.value.notes.filter { it.isSelected }
@@ -403,7 +394,7 @@ class HomeViewModel @Inject constructor(
             it.copy(shareNoteAsString = tasksToCopy.toCopyString())
         }
 
-        selectionModeActive.update { null }
+        onSelectionEnd()
     }
 
     fun onShareCompleted() {
@@ -423,7 +414,7 @@ class HomeViewModel @Inject constructor(
             )
         }
 
-        selectionModeActive.update { null }
+        onSelectionEnd()
     }
 
     fun onCopiedCompleted() {

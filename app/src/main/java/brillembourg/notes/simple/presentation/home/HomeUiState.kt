@@ -9,18 +9,45 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class HomeUiState(
+    val noteList: NoteList = NoteList(),
     val noteLayout: NoteLayout = NoteLayout.Vertical,
-    val selectionModeActive: SelectionModeActive? = null,
+    val selectionModeActive: SelectionModeActive = SelectionModeActive(),
     val noteActions: NoteActions = NoteActions(),
-    val selectCategoriesState: SelectCategoriesState = SelectCategoriesState(),
-    val emptyNotesState: HomeViewModel.EmptyNote = HomeViewModel.EmptyNote.None
-) : Parcelable
+    val selectCategoriesState: SelectCategoriesState = SelectCategoriesState()
+) : Parcelable {
+
+    val emptyNotesState: EmptyNote
+        get() = when {
+            noteList.key.isEmpty()
+                    && noteList.notes.isEmpty()
+                    && noteList.filteredCategories.isEmpty() -> EmptyNote.Wizard
+
+            noteList.key.isEmpty()
+                    && noteList.notes.isEmpty()
+                    && noteList.filteredCategories.size == 1 -> EmptyNote.EmptyForLabel
+
+            noteList.key.isEmpty()
+                    && noteList.notes.isEmpty()
+                    && noteList.filteredCategories.size > 1 -> EmptyNote.EmptyForMultipleLabels
+
+            noteList.key.isNotEmpty()
+                    && noteList.notes.isEmpty() -> EmptyNote.EmptyForSearch
+
+            else -> EmptyNote.None
+        }
+
+    enum class EmptyNote {
+        Wizard, EmptyForLabel, EmptyForSearch, EmptyForMultipleLabels, None
+    }
+}
+
 
 @Parcelize
 data class NoteList(
     val notes: List<NotePresentationModel> = ArrayList(),
     val filteredCategories: List<CategoryPresentationModel> = emptyList(),
-    val mustRender: Boolean = false //To avoid rendering set false
+    val mustRender: Boolean = false, //To avoid rendering set false
+    val key: String = ""
 ) : Parcelable
 
 @Parcelize

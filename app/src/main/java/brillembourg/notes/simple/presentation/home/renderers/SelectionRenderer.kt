@@ -19,8 +19,8 @@ class SelectionRenderer(
 
     private var actionMode: ActionMode? = null
 
-    fun render(selectionModeActive: SelectionModeActive?) {
-        if (selectionModeActive == null) {
+    fun render(selectionModeActive: SelectionModeActive) {
+        if (selectionModeActive.isActive.not()) {
             actionMode?.finish()
             actionMode = null
             return

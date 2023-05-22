@@ -41,7 +41,6 @@ import brillembourg.notes.simple.presentation.ui_utils.setTransitionToEditNote
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.runBlocking
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(), MenuProvider {
@@ -140,15 +139,11 @@ class HomeFragment : Fragment(), MenuProvider {
         }
 
         safeUiLaunch {
-            viewModel.noteList.collect {
-                noteRenderer.render(it)
-            }
-        }
-
-        safeUiLaunch {
             viewModel.homeUiState.collect { homeUiState: HomeUiState ->
 
                 selectionRenderer.render(homeUiState.selectionModeActive)
+
+                noteRenderer.render(homeUiState.noteList)
 
                 changeLayoutRenderer.render(homeUiState.noteLayout)
 
@@ -168,11 +163,9 @@ class HomeFragment : Fragment(), MenuProvider {
                     is NoteDeletionState.ConfirmArchiveDialog -> {
                         showDeleteConfirmationState(dialogState)
                     }
-
                     is NoteDeletionState.ConfirmDeleteDialog -> {
                         showArchiveConfirmationState(dialogState)
                     }
-
                     else -> Unit
                 }
             }
@@ -188,29 +181,29 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun emptyNotesState(emptyNotesState: HomeViewModel.EmptyNote) {
+    private fun emptyNotesState(emptyNotesState: HomeUiState.EmptyNote) {
         when (emptyNotesState) {
-            HomeViewModel.EmptyNote.Wizard -> {
+            HomeUiState.EmptyNote.Wizard -> {
                 binding.homeWizardText.setText(R.string.wizard_text)
                 binding.homeWizard.isVisible = true
             }
 
-            HomeViewModel.EmptyNote.EmptyForLabel -> {
+            HomeUiState.EmptyNote.EmptyForLabel -> {
                 binding.homeWizardText.setText(R.string.label_empty_text)
                 binding.homeWizard.isVisible = true
             }
 
-            HomeViewModel.EmptyNote.EmptyForSearch -> {
+            HomeUiState.EmptyNote.EmptyForSearch -> {
                 binding.homeWizardText.setText(R.string.search_no_notes_found)
                 binding.homeWizard.isVisible = true
             }
 
-            HomeViewModel.EmptyNote.EmptyForMultipleLabels -> {
+            HomeUiState.EmptyNote.EmptyForMultipleLabels -> {
                 binding.homeWizardText.setText(R.string.labels_empty_text)
                 binding.homeWizard.isVisible = true
             }
 
-            HomeViewModel.EmptyNote.None -> {
+            HomeUiState.EmptyNote.None -> {
                 binding.homeWizard.isVisible = false
                 binding.homeWizardText.text = ""
             }
@@ -302,7 +295,6 @@ class HomeFragment : Fragment(), MenuProvider {
                 binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!! + headers)!!.itemView
             navigateToDetail(navigateToDetail.notePresentationModel!!, view)
             viewModel.onNavigateToDetailCompleted()
-            runBlocking { }
         }
     }
 
@@ -332,13 +324,11 @@ class HomeFragment : Fragment(), MenuProvider {
     //region Delete
 
     private fun showDeleteConfirmationState(showDeleteConfirmationState: NoteDeletionState.ConfirmArchiveDialog) {
-        showDeleteTasksDialog(this, showDeleteConfirmationState.tasksToDeleteSize,
-            onPositive = {
-                viewModel.noteDeletionManager.onDeleteNotes()
-            },
-            onDismiss = {
-                viewModel.noteDeletionManager.onDismissConfirmDeleteShown()
-            })
+        showDeleteTasksDialog(
+            this, showDeleteConfirmationState.tasksToDeleteSize,
+            onPositive = viewModel.noteDeletionManager::onDeleteNotes,
+            onDismiss = viewModel.noteDeletionManager::onDismissConfirmDeleteShown
+        )
     }
 
     private fun onDeleteNotesConfirm() {
@@ -350,13 +340,11 @@ class HomeFragment : Fragment(), MenuProvider {
     //region Archive
 
     private fun showArchiveConfirmationState(showArchiveConfirmationState: NoteDeletionState.ConfirmDeleteDialog) {
-        showArchiveConfirmationDialog(this, showArchiveConfirmationState.tasksToArchiveSize,
-            onPositive = {
-                viewModel.noteDeletionManager.onArchiveNotes()
-            },
-            onDismiss = {
-                viewModel.noteDeletionManager.onDismissConfirm()
-            })
+        showArchiveConfirmationDialog(
+            this, showArchiveConfirmationState.tasksToArchiveSize,
+            onPositive = viewModel.noteDeletionManager::onArchiveNotes,
+            onDismiss = viewModel.noteDeletionManager::onDismissConfirm
+        )
     }
 
     private fun onArchiveTasks() {
