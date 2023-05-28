@@ -13,6 +13,7 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.presentation.models.IsSelectable
 
 inline fun <T : IsSelectable, VH : RecyclerView.ViewHolder> setupContextualActionBar(
+    size: Int,
     toolbar: Toolbar,
     @MenuRes menuId: Int,
     currentActionMode: ActionMode?,
@@ -21,16 +22,16 @@ inline fun <T : IsSelectable, VH : RecyclerView.ViewHolder> setupContextualActio
     crossinline onSetTitle: (selectedSize: Int) -> String,
     crossinline onDestroyMyActionMode: () -> Unit
 ): ActionMode? {
-    val taskList = adapter.currentList
-    val selectedList = taskList.filter { it.isSelected }
+//    val taskList = adapter.currentList
+//    val selectedList = taskList.filter { it.isSelected }
 
-    if (selectedList.isEmpty()) {
+    if (size <= 0) {
         currentActionMode?.finish()
         return null
     }
 
     if (currentActionMode != null) {
-        currentActionMode.title = onSetTitle.invoke(selectedList.size)
+        currentActionMode.title = onSetTitle.invoke(size)
         return currentActionMode
     }
 
@@ -42,7 +43,7 @@ inline fun <T : IsSelectable, VH : RecyclerView.ViewHolder> setupContextualActio
         }
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            onSetTitle.invoke(selectedList.size)
+            onSetTitle.invoke(size)
             return false
         }
 
@@ -52,16 +53,16 @@ inline fun <T : IsSelectable, VH : RecyclerView.ViewHolder> setupContextualActio
 
         override fun onDestroyActionMode(mode: ActionMode) {
 
-            taskList.forEachIndexed { index, taskPresentationModel ->
-                if (taskPresentationModel.isSelected) {
-                    taskPresentationModel.isSelected = false
-                    adapter.notifyItemChanged(index, taskPresentationModel)
-                }
-            }
+//            taskList.forEachIndexed { index, taskPresentationModel ->
+//                if (taskPresentationModel.isSelected) {
+//                    taskPresentationModel.isSelected = false
+//                    adapter.notifyItemChanged(index, taskPresentationModel)
+//                }
+//            }
             onDestroyMyActionMode.invoke()
         }
     })
-    actionMode.title = onSetTitle.invoke(selectedList.size)
+    actionMode.title = onSetTitle.invoke(size)
     return actionMode
 }
 

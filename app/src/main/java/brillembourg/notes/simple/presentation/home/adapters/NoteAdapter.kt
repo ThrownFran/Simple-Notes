@@ -15,11 +15,11 @@ class NoteAdapter(
     dragAndDropDirs: Int,
     private val recyclerView: RecyclerView,
     private val onClick: (task: NotePresentationModel) -> Unit,
-    private val onSelection: () -> Unit,
+    private val onSelection: (isSelected: Boolean, id: Long) -> Unit,
     private val onReorderSuccess: (reorderedTaskList: List<NotePresentationModel>) -> Unit,
     private val onReorderCanceled: () -> Unit
 ) : ListAdapter<NotePresentationModel, NoteViewHolder>(setupTaskDiffCallback()),
-    Draggable<NotePresentationModel> by ItemTouchDraggableImp(dragAndDropDirs) {
+    Draggable<NotePresentationModel> by ItemTouchDraggableImp(recyclerView, dragAndDropDirs) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
         return NoteViewHolder(

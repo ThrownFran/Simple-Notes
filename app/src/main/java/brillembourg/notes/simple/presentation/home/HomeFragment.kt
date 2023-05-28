@@ -61,12 +61,12 @@ class HomeFragment : Fragment(), MenuProvider {
         NoteUiRenderer(
             binding.homeRecycler,
             recyclerViewState,
-            onLayoutType = { viewModel.homeUiState.value.noteLayout.toLayoutType() },
-            onNavigateToCategories = { viewModel.onNavigateToCategories() },
-            onSelection = { viewModel.onSelection() },
-            onNoteClick = { viewModel.onNoteClick(it) },
-            onReorderedNotes = { viewModel.onReorderedNotes(it) },
-            onReorderedNotesCancelled = { viewModel.onReorderNotesCancelled() }
+            onLayoutType = viewModel.homeUiState.value.noteLayout::toLayoutType,
+            onNavigateToCategories = viewModel::onNavigateToCategories,
+            onSelection = viewModel::onSelection,
+            onNoteClick = viewModel::onNoteClick,
+            onReorderedNotes = viewModel::onReorderedNotes,
+            onReorderedNotesCancelled = viewModel::onReorderNotesCancelled
         )
     }
 
@@ -82,18 +82,22 @@ class HomeFragment : Fragment(), MenuProvider {
                         onArchiveTasks()
                         true
                     }
+
                     R.id.menu_context_menu_delete -> {
                         onDeleteNotesConfirm()
                         true
                     }
+
                     R.id.menu_context_copy -> {
                         onCopyNotes()
                         true
                     }
+
                     R.id.menu_context_share -> {
                         onShareNotes()
                         true
                     }
+
                     else -> false
                 }
             }
@@ -139,11 +143,14 @@ class HomeFragment : Fragment(), MenuProvider {
         }
 
         safeUiLaunch {
+            viewModel.noteList.collect { noteRenderer.render(it) }
+        }
+
+        safeUiLaunch {
             viewModel.homeUiState.collect { homeUiState: HomeUiState ->
 
                 selectionRenderer.render(homeUiState.selectionModeActive)
 
-                noteRenderer.render(homeUiState.noteList)
 
                 changeLayoutRenderer.render(homeUiState.noteLayout)
 
@@ -163,9 +170,11 @@ class HomeFragment : Fragment(), MenuProvider {
                     is NoteDeletionState.ConfirmArchiveDialog -> {
                         showDeleteConfirmationState(dialogState)
                     }
+
                     is NoteDeletionState.ConfirmDeleteDialog -> {
                         showArchiveConfirmationState(dialogState)
                     }
+
                     else -> Unit
                 }
             }
@@ -258,14 +267,17 @@ class HomeFragment : Fragment(), MenuProvider {
                 menuHost.invalidateMenu()
                 return true
             }
+
             R.id.menu_home_staggered -> {
                 changeLayoutRenderer.onClickStaggeredLayout()
                 menuHost.invalidateMenu()
                 return true
             }
+
             R.id.menu_home_categories -> {
                 viewModel.onNavigateToCategories()
             }
+
             R.id.menu_home_search -> {
                 search()
             }

@@ -31,6 +31,7 @@ class SelectionRenderer(
 
     private fun launchContextualActionBar(sizeSelected: Int) {
         actionMode = setupContextualActionBar(
+            size = sizeSelected,
             toolbar = toolbar,
             menuId = menuId,
             currentActionMode = actionMode,

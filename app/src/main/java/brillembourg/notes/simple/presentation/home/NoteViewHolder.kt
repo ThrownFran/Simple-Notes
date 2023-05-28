@@ -18,7 +18,7 @@ class NoteViewHolder(
     private val getCurrentList: () -> List<NotePresentationModel>,
     private val binding: ItemNoteBinding,
     onClick: ((NotePresentationModel) -> Unit)? = null,
-    private val onSelected: (() -> Unit)? = null,
+    private val onSelected: ((isSelected: Boolean, id: Long) -> Unit)? = null,
     private val onReadyToDrag: ((NoteViewHolder) -> Unit)? = null
 ) : RecyclerView.ViewHolder(binding.root),
     Selectable<NotePresentationModel> by SelectableImp(getCurrentList) {
@@ -26,8 +26,8 @@ class NoteViewHolder(
     init {
         setupClickListeners()
         setupSelection(
-            bindSelection = { note -> bindSelection(note) },
-            onSelected = { onSelected?.invoke() },
+            bindSelection = ::bindSelection,
+            onSelected = { isSelected, id -> onSelected?.invoke(isSelected, id) },
             onClickWithNoSelection = onClick,
             onReadyToDrag = { onReadyToDrag?.invoke(this) }
         )

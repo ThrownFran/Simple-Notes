@@ -1,8 +1,12 @@
 package brillembourg.notes.simple.presentation.ui_utils.recycler_view
 
-import androidx.recyclerview.widget.*
+import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.presentation.models.HasOrder
-import java.util.*
+import java.util.Collections
 
 interface Draggable<T : HasOrder> {
 
@@ -19,14 +23,16 @@ interface Draggable<T : HasOrder> {
 }
 
 class ItemTouchDraggableImp<T : HasOrder>(
+    recyclerView: RecyclerView,
     dragAndDropDirs: Int = ItemTouchHelper.UP or ItemTouchHelper.DOWN,
 ) : Draggable<T> {
 
-    var itemTouchHelper = setupDragAndDropTouchHelper(dragAndDropDirs)
+    private var itemTouchHelper = setupDragAndDropTouchHelper(dragAndDropDirs)
+        .also { it.attachToRecyclerView(recyclerView) }
     private var isDragging: Boolean = false
     private var dragAndDropList: List<T>? = null
 
-    val originalOrder: MutableList<Int> = ArrayList()
+    private val originalOrder: MutableList<Int> = ArrayList()
 
     //Adapter callbacks
     private var onGetCurrentList: (() -> List<T>)? = null
@@ -52,7 +58,6 @@ class ItemTouchDraggableImp<T : HasOrder>(
         this.onSubmitList = onSubmitList
         this.onReorderSuccess = onReorderSuccess
         this.onReorderCanceled = onReorderCanceled
-        itemTouchHelper.attachToRecyclerView(recyclerView)
         itemTouchHelper.startDrag(viewHolder)
     }
 

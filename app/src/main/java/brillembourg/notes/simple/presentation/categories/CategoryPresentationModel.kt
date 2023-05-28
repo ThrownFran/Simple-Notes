@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class CategoryPresentationModel(
-    val id: Long = -1L,
+    override val id: Long = -1L,
     var name: String,
     override var order: Int,
     override var isSelected: Boolean = false,

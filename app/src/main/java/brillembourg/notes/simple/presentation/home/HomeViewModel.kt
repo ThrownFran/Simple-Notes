@@ -75,26 +75,53 @@ class HomeViewModel @Inject constructor(
     private val key: MutableStateFlow<String> = MutableStateFlow("")
     private val selectionModeActive: MutableStateFlow<SelectionModeActive> =
         MutableStateFlow(getSavedUiState()?.selectionModeActive ?: SelectionModeActive())
-    private val noteList: StateFlow<NoteList> = initNoteList()
+    val noteList: StateFlow<NoteList> = initNoteList()
+
     private val noteLayout: StateFlow<NoteLayout> = initPreferences()
     private val noteActions: MutableStateFlow<NoteActions> =
         MutableStateFlow(getSavedUiState()?.noteActions ?: NoteActions())
     private val selectCategoriesState: MutableStateFlow<SelectCategoriesState> =
         MutableStateFlow(SelectCategoriesState())
 
+    private val emptyState: StateFlow<HomeUiState.EmptyNote> =
+        noteList.transform<NoteList, HomeUiState.EmptyNote> { noteList ->
+            when {
+                noteList.key.isEmpty()
+                        && noteList.notes.isEmpty()
+                        && noteList.filteredCategories.isEmpty() -> HomeUiState.EmptyNote.Wizard
+
+                noteList.key.isEmpty()
+                        && noteList.notes.isEmpty()
+                        && noteList.filteredCategories.size == 1 -> HomeUiState.EmptyNote.EmptyForLabel
+
+                noteList.key.isEmpty()
+                        && noteList.notes.isEmpty()
+                        && noteList.filteredCategories.size > 1 -> HomeUiState.EmptyNote.EmptyForMultipleLabels
+
+                noteList.key.isNotEmpty()
+                        && noteList.notes.isEmpty() -> HomeUiState.EmptyNote.EmptyForSearch
+
+                else -> HomeUiState.EmptyNote.None
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
+            initialValue = HomeUiState.EmptyNote.None
+        )
+
     val homeUiState: StateFlow<HomeUiState> = combine(
-        noteList,
         noteLayout,
         selectionModeActive,
         noteActions,
-        selectCategoriesState
-    ) { noteList, noteLayout, selectionModeActive, noteActions, selectCategoriesState ->
+        selectCategoriesState,
+        emptyState
+    ) { noteLayout, selectionModeActive, noteActions, selectCategoriesState, emptyState ->
         HomeUiState(
-            noteList = noteList,
             noteLayout = noteLayout,
             selectionModeActive = selectionModeActive,
             noteActions = noteActions,
-            selectCategoriesState = selectCategoriesState
+            selectCategoriesState = selectCategoriesState,
+            emptyNotesState = emptyState
         )
     }.distinctUntilChanged()
         .onEach {
@@ -120,7 +147,7 @@ class HomeViewModel @Inject constructor(
     )
 
     private fun initNoteList() = key
-        .debounce(100)
+        .debounce(0)
         .distinctUntilChanged()
         .combine(filteredCategories) { key, filteredCategories ->
             GetNotesUseCase.Params(
@@ -178,6 +205,7 @@ class HomeViewModel @Inject constructor(
                                 .map { it.toPresentation() }.toDiplayOrder()
                         )
                     }
+
                     is Resource.Error -> showErrorMessage(result.exception)
                     is Resource.Loading -> Unit
                 }
@@ -308,7 +336,10 @@ class HomeViewModel @Inject constructor(
     //region Reordering
 
     fun onReorderedNotes(reorderedTaskList: List<NotePresentationModel>) {
-//        if (reorderedTaskList == noteList.value.notes) return
+        if (reorderedTaskList == noteList.value.notes) {
+            onSelectionEnd()
+            return
+        }
         reorderTasks(reorderedTaskList)
     }
 
@@ -327,7 +358,7 @@ class HomeViewModel @Inject constructor(
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
             }
-            delay(100) //Give time to database to have new values.
+            delay(100)
             onSelectionEnd()
         }
     }
@@ -348,13 +379,20 @@ class HomeViewModel @Inject constructor(
 
     //region Selection mode
 
-    fun onSelection() {
-        val sizeSelected = getSelectedTasks().size
+    fun onSelection(isSelected: Boolean, id: Long) {
+        val selectedIds: MutableList<Long> = selectionModeActive.value.selectedIds.toMutableList()
+        if (isSelected) {
+            selectedIds.add(id)
+        } else {
+            selectedIds.remove(id)
+        }
+        val isActive = selectedIds.size > 0
 
         selectionModeActive.update {
             SelectionModeActive(
-                size = sizeSelected,
-                selectedIds = getSelectedTasks().map { it.id }
+                isActive = isActive,
+                selectedIds = selectedIds,
+                size = selectedIds.size
             )
         }
     }

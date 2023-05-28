@@ -12,7 +12,7 @@ import brillembourg.notes.simple.presentation.ui_utils.setupTaskDiffCallback
 class ArchivedTaskAdapter(
     val recyclerView: RecyclerView,
     val onClick: (NotePresentationModel) -> Unit,
-    val onSelection: () -> Unit,
+    val onSelection: (isSelected: Boolean, id: Long) -> Unit,
 ) : ListAdapter<NotePresentationModel, NoteViewHolder>(setupTaskDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {

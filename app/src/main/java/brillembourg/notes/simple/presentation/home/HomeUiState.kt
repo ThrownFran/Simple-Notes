@@ -9,32 +9,12 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class HomeUiState(
-    val noteList: NoteList = NoteList(),
     val noteLayout: NoteLayout = NoteLayout.Vertical,
     val selectionModeActive: SelectionModeActive = SelectionModeActive(),
     val noteActions: NoteActions = NoteActions(),
-    val selectCategoriesState: SelectCategoriesState = SelectCategoriesState()
+    val selectCategoriesState: SelectCategoriesState = SelectCategoriesState(),
+    val emptyNotesState: EmptyNote = EmptyNote.None
 ) : Parcelable {
-
-    val emptyNotesState: EmptyNote
-        get() = when {
-            noteList.key.isEmpty()
-                    && noteList.notes.isEmpty()
-                    && noteList.filteredCategories.isEmpty() -> EmptyNote.Wizard
-
-            noteList.key.isEmpty()
-                    && noteList.notes.isEmpty()
-                    && noteList.filteredCategories.size == 1 -> EmptyNote.EmptyForLabel
-
-            noteList.key.isEmpty()
-                    && noteList.notes.isEmpty()
-                    && noteList.filteredCategories.size > 1 -> EmptyNote.EmptyForMultipleLabels
-
-            noteList.key.isNotEmpty()
-                    && noteList.notes.isEmpty() -> EmptyNote.EmptyForSearch
-
-            else -> EmptyNote.None
-        }
 
     enum class EmptyNote {
         Wizard, EmptyForLabel, EmptyForSearch, EmptyForMultipleLabels, None

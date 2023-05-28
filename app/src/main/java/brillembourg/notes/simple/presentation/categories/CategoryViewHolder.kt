@@ -23,7 +23,7 @@ class CategoryViewHolder(
         setupClickListeners()
         setupSelection(
             bindSelection = { categoryPresentationModel -> bindSelection(categoryPresentationModel) },
-            onSelected = { onSelected?.invoke() },
+            onSelected = { _, _ -> onSelected?.invoke() },
             onClickWithNoSelection = { presentationModel ->
 
                 editCategoryAndUnfocusOthers(presentationModel)

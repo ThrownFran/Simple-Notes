@@ -13,7 +13,7 @@ interface Selectable<T : IsSelectable> {
     fun setupSelection(
         bindSelection: (T) -> Unit, //Use to bind selected or unselected item
         onClickWithNoSelection: ((T) -> Unit)?, //Normal click item with disabled selection
-        onSelected: (() -> Unit)?, //When selecting or unselecting item
+        onSelected: ((isSelected: Boolean, id: Long) -> Unit)?, //When selecting or unselecting item
         onReadyToDrag: (() -> Unit)? //Start drag suggestion
     )
 
@@ -34,13 +34,13 @@ class SelectableImp<T : IsSelectable>(
 
     lateinit var bindSelection: ((T) -> Unit)
     private var onClickWithNoSelection: ((T) -> Unit)? = null
-    private var onSelected: (() -> Unit)? = null
+    private var onSelected: ((isSelected: Boolean, id: Long) -> Unit)? = null
     private var onReadyToDrag: (() -> Unit)? = null
 
     override fun setupSelection(
         bindSelection: (T) -> Unit,
         onClickWithNoSelection: ((T) -> Unit)?,
-        onSelected: (() -> Unit)?,
+        onSelected: ((isSelected: Boolean, id: Long) -> Unit)?,
         onReadyToDrag: (() -> Unit)?
     ) {
         this.bindSelection = bindSelection
@@ -92,7 +92,7 @@ class SelectableImp<T : IsSelectable>(
         t.let {
             it.isSelected = !it.isSelected
             bindSelection(it)
-            onSelected?.invoke()
+            onSelected?.invoke(it.isSelected, it.id)
         }
     }
 

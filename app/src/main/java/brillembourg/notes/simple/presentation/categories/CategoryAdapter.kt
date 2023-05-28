@@ -17,7 +17,7 @@ class CategoryAdapter(
     private val onReorderSuccess: (reorderedTaskList: List<CategoryPresentationModel>) -> Unit,
     private val onReorderCanceled: () -> Unit
 ) : ListAdapter<CategoryPresentationModel, CategoryViewHolder>(setupCategoryDiffCallback()),
-    Draggable<CategoryPresentationModel> by ItemTouchDraggableImp() {
+    Draggable<CategoryPresentationModel> by ItemTouchDraggableImp(recyclerView) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
         return CategoryViewHolder(

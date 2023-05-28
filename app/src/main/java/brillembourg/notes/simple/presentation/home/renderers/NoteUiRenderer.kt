@@ -19,7 +19,7 @@ class NoteUiRenderer(
     private var recyclerViewState: Parcelable?,
     private val onLayoutType: () -> LayoutType,
     private val onNavigateToCategories: () -> Unit,
-    private val onSelection: () -> Unit,
+    private val onSelection: (isSelected: Boolean, id: Long) -> Unit,
     private val onNoteClick: (NotePresentationModel) -> Unit,
     private val onReorderedNotes: (tasks: List<NotePresentationModel>) -> Unit,
     private val onReorderedNotesCancelled: () -> Unit
@@ -113,8 +113,8 @@ class NoteUiRenderer(
         val noteAdapter = NoteAdapter(
             dragDirs,
             recyclerView,
-            onSelection = {
-                onNoteSelection()
+            onSelection = { isSelected, id ->
+                onNoteSelection(isSelected, id)
             },
             onClick = { task ->
                 onNoteClicked(task)
@@ -137,8 +137,8 @@ class NoteUiRenderer(
     }
 
 
-    private fun onNoteSelection() {
-        onSelection()
+    private fun onNoteSelection(isSelected: Boolean, id: Long) {
+        onSelection(isSelected, id)
     }
 
     private fun onNoteClicked(it: NotePresentationModel) {

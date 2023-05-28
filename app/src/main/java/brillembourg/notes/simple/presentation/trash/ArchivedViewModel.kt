@@ -61,8 +61,8 @@ class ArchivedViewModel @Inject constructor(
     private val noteList: StateFlow<NoteList> = initNoteList(getArchivedNotesUseCase)
 
     private val noteLayout: StateFlow<NoteLayout> = initPreferences()
-    private val selectionModeActive: MutableStateFlow<SelectionModeActive?> =
-        MutableStateFlow(getSavedUiState()?.selectionModeActive)
+    private val selectionModeActive: MutableStateFlow<SelectionModeActive> =
+        MutableStateFlow(getSavedUiState()?.selectionModeActive ?: SelectionModeActive())
     private val noteActions: MutableStateFlow<ArchivedUiState.NoteActions> =
         MutableStateFlow(
             getSavedUiState()?.noteActions ?: ArchivedUiState.NoteActions()
@@ -119,7 +119,7 @@ class ArchivedViewModel @Inject constructor(
         noteList = noteList,
         coroutineScope = viewModelScope,
         onDismissSelectionMode = {
-            selectionModeActive.update { null }
+            selectionModeActive.update { SelectionModeActive() }
         }
     )
 
@@ -197,7 +197,7 @@ class ArchivedViewModel @Inject constructor(
                 notePresentationModel = taskClicked
             )
         }
-        selectionModeActive.update { null }
+        selectionModeActive.update { SelectionModeActive() }
     }
 
     fun onNavigateToDetailCompleted() {
@@ -220,7 +220,7 @@ class ArchivedViewModel @Inject constructor(
     }
 
     fun onSelectionDismissed() {
-        selectionModeActive.update { null }
+        selectionModeActive.update { SelectionModeActive() }
     }
 
     fun onLayoutChange(noteLayout: NoteLayout) {
@@ -255,7 +255,7 @@ class ArchivedViewModel @Inject constructor(
                 copyToClipboard = tasksToCopy.toCopyString()
             )
         }
-        selectionModeActive.update { null }
+        selectionModeActive.update { SelectionModeActive() }
     }
 
     fun onCopiedCompleted() {

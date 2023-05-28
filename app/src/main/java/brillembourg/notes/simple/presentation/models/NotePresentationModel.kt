@@ -10,7 +10,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class NotePresentationModel(
-    val id: Long = -1L,
+    override val id: Long = -1L,
     var title: String? = null,
     var content: String,
     val dateInLocal: String,
@@ -44,11 +44,11 @@ fun NoteWithCategories.toPresentation(dateProvider: DateProvider): NotePresentat
 }
 
 interface HasOrder {
-//    val id: Long
-var order: Int
+    var order: Int
 }
 
 interface IsSelectable {
+    val id: Long
     var isSelected: Boolean
 }
 
