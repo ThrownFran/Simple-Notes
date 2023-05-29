@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="6dp"
         android:checkable="true"
+        app:checkedIcon="@null"
         android:transitionName="@{@string/home_shared_item_container(task.id)}"
         app:cardElevation="0dp"
         app:cardForegroundColor="@drawable/selector_cardview_foreground_color"

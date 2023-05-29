@@ -63,6 +63,7 @@ class SelectableImp<T : IsSelectable>(
     ) {
         if (isSelectionNotVisible()) {
             onReadyToDrag?.invoke()
+            toggleItemSelection(position, t)
         } else {
             longClickInSelectionVisible(position, t)
         }
