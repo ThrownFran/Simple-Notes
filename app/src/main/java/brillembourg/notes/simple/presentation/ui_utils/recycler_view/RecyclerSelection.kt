@@ -62,18 +62,13 @@ class SelectableImp<T : IsSelectable>(
         t: T,
     ) {
         if (isSelectionNotVisible()) {
-            longClickInNormalState(position, t)
+            onReadyToDrag?.invoke()
         } else {
             longClickInSelectionVisible(position, t)
         }
     }
 
     private fun longClickInSelectionVisible(position: Int, t: T) {
-        toggleItemSelection(position, t)
-    }
-
-    private fun longClickInNormalState(position: Int, t: T) {
-        onReadyToDrag?.invoke()
         toggleItemSelection(position, t)
     }
 

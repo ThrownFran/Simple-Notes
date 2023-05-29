@@ -29,7 +29,10 @@ class NoteViewHolder(
             bindSelection = ::bindSelection,
             onSelected = { isSelected, id -> onSelected?.invoke(isSelected, id) },
             onClickWithNoSelection = onClick,
-            onReadyToDrag = { onReadyToDrag?.invoke(this) }
+            onReadyToDrag = {
+                onReadyToDrag?.invoke(this)
+                setBackgroundSelectedStroke()
+            }
         )
     }
 
@@ -109,6 +112,10 @@ class NoteViewHolder(
 
     private fun setBackgroundSelected() {
         binding.taskCardview.isChecked = true
+        setBackgroundSelectedStroke()
+    }
+
+    private fun setBackgroundSelectedStroke() {
         binding.taskCardview.strokeWidth =
             2.5f.fromDpToPixel(binding.taskCardview.context).toInt()
     }
