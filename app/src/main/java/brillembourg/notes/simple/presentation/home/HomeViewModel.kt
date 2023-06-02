@@ -75,7 +75,7 @@ class HomeViewModel @Inject constructor(
 
     private val selectionModeActive: MutableStateFlow<SelectionModeActive> =
         MutableStateFlow(getSavedUiState()?.selectionModeActive ?: SelectionModeActive())
-    val noteList: StateFlow<NoteList> = initNoteList()
+    private val noteList: StateFlow<NoteList> = initNoteList()
 
     private val noteLayout: StateFlow<NoteLayout> = initPreferences()
     private val noteActions: MutableStateFlow<NoteActions> =
@@ -83,45 +83,19 @@ class HomeViewModel @Inject constructor(
     private val selectCategoriesState: MutableStateFlow<SelectCategoriesState> =
         MutableStateFlow(SelectCategoriesState())
 
-    private val emptyState: StateFlow<HomeUiState.EmptyNote> =
-        noteList.transform<NoteList, HomeUiState.EmptyNote> { noteList ->
-            when {
-                noteList.key.isEmpty()
-                        && noteList.notes.isEmpty()
-                        && noteList.filteredCategories.isEmpty() -> HomeUiState.EmptyNote.Wizard
-
-                noteList.key.isEmpty()
-                        && noteList.notes.isEmpty()
-                        && noteList.filteredCategories.size == 1 -> HomeUiState.EmptyNote.EmptyForLabel
-
-                noteList.key.isEmpty()
-                        && noteList.notes.isEmpty()
-                        && noteList.filteredCategories.size > 1 -> HomeUiState.EmptyNote.EmptyForMultipleLabels
-
-                noteList.key.isNotEmpty()
-                        && noteList.notes.isEmpty() -> HomeUiState.EmptyNote.EmptyForSearch
-
-                else -> HomeUiState.EmptyNote.None
-            }
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
-            initialValue = HomeUiState.EmptyNote.None
-        )
-
     val homeUiState: StateFlow<HomeUiState> = combine(
         noteLayout,
         selectionModeActive,
         noteActions,
         selectCategoriesState,
-        emptyState
-    ) { noteLayout, selectionModeActive, noteActions, selectCategoriesState, emptyState ->
+        noteList
+    ) { noteLayout, selectionModeActive, noteActions, selectCategoriesState, noteList ->
         HomeUiState(
             noteLayout = noteLayout,
             selectionModeActive = selectionModeActive,
             noteActions = noteActions,
             selectCategoriesState = selectCategoriesState,
-            emptyNotesState = emptyState,
+            noteList = noteList
         )
     }.distinctUntilChanged()
         .onEach {
@@ -456,15 +430,13 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onSearch(key: String) {
-//        isSearchActive.update { true }
         this.key.update { key }
     }
 
     fun onSearchCancelled() {
-//        isSearchActive.update { false }
-//        if(navigates.value == HomeUiNavigates.Idle) {
-        this.key.update { "" }
-//        }
+        if (navigates.value == HomeUiNavigates.Idle) {
+            this.key.update { "" }
+        }
     }
 
     //endregion
