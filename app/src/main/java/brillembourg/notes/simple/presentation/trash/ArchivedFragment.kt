@@ -58,7 +58,12 @@ class ArchivedFragment : Fragment(), MenuProvider {
             recylerViewState,
             onLayoutType = { viewModel.archivedUiState.value.noteLayout.toLayoutType() },
             onNavigateToCategories = {},
-            onSelection = { isSelected: Boolean, id: Long -> viewModel.onSelection() },
+            onSelection = { isSelected: Boolean, id: Long ->
+                viewModel.onSelection(
+                    isSelected,
+                    id
+                )
+            },
             onNoteClick = { viewModel.onNoteClick(it) },
             onReorderedNotes = {},
             onReorderedNotesCancelled = {}
@@ -287,6 +292,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
             val view =
                 binding.trashRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!!)!!.itemView
             navigateToDetail(navigateToDetail.notePresentationModel!!, view)
+            searchManager.actionMode?.finish()
             viewModel.onNavigateToDetailCompleted()
         }
     }

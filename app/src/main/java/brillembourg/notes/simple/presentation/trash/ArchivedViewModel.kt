@@ -198,9 +198,22 @@ class ArchivedViewModel @Inject constructor(
 
     private fun getSelectedTasks() = noteList.value.notes.filter { it.isSelected }
 
-    fun onSelection() {
-        val sizeSelected = getSelectedTasks().size
-        selectionModeActive.update { SelectionModeActive(size = sizeSelected) }
+    fun onSelection(isSelected: Boolean, id: Long) {
+        val selectedIds: MutableList<Long> = selectionModeActive.value.selectedIds.toMutableList()
+        if (isSelected) {
+            selectedIds.add(id)
+        } else {
+            selectedIds.remove(id)
+        }
+        val isActive = selectedIds.size > 0
+
+        selectionModeActive.update {
+            SelectionModeActive(
+                isActive = isActive,
+                selectedIds = selectedIds,
+                size = selectedIds.size
+            )
+        }
     }
 
     fun onSelectionDismissed() {
