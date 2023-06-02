@@ -13,7 +13,7 @@ data class HomeUiState(
     val selectionModeActive: SelectionModeActive = SelectionModeActive(),
     val noteActions: NoteActions = NoteActions(),
     val selectCategoriesState: SelectCategoriesState = SelectCategoriesState(),
-    val emptyNotesState: EmptyNote = EmptyNote.None
+    val emptyNotesState: EmptyNote = EmptyNote.None,
 ) : Parcelable {
 
     enum class EmptyNote {
@@ -27,7 +27,7 @@ data class NoteList(
     val notes: List<NotePresentationModel> = ArrayList(),
     val filteredCategories: List<CategoryPresentationModel> = emptyList(),
     val mustRender: Boolean = false, //To avoid rendering set false
-    val key: String = ""
+    val key: String = "",
 ) : Parcelable
 
 @Parcelize

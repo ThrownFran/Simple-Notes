@@ -173,6 +173,7 @@ class CategoriesFragment : Fragment() {
 
     private fun launchContextualActionBar(sizeSelected: Int) {
         actionMode = setupContextualActionBar(
+            size = sizeSelected,
             toolbar = requireActivity().findViewById(R.id.toolbar),
             menuId = R.menu.menu_contextual_categories,
             currentActionMode = actionMode,

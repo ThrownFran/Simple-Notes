@@ -58,7 +58,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
             recylerViewState,
             onLayoutType = { viewModel.archivedUiState.value.noteLayout.toLayoutType() },
             onNavigateToCategories = {},
-            onSelection = { viewModel.onSelection() },
+            onSelection = { isSelected: Boolean, id: Long -> viewModel.onSelection() },
             onNoteClick = { viewModel.onNoteClick(it) },
             onReorderedNotes = {},
             onReorderedNotesCancelled = {}
@@ -105,7 +105,11 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
     private val searchManager by lazy {
         val toolbarMain: Toolbar = requireActivity().findViewById(R.id.toolbar)
-        SearchManager(this, toolbarMain) { viewModel.onSearch(key = it) }
+        SearchManager(
+            fragment = this,
+            toolbar = toolbarMain,
+            onSearch = viewModel::onSearch,
+            onDestroyActionMode = {})
     }
 
     override fun onCreateView(

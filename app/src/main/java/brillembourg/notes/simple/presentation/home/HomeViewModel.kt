@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import brillembourg.notes.simple.data.DateProvider
-import brillembourg.notes.simple.domain.models.Note
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCase
@@ -73,6 +72,7 @@ class HomeViewModel @Inject constructor(
         initFilteredCategories(getFilteredCategoriesUseCase)
 
     private val key: MutableStateFlow<String> = MutableStateFlow("")
+
     private val selectionModeActive: MutableStateFlow<SelectionModeActive> =
         MutableStateFlow(getSavedUiState()?.selectionModeActive ?: SelectionModeActive())
     val noteList: StateFlow<NoteList> = initNoteList()
@@ -121,7 +121,7 @@ class HomeViewModel @Inject constructor(
             selectionModeActive = selectionModeActive,
             noteActions = noteActions,
             selectCategoriesState = selectCategoriesState,
-            emptyNotesState = emptyState
+            emptyNotesState = emptyState,
         )
     }.distinctUntilChanged()
         .onEach {
@@ -147,12 +147,12 @@ class HomeViewModel @Inject constructor(
     )
 
     private fun initNoteList() = key
-        .debounce(0)
+        .debounce(50)
         .distinctUntilChanged()
-        .combine(filteredCategories) { key, filteredCategories ->
+        .combine(filteredCategories) { search, filteredCategories ->
             GetNotesUseCase.Params(
                 filterByCategories = filteredCategories.map { it.toDomain() },
-                keySearch = key
+                keySearch = key.value
             )
         }
         .flatMapLatest { params ->
@@ -253,11 +253,6 @@ class HomeViewModel @Inject constructor(
         navigateToDetail(it)
     }
 
-    private fun isNoteSelectedInUi(
-        note: Note
-    ): Boolean {
-        return selectionModeActive.value?.selectedIds?.contains(note.id) ?: false
-    }
     //endregion
 
     //region Categories
@@ -399,6 +394,7 @@ class HomeViewModel @Inject constructor(
 
     private fun onSelectionEnd() {
         selectionModeActive.update { SelectionModeActive() }
+//        isSearchActive.update { false }
     }
 
     fun onSelectionDismissed() {
@@ -460,7 +456,15 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onSearch(key: String) {
+//        isSearchActive.update { true }
         this.key.update { key }
+    }
+
+    fun onSearchCancelled() {
+//        isSearchActive.update { false }
+//        if(navigates.value == HomeUiNavigates.Idle) {
+        this.key.update { "" }
+//        }
     }
 
     //endregion

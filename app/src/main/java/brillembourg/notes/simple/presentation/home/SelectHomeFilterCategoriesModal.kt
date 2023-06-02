@@ -62,13 +62,14 @@ class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
         safeUiLaunch {
             combine(
                 detailViewModel.allCategories,
-                detailViewModel.homeUiState
-            ) { a, b ->
-                Pair(a, b)
+                detailViewModel.homeUiState,
+                detailViewModel.noteList
+            ) { a, b, c ->
+                Triple(a, b, c)
             }.collectLatest {
                 val allCategories = it.first
-                val noteList = it.second.noteList
                 val isShowing = it.second.selectCategoriesState.isShowing
+                val noteList = it.third
 
                 if (isShowing) {
                     setupSelectCategoriesAdapter(

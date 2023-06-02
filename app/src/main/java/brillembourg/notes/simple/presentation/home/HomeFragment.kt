@@ -16,6 +16,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import brillembourg.notes.simple.R
@@ -41,6 +43,7 @@ import brillembourg.notes.simple.presentation.ui_utils.setTransitionToEditNote
 import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(), MenuProvider {
@@ -113,7 +116,13 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private val searchManager by lazy {
         val toolbarMain: Toolbar = requireActivity().findViewById(R.id.toolbar)
-        SearchManager(this, toolbarMain) { viewModel.onSearch(key = it) }
+        SearchManager(
+            fragment = this,
+            toolbar = toolbarMain,
+            onSearch = viewModel::onSearch,
+            onDestroyActionMode = {
+                viewModel.onSearchCancelled()
+            })
     }
 
     override fun onCreateView(
@@ -151,7 +160,6 @@ class HomeFragment : Fragment(), MenuProvider {
 
                 selectionRenderer.render(homeUiState.selectionModeActive)
 
-
                 changeLayoutRenderer.render(homeUiState.noteLayout)
 
                 copyClipboardState(homeUiState.noteActions.copyToClipboard)
@@ -161,6 +169,23 @@ class HomeFragment : Fragment(), MenuProvider {
                 selectCategoriesState(homeUiState.selectCategoriesState)
 
                 emptyNotesState(homeUiState.emptyNotesState)
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                if (searchManager.actionMode == null
+                    && viewModel.noteList.value.key.isNotEmpty()
+                ) {
+                    searchManager.startSearch(viewModel.noteList.value.key)
+                }
+//                viewModel.homeUiState.combine(viewModel.noteList) {
+//                        uiState: HomeUiState, noteList: NoteList ->
+//                    if(searchManager.actionMode == null
+//                        && noteList.key.isNotEmpty()) {
+//                        searchManager.startSearch(noteList.key)
+//                    }
+//                }
             }
         }
 
@@ -296,6 +321,7 @@ class HomeFragment : Fragment(), MenuProvider {
     private fun navigateToAddNoteState(navigateToAddNote: HomeUiNavigates.NavigateToAddNote) {
         navigateToAddNote.let {
             navigateToCreateTask(navigateToAddNote.content)
+            searchManager.actionMode?.finish()
             viewModel.onNavigateToAddNoteCompleted()
         }
     }
@@ -306,6 +332,7 @@ class HomeFragment : Fragment(), MenuProvider {
             val view =
                 binding.homeRecycler.findViewHolderForAdapterPosition(navigateToDetail.taskIndex!! + headers)!!.itemView
             navigateToDetail(navigateToDetail.notePresentationModel!!, view)
+            searchManager.actionMode?.finish()
             viewModel.onNavigateToDetailCompleted()
         }
     }

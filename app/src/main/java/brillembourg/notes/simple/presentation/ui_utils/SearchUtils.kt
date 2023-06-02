@@ -14,12 +14,13 @@ import brillembourg.notes.simple.R
 class SearchManager(
     val fragment: Fragment,
     val toolbar: Toolbar,
-    val onSearch: (String) -> Unit
+    val onSearch: (String) -> Unit,
+    val onDestroyActionMode: () -> Unit
 ) {
 
     var actionMode: ActionMode? = null
 
-    fun startSearch() {
+    fun startSearch(key: String = "") {
 
         actionMode = toolbar.startActionMode(object : ActionMode.Callback {
             override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
@@ -36,14 +37,15 @@ class SearchManager(
                         searchView.context, R.color.md_theme_light_onPrimary
                     )
                 )
+                searchText.setText(key)
                 searchText.setHintTextColor(
                     ContextCompat.getColor(
-                        searchView.context, R.color.md_theme_light_secondaryContainer_transparent
+                        searchView.context, R.color.md_theme_light_secondaryContainer
                     )
                 )
                 searchView.isIconified = false
                 searchView.requestFocus()
-                searchView.queryHint = "Search note ..."
+                searchView.queryHint = searchView.context.resources.getString(R.string.search_note)
                 searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String): Boolean {
                         // perform search
@@ -69,6 +71,7 @@ class SearchManager(
 
             override fun onDestroyActionMode(mode: ActionMode) {
                 actionMode = null
+                onDestroyActionMode()
             }
         })
     }
