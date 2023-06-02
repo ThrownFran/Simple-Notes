@@ -84,14 +84,17 @@ class ArchivedFragment : Fragment(), MenuProvider {
                         viewModel.noteDeletionManager.onDeleteConfirm()
                         true
                     }
+
                     R.id.menu_context_menu_unarchive -> {
                         onUnarchiveTasks()
                         true
                     }
+
                     R.id.menu_context_share -> {
                         onShareNotes()
                         true
                     }
+
                     R.id.menu_context_copy -> {
                         viewModel.onCopy()
                         true
@@ -109,7 +112,8 @@ class ArchivedFragment : Fragment(), MenuProvider {
             fragment = this,
             toolbar = toolbarMain,
             onSearch = viewModel::onSearch,
-            onDestroyActionMode = {})
+            onDestroyActionMode = viewModel::onSearchCancelled
+        )
     }
 
     override fun onCreateView(
@@ -198,6 +202,8 @@ class ArchivedFragment : Fragment(), MenuProvider {
         safeUiLaunch {
             viewModel.archivedUiState.collect { uiState: ArchivedUiState ->
 
+                binding.trashProgress.isVisible = uiState.isLoading
+
                 noteRenderer.render(uiState.noteList)
 
                 selectionRenderer.render(uiState.selectionModeActive)
@@ -209,6 +215,8 @@ class ArchivedFragment : Fragment(), MenuProvider {
                 shareNotesAsStringState(uiState.noteActions.shareNoteAsString)
 
                 emptyNotesState(uiState.emptyNote)
+
+                searchManager.onCheckState(uiState.noteList.key)
             }
         }
 
@@ -225,19 +233,19 @@ class ArchivedFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun emptyNotesState(emptyNotesState: ArchivedViewModel.EmptyNote) {
+    private fun emptyNotesState(emptyNotesState: ArchivedUiState.EmptyNote) {
         when (emptyNotesState) {
-            ArchivedViewModel.EmptyNote.NoArchived -> {
+            ArchivedUiState.EmptyNote.NoArchived -> {
                 binding.trashTextEmpty.setText(R.string.trash_empty)
                 binding.trashTextEmpty.isVisible = true
             }
 
-            ArchivedViewModel.EmptyNote.EmptyForSearch -> {
+            ArchivedUiState.EmptyNote.EmptyForSearch -> {
                 binding.trashTextEmpty.setText(R.string.search_no_notes_found)
                 binding.trashTextEmpty.isVisible = true
             }
 
-            ArchivedViewModel.EmptyNote.None -> {
+            ArchivedUiState.EmptyNote.None -> {
                 binding.trashTextEmpty.isVisible = false
                 binding.trashTextEmpty.text = ""
             }

@@ -117,9 +117,8 @@ class HomeFragment : Fragment(), MenuProvider {
             fragment = this,
             toolbar = toolbarMain,
             onSearch = viewModel::onSearch,
-            onDestroyActionMode = {
-                viewModel.onSearchCancelled()
-            })
+            onDestroyActionMode = viewModel::onSearchCancelled
+        )
     }
 
     override fun onCreateView(
@@ -151,6 +150,8 @@ class HomeFragment : Fragment(), MenuProvider {
         safeUiLaunch {
             viewModel.homeUiState.collect { homeUiState: HomeUiState ->
 
+                binding.homeProgress.isVisible = homeUiState.isLoading
+
                 noteRenderer.render(homeUiState.noteList)
 
                 selectionRenderer.render(homeUiState.selectionModeActive)
@@ -165,9 +166,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
                 emptyNotesState(homeUiState.emptyNotesState)
 
-                if (searchManager.actionMode == null && homeUiState.noteList.key.isNotEmpty()) {
-                    searchManager.startSearch(homeUiState.noteList.key)
-                }
+                searchManager.onCheckState(homeUiState.noteList.key)
             }
         }
 

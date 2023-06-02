@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.presentation.trash
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -57,12 +58,11 @@ class ArchivedViewModel @Inject constructor(
     private val uiStateKey = "archived_ui_state"
 
     private val key: MutableStateFlow<String> = MutableStateFlow("")
-
-    private val noteList: StateFlow<NoteList> = initNoteList(getArchivedNotesUseCase)
-
-    private val noteLayout: StateFlow<NoteLayout> = initPreferences()
     private val selectionModeActive: MutableStateFlow<SelectionModeActive> =
         MutableStateFlow(getSavedUiState()?.selectionModeActive ?: SelectionModeActive())
+
+    private val noteList: StateFlow<NoteList> = initNoteList(getArchivedNotesUseCase)
+    private val noteLayout: StateFlow<NoteLayout> = initPreferences()
     private val noteActions: MutableStateFlow<ArchivedUiState.NoteActions> =
         MutableStateFlow(
             getSavedUiState()?.noteActions ?: ArchivedUiState.NoteActions()
@@ -72,43 +72,29 @@ class ArchivedViewModel @Inject constructor(
         MutableStateFlow(ArchivedUiNavigates.Idle)
     val navigates = _navigates.asStateFlow()
 
-    private val isWizardVisible: StateFlow<EmptyNote> = combine(noteList, key) { noteList, key ->
-        when {
-            key.isEmpty() && noteList.notes.isEmpty() -> EmptyNote.NoArchived
-            key.isNotEmpty() && noteList.notes.isEmpty() -> EmptyNote.EmptyForSearch
-            else -> EmptyNote.None
-        }
-    }.distinctUntilChanged()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
-            initialValue = EmptyNote.None
-        )
-
     private fun getSavedUiState(): ArchivedUiState? =
         savedStateHandle.get<ArchivedUiState>(uiStateKey)
 
     val archivedUiState: StateFlow<ArchivedUiState> = combine(
-        flow = noteList,
-        flow2 = noteLayout,
-        flow3 = isWizardVisible,
-        flow4 = selectionModeActive,
-        flow5 = noteActions
-    ) { noteList, noteLayout, isWizardVisible, selectionModeActive, noteActions ->
+        noteList,
+        noteLayout,
+        selectionModeActive,
+        noteActions
+    ) { noteList, noteLayout, selectionModeActive, noteActions ->
         ArchivedUiState(
             noteList = noteList,
             noteLayout = noteLayout,
             selectionModeActive = selectionModeActive,
-            noteActions = noteActions,
-            emptyNote = isWizardVisible
+            noteActions = noteActions
         )
     }.distinctUntilChanged()
         .onEach {
+            Log.e("Render", it.toString())
             savedStateHandle[uiStateKey] = it
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
-            initialValue = getSavedUiState() ?: ArchivedUiState()
+            initialValue = ArchivedUiState()
         )
 
     val noteDeletionManager = NoteDeletionManager(
@@ -123,9 +109,12 @@ class ArchivedViewModel @Inject constructor(
         }
     )
 
+    val uiStateOrNull: ArchivedUiState?
+        get() = archivedUiState.value as? ArchivedUiState?
+
     private fun initNoteList(getArchivedNotesUseCase: GetArchivedNotesUseCase) =
         key
-            .debounce(100)
+            .debounce(50)
             .distinctUntilChanged()
             .map { key ->
                 GetArchivedNotesUseCase.Params(key)
@@ -133,24 +122,28 @@ class ArchivedViewModel @Inject constructor(
             .flatMapLatest { params ->
                 getArchivedNotesUseCase(params)
             }
-            .transform { result ->
+            .combine(selectionModeActive) { result, selectionMode ->
+                result to selectionMode
+            }
+            .transform { pair ->
+                val result = pair.first
+                val selectionMode = pair.second
                 when (result) {
                     is Resource.Success -> {
                         emit(NoteList(
-                            notes = result.data.noteList.map { task ->
-                                task.toPresentation(dateProvider)
-                                    .apply {
-                                        isSelected =
-                                            isNoteSelectedInUi(
-                                                notes = result.data.noteList
-                                                    .map { it.toPresentation(dateProvider) },
-                                                note = this
-                                            )
-                                    }
-                            }
+                            notes = result.data.noteList
+                                .map { task ->
+                                    task.toPresentation(dateProvider)
+                                        .apply {
+                                            this.isSelected =
+                                                selectionMode.selectedIds.contains(task.note.id)
+                                        }
+                                }
                                 .sortedBy { taskPresentationModel -> taskPresentationModel.order }
                                 .asReversed(),
-                            mustRender = true
+                            mustRender = true,
+                            key = key.value,
+                            hasLoaded = true
                         ))
                     }
 
@@ -175,15 +168,6 @@ class ArchivedViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
             initialValue = NoteLayout.Vertical
         )
-
-    private fun isNoteSelectedInUi(
-        notes: List<NotePresentationModel>,
-        note: NotePresentationModel
-    ): Boolean {
-        return (notes
-            .firstOrNull() { note.id == it.id }?.isSelected
-            ?: false)
-    }
 
     fun onNoteClick(it: NotePresentationModel) {
         navigateToDetail(it)
@@ -268,8 +252,11 @@ class ArchivedViewModel @Inject constructor(
         this.key.update { key }
     }
 
-    enum class EmptyNote {
-        None, EmptyForSearch, NoArchived
+    fun onSearchCancelled() {
+        if (navigates.value == ArchivedUiNavigates.Idle) {
+            this.key.update { "" }
+        }
     }
+
 }
 

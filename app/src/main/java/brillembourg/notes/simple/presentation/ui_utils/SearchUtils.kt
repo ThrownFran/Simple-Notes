@@ -20,6 +20,12 @@ class SearchManager(
 
     var actionMode: ActionMode? = null
 
+    fun onCheckState(key: String) {
+        if (actionMode == null && key.isNotEmpty()) {
+            startSearch(key)
+        }
+    }
+
     fun startSearch(key: String = "") {
 
         actionMode = toolbar.startActionMode(object : ActionMode.Callback {

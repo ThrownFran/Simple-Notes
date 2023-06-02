@@ -133,7 +133,7 @@ class HomeViewModel @Inject constructor(
             getNotesUseCase(params)
         }
         .combine(selectionModeActive) { result, selectionMode ->
-            Pair(result, selectionMode)
+            result to selectionMode
         }
         .transform { pair ->
             val result = pair.first
@@ -156,7 +156,8 @@ class HomeViewModel @Inject constructor(
                                 .asReversed(),
                             mustRender = true,
                             filteredCategories = filteredCategories.value,
-                            key = key.value
+                            key = key.value,
+                            hasLoaded = true
                         ))
                 }
 

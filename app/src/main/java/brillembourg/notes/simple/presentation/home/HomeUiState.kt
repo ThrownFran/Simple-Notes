@@ -13,11 +13,13 @@ data class HomeUiState(
     val selectionModeActive: SelectionModeActive = SelectionModeActive(),
     val noteActions: NoteActions = NoteActions(),
     val selectCategoriesState: SelectCategoriesState = SelectCategoriesState(),
-    val noteList: NoteList = NoteList()
+    val noteList: NoteList = NoteList(),
+    val isLoading: Boolean = noteList.hasLoaded.not()
 ) : Parcelable {
 
     val emptyNotesState: EmptyNote
         get() = when {
+            isLoading -> EmptyNote.None
             noteList.key.isEmpty()
                     && noteList.notes.isEmpty()
                     && noteList.filteredCategories.isEmpty() -> EmptyNote.Wizard
@@ -47,6 +49,7 @@ data class NoteList(
     val notes: List<NotePresentationModel> = ArrayList(),
     val filteredCategories: List<CategoryPresentationModel> = emptyList(),
     val mustRender: Boolean = false, //To avoid rendering set false
+    val hasLoaded: Boolean = false, //To avoid rendering set false
     val key: String = "",
 ) : Parcelable
 
