@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.data.database.notes
 
+import androidx.room.withTransaction
 import brillembourg.notes.simple.data.database.AppDatabase
 import brillembourg.notes.simple.data.database.CategoryNoteCrossRef
 import brillembourg.notes.simple.data.database.NoteWithCategoriesEntity
@@ -78,8 +79,10 @@ class NoteDatabase(
     }
 
     suspend fun saveTasksReordering(taskList: List<NoteEntity>) {
-        taskList.forEach {
-            roomDatabase.taskDao().updateOrder(it.id!!, it.order)
+        roomDatabase.withTransaction {
+            taskList.forEach {
+                roomDatabase.taskDao().updateOrder(it.id!!, it.order)
+            }
         }
     }
 
