@@ -148,6 +148,12 @@ class HomeFragment : Fragment(), MenuProvider {
         }
 
         safeUiLaunch {
+            viewModel.selectCategoriesState.collect { state ->
+                selectCategoriesState(state)
+            }
+        }
+
+        safeUiLaunch {
             viewModel.homeUiState.collect { homeUiState: HomeUiState ->
 
                 binding.homeProgress.isVisible = homeUiState.isLoading
@@ -161,8 +167,6 @@ class HomeFragment : Fragment(), MenuProvider {
                 copyClipboardState(homeUiState.noteActions.copyToClipboard)
 
                 shareNotesAsStringState(homeUiState.noteActions.shareNoteAsString)
-
-                selectCategoriesState(homeUiState.selectCategoriesState)
 
                 emptyNotesState(homeUiState.emptyNotesState)
 

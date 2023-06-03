@@ -12,7 +12,6 @@ data class HomeUiState(
     val noteLayout: NoteLayout = NoteLayout.Vertical,
     val selectionModeActive: SelectionModeActive = SelectionModeActive(),
     val noteActions: NoteActions = NoteActions(),
-    val selectCategoriesState: SelectCategoriesState = SelectCategoriesState(),
     val noteList: NoteList = NoteList(),
     val isLoading: Boolean = noteList.hasLoaded.not()
 ) : Parcelable {
@@ -61,7 +60,6 @@ data class NoteActions(
 
 @Parcelize
 data class SelectCategoriesState(
-    val isFilterCategoryMenuAvailable: Boolean = false,
     val navigate: Boolean = false,
     val isShowing: Boolean = false
 ) : Parcelable

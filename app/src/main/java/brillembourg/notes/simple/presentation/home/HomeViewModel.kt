@@ -35,7 +35,6 @@ import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -80,24 +79,24 @@ class HomeViewModel @Inject constructor(
     private val noteLayout: StateFlow<NoteLayout> = initPreferences()
     private val noteActions: MutableStateFlow<NoteActions> =
         MutableStateFlow(getSavedUiState()?.noteActions ?: NoteActions())
-    private val selectCategoriesState: MutableStateFlow<SelectCategoriesState> =
+
+    val selectCategoriesState: MutableStateFlow<SelectCategoriesState> =
         MutableStateFlow(SelectCategoriesState())
 
     val homeUiState: StateFlow<HomeUiState> = combine(
         noteLayout,
         selectionModeActive,
         noteActions,
-        selectCategoriesState,
         noteList
-    ) { noteLayout, selectionModeActive, noteActions, selectCategoriesState, noteList ->
+    ) { noteLayout, selectionModeActive, noteActions, noteList ->
         HomeUiState(
             noteLayout = noteLayout,
             selectionModeActive = selectionModeActive,
             noteActions = noteActions,
-            selectCategoriesState = selectCategoriesState,
             noteList = noteList
         )
     }.distinctUntilChanged()
+        .debounce(150)
         .onEach {
             savedStateHandle[uiStateKey] = it
         }.stateIn(
@@ -319,16 +318,18 @@ class HomeViewModel @Inject constructor(
 
     private fun reorderTasks(reorderedTaskList: List<NotePresentationModel>) {
         viewModelScope.launch {
-            val params = ReorderNotesUseCase.Params(reorderedTaskList.map {
-                it.toDomain(dateProvider)
-            })
+            val params = ReorderNotesUseCase.Params(
+                noteList = reorderedTaskList.map {
+                    it.toDomain(dateProvider)
+                }
+            )
 
             when (val result = reorderNotesUseCase(params)) {
                 is Resource.Success -> showMessage(result.data.message)
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
             }
-            delay(100)
+//            delay(100)
             onSelectionEnd()
         }
     }

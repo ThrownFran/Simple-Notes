@@ -12,7 +12,6 @@ import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
 import brillembourg.notes.simple.presentation.detail.setupSelectCategoriesAdapter
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 
 @AndroidEntryPoint
@@ -63,12 +62,13 @@ class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
             combine(
                 detailViewModel.allCategories,
                 detailViewModel.homeUiState,
-            ) { a, b ->
-                a to b
-            }.collectLatest {
+                detailViewModel.selectCategoriesState
+            ) { a, b, c ->
+                Triple(a, b, c)
+            }.collect {
                 val allCategories = it.first
-                val isShowing = it.second.selectCategoriesState.isShowing
                 val noteList = it.second.noteList
+                val isShowing = it.third.isShowing
 
                 if (isShowing) {
                     setupSelectCategoriesAdapter(
