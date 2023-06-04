@@ -7,23 +7,17 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.annotation.MenuRes
 import androidx.appcompat.widget.Toolbar
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.R
-import brillembourg.notes.simple.presentation.models.IsSelectable
 
-inline fun <T : IsSelectable, VH : RecyclerView.ViewHolder> setupContextualActionBar(
+inline fun setupContextualActionBar(
     size: Int,
     toolbar: Toolbar,
     @MenuRes menuId: Int,
     currentActionMode: ActionMode?,
-    adapter: ListAdapter<T, VH>,
     crossinline onActionClick: (menuId: Int) -> Boolean,
     crossinline onSetTitle: (selectedSize: Int) -> String,
     crossinline onDestroyMyActionMode: () -> Unit
 ): ActionMode? {
-//    val taskList = adapter.currentList
-//    val selectedList = taskList.filter { it.isSelected }
 
     if (size <= 0) {
         currentActionMode?.finish()
@@ -52,13 +46,6 @@ inline fun <T : IsSelectable, VH : RecyclerView.ViewHolder> setupContextualActio
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
-
-//            taskList.forEachIndexed { index, taskPresentationModel ->
-//                if (taskPresentationModel.isSelected) {
-//                    taskPresentationModel.isSelected = false
-//                    adapter.notifyItemChanged(index, taskPresentationModel)
-//                }
-//            }
             onDestroyMyActionMode.invoke()
         }
     })

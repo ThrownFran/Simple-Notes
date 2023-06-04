@@ -15,9 +15,9 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentCategoriesBinding
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
 import brillembourg.notes.simple.presentation.home.delete.NoteDeletionState
+import brillembourg.notes.simple.presentation.home.renderers.SelectionRenderer
 import brillembourg.notes.simple.presentation.ui_utils.getCategoriesSelectedTitle
 import brillembourg.notes.simple.presentation.ui_utils.recycler_view.buildVerticalManager
-import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
 import brillembourg.notes.simple.presentation.ui_utils.showDeleteCategoriesDialog
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -32,6 +32,31 @@ class CategoriesFragment : Fragment() {
 
     private var _binding: FragmentCategoriesBinding? = null
     private lateinit var binding: FragmentCategoriesBinding
+
+    private val selectionRenderer by lazy {
+        SelectionRenderer(
+            toolbar = requireActivity().findViewById(R.id.toolbar),
+            menuId = R.menu.menu_contextual_categories,
+            recyclerView = binding.categoriesRecycler,
+            onSelectionDismissed = { viewModel.onSelectionDismissed() },
+            onActionClick = { menuId ->
+                when (menuId) {
+                    R.id.menu_context_menu_delete -> {
+                        onDeleteCategoriesConfirm()
+                        true
+                    }
+
+                    else -> false
+                }
+            },
+            onSetTitle = { size ->
+                getCategoriesSelectedTitle(
+                    resources = resources,
+                    selectedSize = size
+                )
+            }
+        )
+    }
 
     private var actionMode: ActionMode? = null
 
@@ -62,7 +87,9 @@ class CategoriesFragment : Fragment() {
 
                 enableOrDisableCreateCategory(it.createCategory)
 
-                selectionModeState(it.selectionMode)
+                selectionRenderer.render(it.selectionMode)
+
+//                selectionModeState(it.selectionMode)
 
                 showDeleteCategoriesState(it.deleteConfirmation)
 
@@ -83,14 +110,15 @@ class CategoriesFragment : Fragment() {
         }
     }
 
-    private fun selectionModeState(selectionMode: SelectionMode?) {
-        if (selectionMode == null) {
-            actionMode?.finish()
-            actionMode = null
-            return
-        }
-        launchContextualActionBar(selectionMode.size)
-    }
+//    private fun selectionModeState(selectionMode: SelectionModeActive) {
+//        selectionRenderer.render(selectionMode)
+////        if (selectionMode == null) {
+////            actionMode?.finish()
+////            actionMode = null
+////            return
+////        }
+////        launchContextualActionBar(selectionMode.size)
+//    }
 
     private fun enableOrDisableCreateCategory(createCategory: CreateCategory) {
         if (createCategory.isEnabled) binding.categoriesCreateitemview.setCreatingMode()
@@ -135,12 +163,12 @@ class CategoriesFragment : Fragment() {
         list: List<CategoryPresentationModel>
     ): CategoryAdapter {
         return CategoryAdapter(
-            onRename = { it, model -> onSaveRenaming(it, model) },
+            onRename = viewModel::onSave,
             recyclerView = recyclerView,
             onClick = { category -> onCategoryClicked(category) },
-            onReorderSuccess = { categories -> onReorderedCategories(categories) },
-            onReorderCanceled = { onReorderCanceled() },
-            onSelection = { onSelection() }
+            onReorderSuccess = viewModel::onReorderedCategories,
+            onReorderCanceled = viewModel::onReorderCategoriesCancelled,
+            onSelection = viewModel::onSelection
         ).apply {
             submitList(list)
             setDragDirections(recyclerView, ItemTouchHelper.UP or ItemTouchHelper.DOWN)
@@ -151,13 +179,13 @@ class CategoriesFragment : Fragment() {
         viewModel.onSave(newName, presentationModel)
     }
 
-    private fun onSelection() {
-        viewModel.onSelection()
-    }
+//    private fun onSelection() {
+//        viewModel.onSelection()
+//    }
 
-    private fun onReorderCanceled() {
-        viewModel.onReorderCategoriesCancelled()
-    }
+//    private fun onReorderCanceled() {
+//        viewModel.onReorderCategoriesCancelled()
+//    }
 
     private fun onReorderedCategories(categories: List<CategoryPresentationModel>) {
         viewModel.onReorderedCategories(categories)
@@ -171,33 +199,32 @@ class CategoriesFragment : Fragment() {
         binding.categoriesRecycler.scrollToPosition(0)
     }
 
-    private fun launchContextualActionBar(sizeSelected: Int) {
-        actionMode = setupContextualActionBar(
-            size = sizeSelected,
-            toolbar = requireActivity().findViewById(R.id.toolbar),
-            menuId = R.menu.menu_contextual_categories,
-            currentActionMode = actionMode,
-            adapter = binding.categoriesRecycler.adapter as CategoryAdapter,
-            onActionClick = { onContextualActionItem(menuId = it) },
-            onSetTitle = { selectedSize: Int ->
-                getCategoriesSelectedTitle(
-                    resources = resources,
-                    selectedSize = selectedSize
-                )
-            },
-            onDestroyMyActionMode = {
-                viewModel.onSelectionDismissed()
-            }
-        )
-    }
+//    private fun launchContextualActionBar(sizeSelected: Int) {
+//        actionMode = setupContextualActionBar(
+//            size = sizeSelected,
+//            toolbar = requireActivity().findViewById(R.id.toolbar),
+//            menuId = R.menu.menu_contextual_categories,
+//            currentActionMode = actionMode,
+//            onActionClick = { onContextualActionItem(menuId = it) },
+//            onSetTitle = { selectedSize: Int ->
+//                getCategoriesSelectedTitle(
+//                    resources = resources,
+//                    selectedSize = selectedSize
+//                )
+//            },
+//            onDestroyMyActionMode = {
+//                viewModel.onSelectionDismissed()
+//            }
+//        )
+//    }
 
-    private fun onContextualActionItem(menuId: Int) = when (menuId) {
-        R.id.menu_context_menu_delete -> {
-            onDeleteCategoriesConfirm()
-            true
-        }
-        else -> false
-    }
+//    private fun onContextualActionItem(menuId: Int) = when (menuId) {
+//        R.id.menu_context_menu_delete -> {
+//            onDeleteCategoriesConfirm()
+//            true
+//        }
+//        else -> false
+//    }
 
     private fun onDeleteCategoriesConfirm() {
         viewModel.onDeleteConfirmCategories()

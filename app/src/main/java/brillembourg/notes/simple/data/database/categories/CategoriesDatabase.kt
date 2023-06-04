@@ -1,5 +1,6 @@
 package brillembourg.notes.simple.data.database.categories
 
+import androidx.room.withTransaction
 import brillembourg.notes.simple.data.database.AppDatabase
 import kotlinx.coroutines.flow.Flow
 
@@ -44,8 +45,10 @@ class CategoriesDatabase(
     }
 
     suspend fun saveReordering(taskList: List<CategoryEntity>) {
-        taskList.forEach {
-            roomDatabase.categoryDao().updateOrder(it.id!!, it.order)
+        roomDatabase.withTransaction {
+            taskList.forEach {
+                roomDatabase.categoryDao().updateOrder(it.id!!, it.order)
+            }
         }
     }
 

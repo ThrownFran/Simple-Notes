@@ -13,7 +13,7 @@ class CategoryAdapter(
     private val recyclerView: RecyclerView,
     private val onRename: (name: String, CategoryPresentationModel) -> Unit,
     private val onClick: (task: CategoryPresentationModel) -> Unit,
-    private val onSelection: () -> Unit,
+    private val onSelection: (isSelected: Boolean, id: Long) -> Unit,
     private val onReorderSuccess: (reorderedTaskList: List<CategoryPresentationModel>) -> Unit,
     private val onReorderCanceled: () -> Unit
 ) : ListAdapter<CategoryPresentationModel, CategoryViewHolder>(setupCategoryDiffCallback()),

@@ -10,13 +10,19 @@ import brillembourg.notes.simple.domain.use_cases.categories.ReorderCategoriesUs
 import brillembourg.notes.simple.domain.use_cases.categories.SaveCategoryUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.home.delete.NoteDeletionState
+import brillembourg.notes.simple.presentation.home.stopTimeoutMillis
+import brillembourg.notes.simple.presentation.trash.SelectionModeActive
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,7 +30,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val getCategoriesUseCase: GetCategoriesUseCase,
+    getCategoriesUseCase: GetCategoriesUseCase,
     private val createCategoryUseCase: CreateCategoryUseCase,
     private val saveCategoryUseCase: SaveCategoryUseCase,
     private val deleteCategoriesUseCase: DeleteCategoriesUseCase,
@@ -32,34 +38,69 @@ class CategoriesViewModel @Inject constructor(
     private val messageManager: MessageManager
 ) : ViewModel() {
 
-    private val _categoryUiState = MutableStateFlow(CategoriesUiState())
-        .apply { observeCategoryList() }
-    val categoryUiState = _categoryUiState.asStateFlow()
-
-    //region List
-
-    private fun observeCategoryList() {
+    private val selectionMode: MutableStateFlow<SelectionModeActive> = MutableStateFlow(
+        SelectionModeActive()
+    )
+    private val categoryList: StateFlow<CategoryList> =
         getCategoriesUseCase(GetCategoriesUseCase.Params())
-            .onEach { result ->
+            .combine(selectionMode) { result, selectionMode ->
+                result to selectionMode
+            }
+            .transform { pair ->
+                val result = pair.first
+                val selectionMode = pair.second
                 when (result) {
-                    is Resource.Success -> _categoryUiState.update { uiState ->
-                        uiState.copy(
-                            categoryList = CategoryList(
+                    is Resource.Success ->
+                        emit(
+                            CategoryList(
                                 data = result.data.categoryList
-                                    .map { category -> category.toPresentation() }
+                                    .map { category ->
+                                        category.toPresentation().apply {
+                                            isSelected =
+                                                selectionMode.selectedIds.contains(category.id)
+                                        }
+                                    }
                                     .sortedBy { it.order }
                                     .asReversed(),
                                 mustRender = true
                             )
                         )
-                    }
 
                     is Resource.Error -> showErrorMessage(result.exception)
                     is Resource.Loading -> Unit
                 }
-            }
-            .launchIn(viewModelScope)
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
+                initialValue = CategoryList()
+            )
+
+    private val createCategory: MutableStateFlow<CreateCategory> =
+        MutableStateFlow(CreateCategory())
+    private val deleteConfirmation: MutableStateFlow<NoteDeletionState.ConfirmArchiveDialog?> =
+        MutableStateFlow(null)
+
+    val categoryUiState: StateFlow<CategoriesUiState> = combine(
+        categoryList,
+        selectionMode,
+        createCategory,
+        deleteConfirmation
+    )
+    { categoryList, selectionMode, createCategory, deleteConfirmation ->
+        CategoriesUiState(
+            categoryList = categoryList,
+            selectionMode = selectionMode,
+            deleteConfirmation = deleteConfirmation,
+            createCategory = createCategory
+        )
     }
+        .distinctUntilChanged()
+        .debounce(300)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
+            initialValue = CategoriesUiState()
+        )
 
     //endregion
 
@@ -86,9 +127,7 @@ class CategoriesViewModel @Inject constructor(
 
         createCategory(providedName)
 
-        _categoryUiState.update {
-            it.copy(createCategory = it.createCategory.copy(isEnabled = false, name = ""))
-        }
+        createCategory.update { CreateCategory(isEnabled = false, name = "") }
     }
 
     private fun createCategory(name: String) {
@@ -106,24 +145,30 @@ class CategoriesViewModel @Inject constructor(
 
     //region Selection
 
-    fun onSelection() {
-        val sizeSelected = getSelectedCategories().size
+    fun onSelection(isSelected: Boolean, id: Long) {
+        val selectedIds: MutableList<Long> = selectionMode.value.selectedIds.toMutableList()
+        if (isSelected) {
+            selectedIds.add(id)
+        } else {
+            selectedIds.remove(id)
+        }
+        val isActive = selectedIds.size > 0
 
-        _categoryUiState.update {
-            it.copy(
-                selectionMode = SelectionMode(
-                    size = sizeSelected
-                )
+        selectionMode.update {
+            SelectionModeActive(
+                isActive = isActive,
+                selectedIds = selectedIds,
+                size = selectedIds.size
             )
         }
     }
 
     fun onSelectionDismissed() {
-        _categoryUiState.update { it.copy(selectionMode = null) }
+        selectionMode.update { SelectionModeActive() }
     }
 
     private fun getSelectedCategories(): List<CategoryPresentationModel> {
-        return categoryUiState.value.categoryList.data.filter { it.isSelected }
+        return categoryList.value.data.filter { it.isSelected }
     }
 
     //endregion
@@ -131,33 +176,22 @@ class CategoriesViewModel @Inject constructor(
     //region Delete
 
     fun onDeleteConfirmCategories() {
-        _categoryUiState.update {
-            it.copy(
-                deleteConfirmation = NoteDeletionState.ConfirmArchiveDialog(
-                    getSelectedCategories().size
-                )
+        deleteConfirmation.update {
+            NoteDeletionState.ConfirmArchiveDialog(
+                getSelectedCategories().size
             )
         }
     }
 
     fun onDismissConfirmDeleteShown() {
-        _categoryUiState.update {
-            it.copy(
-                deleteConfirmation = null
-            )
-        }
+        deleteConfirmation.update { null }
     }
 
     fun onDeleteCategories() {
         val tasksToDeleteIds = getSelectedCategories().map { it.id }
         deleteCategories(tasksToDeleteIds)
-
-        _categoryUiState.update {
-            it.copy(
-                deleteConfirmation = null,
-                selectionMode = null
-            )
-        }
+        deleteConfirmation.update { null }
+        selectionMode.update { SelectionModeActive() }
     }
 
     private fun deleteCategories(tasksToDeleteIds: List<Long>) {
@@ -176,22 +210,7 @@ class CategoriesViewModel @Inject constructor(
     //region Reordered
 
     fun onReorderedCategories(reorderedCategoryList: List<CategoryPresentationModel>) {
-        _categoryUiState.update {
-
-            val categoryList: List<CategoryPresentationModel> =
-                _categoryUiState.value.categoryList.data
-            categoryList.forEach { it.isSelected = false }
-
-            it.copy(
-                selectionMode = null,
-                categoryList = _categoryUiState.value.categoryList.copy(
-                    data = categoryList,
-                    mustRender = false
-                )
-            )
-        }
-
-        if (reorderedCategoryList == _categoryUiState.value.categoryList.data) return
+        if (reorderedCategoryList == categoryList.value.data) return
         reorderCategories(reorderedCategoryList)
     }
 
@@ -206,6 +225,7 @@ class CategoriesViewModel @Inject constructor(
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
             }
+            selectionMode.update { SelectionModeActive() }
         }
     }
 

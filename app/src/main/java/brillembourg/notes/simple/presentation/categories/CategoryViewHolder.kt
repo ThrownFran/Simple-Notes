@@ -14,7 +14,7 @@ class CategoryViewHolder(
     private val getCurrentList: () -> List<CategoryPresentationModel>,
     private val binding: ItemCategoryBinding,
     onClick: ((CategoryPresentationModel) -> Unit)? = null,
-    private val onSelected: (() -> Unit)? = null,
+    private val onSelected: ((isSelected: Boolean, id: Long) -> Unit)? = null,
     private val onReadyToDrag: ((CategoryViewHolder) -> Unit)? = null
 ) : RecyclerView.ViewHolder(binding.root),
     Selectable<CategoryPresentationModel> by SelectableImp(getCurrentList) {
@@ -23,7 +23,7 @@ class CategoryViewHolder(
         setupClickListeners()
         setupSelection(
             bindSelection = { categoryPresentationModel -> bindSelection(categoryPresentationModel) },
-            onSelected = { _, _ -> onSelected?.invoke() },
+            onSelected = { isSelected: Boolean, id: Long -> onSelected?.invoke(isSelected, id) },
             onClickWithNoSelection = { presentationModel ->
 
                 editCategoryAndUnfocusOthers(presentationModel)

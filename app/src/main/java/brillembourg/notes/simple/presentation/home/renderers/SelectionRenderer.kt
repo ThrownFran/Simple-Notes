@@ -2,9 +2,7 @@ package brillembourg.notes.simple.presentation.home.renderers
 
 import android.view.ActionMode
 import androidx.appcompat.widget.Toolbar
-import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
-import brillembourg.notes.simple.presentation.home.adapters.NoteAdapter
 import brillembourg.notes.simple.presentation.trash.SelectionModeActive
 import brillembourg.notes.simple.presentation.ui_utils.getNoteSelectedTitle
 import brillembourg.notes.simple.presentation.ui_utils.setupContextualActionBar
@@ -14,7 +12,8 @@ class SelectionRenderer(
     private val menuId: Int,
     private val recyclerView: RecyclerView,
     private val onActionClick: (menuId: Int) -> Boolean,
-    private val onSelectionDismissed: () -> Unit
+    private val onSelectionDismissed: () -> Unit,
+    private val onSetTitle: ((selectedSize: Int) -> String)? = null
 ) {
 
     private var actionMode: ActionMode? = null
@@ -35,10 +34,9 @@ class SelectionRenderer(
             toolbar = toolbar,
             menuId = menuId,
             currentActionMode = actionMode,
-            adapter = requireNotNull(getAdapter()),
             onActionClick = { onActionClick(it) },
             onSetTitle = { selectedSize: Int ->
-                getNoteSelectedTitle(
+                onSetTitle?.invoke(selectedSize) ?: getNoteSelectedTitle(
                     resources = recyclerView.resources,
                     selectedSize = selectedSize
                 )
@@ -46,13 +44,4 @@ class SelectionRenderer(
             onDestroyMyActionMode = { onSelectionDismissed() }
         )
     }
-
-    private fun getAdapter(): NoteAdapter? = try {
-        getConcatAdapter()?.adapters?.first { it is NoteAdapter } as NoteAdapter
-    } catch (e: Exception) {
-        null
-    }
-
-    private fun getConcatAdapter() = (recyclerView.adapter as? ConcatAdapter?)
-
 }
