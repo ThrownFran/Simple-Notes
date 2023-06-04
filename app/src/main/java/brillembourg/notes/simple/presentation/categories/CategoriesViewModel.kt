@@ -95,7 +95,7 @@ class CategoriesViewModel @Inject constructor(
         )
     }
         .distinctUntilChanged()
-        .debounce(300)
+        .debounce(250)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis),
@@ -225,6 +225,7 @@ class CategoriesViewModel @Inject constructor(
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
             }
+
             selectionMode.update { SelectionModeActive() }
         }
     }

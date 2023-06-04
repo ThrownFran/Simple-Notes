@@ -1,7 +1,6 @@
 package brillembourg.notes.simple.presentation.categories
 
 import android.os.Bundle
-import android.view.ActionMode
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,7 +44,6 @@ class CategoriesFragment : Fragment() {
                         onDeleteCategoriesConfirm()
                         true
                     }
-
                     else -> false
                 }
             },
@@ -57,8 +55,6 @@ class CategoriesFragment : Fragment() {
             }
         )
     }
-
-    private var actionMode: ActionMode? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -89,14 +85,11 @@ class CategoriesFragment : Fragment() {
 
                 selectionRenderer.render(it.selectionMode)
 
-//                selectionModeState(it.selectionMode)
-
                 showDeleteCategoriesState(it.deleteConfirmation)
 
             }
         }
     }
-
 
     private fun showDeleteCategoriesState(state: NoteDeletionState.ConfirmArchiveDialog?) {
         if (state != null) {
@@ -109,16 +102,6 @@ class CategoriesFragment : Fragment() {
                 })
         }
     }
-
-//    private fun selectionModeState(selectionMode: SelectionModeActive) {
-//        selectionRenderer.render(selectionMode)
-////        if (selectionMode == null) {
-////            actionMode?.finish()
-////            actionMode = null
-////            return
-////        }
-////        launchContextualActionBar(selectionMode.size)
-//    }
 
     private fun enableOrDisableCreateCategory(createCategory: CreateCategory) {
         if (createCategory.isEnabled) binding.categoriesCreateitemview.setCreatingMode()
@@ -175,22 +158,6 @@ class CategoriesFragment : Fragment() {
         }
     }
 
-    private fun onSaveRenaming(newName: String, presentationModel: CategoryPresentationModel) {
-        viewModel.onSave(newName, presentationModel)
-    }
-
-//    private fun onSelection() {
-//        viewModel.onSelection()
-//    }
-
-//    private fun onReorderCanceled() {
-//        viewModel.onReorderCategoriesCancelled()
-//    }
-
-    private fun onReorderedCategories(categories: List<CategoryPresentationModel>) {
-        viewModel.onReorderedCategories(categories)
-    }
-
     private fun onCategoryClicked(category: CategoryPresentationModel) {
         //TODO
     }
@@ -199,36 +166,7 @@ class CategoriesFragment : Fragment() {
         binding.categoriesRecycler.scrollToPosition(0)
     }
 
-//    private fun launchContextualActionBar(sizeSelected: Int) {
-//        actionMode = setupContextualActionBar(
-//            size = sizeSelected,
-//            toolbar = requireActivity().findViewById(R.id.toolbar),
-//            menuId = R.menu.menu_contextual_categories,
-//            currentActionMode = actionMode,
-//            onActionClick = { onContextualActionItem(menuId = it) },
-//            onSetTitle = { selectedSize: Int ->
-//                getCategoriesSelectedTitle(
-//                    resources = resources,
-//                    selectedSize = selectedSize
-//                )
-//            },
-//            onDestroyMyActionMode = {
-//                viewModel.onSelectionDismissed()
-//            }
-//        )
-//    }
-
-//    private fun onContextualActionItem(menuId: Int) = when (menuId) {
-//        R.id.menu_context_menu_delete -> {
-//            onDeleteCategoriesConfirm()
-//            true
-//        }
-//        else -> false
-//    }
-
     private fun onDeleteCategoriesConfirm() {
         viewModel.onDeleteConfirmCategories()
     }
-
-
 }
