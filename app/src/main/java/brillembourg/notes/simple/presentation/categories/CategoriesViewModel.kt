@@ -178,7 +178,7 @@ class CategoriesViewModel @Inject constructor(
     fun onDeleteConfirmCategories() {
         deleteConfirmation.update {
             NoteDeletionState.ConfirmArchiveDialog(
-                getSelectedCategories().size
+                selectionMode.value.size
             )
         }
     }
@@ -188,8 +188,7 @@ class CategoriesViewModel @Inject constructor(
     }
 
     fun onDeleteCategories() {
-        val tasksToDeleteIds = getSelectedCategories().map { it.id }
-        deleteCategories(tasksToDeleteIds)
+        deleteCategories(selectionMode.value.selectedIds)
         deleteConfirmation.update { null }
         selectionMode.update { SelectionModeActive() }
     }

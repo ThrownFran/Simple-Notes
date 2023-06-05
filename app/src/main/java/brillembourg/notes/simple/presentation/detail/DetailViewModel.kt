@@ -8,7 +8,11 @@ import brillembourg.notes.simple.domain.use_cases.categories.GetCategoriesUseCas
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.AddCategoryToNoteUseCase
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.GetCategoriesForNoteUseCase
 import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.RemoveCategoryToNoteUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.*
+import brillembourg.notes.simple.domain.use_cases.notes.ArchiveNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.CreateNoteUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.DeleteNotesUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.SaveNoteUseCase
+import brillembourg.notes.simple.domain.use_cases.notes.UnArchiveNotesUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
@@ -21,7 +25,12 @@ import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
 import brillembourg.notes.simple.util.getMessageFromError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -67,14 +76,7 @@ class DetailViewModel @Inject constructor(
 
     init {
         getCategories()
-
-        currentNotePresentation?.let {
-            editTaskState(it)
-        }
-
-        if (currentNotePresentation == null) {
-            newTaskState()
-        }
+        currentNotePresentation?.let { editTaskState(it) } ?: newTaskState()
         saveStateInSavedStateHandler()
     }
 
@@ -144,6 +146,7 @@ class DetailViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
             }
@@ -226,6 +229,7 @@ class DetailViewModel @Inject constructor(
                         )
                     }
                 }
+
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
             }
@@ -265,6 +269,7 @@ class DetailViewModel @Inject constructor(
                     showMessage(result.data.message)
                     _uiDetailState.update { it.copy(navigateBack = true) }
                 }
+
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
             }
@@ -286,6 +291,7 @@ class DetailViewModel @Inject constructor(
                     _uiDetailState.update { it.copy(navigateBack = true) }
                     showMessage(result.data.message)
                 }
+
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
             }
@@ -310,6 +316,7 @@ class DetailViewModel @Inject constructor(
                     showMessage(result.data.message)
                     _uiDetailState.update { it.copy(navigateBack = true) }
                 }
+
                 is Resource.Error -> showErrorMessage(result.exception)
                 is Resource.Loading -> Unit
             }
@@ -378,6 +385,7 @@ class DetailViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is Resource.Error -> showErrorMessage(result.exception)
                     is Resource.Loading -> Unit
 
@@ -406,9 +414,11 @@ class DetailViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is Resource.Error -> {
                         showErrorMessage(result.exception)
                     }
+
                     is Resource.Loading -> {
                         Unit
                     }
