@@ -2,7 +2,6 @@ package brillembourg.notes.simple.presentation.home
 
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -278,7 +277,6 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun updateMenu(menu: Menu?, layoutType: LayoutType) {
         menu?.apply {
-            Log.e("Update menu", layoutType.name)
             findItem(R.id.menu_home_vertical)?.apply {
                 isVisible = layoutType == LayoutType.Staggered
             }
@@ -289,7 +287,6 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        val menuHost = requireActivity()
         when (menuItem.itemId) {
             R.id.menu_home_vertical -> {
                 changeLayoutRenderer.onClickVerticalLayout()

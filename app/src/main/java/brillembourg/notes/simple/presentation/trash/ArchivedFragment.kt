@@ -51,6 +51,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
     private lateinit var binding: FragmentTrashBinding
 
     private var recylerViewState: Parcelable? = null
+    private var menu: Menu? = null
 
     private val noteRenderer by lazy {
         NoteUiRenderer(
@@ -82,7 +83,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
             toolbar = requireActivity().findViewById(R.id.toolbar),
             menuId = R.menu.menu_contextual_trash,
             recyclerView = binding.trashRecycler,
-            onSelectionDismissed = { viewModel.onSelectionDismissed() },
+            onSelectionDismissed = viewModel::onSelectionDismissed,
             onActionClick = {
                 when (it) {
                     R.id.menu_context_menu_delete -> {
@@ -150,42 +151,44 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
         menuInflater.inflate(R.menu.menu_home, menu)
+        this.menu = menu
     }
 
     override fun onPrepareMenu(menu: Menu) {
         super.onPrepareMenu(menu)
-        val layoutType = viewModel.archivedUiState.value.noteLayout.toLayoutType()
-        menu.findItem(R.id.menu_home_vertical)
-            .apply { isVisible = layoutType == LayoutType.Staggered }
-        menu.findItem(R.id.menu_home_staggered)
-            .apply { isVisible = layoutType == LayoutType.LinearVertical }
-        menu.findItem(R.id.menu_home_categories).isVisible = false
+        this.menu = menu
+        updateMenu(menu, viewModel.archivedUiState.value.noteLayout.toLayoutType())
+    }
+
+    private fun updateMenu(menu: Menu?, layoutType: LayoutType) {
+        menu?.apply {
+            findItem(R.id.menu_home_vertical)?.apply {
+                isVisible = layoutType == LayoutType.Staggered
+            }
+            findItem(R.id.menu_home_staggered)?.apply {
+                isVisible = layoutType == LayoutType.LinearVertical
+            }
+        }
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        val menuHost = requireActivity()
         when (menuItem.itemId) {
             R.id.menu_home_vertical -> {
                 changeLayoutRenderer.onClickVerticalLayout()
-                menuHost.invalidateMenu()
                 return true
             }
 
             R.id.menu_home_staggered -> {
                 changeLayoutRenderer.onClickStaggeredLayout()
-                menuHost.invalidateMenu()
                 return true
             }
 
             R.id.menu_home_search -> {
-                search()
+                searchManager.startSearch("")
+                return true
             }
         }
         return false
-    }
-
-    private fun search() {
-        searchManager.startSearch()
     }
 
     override fun onDestroyView() {
@@ -222,6 +225,11 @@ class ArchivedFragment : Fragment(), MenuProvider {
                 emptyNotesState(uiState.emptyNote)
 
                 searchManager.onCheckState(uiState.noteList.key)
+
+                updateMenu(
+                    menu = menu,
+                    layoutType = uiState.noteLayout.toLayoutType()
+                )
             }
         }
 
