@@ -52,7 +52,7 @@ class NoteDeletionManager constructor(
 
     fun onDeleteConfirm() {
         _dialogs.update {
-            NoteDeletionState.ConfirmDeleteDialog(tasksToArchiveSize = getSelectedTasks().size)
+            NoteDeletionState.ConfirmDeleteDialog(tasksToDeleteSize = getSelectedTasks().size)
         }
     }
 
@@ -94,7 +94,7 @@ class NoteDeletionManager constructor(
 
     fun onArchiveConfirmNotes() {
         _dialogs.update {
-            NoteDeletionState.ConfirmDeleteDialog(
+            NoteDeletionState.ConfirmArchiveDialog(
                 tasksToArchiveSize = getSelectedTasks().size
             )
         }

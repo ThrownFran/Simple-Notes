@@ -1,7 +1,6 @@
 package brillembourg.notes.simple.presentation.detail
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -71,7 +70,6 @@ class DetailFragment : Fragment(), MenuProvider {
         setHasOptionsMenu(true)
         unfocusScreenWhenKeyboardHidden()
         setupMenu()
-        Log.e("DetailFragment", "OnCreateView: $this")
         return binding.root
     }
 
@@ -155,11 +153,7 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-        when (menuItem.itemId) {
-            R.id.menu_note_unachive -> {
-                viewModel.onUnarchive()
-                return true
-            }
+        return when (menuItem.itemId) {
             R.id.menu_note_delete -> {
                 showDeleteTasksDialog(
                     fragment = this,
@@ -178,30 +172,18 @@ class DetailFragment : Fragment(), MenuProvider {
                 return true
             }
 
-            R.id.menu_note_copy -> {
-                onCopy()
-            }
-
-            R.id.menu_note_share -> {
-                onShare()
-            }
-
-            R.id.menu_note_label -> {
-                onAddCategories()
-            }
+            R.id.menu_note_unachive -> viewModel::onUnarchive.let { true }
+            R.id.menu_note_copy -> onCopy().let { true }
+            R.id.menu_note_share -> onShare().let { true }
+            R.id.menu_note_label -> viewModel::onNavigateToCategories.let { true }
+            else -> false
         }
-        return false
-    }
-
-    private fun onAddCategories() {
-        viewModel.onNavigateToCategories()
     }
 
     private fun onShare() {
         val textToCopy = generateTextToCopy()
         shareText(textToCopy)
     }
-
 
     private fun generateTextToCopy(): String {
         val title = viewModel.uiDetailUiState.value.userInput.title
@@ -221,7 +203,6 @@ class DetailFragment : Fragment(), MenuProvider {
         setEventListener(
             requireActivity(),
             KeyboardVisibilityEventListener {
-                // Ah... at last. do your thing :)
                 if (!it) {
                     binding.detailEditTitle.clearFocus()
                     binding.detailEditContent.clearFocus()
@@ -331,10 +312,10 @@ class DetailFragment : Fragment(), MenuProvider {
         if (isNewTask) {
             //Create or Edit title
             val activityBinding = (activity as MainActivity?)?.binding
-            activityBinding?.toolbar?.title = "Add note"
+            activityBinding?.toolbar?.title = getString(R.string.add_note)
         } else {
             val activityBinding = (activity as MainActivity?)?.binding
-            activityBinding?.toolbar?.title = "Edit note"
+            activityBinding?.toolbar?.title = getString(R.string.edit_note)
         }
     }
 

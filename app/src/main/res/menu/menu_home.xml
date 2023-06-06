@@ -12,18 +12,19 @@
         android:id="@+id/menu_home_vertical"
         android:icon="@drawable/ic_baseline_stack_24px"
         android:title="@string/vertical"
-        app:showAsAction="ifRoom" />
+        android:visible="false"
+        app:showAsAction="always" />
     <item
         android:id="@+id/menu_home_staggered"
         android:icon="@drawable/ic_baseline_dashboard_24"
         android:title="@string/all_staggered"
-        app:showAsAction="ifRoom" />
+        android:visible="false"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/menu_home_search"
         android:icon="@drawable/ic_baseline_search_24"
         android:title="@string/all_search"
         app:showAsAction="ifRoom" />
-
 
 </menu>

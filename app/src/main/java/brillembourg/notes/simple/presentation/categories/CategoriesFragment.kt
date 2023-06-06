@@ -91,7 +91,7 @@ class CategoriesFragment : Fragment() {
         }
     }
 
-    private fun showDeleteCategoriesState(state: NoteDeletionState.ConfirmArchiveDialog?) {
+    private fun showDeleteCategoriesState(state: NoteDeletionState.ConfirmDeleteDialog?) {
         if (state != null) {
             showDeleteCategoriesDialog(this, state.tasksToDeleteSize,
                 onPositive = {

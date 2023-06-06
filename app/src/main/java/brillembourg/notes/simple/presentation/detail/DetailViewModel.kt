@@ -72,7 +72,7 @@ class DetailViewModel @Inject constructor(
 
     var messageToShowWhenNavBack: UiText? = null
 
-    fun isCategoryOptionAvailable() = currentNotePresentation != null
+    private fun isCategoryOptionAvailable() = currentNotePresentation != null
 
     init {
         getCategories()

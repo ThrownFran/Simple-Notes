@@ -228,7 +228,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
         safeUiLaunch {
             viewModel.noteDeletionManager.dialogs.collect { dialogState ->
                 when (dialogState) {
-                    is NoteDeletionState.ConfirmDeleteDialog -> {
+                    is NoteDeletionState.ConfirmArchiveDialog -> {
                         showDeleteConfirmationState(dialogState)
                     }
 
@@ -273,7 +273,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
     private fun getConcatAdapter() = (binding.trashRecycler.adapter as? ConcatAdapter?)
 
-    private fun showDeleteConfirmationState(showDeleteConfirmationState: NoteDeletionState.ConfirmDeleteDialog?) {
+    private fun showDeleteConfirmationState(showDeleteConfirmationState: NoteDeletionState.ConfirmArchiveDialog?) {
         showDeleteConfirmationState?.let {
             showDeleteTasksDialog(
                 fragment = this,

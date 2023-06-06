@@ -77,7 +77,7 @@ class CategoriesViewModel @Inject constructor(
 
     private val createCategory: MutableStateFlow<CreateCategory> =
         MutableStateFlow(CreateCategory())
-    private val deleteConfirmation: MutableStateFlow<NoteDeletionState.ConfirmArchiveDialog?> =
+    private val deleteConfirmation: MutableStateFlow<NoteDeletionState.ConfirmDeleteDialog?> =
         MutableStateFlow(null)
 
     val categoryUiState: StateFlow<CategoriesUiState> = combine(
@@ -167,17 +167,13 @@ class CategoriesViewModel @Inject constructor(
         selectionMode.update { SelectionModeActive() }
     }
 
-    private fun getSelectedCategories(): List<CategoryPresentationModel> {
-        return categoryList.value.data.filter { it.isSelected }
-    }
-
     //endregion
 
     //region Delete
 
     fun onDeleteConfirmCategories() {
         deleteConfirmation.update {
-            NoteDeletionState.ConfirmArchiveDialog(
+            NoteDeletionState.ConfirmDeleteDialog(
                 selectionMode.value.size
             )
         }

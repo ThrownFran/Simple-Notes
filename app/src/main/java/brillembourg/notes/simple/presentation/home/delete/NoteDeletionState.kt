@@ -7,7 +7,7 @@ sealed class NoteDeletionState {
 
     /*Show confirm to archive notes*/
     @Parcelize
-    data class ConfirmArchiveDialog(
+    data class ConfirmDeleteDialog(
         val tasksToDeleteSize: Int
     ) : NoteDeletionState(), Parcelable
 
@@ -18,7 +18,7 @@ sealed class NoteDeletionState {
 
     /*Show confirm to archive notes*/
     @Parcelize
-    data class ConfirmDeleteDialog(
+    data class ConfirmArchiveDialog(
         val tasksToArchiveSize: Int
     ) : NoteDeletionState(), Parcelable
 

@@ -2,6 +2,7 @@ package brillembourg.notes.simple.presentation.home
 
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -56,6 +57,8 @@ class HomeFragment : Fragment(), MenuProvider {
     private lateinit var binding: FragmentHomeBinding
 
     private var recyclerViewState: Parcelable? = null
+
+    private var menu: Menu? = null
 
     private val noteRenderer by lazy {
         NoteUiRenderer(
@@ -135,6 +138,7 @@ class HomeFragment : Fragment(), MenuProvider {
         return binding.root
     }
 
+
     private fun renderStates() {
 
         safeUiLaunch {
@@ -171,17 +175,22 @@ class HomeFragment : Fragment(), MenuProvider {
                 emptyNotesState(homeUiState.emptyNotesState)
 
                 searchManager.onCheckState(homeUiState.noteList.key)
+
+                updateMenu(
+                    menu = menu,
+                    layoutType = homeUiState.noteLayout.toLayoutType()
+                )
             }
         }
 
         safeUiLaunch {
             viewModel.noteDeletionManager.dialogs.collect { dialogState ->
                 when (dialogState) {
-                    is NoteDeletionState.ConfirmArchiveDialog -> {
+                    is NoteDeletionState.ConfirmDeleteDialog -> {
                         showDeleteConfirmationState(dialogState)
                     }
 
-                    is NoteDeletionState.ConfirmDeleteDialog -> {
+                    is NoteDeletionState.ConfirmArchiveDialog -> {
                         showArchiveConfirmationState(dialogState)
                     }
 
@@ -257,16 +266,26 @@ class HomeFragment : Fragment(), MenuProvider {
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        this.menu = menu
         menuInflater.inflate(R.menu.menu_home, menu)
     }
 
     override fun onPrepareMenu(menu: Menu) {
         super.onPrepareMenu(menu)
-        val layoutType = viewModel.homeUiState.value.noteLayout.toLayoutType()
-        menu.findItem(R.id.menu_home_vertical)
-            .apply { isVisible = layoutType == LayoutType.Staggered }
-        menu.findItem(R.id.menu_home_staggered)
-            .apply { isVisible = layoutType == LayoutType.LinearVertical }
+        this.menu = menu
+        updateMenu(menu, viewModel.homeUiState.value.noteLayout.toLayoutType())
+    }
+
+    private fun updateMenu(menu: Menu?, layoutType: LayoutType) {
+        menu?.apply {
+            Log.e("Update menu", layoutType.name)
+            findItem(R.id.menu_home_vertical)?.apply {
+                isVisible = layoutType == LayoutType.Staggered
+            }
+            findItem(R.id.menu_home_staggered)?.apply {
+                isVisible = layoutType == LayoutType.LinearVertical
+            }
+        }
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -274,13 +293,11 @@ class HomeFragment : Fragment(), MenuProvider {
         when (menuItem.itemId) {
             R.id.menu_home_vertical -> {
                 changeLayoutRenderer.onClickVerticalLayout()
-                menuHost.invalidateMenu()
                 return true
             }
 
             R.id.menu_home_staggered -> {
                 changeLayoutRenderer.onClickStaggeredLayout()
-                menuHost.invalidateMenu()
                 return true
             }
 
@@ -347,7 +364,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
     //region Delete
 
-    private fun showDeleteConfirmationState(showDeleteConfirmationState: NoteDeletionState.ConfirmArchiveDialog) {
+    private fun showDeleteConfirmationState(showDeleteConfirmationState: NoteDeletionState.ConfirmDeleteDialog) {
         showDeleteTasksDialog(
             this, showDeleteConfirmationState.tasksToDeleteSize,
             onPositive = viewModel.noteDeletionManager::onDeleteNotes,
@@ -363,7 +380,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
     //region Archive
 
-    private fun showArchiveConfirmationState(showArchiveConfirmationState: NoteDeletionState.ConfirmDeleteDialog) {
+    private fun showArchiveConfirmationState(showArchiveConfirmationState: NoteDeletionState.ConfirmArchiveDialog) {
         showArchiveConfirmationDialog(
             this, showArchiveConfirmationState.tasksToArchiveSize,
             onPositive = viewModel.noteDeletionManager::onArchiveNotes,
