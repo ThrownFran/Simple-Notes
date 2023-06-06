@@ -160,7 +160,8 @@ class DetailFragment : Fragment(), MenuProvider {
                     size = 1,
                     onPositive = {
                         viewModel.onDelete()
-                    })
+                    }
+                )
                 return true
             }
 
@@ -168,14 +169,15 @@ class DetailFragment : Fragment(), MenuProvider {
                 showArchiveConfirmationDialog(
                     fragment = this,
                     size = 1,
-                    onPositive = { viewModel.onArchive() })
+                    onPositive = { viewModel.onArchive() }
+                )
                 return true
             }
 
-            R.id.menu_note_unachive -> viewModel::onUnarchive.let { true }
+            R.id.menu_note_unachive -> viewModel.onUnarchive().let { true }
             R.id.menu_note_copy -> onCopy().let { true }
             R.id.menu_note_share -> onShare().let { true }
-            R.id.menu_note_label -> viewModel::onNavigateToCategories.let { true }
+            R.id.menu_note_label -> viewModel.onNavigateToCategories().let { true }
             else -> false
         }
     }
