@@ -61,8 +61,9 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private val noteRenderer by lazy {
         NoteUiRenderer(
-            binding.homeRecycler,
-            recyclerViewState,
+            isDragEnabled = true,
+            recyclerView = binding.homeRecycler,
+            recyclerViewState = recyclerViewState,
             onLayoutType = viewModel.homeUiState.value.noteLayout::toLayoutType,
             onNavigateToCategories = viewModel::onNavigateToCategories,
             onSelection = viewModel::onSelection,

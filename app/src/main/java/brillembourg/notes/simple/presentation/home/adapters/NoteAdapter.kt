@@ -14,6 +14,7 @@ import brillembourg.notes.simple.presentation.ui_utils.setupTaskDiffCallback
 class NoteAdapter(
     dragAndDropDirs: Int,
     private val recyclerView: RecyclerView,
+    private val isDragEnabled: Boolean = false,
     private val onClick: (task: NotePresentationModel) -> Unit,
     private val onSelection: (isSelected: Boolean, id: Long) -> Unit,
     private val onReorderSuccess: (reorderedTaskList: List<NotePresentationModel>) -> Unit,
@@ -32,20 +33,22 @@ class NoteAdapter(
     }
 
     private fun onStartDrag() = { noteViewHolder: NoteViewHolder ->
-        startDrag(
-            recyclerView = recyclerView,
-            viewHolder = noteViewHolder,
-            onGetCurrentList = { currentList },
+        if (isDragEnabled) {
+            startDrag(
+                recyclerView = recyclerView,
+                viewHolder = noteViewHolder,
+                onGetCurrentList = { currentList },
 
-            onSubmitList = { noteList, submitSuccess ->
-                submitList(noteList) {
-                    submitSuccess() //Commit callback
-                }
-            },
+                onSubmitList = { noteList, submitSuccess ->
+                    submitList(noteList) {
+                        submitSuccess() //Commit callback
+                    }
+                },
 
-            onReorderSuccess = onReorderSuccess,
-            onReorderCanceled = onReorderCanceled
-        )
+                onReorderSuccess = onReorderSuccess,
+                onReorderCanceled = onReorderCanceled
+            )
+        }
     }
 
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {

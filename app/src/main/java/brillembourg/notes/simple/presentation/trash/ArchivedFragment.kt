@@ -55,17 +55,12 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
     private val noteRenderer by lazy {
         NoteUiRenderer(
-            binding.trashRecycler,
-            recylerViewState,
+            recyclerView = binding.trashRecycler,
+            recyclerViewState = recylerViewState,
             onLayoutType = { viewModel.archivedUiState.value.noteLayout.toLayoutType() },
             onNavigateToCategories = {},
-            onSelection = { isSelected: Boolean, id: Long ->
-                viewModel.onSelection(
-                    isSelected,
-                    id
-                )
-            },
-            onNoteClick = { viewModel.onNoteClick(it) },
+            onSelection = viewModel::onSelection,
+            onNoteClick = viewModel::onNoteClick,
             onReorderedNotes = {},
             onReorderedNotesCancelled = {}
         )
@@ -74,7 +69,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
     private val changeLayoutRenderer by lazy {
         LayoutChangeRenderer(
             binding.trashRecycler,
-            onLayoutChange = { viewModel.onLayoutChange(it) }
+            onLayoutChange = viewModel::onLayoutChange
         )
     }
 
@@ -162,6 +157,9 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
     private fun updateMenu(menu: Menu?, layoutType: LayoutType) {
         menu?.apply {
+            findItem(R.id.menu_home_categories)?.apply {
+                isVisible = false
+            }
             findItem(R.id.menu_home_vertical)?.apply {
                 isVisible = layoutType == LayoutType.Staggered
             }
@@ -236,7 +234,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
         safeUiLaunch {
             viewModel.noteDeletionManager.dialogs.collect { dialogState ->
                 when (dialogState) {
-                    is NoteDeletionState.ConfirmArchiveDialog -> {
+                    is NoteDeletionState.ConfirmDeleteDialog -> {
                         showDeleteConfirmationState(dialogState)
                     }
 
@@ -281,17 +279,18 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
     private fun getConcatAdapter() = (binding.trashRecycler.adapter as? ConcatAdapter?)
 
-    private fun showDeleteConfirmationState(showDeleteConfirmationState: NoteDeletionState.ConfirmArchiveDialog?) {
+    private fun showDeleteConfirmationState(showDeleteConfirmationState: NoteDeletionState.ConfirmDeleteDialog?) {
         showDeleteConfirmationState?.let {
             showDeleteTasksDialog(
                 fragment = this,
-                size = showDeleteConfirmationState.tasksToArchiveSize,
+                size = showDeleteConfirmationState.tasksToDeleteSize,
                 onPositive = {
                     onDeleteNotes()
                 },
                 onDismiss = {
                     viewModel.noteDeletionManager.onDismissConfirm()
-                })
+                }
+            )
         }
     }
 

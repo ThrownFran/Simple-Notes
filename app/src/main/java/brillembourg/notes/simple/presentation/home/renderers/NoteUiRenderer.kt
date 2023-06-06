@@ -16,6 +16,7 @@ import brillembourg.notes.simple.presentation.ui_utils.recycler_view.getDragDirs
 
 class NoteUiRenderer(
     private val recyclerView: RecyclerView,
+    private val isDragEnabled: Boolean = false,
     private var recyclerViewState: Parcelable?,
     private val onLayoutType: () -> LayoutType,
     private val onNavigateToCategories: () -> Unit,
@@ -111,8 +112,9 @@ class NoteUiRenderer(
     ): ConcatAdapter {
 
         val noteAdapter = NoteAdapter(
-            dragDirs,
-            recyclerView,
+            dragAndDropDirs = dragDirs,
+            recyclerView = recyclerView,
+            isDragEnabled = isDragEnabled,
             onSelection = { isSelected, id ->
                 onNoteSelection(isSelected, id)
             },
