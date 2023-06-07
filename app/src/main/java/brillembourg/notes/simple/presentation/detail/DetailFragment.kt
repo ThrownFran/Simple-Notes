@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -264,6 +265,8 @@ class DetailFragment : Fragment(), MenuProvider {
                 selectCategoriesState(uiState.selectCategories)
 
                 setupNoteCategories(uiState.noteCategories)
+
+                renderLastEdit(uiState)
             }
         }
 
@@ -280,6 +283,17 @@ class DetailFragment : Fragment(), MenuProvider {
                 content?.let {
                     clickBack()
                 }
+            }
+        }
+    }
+
+    private fun renderLastEdit(uiState: DetailUiState) = with(uiState) {
+        binding.detailTextLastEdit.apply {
+            if (lastEdit.isNotEmpty()) {
+                isVisible = true
+                text = getString(R.string.last_edited, lastEdit)
+            } else {
+                isVisible = false
             }
         }
     }

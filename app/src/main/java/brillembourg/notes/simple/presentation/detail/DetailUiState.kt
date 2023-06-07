@@ -21,7 +21,8 @@ data class DetailUiState(
     val focusInput: Boolean = false,
     val unFocusInput: Boolean = false,
     val noteCategories: List<CategoryPresentationModel> = emptyList(),
-    var selectCategories: SelectCategories = SelectCategories()
+    var selectCategories: SelectCategories = SelectCategories(),
+    val lastEdit: String = ""
 ) : Parcelable {
 
     fun getOnInputChangedFlow(): Flow<UserInput> {

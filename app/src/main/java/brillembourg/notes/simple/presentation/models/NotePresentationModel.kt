@@ -22,7 +22,7 @@ data class NotePresentationModel(
 
 fun NotePresentationModel.toDomain(dateProvider: DateProvider): Note {
     return Note(
-        id,
+        id = id,
         title = title,
         content = content,
         order = order,

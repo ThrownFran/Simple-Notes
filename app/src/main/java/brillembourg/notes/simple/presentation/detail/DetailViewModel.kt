@@ -188,7 +188,8 @@ class DetailViewModel @Inject constructor(
                 unFocusInput = true,
                 isNewTask = false,
                 isArchivedTask = note.isArchived,
-                noteCategories = note.categories
+                noteCategories = note.categories,
+                lastEdit = note.dateInLocal
             )
         }
     }
