@@ -189,7 +189,7 @@ class DetailViewModel @Inject constructor(
                 isNewTask = false,
                 isArchivedTask = note.isArchived,
                 noteCategories = note.categories,
-                lastEdit = note.dateInLocal
+                lastEdit = note.friendlyDate
             )
         }
     }

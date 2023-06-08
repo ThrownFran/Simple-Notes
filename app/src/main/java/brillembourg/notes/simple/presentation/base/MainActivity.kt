@@ -23,6 +23,7 @@ import brillembourg.notes.simple.presentation.custom_views.showToast
 import brillembourg.notes.simple.presentation.ui_utils.asString
 import brillembourg.notes.simple.presentation.ui_utils.contentViews
 import brillembourg.notes.simple.util.UiText
+import com.jakewharton.threetenabp.AndroidThreeTen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AndroidThreeTen.init(this)
         binding.viewmodel = viewModel
         setupToolbar()
         renderStates()

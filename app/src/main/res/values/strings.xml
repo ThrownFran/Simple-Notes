@@ -62,5 +62,5 @@
     <string name="categories_wizard">Labels are used to categorize your notes so you can filter your homepage</string>
     <string name="all_search">Search</string>
     <string name="search_note">Search note</string>
-    <string name="last_edited">Last edited: %s</string>
+    <string name="last_edited">Edited: %s</string>
 </resources>

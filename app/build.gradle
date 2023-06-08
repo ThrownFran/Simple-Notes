@@ -102,6 +102,8 @@ dependencies {
     implementation "com.mikepenz:aboutlibraries-core:10.6.1"
     implementation "com.mikepenz:aboutlibraries:10.6.1"
 
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.4.6'
+
     //In App Review
     // This dependency is downloaded from the Google’s Maven repository.
     // So, make sure you also include that repository in your project's build.gradle file.
