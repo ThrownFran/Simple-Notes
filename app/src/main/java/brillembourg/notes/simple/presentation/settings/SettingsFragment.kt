@@ -165,14 +165,6 @@ class SettingsFragment : Fragment() {
         val dialog = builder.create()
         dialog.show()
 
-//        val buttonNegative: Button = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
-//        buttonNegative.backgroundTintList = resources.getColorStateList(R.color.colorPrimary)
-//        buttonNegative.setTextColor(resources.getColor(R.color.colorAccent))
-//
-//        val buttonPositive: Button = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
-//        buttonPositive.backgroundTintList = resources.getColorStateList(R.color.colorPrimary)
-//        buttonPositive.setTextColor(resources.getColor(R.color.colorAccent))
-
         dialog.setOnDismissListener {
             listener.onItemSelected(unitChosed)
         }
