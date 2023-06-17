@@ -20,6 +20,7 @@ import brillembourg.notes.simple.presentation.settings.SettingsState
 import brillembourg.notes.simple.presentation.settings.SettingsViewModel
 import brillembourg.notes.simple.presentation.ui_utils.MyLogger
 import brillembourg.notes.simple.util.GenericException
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.play.core.review.ReviewManagerFactory
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -131,7 +132,7 @@ class SettingsFragment : Fragment() {
         listener: DialogListener
     ) {
         val builder =
-            context?.let { AlertDialog.Builder(it) } ?: return
+            context?.let { MaterialAlertDialogBuilder(it) } ?: return
         // setup the alert builder
         builder.setTitle(title)
 
