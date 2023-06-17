@@ -65,4 +65,7 @@
     <string name="all_search">Buscar</string>
     <string name="search_note">Buscar nota</string>
     <string name="last_edited">Editado: %s</string>
+    <string name="settings_theme_light">Modo claro</string>
+    <string name="settings_theme_dark">Modo oscuro</string>
+    <string name="settings_theme_system">Modo automático</string>
 </resources>

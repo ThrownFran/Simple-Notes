@@ -139,7 +139,7 @@ class SettingsFragment : Fragment() {
         val items = arrayOfNulls<String>(list.size)
 
         for (i in list.indices) {
-            items[i] = (list[i] as IsOption).getName()
+            items[i] = (list[i] as IsOption).getName(resources)
         }
 
         val checkedItem: Int = current.getValue().toInt()
@@ -172,7 +172,7 @@ class SettingsFragment : Fragment() {
 
 
     private fun stateSuccess(it: SettingsState.Success) {
-        binding.settingsTextTheme.text = it.themeMode.getName()
+        binding.settingsTextTheme.text = it.themeMode.getName(resources)
     }
 
     private fun showThemeDialog(it: SettingsState.ShowThemesView) {

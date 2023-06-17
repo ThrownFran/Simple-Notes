@@ -29,9 +29,8 @@ class CreateItemView @JvmOverloads constructor(
 
     var onReadyToCreateItem: ((String) -> Unit)? = null
 
-    override fun getLifecycle(): Lifecycle {
-        return lifeCycleRegistry
-    }
+    override val lifecycle: Lifecycle
+        get() = lifeCycleRegistry
 
     private fun onUpdateState() {
         val isCreatingCategory = isCreationEnabled

@@ -63,4 +63,7 @@
     <string name="all_search">Search</string>
     <string name="search_note">Search note</string>
     <string name="last_edited">Edited: %s</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_system">Follow system</string>
 </resources>
