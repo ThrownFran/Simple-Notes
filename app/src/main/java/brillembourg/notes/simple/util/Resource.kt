@@ -6,11 +6,10 @@ package brillembourg.notes.simple.util
  *
  * Modification: Error class has exception instead of message to increase flexibility in the UI
  */
-sealed class Resource<T>() {
-
-    class Success<T>(val data: T) : Resource<T>()
-    class Error<T>(val exception: Exception, val data: T? = null) : Resource<T>()
-    class Loading<T>(val isLoading: Boolean = true) : Resource<T>()
+sealed interface Resource<out T> {
+    class Success<T>(val data: T) : Resource<T>
+    class Error<T>(val exception: Exception, val data: T? = null) : Resource<T>
+    class Loading<T> : Resource<T>
 }
 
 suspend fun <T> safeCall(block: suspend () -> Resource<T>): Resource<T> {

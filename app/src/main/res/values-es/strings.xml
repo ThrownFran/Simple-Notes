@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Simple Notes</string>
+    <string name="title">Título</string>
+    <string name="note">Nota</string>
+    <string name="notes">Notas</string>
+    <string name="delete">Eliminar</string>
+    <string name="all_delete">Eliminar</string>
+    <string name="all_cancel">Cancelar</string>
+    <string name="delete_task_confirm">¿Confirmar eliminación de la(s) nota(s)?</string>
+    <string name="move_task_archive">¿Archivar la nota seleccionada?</string>
+    <string name="move_tasks_archive">¿Archivar las notas seleccionadas?</string>
+    <string name="all_move_to_trash">Mover a la papelera</string>
+    <string name="trash_title">Papelera</string>
+    <string name="all_staggered">Alineación escalonada</string>
+    <string name="vertical">Vertical</string>
+    <string name="add_note">Agregar nota</string>
+    <string name="total_notes">Total de notas (%1$s)</string>
+
+    <string name="home_shared_item_container">task_animation_container%1$s</string>
+    <string name="home_shared_detail_container">task_animation_detail_container</string>
+    <string name="selected">Seleccionado</string>
+    <string name="archive">Archivar</string>
+    <string name="edit_note">Editar nota</string>
+    <string name="delete_task_permanently">¿Eliminar nota permanentemente?</string>
+    <string name="delete_tasks_permanently">¿Eliminar notas permanentemente?</string>
+    <string name="all_unarchive">Desarchivar</string>
+    <string name="note_copied">Copiado</string>
+    <string name="all_copy">Copiar</string>
+    <string name="all_share">Compartir</string>
+    <string name="archived">Archivado</string>
+    <string name="backup">Respaldo</string>
+    <string name="restore">Restaurar</string>
+    <string name="settings">Configuración</string>
+    <string name="categories">Etiquetas</string>
+
+    <string name="delete_category">¿Eliminar etiqueta?</string>
+    <string name="delete_categories">¿Eliminar etiquetas?</string>
+    <string name="category">Etiqueta</string>
+    <string name="edit_categories">Editar etiquetas</string>
+    <string name="add_categories">Agregar etiquetas</string>
+    <string name="add_category">Agregar etiqueta</string>
+    <string name="categories_dot">"Etiquetas: "</string>
+    <string name="filter_by_category">Filtrar por etiquetas</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_about">Acerca de</string>
+    <string name="settings_source_licenses">Licencia de origen</string>
+    <string name="settings_review">Calificar aplicación</string>
+    <string name="all_ok">Aceptar</string>
+    <string name="settings_choose_theme">Elegir tema</string>
+
+    <string name="about_developer">Si deseas ponerte en contacto con el desarrollador para proporcionar comentarios o sugerencias, utiliza este correo electrónico <a href="mailto:franbrillembourg@gmail.com?subject=Comentarios de la aplicación Notas Simples">franbrillembourg@gmail.com</a></string>
+    <string name="about_copyright">©2023 Francisco Brillembourg</string>
+
+    <string name="about_title">Acerca de</string>
+    <string name="about_version">Versión</string>
+    <string name="about">Acerca de</string>
+    <string name="licences">Licencias</string>
+    <string name="wizard_text">¡Escribe tu primera nota!</string>
+    <string name="label_empty_text">¡Escribe tu primera nota en esta etiqueta!</string>
+    <string name="search_no_notes_found">No se encontraron notas</string>
+    <string name="labels_empty_text">No se encontraron notas en estas etiquetas</string>
+    <string name="trash_empty">Aún no hay notas archivadas</string>
+    <string name="categories_wizard">Las etiquetas se utilizan para categorizar tus notas y poder filtrar en tu página principal</string>
+    <string name="all_search">Buscar</string>
+    <string name="search_note">Buscar nota</string>
+    <string name="last_edited">Editado: %s</string>
+</resources>
