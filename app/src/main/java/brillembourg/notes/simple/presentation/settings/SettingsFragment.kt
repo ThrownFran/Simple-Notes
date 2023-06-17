@@ -1,4 +1,4 @@
-package brillembourg.forecast.weather.simple.presentation.settings
+package brillembourg.notes.simple.presentation.settings
 
 import android.content.DialogInterface
 import android.content.Intent
@@ -15,9 +15,6 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentSettingsBinding
 import brillembourg.notes.simple.domain.models.ThemeMode
 import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
-import brillembourg.notes.simple.presentation.settings.IsOption
-import brillembourg.notes.simple.presentation.settings.SettingsState
-import brillembourg.notes.simple.presentation.settings.SettingsViewModel
 import brillembourg.notes.simple.presentation.ui_utils.MyLogger
 import brillembourg.notes.simple.util.GenericException
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -89,7 +86,7 @@ class SettingsFragment : Fragment() {
         try {
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 data = Uri.parse(
-                    "https://play.google.com/store/apps/details?id=brillembourg.notes.simple"
+                    "https://play.google.com/store/apps/details?id=brillembourg.notes.simple.fast"
                 )
                 setPackage("com.android.vending")
             }

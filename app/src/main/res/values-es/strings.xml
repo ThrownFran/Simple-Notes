@@ -29,8 +29,8 @@
     <string name="all_copy">Copiar</string>
     <string name="all_share">Compartir</string>
     <string name="archived">Archivado</string>
-    <string name="backup">Respaldo</string>
-    <string name="restore">Restaurar</string>
+    <string name="backup">Guardar copia</string>
+    <string name="restore">Restaurar copia</string>
     <string name="settings">Configuración</string>
     <string name="categories">Etiquetas</string>
 

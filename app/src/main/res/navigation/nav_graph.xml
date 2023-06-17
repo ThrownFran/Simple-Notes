@@ -63,7 +63,7 @@
         tools:layout="@layout/fragment_categories" />
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="brillembourg.forecast.weather.simple.presentation.settings.SettingsFragment"
+        android:name="brillembourg.notes.simple.presentation.settings.SettingsFragment"
         android:label="@string/settings">
         <action
             android:id="@+id/action_settingsFragment_to_aboutFragment"
