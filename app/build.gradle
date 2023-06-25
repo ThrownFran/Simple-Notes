@@ -15,7 +15,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        applicationId "brillembourg.notes.simple"
+        applicationId "brillembourg.notes.simple.fast"
         minSdk 21
         targetSdk 33
         versionCode 6
