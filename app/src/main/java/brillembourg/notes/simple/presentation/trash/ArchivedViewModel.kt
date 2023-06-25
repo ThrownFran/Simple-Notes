@@ -89,7 +89,6 @@ class ArchivedViewModel @Inject constructor(
         )
     }.distinctUntilChanged()
         .onEach {
-            Log.e("Render", it.toString())
             savedStateHandle[uiStateKey] = it
         }.stateIn(
             scope = viewModelScope,
