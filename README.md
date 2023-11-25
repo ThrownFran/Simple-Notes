@@ -1,5 +1,4 @@
 # Simple-Notes 
-UNDER DEVELOPMENT
 
 Coding approach: Clean arquitecture and clean code.
 MVVM, Kotlin coroutines, Kotlin Flow, Room, Material design 3, Unit testing
