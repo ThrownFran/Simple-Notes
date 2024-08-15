@@ -1,6 +1,12 @@
 package brillembourg.notes.simple.data.database.notes
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Update
 import brillembourg.notes.simple.data.database.CategoryNoteCrossRef
 import brillembourg.notes.simple.data.database.NoteWithCategoriesEntity
 import kotlinx.coroutines.flow.Flow
@@ -38,7 +44,7 @@ abstract class TaskDao {
     abstract suspend fun save(task: NoteEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun saveTasks(itemList: ArrayList<NoteEntity>)
+    abstract suspend fun saveTasks(itemList: List<NoteEntity>)
 
     @Query("UPDATE taskentity SET `order` = :order WHERE note_id = :id")
     abstract suspend fun updateOrder(id: Long, order: Int)
