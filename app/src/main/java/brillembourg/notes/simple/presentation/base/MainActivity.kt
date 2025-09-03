@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         setupToolbar()
         renderStates()
         backupModel = roomBackupBuilder.prepareBackupInLocalStorage()
+        handleIntentReceiver(intent)
     }
 
     override fun onNewIntent(intent: Intent?) {
