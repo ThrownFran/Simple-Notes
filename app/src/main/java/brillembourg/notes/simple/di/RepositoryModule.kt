@@ -23,7 +23,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class RepositoryModule {
-
     @Singleton
     @Provides
     fun categoryRepo(database: CategoriesDatabase): CategoryRepository {
@@ -32,17 +31,20 @@ class RepositoryModule {
 
     @Singleton
     @Provides
-    fun taskRepo(database: NoteDatabase, dateProvider: DateProvider): NotesRepository =
-        NotesRepositoryImp(database, dateProvider)
+    fun taskRepo(
+        database: NoteDatabase,
+        dateProvider: DateProvider,
+    ): NotesRepository = NotesRepositoryImp(database, dateProvider)
 
     @Singleton
     @Provides
-    fun userPrefRepo(@ApplicationContext context: Context): UserPrefRepository {
+    fun userPrefRepo(
+        @ApplicationContext context: Context,
+    ): UserPrefRepository {
         return UserPreferencesRepositoryImp(context)
     }
 
     @Singleton
     @Provides
-    fun dataRepo(roomBackupHandler: RoomBackupHandler): BackupAndRestoreRepository =
-        BackupAndRestoreRepositoryImp(roomBackupHandler)
+    fun dataRepo(roomBackupHandler: RoomBackupHandler): BackupAndRestoreRepository = BackupAndRestoreRepositoryImp(roomBackupHandler)
 }

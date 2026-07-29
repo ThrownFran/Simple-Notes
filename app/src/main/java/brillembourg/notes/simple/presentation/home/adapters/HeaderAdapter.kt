@@ -16,37 +16,37 @@ class HeaderAdapter(
     val filteredCategories: MutableList<CategoryPresentationModel>,
     private val onClick: (() -> Unit)? = null,
 ) : RecyclerView.Adapter<HeaderFilterCategoriesHolder>() {
-
-
     override fun getItemCount(): Int {
         return 1
     }
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
-        viewType: Int
+        viewType: Int,
     ): HeaderFilterCategoriesHolder {
         return HeaderFilterCategoriesHolder(
             onClick = onClick,
-            binding = ItemHeaderFilteredCategoriesBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
+            binding =
+                ItemHeaderFilteredCategoriesBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false,
+                ),
         )
     }
 
-    override fun onBindViewHolder(holder: HeaderFilterCategoriesHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: HeaderFilterCategoriesHolder,
+        position: Int,
+    ) {
         holder.bind(filteredCategories)
     }
-
 }
 
 class HeaderFilterCategoriesHolder(
     private val binding: ItemHeaderFilteredCategoriesBinding,
     private val onClick: (() -> Unit)? = null,
 ) : RecyclerView.ViewHolder(binding.root) {
-
     init {
         (itemView.layoutParams as? StaggeredGridLayoutManager.LayoutParams)?.isFullSpan = true
 
@@ -60,16 +60,18 @@ class HeaderFilterCategoriesHolder(
 
         if (binding.mainRecyclerCategoriesFilter.adapter == null) {
             binding.mainRecyclerCategoriesFilter.apply {
-                layoutManager = FlexboxLayoutManager(context)
-                    .apply {
-                        flexDirection = FlexDirection.ROW
-                        justifyContent = JustifyContent.FLEX_START
-                        flexWrap = FlexWrap.WRAP
-                    }
+                layoutManager =
+                    FlexboxLayoutManager(context)
+                        .apply {
+                            flexDirection = FlexDirection.ROW
+                            justifyContent = JustifyContent.FLEX_START
+                            flexWrap = FlexWrap.WRAP
+                        }
 
-                adapter = CategoryChipColorSurfaceAdapter(onClick = {
-                    onClick?.invoke()
-                }).apply { submitList(filteredCategories.toDiplayOrder()) }
+                adapter =
+                    CategoryChipColorSurfaceAdapter(onClick = {
+                        onClick?.invoke()
+                    }).apply { submitList(filteredCategories.toDiplayOrder()) }
             }
         } else {
             (binding.mainRecyclerCategoriesFilter.adapter as CategoryChipColorSurfaceAdapter).apply {

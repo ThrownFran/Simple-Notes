@@ -19,14 +19,15 @@ data class CategoriesUiState(
 @Parcelize
 data class CategoryList(
     val data: List<CategoryPresentationModel> = emptyList(),
-    val mustRender: Boolean = false //To avoid rendering set false
+    /**
+     * To avoid rendering set false
+     */
+    val mustRender: Boolean = false,
 ) : Parcelable
 
 @Parcelize
 data class CreateCategory(var isEnabled: Boolean = false, var name: String = "") : Parcelable,
     BaseObservable() {
-
-
     @Bindable
     fun getCreateCategoryNameBinding(): String {
         return name
@@ -41,18 +42,16 @@ data class CreateCategory(var isEnabled: Boolean = false, var name: String = "")
             notifyPropertyChanged(BR.createCategoryNameBinding)
         }
     }
-
 }
 
-/*Notes are selected and contextual bar is shown*/
-//@Parcelize
-//data class SelectionMode(
+// Notes are selected and contextual bar is shown
+// @Parcelize
+// data class SelectionMode(
 //    val size: Int
-//) : Parcelable
+// ) : Parcelable
 
-/*Show confirm to archive notes*/
+// Show confirm to archive notes
 @Parcelize
 data class ShowDeleteCategoriesConfirmationState(
-    val categoriesToDeleteSize: Int
+    val categoriesToDeleteSize: Int,
 ) : Parcelable
-

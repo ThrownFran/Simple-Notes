@@ -8,13 +8,12 @@ import androidx.fragment.app.viewModels
 import brillembourg.notes.simple.databinding.ModalBottomSheetCategoriesBinding
 import brillembourg.notes.simple.presentation.categories.CategoriesViewModel
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
-import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
+import brillembourg.notes.simple.presentation.customviews.safeUiLaunch
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SelectNoteCategoriesModal : BottomSheetDialogFragment() {
-
     private val detailViewModel: DetailViewModel by viewModels(ownerProducer = { requireParentFragment() })
     private val categoryViewModel: CategoriesViewModel by viewModels()
     private lateinit var binding: ModalBottomSheetCategoriesBinding
@@ -22,7 +21,7 @@ class SelectNoteCategoriesModal : BottomSheetDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         binding = ModalBottomSheetCategoriesBinding.inflate(inflater, container, false)
         renderStates()
@@ -39,12 +38,12 @@ class SelectNoteCategoriesModal : BottomSheetDialogFragment() {
 
     private fun renderStates() {
         safeUiLaunch {
-            detailViewModel.uiDetailUiState.collect {
+            detailViewModel.uiDetailState.collect {
                 if (it.selectCategories.isShowing) {
                     setupSelectCategoriesAdapter(
                         binding.detailRecyclerCategories,
                         it.selectCategories.categories,
-                        it.noteCategories.map { it.id }
+                        it.noteCategories.map { it.id },
                     ) { category, isChecked ->
                         onCheckedCategory(category, isChecked)
                     }
@@ -70,17 +69,15 @@ class SelectNoteCategoriesModal : BottomSheetDialogFragment() {
         super.onDestroy()
     }
 
-
     private fun onCheckedCategory(
         category: CategoryPresentationModel,
-        isChecked: Boolean
+        isChecked: Boolean,
     ) {
         detailViewModel.onCategoryChecked(
             category,
-            isChecked
+            isChecked,
         )
     }
-
 
     companion object {
         const val TAG = "SelectCategoryModalBottomSheet"

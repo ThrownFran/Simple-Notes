@@ -7,5 +7,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class NoteWithCategoriesPresentationModel(
     val note: NotePresentationModel,
-    val categoryList: List<CategoryPresentationModel>
+    val categoryList: List<CategoryPresentationModel>,
 ) : Parcelable

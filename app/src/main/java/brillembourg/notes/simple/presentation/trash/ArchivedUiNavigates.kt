@@ -5,7 +5,6 @@ import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import kotlinx.parcelize.Parcelize
 
 sealed class ArchivedUiNavigates {
-
     @Parcelize
     data class NavigateToEditNote(
         val mustConsume: Boolean = false,

@@ -2,7 +2,7 @@ package brillembourg.notes.simple.domain.models
 
 data class UserPreferences(
     val _notesLayout: NoteLayout? = null,
-    val _theme: ThemeMode? = null
+    val _theme: ThemeMode? = null,
 ) {
     val noteLayout
         get() = _notesLayout ?: NoteLayout.Vertical
@@ -11,5 +11,6 @@ data class UserPreferences(
 }
 
 enum class NoteLayout {
-    Vertical, Grid
+    Vertical,
+    Grid,
 }

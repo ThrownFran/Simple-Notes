@@ -1,32 +1,38 @@
 package brillembourg.notes.simple.data.database
 
-import androidx.room.*
+import androidx.room.ColumnInfo
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Junction
+import androidx.room.Relation
 import brillembourg.notes.simple.data.database.categories.CategoryEntity
 import brillembourg.notes.simple.data.database.categories.toDomain
 import brillembourg.notes.simple.data.database.notes.NoteEntity
 import brillembourg.notes.simple.data.database.notes.toDomain
 import brillembourg.notes.simple.domain.models.NoteWithCategories
 
-
 @Entity(
-    tableName = "category_note_cross_ref", primaryKeys = ["category_id", "note_id"], foreignKeys = [
+    tableName = "category_note_cross_ref",
+    primaryKeys = ["category_id", "note_id"],
+    foreignKeys = [
         ForeignKey(
             entity = CategoryEntity::class,
             parentColumns = ["category_id"],
             childColumns = ["category_id"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.CASCADE,
         ),
         ForeignKey(
             entity = NoteEntity::class,
             parentColumns = ["note_id"],
             childColumns = ["note_id"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
 )
 class CategoryNoteCrossRef(
     @ColumnInfo(name = "category_id") val categoryId: Long,
-    @ColumnInfo(name = "note_id") val noteId: Long
+    @ColumnInfo(name = "note_id") val noteId: Long,
 )
 
 data class CategoryWithNotes(
@@ -34,9 +40,9 @@ data class CategoryWithNotes(
     @Relation(
         parentColumn = "category_id",
         entityColumn = "note_id",
-        associateBy = Junction(CategoryNoteCrossRef::class)
+        associateBy = Junction(CategoryNoteCrossRef::class),
     )
-    val notes: List<NoteEntity>
+    val notes: List<NoteEntity>,
 )
 
 data class NoteWithCategoriesEntity(
@@ -44,9 +50,9 @@ data class NoteWithCategoriesEntity(
     @Relation(
         parentColumn = "note_id",
         entityColumn = "category_id",
-        associateBy = Junction(CategoryNoteCrossRef::class)
+        associateBy = Junction(CategoryNoteCrossRef::class),
     )
-    val categories: List<CategoryEntity>
+    val categories: List<CategoryEntity>,
 )
 
 fun NoteWithCategoriesEntity.toDomain(): NoteWithCategories {

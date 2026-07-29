@@ -12,13 +12,15 @@ import kotlinx.coroutines.flow.update
  */
 interface MessageManager {
     val message: StateFlow<UiText?>
+
     fun showMessage(message: UiText)
+
     fun showError(exception: Exception)
+
     fun onMessageShown(message: UiText)
 }
 
 class MessageManagerImp : MessageManager {
-
     private val _message: MutableStateFlow<UiText?> = MutableStateFlow(null)
     override val message = _message.asStateFlow()
 
@@ -36,25 +38,3 @@ class MessageManagerImp : MessageManager {
 }
 
 data class Message(val id: Long, val message: UiText)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

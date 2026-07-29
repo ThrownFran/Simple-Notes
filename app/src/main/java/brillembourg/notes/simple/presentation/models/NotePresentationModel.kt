@@ -18,7 +18,7 @@ data class NotePresentationModel(
     override var order: Int,
     var isArchived: Boolean = false,
     override var isSelected: Boolean = false,
-    val categories: List<CategoryPresentationModel>
+    val categories: List<CategoryPresentationModel>,
 ) : Parcelable, HasOrder, IsSelectable
 
 fun NotePresentationModel.toDomain(dateProvider: DateProvider): Note {
@@ -28,7 +28,7 @@ fun NotePresentationModel.toDomain(dateProvider: DateProvider): Note {
         content = content,
         order = order,
         date = dateProvider.formatLocalDateToTime(dateInLocal),
-        isArchived = isArchived
+        isArchived = isArchived,
     )
 }
 
@@ -42,7 +42,8 @@ fun NoteWithCategories.toPresentation(dateProvider: DateProvider): NotePresentat
         order = note.order,
         isArchived = note.isArchived,
         isSelected = false,
-        categories = categories.map { it.toPresentation() })
+        categories = categories.map { it.toPresentation() },
+    )
 }
 
 interface HasOrder {

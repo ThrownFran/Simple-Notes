@@ -2,13 +2,16 @@ package brillembourg.notes.simple.data.database.backup
 
 import brillembourg.notes.simple.data.database.RoomBackupHandler
 import brillembourg.notes.simple.domain.repositories.BackupAndRestoreRepository
-import brillembourg.notes.simple.domain.use_cases.notes.BackupAndRestoreNotesUseCase
-import brillembourg.notes.simple.util.*
+import brillembourg.notes.simple.domain.usecases.notes.BackupAndRestoreNotesUseCase
+import brillembourg.notes.simple.util.BackupException
+import brillembourg.notes.simple.util.Resource
+import brillembourg.notes.simple.util.RestoreException
+import brillembourg.notes.simple.util.UiText
+import brillembourg.notes.simple.util.safeCall
 
 class BackupAndRestoreRepositoryImp(
-    private val roomBackupHandler: RoomBackupHandler
+    private val roomBackupHandler: RoomBackupHandler,
 ) : BackupAndRestoreRepository {
-
     override suspend fun restore(params: BackupAndRestoreNotesUseCase.Params): Resource<BackupAndRestoreNotesUseCase.Result> {
         return safeCall {
             val result = roomBackupHandler.restoreInLocalStorage(params.backupModel)

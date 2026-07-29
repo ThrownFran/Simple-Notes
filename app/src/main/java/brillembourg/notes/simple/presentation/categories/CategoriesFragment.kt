@@ -12,17 +12,16 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentCategoriesBinding
-import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
+import brillembourg.notes.simple.presentation.customviews.safeUiLaunch
 import brillembourg.notes.simple.presentation.home.delete.NoteDeletionState
 import brillembourg.notes.simple.presentation.home.renderers.SelectionRenderer
-import brillembourg.notes.simple.presentation.ui_utils.getCategoriesSelectedTitle
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.buildVerticalManager
-import brillembourg.notes.simple.presentation.ui_utils.showDeleteCategoriesDialog
+import brillembourg.notes.simple.presentation.uiutils.getCategoriesSelectedTitle
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.buildVerticalManager
+import brillembourg.notes.simple.presentation.uiutils.showDeleteCategoriesDialog
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class CategoriesFragment : Fragment() {
-
     companion object {
         fun newInstance() = CategoriesFragment()
     }
@@ -50,18 +49,21 @@ class CategoriesFragment : Fragment() {
             onSetTitle = { size ->
                 getCategoriesSelectedTitle(
                     resources = resources,
-                    selectedSize = size
+                    selectedSize = size,
                 )
-            }
+            },
         )
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View {
-        if (_binding == null) _binding =
-            FragmentCategoriesBinding.inflate(inflater, container, false)
+        if (_binding == null) {
+            _binding =
+                FragmentCategoriesBinding.inflate(inflater, container, false)
+        }
         binding = _binding as FragmentCategoriesBinding
         binding.viewmodel = viewModel
         renderStates()
@@ -78,7 +80,6 @@ class CategoriesFragment : Fragment() {
     private fun renderStates() {
         safeUiLaunch {
             viewModel.categoryUiState.collect {
-
                 setupCategoryList(it.categoryList)
 
                 enableOrDisableCreateCategory(it.createCategory)
@@ -86,26 +87,31 @@ class CategoriesFragment : Fragment() {
                 selectionRenderer.render(it.selectionMode)
 
                 showDeleteCategoriesState(it.deleteConfirmation)
-
             }
         }
     }
 
     private fun showDeleteCategoriesState(state: NoteDeletionState.ConfirmDeleteDialog?) {
         if (state != null) {
-            showDeleteCategoriesDialog(this, state.tasksToDeleteSize,
+            showDeleteCategoriesDialog(
+                this,
+                state.tasksToDeleteSize,
                 onPositive = {
                     viewModel.onDeleteCategories()
                 },
                 onDismiss = {
                     viewModel.onDismissConfirmDeleteShown()
-                })
+                },
+            )
         }
     }
 
     private fun enableOrDisableCreateCategory(createCategory: CreateCategory) {
-        if (createCategory.isEnabled) binding.categoriesCreateitemview.setCreatingMode()
-        else binding.categoriesCreateitemview.setIdleMode()
+        if (createCategory.isEnabled) {
+            binding.categoriesCreateitemview.setCreatingMode()
+        } else {
+            binding.categoriesCreateitemview.setIdleMode()
+        }
     }
 
     private fun setupCategoryList(categoryList: CategoryList) {
@@ -124,7 +130,7 @@ class CategoriesFragment : Fragment() {
     private fun submitListAndScrollIfApplies(
         noteAdapter: CategoryAdapter,
         currentList: List<CategoryPresentationModel>,
-        taskList: List<CategoryPresentationModel>
+        taskList: List<CategoryPresentationModel>,
     ) {
         val isInsertingInList = currentList.size < taskList.size
         noteAdapter.submitList(taskList.toMutableList()) { if (isInsertingInList) scrollToTop() }
@@ -133,17 +139,18 @@ class CategoriesFragment : Fragment() {
     private fun setupCategoryRecycler(list: List<CategoryPresentationModel>) {
         binding.categoriesRecycler.apply {
             adapter = buildCategoryAdapter(this, list)
-            layoutManager = buildVerticalManager(context).also { layoutManager ->
-                //TODO
+            layoutManager =
+                buildVerticalManager(context).also { layoutManager ->
+                    // TODO
 //                retrieveRecyclerStateIfApplies(layoutManager)
-            }
+                }
             (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         }
     }
 
     private fun buildCategoryAdapter(
         recyclerView: RecyclerView,
-        list: List<CategoryPresentationModel>
+        list: List<CategoryPresentationModel>,
     ): CategoryAdapter {
         return CategoryAdapter(
             onRename = viewModel::onSave,
@@ -151,7 +158,7 @@ class CategoriesFragment : Fragment() {
             onClick = { category -> onCategoryClicked(category) },
             onReorderSuccess = viewModel::onReorderedCategories,
             onReorderCanceled = viewModel::onReorderCategoriesCancelled,
-            onSelection = viewModel::onSelection
+            onSelection = viewModel::onSelection,
         ).apply {
             submitList(list)
             setDragDirections(recyclerView, ItemTouchHelper.UP or ItemTouchHelper.DOWN)
@@ -159,7 +166,7 @@ class CategoriesFragment : Fragment() {
     }
 
     private fun onCategoryClicked(category: CategoryPresentationModel) {
-        //TODO
+        // TODO
     }
 
     private fun scrollToTop() {

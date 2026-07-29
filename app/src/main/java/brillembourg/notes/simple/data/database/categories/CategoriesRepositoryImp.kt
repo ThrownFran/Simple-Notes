@@ -1,7 +1,11 @@
 package brillembourg.notes.simple.data.database.categories
 
 import brillembourg.notes.simple.domain.repositories.CategoryRepository
-import brillembourg.notes.simple.domain.use_cases.categories.*
+import brillembourg.notes.simple.domain.usecases.categories.CreateCategoryUseCase
+import brillembourg.notes.simple.domain.usecases.categories.DeleteCategoriesUseCase
+import brillembourg.notes.simple.domain.usecases.categories.GetCategoriesUseCase
+import brillembourg.notes.simple.domain.usecases.categories.ReorderCategoriesUseCase
+import brillembourg.notes.simple.domain.usecases.categories.SaveCategoryUseCase
 import brillembourg.notes.simple.util.GetCategoriesException
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
@@ -14,8 +18,6 @@ import kotlinx.coroutines.flow.transform
 class CategoriesRepositoryImp(
     private val database: CategoriesDatabase,
 ) : CategoryRepository {
-
-
     override suspend fun create(params: CreateCategoryUseCase.Params): Resource<CreateCategoryUseCase.Result> {
         return safeCall {
             val category = database.create(params.name).toDomain()
@@ -34,8 +36,11 @@ class CategoriesRepositoryImp(
         return safeCall {
             database.deleteMultiple(params.ids)
             val message =
-                if (params.ids.size > 1) UiText.CategoriesDeleted
-                else UiText.CategoryDeleted
+                if (params.ids.size > 1) {
+                    UiText.CategoriesDeleted
+                } else {
+                    UiText.CategoryDeleted
+                }
             Resource.Success(DeleteCategoriesUseCase.Result(message))
         }
     }

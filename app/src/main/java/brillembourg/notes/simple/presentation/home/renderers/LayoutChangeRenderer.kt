@@ -4,33 +4,32 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.presentation.home.adapters.NoteAdapter
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.LayoutType
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.changeLayout
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.getDragDirs
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.toLayoutType
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.LayoutType
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.changeLayout
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.getDragDirs
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.toLayoutType
 
 class LayoutChangeRenderer(
     private val recyclerView: RecyclerView,
-    private val onLayoutChange: (NoteLayout) -> Unit
+    private val onLayoutChange: (NoteLayout) -> Unit,
 ) {
-
     fun render(noteLayout: NoteLayout) {
         onChangeLayout(
             recyclerView,
-            noteLayout.toLayoutType()
+            noteLayout.toLayoutType(),
         )
     }
 
     private fun onChangeLayout(
         recyclerView: RecyclerView,
-        layoutType: LayoutType
+        layoutType: LayoutType,
     ) {
         val noteAdapter = getAdapter() ?: return
 
         changeLayout(
             recyclerView,
             layoutType,
-            noteAdapter.currentList
+            noteAdapter.currentList,
         )
 
         noteAdapter.setDragDirections(recyclerView, getDragDirs(layoutType))
@@ -44,12 +43,12 @@ class LayoutChangeRenderer(
         onLayoutChange(NoteLayout.Vertical)
     }
 
-    private fun getAdapter(): NoteAdapter? = try {
-        getConcatAdapter()?.adapters?.first { it is NoteAdapter } as NoteAdapter
-    } catch (e: Exception) {
-        null
-    }
+    private fun getAdapter(): NoteAdapter? =
+        try {
+            getConcatAdapter()?.adapters?.first { it is NoteAdapter } as NoteAdapter
+        } catch (e: Exception) {
+            null
+        }
 
     private fun getConcatAdapter() = (recyclerView.adapter as? ConcatAdapter?)
-
 }

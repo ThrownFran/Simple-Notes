@@ -13,42 +13,51 @@ data class HomeUiState(
     val selectionModeActive: SelectionModeActive = SelectionModeActive(),
     val noteActions: NoteActions = NoteActions(),
     val noteList: NoteList = NoteList(),
-    val isLoading: Boolean = noteList.hasLoaded.not()
+    val isLoading: Boolean = noteList.hasLoaded.not(),
 ) : Parcelable {
-
     val emptyNotesState: EmptyNote
-        get() = when {
-            isLoading -> EmptyNote.None
-            noteList.key.isEmpty()
-                    && noteList.notes.isEmpty()
-                    && noteList.filteredCategories.isEmpty() -> EmptyNote.Wizard
+        get() =
+            when {
+                isLoading -> EmptyNote.None
+                noteList.key.isEmpty() &&
+                    noteList.notes.isEmpty() &&
+                    noteList.filteredCategories.isEmpty() -> EmptyNote.Wizard
 
-            noteList.key.isEmpty()
-                    && noteList.notes.isEmpty()
-                    && noteList.filteredCategories.size == 1 -> EmptyNote.EmptyForLabel
+                noteList.key.isEmpty() &&
+                    noteList.notes.isEmpty() &&
+                    noteList.filteredCategories.size == 1 -> EmptyNote.EmptyForLabel
 
-            noteList.key.isEmpty()
-                    && noteList.notes.isEmpty()
-                    && noteList.filteredCategories.size > 1 -> EmptyNote.EmptyForMultipleLabels
+                noteList.key.isEmpty() &&
+                    noteList.notes.isEmpty() &&
+                    noteList.filteredCategories.size > 1 -> EmptyNote.EmptyForMultipleLabels
 
-            noteList.key.isNotEmpty()
-                    && noteList.notes.isEmpty() -> EmptyNote.EmptyForSearch
+                noteList.key.isNotEmpty() &&
+                    noteList.notes.isEmpty() -> EmptyNote.EmptyForSearch
 
-            else -> EmptyNote.None
-        }
+                else -> EmptyNote.None
+            }
 
     enum class EmptyNote {
-        Wizard, EmptyForLabel, EmptyForSearch, EmptyForMultipleLabels, None
+        Wizard,
+        EmptyForLabel,
+        EmptyForSearch,
+        EmptyForMultipleLabels,
+        None,
     }
 }
-
 
 @Parcelize
 data class NoteList(
     val notes: List<NotePresentationModel> = ArrayList(),
     val filteredCategories: List<CategoryPresentationModel> = emptyList(),
-    val mustRender: Boolean = false, //To avoid rendering set false
-    val hasLoaded: Boolean = false, //To avoid rendering set false
+    /**
+     * To avoid rendering set false
+     */
+    val mustRender: Boolean = false,
+    /**
+     * To avoid rendering set false
+     */
+    val hasLoaded: Boolean = false,
     val key: String = "",
 ) : Parcelable
 
@@ -61,5 +70,5 @@ data class NoteActions(
 @Parcelize
 data class SelectCategoriesState(
     val navigate: Boolean = false,
-    val isShowing: Boolean = false
+    val isShowing: Boolean = false,
 ) : Parcelable

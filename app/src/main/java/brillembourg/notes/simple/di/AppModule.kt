@@ -4,7 +4,7 @@ import brillembourg.notes.simple.data.DateProvider
 import brillembourg.notes.simple.data.DateProviderImp
 import brillembourg.notes.simple.domain.Schedulers
 import brillembourg.notes.simple.domain.SchedulersImp
-import brillembourg.notes.simple.domain.use_cases.theme.ThemeManager
+import brillembourg.notes.simple.domain.usecases.theme.ThemeManager
 import brillembourg.notes.simple.presentation.ThemeManagerImp
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.base.MessageManagerImp
@@ -17,7 +17,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class AppModule {
-
     @Singleton
     @Provides
     fun dispatchers(): Schedulers {
@@ -28,7 +27,6 @@ class AppModule {
     @Provides
     fun messageManager(): MessageManager = MessageManagerImp()
 
-
     @Singleton
     @Provides
     fun dateProvider(): DateProvider = DateProviderImp()
@@ -38,7 +36,4 @@ class AppModule {
     fun getThemeManager(): ThemeManager {
         return ThemeManagerImp()
     }
-
 }
-
-

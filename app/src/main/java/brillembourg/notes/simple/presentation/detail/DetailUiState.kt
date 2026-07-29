@@ -14,7 +14,10 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class DetailUiState(
-    val isNewTask: Boolean = true, //If is new note or an editing note
+    /**
+     * If is new note or an editing note
+     */
+    val isNewTask: Boolean = true,
     val isArchivedTask: Boolean = false,
     var userInput: UserInput = UserInput(),
     val navigateBack: Boolean = false,
@@ -22,9 +25,8 @@ data class DetailUiState(
     val unFocusInput: Boolean = false,
     val noteCategories: List<CategoryPresentationModel> = emptyList(),
     var selectCategories: SelectCategories = SelectCategories(),
-    val lastEdit: String = ""
+    val lastEdit: String = "",
 ) : Parcelable {
-
     fun getOnInputChangedFlow(): Flow<UserInput> {
         return userInput.getOnInputChangedFlow()
     }
@@ -35,7 +37,7 @@ data class SelectCategories(
     val isCategoryMenuAvailable: Boolean = false,
     val navigate: Boolean = false,
     val isShowing: Boolean = false,
-    val categories: List<CategoryPresentationModel> = emptyList()
+    val categories: List<CategoryPresentationModel> = emptyList(),
 ) : Parcelable
 
 /**
@@ -46,7 +48,6 @@ data class UserInput(
     var title: String = "",
     var content: String = "",
 ) : BaseObservable(), Parcelable {
-
     @IgnoredOnParcel
     private var onInputChanged: ((UserInput) -> Unit)? = null
 
@@ -91,5 +92,3 @@ data class UserInput(
         }
     }
 }
-
-

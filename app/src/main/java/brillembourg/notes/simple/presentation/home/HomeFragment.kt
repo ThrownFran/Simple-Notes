@@ -22,29 +22,28 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentHomeBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.base.MainViewModel
-import brillembourg.notes.simple.presentation.custom_views.animateWithRecycler
-import brillembourg.notes.simple.presentation.custom_views.copy
-import brillembourg.notes.simple.presentation.custom_views.onClickFlow
-import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
-import brillembourg.notes.simple.presentation.custom_views.shareText
+import brillembourg.notes.simple.presentation.customviews.animateWithRecycler
+import brillembourg.notes.simple.presentation.customviews.copy
+import brillembourg.notes.simple.presentation.customviews.onClickFlow
+import brillembourg.notes.simple.presentation.customviews.safeUiLaunch
+import brillembourg.notes.simple.presentation.customviews.shareText
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.home.delete.NoteDeletionState
 import brillembourg.notes.simple.presentation.home.renderers.LayoutChangeRenderer
 import brillembourg.notes.simple.presentation.home.renderers.NoteUiRenderer
 import brillembourg.notes.simple.presentation.home.renderers.SelectionRenderer
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
-import brillembourg.notes.simple.presentation.ui_utils.SearchManager
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.LayoutType
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.toLayoutType
-import brillembourg.notes.simple.presentation.ui_utils.setTransitionToCreateNote
-import brillembourg.notes.simple.presentation.ui_utils.setTransitionToEditNote
-import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
-import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
+import brillembourg.notes.simple.presentation.uiutils.SearchManager
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.LayoutType
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.toLayoutType
+import brillembourg.notes.simple.presentation.uiutils.setTransitionToCreateNote
+import brillembourg.notes.simple.presentation.uiutils.setTransitionToEditNote
+import brillembourg.notes.simple.presentation.uiutils.showArchiveConfirmationDialog
+import brillembourg.notes.simple.presentation.uiutils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class HomeFragment : Fragment(), MenuProvider {
-
     companion object {
         fun newInstance() = HomeFragment()
     }
@@ -69,7 +68,7 @@ class HomeFragment : Fragment(), MenuProvider {
             onSelection = viewModel::onSelection,
             onNoteClick = viewModel::onNoteClick,
             onReorderedNotes = viewModel::onReorderedNotes,
-            onReorderedNotesCancelled = viewModel::onReorderNotesCancelled
+            onReorderedNotesCancelled = viewModel::onReorderNotesCancelled,
         )
     }
 
@@ -103,14 +102,14 @@ class HomeFragment : Fragment(), MenuProvider {
 
                     else -> false
                 }
-            }
+            },
         )
     }
 
     private val changeLayoutRenderer by lazy {
         LayoutChangeRenderer(
             binding.homeRecycler,
-            onLayoutChange = { viewModel.onLayoutChange(it) }
+            onLayoutChange = { viewModel.onLayoutChange(it) },
         )
     }
 
@@ -120,13 +119,14 @@ class HomeFragment : Fragment(), MenuProvider {
             fragment = this,
             toolbar = toolbarMain,
             onSearch = viewModel::onSearch,
-            onDestroyActionMode = viewModel::onSearchCancelled
+            onDestroyActionMode = viewModel::onSearchCancelled,
         )
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View {
         if (_binding == null) _binding = FragmentHomeBinding.inflate(inflater, container, false)
         binding = _binding as FragmentHomeBinding
@@ -138,9 +138,7 @@ class HomeFragment : Fragment(), MenuProvider {
         return binding.root
     }
 
-
     private fun renderStates() {
-
         safeUiLaunch {
             viewModel.navigates.collect { navigates ->
                 when (navigates) {
@@ -178,7 +176,7 @@ class HomeFragment : Fragment(), MenuProvider {
 
                 updateMenu(
                     menu = menu,
-                    layoutType = homeUiState.noteLayout.toLayoutType()
+                    layoutType = homeUiState.noteLayout.toLayoutType(),
                 )
             }
         }
@@ -238,7 +236,6 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-
     //region Categories
 
     private fun selectCategoriesState(selectCategories: SelectCategoriesState) {
@@ -252,7 +249,7 @@ class HomeFragment : Fragment(), MenuProvider {
         val selectCategoriesModalBottomSheet = SelectHomeFilterCategoriesModal()
         selectCategoriesModalBottomSheet.show(
             childFragmentManager,
-            SelectHomeFilterCategoriesModal.TAG
+            SelectHomeFilterCategoriesModal.TAG,
         )
     }
 
@@ -265,7 +262,10 @@ class HomeFragment : Fragment(), MenuProvider {
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateMenu(
+        menu: Menu,
+        menuInflater: MenuInflater,
+    ) {
         this.menu = menu
         menuInflater.inflate(R.menu.menu_home, menu)
     }
@@ -276,7 +276,10 @@ class HomeFragment : Fragment(), MenuProvider {
         updateMenu(menu, viewModel.homeUiState.value.noteLayout.toLayoutType())
     }
 
-    private fun updateMenu(menu: Menu?, layoutType: LayoutType) {
+    private fun updateMenu(
+        menu: Menu?,
+        layoutType: LayoutType,
+    ) {
         menu?.apply {
             findItem(R.id.menu_home_vertical)?.apply {
                 isVisible = layoutType == LayoutType.Staggered
@@ -337,8 +340,7 @@ class HomeFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun getHeaderAdapter() =
-        getConcatAdapter()?.adapters?.filterIsInstance<HeaderAdapter>()?.firstOrNull()
+    private fun getHeaderAdapter() = getConcatAdapter()?.adapters?.filterIsInstance<HeaderAdapter>()?.firstOrNull()
 
     private fun getConcatAdapter() = (binding.homeRecycler.adapter as? ConcatAdapter?)
 
@@ -349,8 +351,11 @@ class HomeFragment : Fragment(), MenuProvider {
         findNavController().navigate(directions)
     }
 
-    private fun navigateToDetail(it: NotePresentationModel, view: View) {
-        //navigate to detail fragment
+    private fun navigateToDetail(
+        it: NotePresentationModel,
+        view: View,
+    ) {
+        // navigate to detail fragment
         val directions = HomeFragmentDirections.actionHomeFragmentToDetailFragment()
         directions.task = it
 
@@ -364,9 +369,10 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun showDeleteConfirmationState(showDeleteConfirmationState: NoteDeletionState.ConfirmDeleteDialog) {
         showDeleteTasksDialog(
-            this, showDeleteConfirmationState.tasksToDeleteSize,
+            this,
+            showDeleteConfirmationState.tasksToDeleteSize,
             onPositive = viewModel.noteDeletionManager::onDeleteNotes,
-            onDismiss = viewModel.noteDeletionManager::onDismissConfirmDeleteShown
+            onDismiss = viewModel.noteDeletionManager::onDismissConfirmDeleteShown,
         )
     }
 
@@ -380,9 +386,10 @@ class HomeFragment : Fragment(), MenuProvider {
 
     private fun showArchiveConfirmationState(showArchiveConfirmationState: NoteDeletionState.ConfirmArchiveDialog) {
         showArchiveConfirmationDialog(
-            this, showArchiveConfirmationState.tasksToArchiveSize,
+            this,
+            showArchiveConfirmationState.tasksToArchiveSize,
             onPositive = viewModel.noteDeletionManager::onArchiveNotes,
-            onDismiss = viewModel.noteDeletionManager::onDismissConfirm
+            onDismiss = viewModel.noteDeletionManager::onDismissConfirm,
         )
     }
 

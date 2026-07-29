@@ -14,8 +14,8 @@ import androidx.navigation.fragment.findNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentSettingsBinding
 import brillembourg.notes.simple.domain.models.ThemeMode
-import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
-import brillembourg.notes.simple.presentation.ui_utils.MyLogger
+import brillembourg.notes.simple.presentation.customviews.safeUiLaunch
+import brillembourg.notes.simple.presentation.uiutils.MyLogger
 import brillembourg.notes.simple.util.GenericException
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.play.core.review.ReviewManagerFactory
@@ -23,20 +23,22 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SettingsFragment : Fragment() {
-
     private lateinit var viewModel: SettingsViewModel
     private lateinit var binding: FragmentSettingsBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         binding = FragmentSettingsBinding.inflate(layoutInflater)
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         viewModel = ViewModelProvider(this).get(SettingsViewModel::class.java)
 //        showToolbar()
         setupObservers()
@@ -84,12 +86,14 @@ class SettingsFragment : Fragment() {
 
     private fun navigateToPlayStore() {
         try {
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse(
-                    "https://play.google.com/store/apps/details?id=brillembourg.notes.simple.fast"
-                )
-                setPackage("com.android.vending")
-            }
+            val intent =
+                Intent(Intent.ACTION_VIEW).apply {
+                    data =
+                        Uri.parse(
+                            "https://play.google.com/store/apps/details?id=brillembourg.notes.simple.fast",
+                        )
+                    setPackage("com.android.vending")
+                }
             activity?.startActivity(intent)
         } catch (e: Exception) {
             val exception = GenericException("Error rating App")
@@ -106,7 +110,6 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setupObservers() {
-
         safeUiLaunch {
             viewModel.state.collect {
                 when (it) {
@@ -126,7 +129,7 @@ class SettingsFragment : Fragment() {
         title: String,
         list: List<T>,
         current: T,
-        listener: DialogListener
+        listener: DialogListener,
     ) {
         val builder =
             context?.let { MaterialAlertDialogBuilder(it) } ?: return
@@ -142,7 +145,8 @@ class SettingsFragment : Fragment() {
         val checkedItem: Int = current.getValue().toInt()
 
         builder.setSingleChoiceItems(
-            items, checkedItem
+            items,
+            checkedItem,
         ) { dialog: DialogInterface?, which: Int -> }
 
         // add OK and Cancel buttons
@@ -150,8 +154,9 @@ class SettingsFragment : Fragment() {
 
         // add OK and Cancel buttons
         builder.setPositiveButton(getString(R.string.all_ok)) { dialog, which ->
-            val selectedPosition = (dialog as AlertDialog).listView
-                .checkedItemPosition
+            val selectedPosition =
+                (dialog as AlertDialog).listView
+                    .checkedItemPosition
             unitChosed = selectedPosition
             dialog.dismiss()
         }
@@ -167,7 +172,6 @@ class SettingsFragment : Fragment() {
         }
     }
 
-
     private fun stateSuccess(it: SettingsState.Success) {
         binding.settingsTextTheme.text = it.themeMode.getName(resources)
     }
@@ -182,9 +186,9 @@ class SettingsFragment : Fragment() {
                 override fun onItemSelected(value: Int) {
                     viewModel.saveAndSetTheme(ThemeMode.getThemeFromType(value))
                 }
-            })
+            },
+        )
     }
-
 
     private fun clickChooseTheme() {
         viewModel.clickShowTheme()

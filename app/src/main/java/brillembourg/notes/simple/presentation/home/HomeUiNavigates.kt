@@ -5,7 +5,6 @@ import brillembourg.notes.simple.presentation.models.NotePresentationModel
 import kotlinx.parcelize.Parcelize
 
 sealed class HomeUiNavigates {
-
     @Parcelize
     data class NavigateToAddNote(val content: String? = null) : HomeUiNavigates(), Parcelable
 

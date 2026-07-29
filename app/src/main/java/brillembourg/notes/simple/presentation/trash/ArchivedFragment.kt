@@ -20,27 +20,25 @@ import androidx.recyclerview.widget.ConcatAdapter
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.databinding.FragmentTrashBinding
 import brillembourg.notes.simple.presentation.base.MainActivity
-import brillembourg.notes.simple.presentation.custom_views.animateWithRecycler
-import brillembourg.notes.simple.presentation.custom_views.copy
-import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
-import brillembourg.notes.simple.presentation.custom_views.shareText
+import brillembourg.notes.simple.presentation.customviews.animateWithRecycler
+import brillembourg.notes.simple.presentation.customviews.copy
+import brillembourg.notes.simple.presentation.customviews.safeUiLaunch
+import brillembourg.notes.simple.presentation.customviews.shareText
 import brillembourg.notes.simple.presentation.detail.setupExtrasToDetail
 import brillembourg.notes.simple.presentation.home.delete.NoteDeletionState
 import brillembourg.notes.simple.presentation.home.renderers.LayoutChangeRenderer
 import brillembourg.notes.simple.presentation.home.renderers.NoteUiRenderer
 import brillembourg.notes.simple.presentation.home.renderers.SelectionRenderer
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
-import brillembourg.notes.simple.presentation.ui_utils.SearchManager
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.LayoutType
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.toLayoutType
-import brillembourg.notes.simple.presentation.ui_utils.setTransitionToEditNote
-import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
+import brillembourg.notes.simple.presentation.uiutils.SearchManager
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.LayoutType
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.toLayoutType
+import brillembourg.notes.simple.presentation.uiutils.setTransitionToEditNote
+import brillembourg.notes.simple.presentation.uiutils.showDeleteTasksDialog
 import dagger.hilt.android.AndroidEntryPoint
-
 
 @AndroidEntryPoint
 class ArchivedFragment : Fragment(), MenuProvider {
-
     companion object ArchivedFragment {
         fun newInstance() = ArchivedFragment()
     }
@@ -62,14 +60,14 @@ class ArchivedFragment : Fragment(), MenuProvider {
             onSelection = viewModel::onSelection,
             onNoteClick = viewModel::onNoteClick,
             onReorderedNotes = {},
-            onReorderedNotesCancelled = {}
+            onReorderedNotesCancelled = {},
         )
     }
 
     private val changeLayoutRenderer by lazy {
         LayoutChangeRenderer(
             binding.trashRecycler,
-            onLayoutChange = viewModel::onLayoutChange
+            onLayoutChange = viewModel::onLayoutChange,
         )
     }
 
@@ -103,7 +101,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
                     else -> false
                 }
-            }
+            },
         )
     }
 
@@ -113,13 +111,14 @@ class ArchivedFragment : Fragment(), MenuProvider {
             fragment = this,
             toolbar = toolbarMain,
             onSearch = viewModel::onSearch,
-            onDestroyActionMode = viewModel::onSearchCancelled
+            onDestroyActionMode = viewModel::onSearchCancelled,
         )
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View {
         if (_binding == null) _binding = FragmentTrashBinding.inflate(inflater, container, false)
         binding = _binding as FragmentTrashBinding
@@ -127,7 +126,10 @@ class ArchivedFragment : Fragment(), MenuProvider {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         setupMenu()
         renderStates()
@@ -144,7 +146,10 @@ class ArchivedFragment : Fragment(), MenuProvider {
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateMenu(
+        menu: Menu,
+        menuInflater: MenuInflater,
+    ) {
         menuInflater.inflate(R.menu.menu_home, menu)
         this.menu = menu
     }
@@ -155,7 +160,10 @@ class ArchivedFragment : Fragment(), MenuProvider {
         updateMenu(menu, viewModel.archivedUiState.value.noteLayout.toLayoutType())
     }
 
-    private fun updateMenu(menu: Menu?, layoutType: LayoutType) {
+    private fun updateMenu(
+        menu: Menu?,
+        layoutType: LayoutType,
+    ) {
         menu?.apply {
             findItem(R.id.menu_home_categories)?.apply {
                 isVisible = false
@@ -195,7 +203,6 @@ class ArchivedFragment : Fragment(), MenuProvider {
     }
 
     private fun renderStates() {
-
         safeUiLaunch {
             viewModel.navigates.collect { navigates ->
                 when (navigates) {
@@ -226,7 +233,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
 
                 updateMenu(
                     menu = menu,
-                    layoutType = uiState.noteLayout.toLayoutType()
+                    layoutType = uiState.noteLayout.toLayoutType(),
                 )
             }
         }
@@ -289,7 +296,7 @@ class ArchivedFragment : Fragment(), MenuProvider {
                 },
                 onDismiss = {
                     viewModel.noteDeletionManager.onDismissConfirm()
-                }
+                },
             )
         }
     }
@@ -304,8 +311,11 @@ class ArchivedFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun navigateToDetail(it: NotePresentationModel, view: View) {
-        //navigate to detail fragment
+    private fun navigateToDetail(
+        it: NotePresentationModel,
+        view: View,
+    ) {
+        // navigate to detail fragment
         val directions = ArchivedFragmentDirections.actionTrashFragmentToDetailFragment()
         directions.task = it
 
@@ -324,5 +334,4 @@ class ArchivedFragment : Fragment(), MenuProvider {
     private fun onUnarchiveTasks() {
         viewModel.noteDeletionManager.onUnarchiveTasks()
     }
-
 }

@@ -14,23 +14,21 @@ import androidx.navigation.ui.setupWithNavController
 import brillembourg.notes.simple.R
 import brillembourg.notes.simple.data.database.RoomBackupBuilder
 import brillembourg.notes.simple.databinding.ActivityMainBinding
-import brillembourg.notes.simple.domain.use_cases.notes.BackupModel
-import brillembourg.notes.simple.presentation.custom_views.restartApp
-import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
-import brillembourg.notes.simple.presentation.custom_views.setBackgroundDrawable
-import brillembourg.notes.simple.presentation.custom_views.showMessage
-import brillembourg.notes.simple.presentation.custom_views.showToast
-import brillembourg.notes.simple.presentation.ui_utils.asString
-import brillembourg.notes.simple.presentation.ui_utils.contentViews
+import brillembourg.notes.simple.domain.usecases.notes.BackupModel
+import brillembourg.notes.simple.presentation.customviews.restartApp
+import brillembourg.notes.simple.presentation.customviews.safeUiLaunch
+import brillembourg.notes.simple.presentation.customviews.setBackgroundDrawable
+import brillembourg.notes.simple.presentation.customviews.showMessage
+import brillembourg.notes.simple.presentation.customviews.showToast
+import brillembourg.notes.simple.presentation.uiutils.asString
+import brillembourg.notes.simple.presentation.uiutils.contentViews
 import brillembourg.notes.simple.util.UiText
 import com.jakewharton.threetenabp.AndroidThreeTen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var navController: NavController
 
@@ -91,7 +89,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun userMessageState(uiText: UiText?) {
         if (uiText == null) return
 
@@ -119,11 +116,12 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentById(R.id.fragment_container_view) as NavHostFragment
         navController = navHostFragment.navController
 
-        //top level configuration
-        appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.homeFragment, R.id.categoriesFragment, R.id.trashFragment),
-            binding.drawerLayout
-        )
+        // top level configuration
+        appBarConfiguration =
+            AppBarConfiguration(
+                setOf(R.id.homeFragment, R.id.categoriesFragment, R.id.trashFragment),
+                binding.drawerLayout,
+            )
 
 //        appBarConfiguration = AppBarConfiguration(
 //            navGraph = navController.graph,
@@ -134,7 +132,7 @@ class MainActivity : AppCompatActivity() {
 
         setupActionBarWithNavController(
             navController = navController,
-            configuration = appBarConfiguration
+            configuration = appBarConfiguration,
         )
 
         binding.navView.setupWithNavController(navController)
@@ -143,7 +141,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupDrawerListener() {
-
         binding.navView.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.homeFragment -> {
@@ -182,7 +179,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun setupNavControllerListener() {
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
@@ -224,13 +220,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun closeDrawer() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            binding.drawerLayout.closeDrawer(GravityCompat.START);
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
         }
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return navigateUp()
-                || super.onSupportNavigateUp()
+        return navigateUp() ||
+            super.onSupportNavigateUp()
     }
 
     private fun navigateUp() = navController.navigateUp(appBarConfiguration)

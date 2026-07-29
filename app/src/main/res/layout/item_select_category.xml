@@ -68,7 +68,7 @@
 
     <!--    </com.google.android.material.card.MaterialCardView>-->
 
-    <brillembourg.notes.simple.presentation.custom_views.CustomCheckBox
+    <brillembourg.notes.simple.presentation.customviews.CustomCheckBox
         android:id="@+id/select_category_check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

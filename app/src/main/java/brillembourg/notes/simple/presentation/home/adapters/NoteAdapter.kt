@@ -7,9 +7,9 @@ import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemNoteBinding
 import brillembourg.notes.simple.presentation.home.NoteViewHolder
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.Draggable
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.ItemTouchDraggableImp
-import brillembourg.notes.simple.presentation.ui_utils.setupTaskDiffCallback
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.Draggable
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.ItemTouchDraggableImp
+import brillembourg.notes.simple.presentation.uiutils.setupTaskDiffCallback
 
 class NoteAdapter(
     dragAndDropDirs: Int,
@@ -18,42 +18,44 @@ class NoteAdapter(
     private val onClick: (task: NotePresentationModel) -> Unit,
     private val onSelection: (isSelected: Boolean, id: Long) -> Unit,
     private val onReorderSuccess: (reorderedTaskList: List<NotePresentationModel>) -> Unit,
-    private val onReorderCanceled: () -> Unit
+    private val onReorderCanceled: () -> Unit,
 ) : ListAdapter<NotePresentationModel, NoteViewHolder>(setupTaskDiffCallback()),
     Draggable<NotePresentationModel> by ItemTouchDraggableImp(recyclerView, dragAndDropDirs) {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): NoteViewHolder {
         return NoteViewHolder(
             binding = ItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false),
             onReadyToDrag = onStartDrag(),
             onClick = onClick,
             onSelected = onSelection,
-            getCurrentList = { currentList }
+            getCurrentList = { currentList },
         )
     }
 
-    private fun onStartDrag() = { noteViewHolder: NoteViewHolder ->
-        if (isDragEnabled) {
-            startDrag(
-                recyclerView = recyclerView,
-                viewHolder = noteViewHolder,
-                onGetCurrentList = { currentList },
-
-                onSubmitList = { noteList, submitSuccess ->
-                    submitList(noteList) {
-                        submitSuccess() //Commit callback
-                    }
-                },
-
-                onReorderSuccess = onReorderSuccess,
-                onReorderCanceled = onReorderCanceled
-            )
+    private fun onStartDrag() =
+        { noteViewHolder: NoteViewHolder ->
+            if (isDragEnabled) {
+                startDrag(
+                    recyclerView = recyclerView,
+                    viewHolder = noteViewHolder,
+                    onGetCurrentList = { currentList },
+                    onSubmitList = { noteList, submitSuccess ->
+                        submitList(noteList) {
+                            submitSuccess() // Commit callback
+                        }
+                    },
+                    onReorderSuccess = onReorderSuccess,
+                    onReorderCanceled = onReorderCanceled,
+                )
+            }
         }
-    }
 
-    override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: NoteViewHolder,
+        position: Int,
+    ) {
         holder.bind(getItem(position))
     }
-
 }
-

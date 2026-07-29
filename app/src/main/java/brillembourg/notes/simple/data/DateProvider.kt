@@ -7,13 +7,15 @@ import org.threeten.bp.format.DateTimeFormatter
 
 interface DateProvider {
     fun getCurrentTime(): String
+
     fun formatTimeToLocalDate(currentTime: String): String
+
     fun formatLocalDateToTime(localDate: String): String
+
     fun formatLocalDateToFriendlyFormat(localDate: String): String
 }
 
 class DateProviderImp : DateProvider {
-
     private val dateFormat = "dd-MM-yyyy HH:mm:ss"
     private val friendlyFormat = "E MMM dd yyyy"
 
@@ -37,6 +39,4 @@ class DateProviderImp : DateProvider {
             LocalDateTime.parse(localDate, formatter).atZone(ZoneId.systemDefault()).toInstant()
         return instant.toString()
     }
-
-
 }

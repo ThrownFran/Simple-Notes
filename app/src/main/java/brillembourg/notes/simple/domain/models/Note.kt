@@ -6,10 +6,10 @@ data class Note(
     var content: String,
     val date: String,
     val order: Int,
-    val isArchived: Boolean = false
+    val isArchived: Boolean = false,
 )
 
 data class NoteWithCategories(
     val note: Note,
-    val categories: List<Category>
+    val categories: List<Category>,
 )

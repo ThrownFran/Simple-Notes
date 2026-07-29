@@ -5,17 +5,13 @@ import brillembourg.notes.simple.data.database.AppDatabase
 import kotlinx.coroutines.flow.Flow
 
 class CategoriesDatabase(
-    private val roomDatabase: AppDatabase
+    private val roomDatabase: AppDatabase,
 ) {
-
     fun getList(): Flow<List<CategoryEntity>> {
         return roomDatabase.categoryDao().getList()
     }
 
-    suspend fun create(
-        name: String,
-    ): CategoryEntity {
-
+    suspend fun create(name: String): CategoryEntity {
         val lastOrderPosition = calculateLastOrderPosition()
         val nextOrderPosition = lastOrderPosition + 1
 
@@ -51,5 +47,4 @@ class CategoriesDatabase(
             }
         }
     }
-
 }

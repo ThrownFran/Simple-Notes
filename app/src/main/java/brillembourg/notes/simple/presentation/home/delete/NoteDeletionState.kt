@@ -4,24 +4,22 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 sealed class NoteDeletionState {
-
-    /*Show confirm to archive notes*/
+    // Show confirm to archive notes
     @Parcelize
     data class ConfirmDeleteDialog(
-        val tasksToDeleteSize: Int
+        val tasksToDeleteSize: Int,
     ) : NoteDeletionState(), Parcelable
 
     @Parcelize
     data class ConfirmUnArchiveDialog(
-        val tasksToDeleteSize: Int
+        val tasksToDeleteSize: Int,
     ) : NoteDeletionState(), Parcelable
 
-    /*Show confirm to archive notes*/
+    // Show confirm to archive notes
     @Parcelize
     data class ConfirmArchiveDialog(
-        val tasksToArchiveSize: Int
+        val tasksToArchiveSize: Int,
     ) : NoteDeletionState(), Parcelable
-
 
     object Idle : NoteDeletionState()
 }

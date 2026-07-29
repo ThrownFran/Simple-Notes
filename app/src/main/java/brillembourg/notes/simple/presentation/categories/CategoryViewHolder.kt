@@ -3,11 +3,11 @@ package brillembourg.notes.simple.presentation.categories
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemCategoryBinding
-import brillembourg.notes.simple.presentation.custom_views.fromDpToPixel
-import brillembourg.notes.simple.presentation.custom_views.hideKeyboard
-import brillembourg.notes.simple.presentation.custom_views.showSoftKeyboard
-import brillembourg.notes.simple.presentation.ui_utils.Selectable
-import brillembourg.notes.simple.presentation.ui_utils.SelectableImp
+import brillembourg.notes.simple.presentation.customviews.fromDpToPixel
+import brillembourg.notes.simple.presentation.customviews.hideKeyboard
+import brillembourg.notes.simple.presentation.customviews.showSoftKeyboard
+import brillembourg.notes.simple.presentation.uiutils.Selectable
+import brillembourg.notes.simple.presentation.uiutils.SelectableImp
 
 class CategoryViewHolder(
     private val onRename: (newName: String, CategoryPresentationModel) -> Unit,
@@ -15,10 +15,9 @@ class CategoryViewHolder(
     private val binding: ItemCategoryBinding,
     onClick: ((CategoryPresentationModel) -> Unit)? = null,
     private val onSelected: ((isSelected: Boolean, id: Long) -> Unit)? = null,
-    private val onReadyToDrag: ((CategoryViewHolder) -> Unit)? = null
+    private val onReadyToDrag: ((CategoryViewHolder) -> Unit)? = null,
 ) : RecyclerView.ViewHolder(binding.root),
     Selectable<CategoryPresentationModel> by SelectableImp(getCurrentList) {
-
     init {
         setupClickListeners()
         setupSelection(
@@ -30,7 +29,7 @@ class CategoryViewHolder(
 
                 onClick?.invoke(presentationModel)
             },
-            onReadyToDrag = { onReadyToDrag?.invoke(this) }
+            onReadyToDrag = { onReadyToDrag?.invoke(this) },
         )
     }
 
@@ -54,11 +53,9 @@ class CategoryViewHolder(
     }
 
     private fun setupClickListeners() {
-
         binding.categoryCardview.setOnClickListener {
             onItemClick(bindingAdapterPosition, getCurrentList()[bindingAdapterPosition])
         }
-
 
         binding.categoryCardview.setOnLongClickListener {
             onItemSelection(bindingAdapterPosition, getCurrentList()[bindingAdapterPosition])
@@ -100,7 +97,7 @@ class CategoryViewHolder(
 
     private fun renameCategory(
         newName: String,
-        presentationModel: CategoryPresentationModel
+        presentationModel: CategoryPresentationModel,
     ) {
         onRename.invoke(newName, presentationModel)
         presentationModel.name = newName
@@ -119,7 +116,6 @@ class CategoryViewHolder(
 
     private fun bindIsEditing(category: CategoryPresentationModel) {
         if (category.isEditing) {
-
             showEditingViews()
 
             binding.categoryEditName.apply {
@@ -127,7 +123,6 @@ class CategoryViewHolder(
                 requestFocus()
                 showSoftKeyboard()
             }
-
         } else {
             hideEditingViews()
 
@@ -151,7 +146,7 @@ class CategoryViewHolder(
         binding.categoryImageCancel.isVisible = false
         binding.categoryImageEdit.isVisible = true
 
-        //Text fields
+        // Text fields
         binding.categoryEditName.isVisible = false
         binding.categoryTextName.isVisible = true
     }
@@ -163,7 +158,7 @@ class CategoryViewHolder(
         binding.categoryImageCancel.isVisible = true
         binding.categoryImageEdit.isVisible = false
 
-        //Text fields
+        // Text fields
         binding.categoryEditName.isVisible = true
         binding.categoryTextName.isVisible = false
     }
@@ -191,6 +186,4 @@ class CategoryViewHolder(
         binding.categoryCardview.strokeWidth =
             2.5f.fromDpToPixel(binding.categoryCardview.context).toInt()
     }
-
-
 }

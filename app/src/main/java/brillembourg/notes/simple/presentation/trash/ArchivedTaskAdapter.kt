@@ -7,26 +7,29 @@ import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemNoteBinding
 import brillembourg.notes.simple.presentation.home.NoteViewHolder
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
-import brillembourg.notes.simple.presentation.ui_utils.setupTaskDiffCallback
+import brillembourg.notes.simple.presentation.uiutils.setupTaskDiffCallback
 
 class ArchivedTaskAdapter(
     val recyclerView: RecyclerView,
     val onClick: (NotePresentationModel) -> Unit,
     val onSelection: (isSelected: Boolean, id: Long) -> Unit,
 ) : ListAdapter<NotePresentationModel, NoteViewHolder>(setupTaskDiffCallback()) {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): NoteViewHolder {
         return NoteViewHolder(
             binding = ItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false),
             getCurrentList = { currentList },
             onClick = onClick,
-            onSelected = onSelection
+            onSelected = onSelection,
         )
     }
 
-    override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: NoteViewHolder,
+        position: Int,
+    ) {
         holder.bind(getItem(position))
     }
-
 }
-

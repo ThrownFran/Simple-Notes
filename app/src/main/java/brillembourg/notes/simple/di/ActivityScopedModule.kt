@@ -13,12 +13,10 @@ import dagger.hilt.android.scopes.ActivityScoped
 @Module
 @InstallIn(ActivityComponent::class)
 class ActivityScopedModule {
-
-
-    /*Room backup needs the Activity Context. Inject this only in Activity*/
+    // Room backup needs the Activity Context. Inject this only in Activity
     @ActivityScoped
     @Provides
-    fun backupPrepare(@ActivityContext context: Context): RoomBackupBuilder =
-        RoomBackupBuilderImp(context)
-
+    fun backupPrepare(
+        @ActivityContext context: Context,
+    ): RoomBackupBuilder = RoomBackupBuilderImp(context)
 }

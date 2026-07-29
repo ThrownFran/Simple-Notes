@@ -5,12 +5,13 @@ import kotlinx.coroutines.Dispatchers
 
 interface Schedulers {
     fun uiDispatcher(): CoroutineDispatcher
+
     fun ioDispatcher(): CoroutineDispatcher
+
     fun defaultDispatcher(): CoroutineDispatcher
 }
 
 class SchedulersImp : Schedulers {
-
     override fun uiDispatcher(): CoroutineDispatcher {
         return Dispatchers.Main.immediate
     }
@@ -22,5 +23,4 @@ class SchedulersImp : Schedulers {
     override fun defaultDispatcher(): CoroutineDispatcher {
         return Dispatchers.Main
     }
-
 }

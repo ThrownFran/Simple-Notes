@@ -1,8 +1,8 @@
 package brillembourg.notes.simple.presentation.home.delete
 
-import brillembourg.notes.simple.domain.use_cases.notes.ArchiveNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.DeleteNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.UnArchiveNotesUseCase
+import brillembourg.notes.simple.domain.usecases.notes.ArchiveNotesUseCase
+import brillembourg.notes.simple.domain.usecases.notes.DeleteNotesUseCase
+import brillembourg.notes.simple.domain.usecases.notes.UnArchiveNotesUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.presentation.home.NoteList
 import brillembourg.notes.simple.util.Resource
@@ -22,9 +22,8 @@ class NoteDeletionManager constructor(
     private val messageManager: MessageManager,
     private val noteList: StateFlow<NoteList>,
     private val coroutineScope: CoroutineScope,
-    private val onDismissSelectionMode: () -> Unit
+    private val onDismissSelectionMode: () -> Unit,
 ) {
-
     private val _dialogs: MutableStateFlow<NoteDeletionState> =
         MutableStateFlow(NoteDeletionState.Idle)
     val dialogs = _dialogs.asStateFlow()
@@ -72,7 +71,6 @@ class NoteDeletionManager constructor(
 
     //region Archive
     fun onArchiveNotes() {
-
         val tasksToDeleteIds = getSelectedTasks().map { it.id }
         archiveNotes(tasksToDeleteIds)
 
@@ -95,7 +93,7 @@ class NoteDeletionManager constructor(
     fun onArchiveConfirmNotes() {
         _dialogs.update {
             NoteDeletionState.ConfirmArchiveDialog(
-                tasksToArchiveSize = getSelectedTasks().size
+                tasksToArchiveSize = getSelectedTasks().size,
             )
         }
     }

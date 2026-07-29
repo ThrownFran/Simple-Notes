@@ -1,6 +1,6 @@
 package brillembourg.notes.simple.util
 
-import brillembourg.notes.simple.presentation.ui_utils.MyLogger
+import brillembourg.notes.simple.presentation.uiutils.MyLogger
 
 fun getMessageFromError(e: Exception): UiText {
     return when (e) {
@@ -19,7 +19,11 @@ open class AppException(message: String?) : Exception(message) {
 }
 
 class GenericException(message: String?) : AppException(message)
+
 class BackupException(message: String?) : AppException(message)
+
 class RestoreException(message: String?) : AppException(message)
+
 class GetTaskException(message: String?) : AppException(message)
+
 class GetCategoriesException(message: String?) : AppException(message)

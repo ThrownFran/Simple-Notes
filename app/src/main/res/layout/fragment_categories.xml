@@ -19,7 +19,7 @@
         tools:context=".presentation.categories.CategoriesFragment">
 
 
-        <brillembourg.notes.simple.presentation.custom_views.CreateItemView
+        <brillembourg.notes.simple.presentation.customviews.CreateItemView
             android:id="@+id/categories_createitemview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

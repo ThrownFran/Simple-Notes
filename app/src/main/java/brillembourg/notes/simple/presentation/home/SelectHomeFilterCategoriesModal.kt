@@ -8,7 +8,7 @@ import androidx.fragment.app.viewModels
 import brillembourg.notes.simple.databinding.ModalBottomSheetCategoriesBinding
 import brillembourg.notes.simple.presentation.categories.CategoriesViewModel
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
-import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
+import brillembourg.notes.simple.presentation.customviews.safeUiLaunch
 import brillembourg.notes.simple.presentation.detail.setupSelectCategoriesAdapter
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.combine
 
 @AndroidEntryPoint
 class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
-
     private val detailViewModel: HomeViewModel by viewModels(ownerProducer = { requireParentFragment() })
     private val categoryViewModel: CategoriesViewModel by viewModels()
     private lateinit var binding: ModalBottomSheetCategoriesBinding
@@ -24,7 +23,7 @@ class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         binding = ModalBottomSheetCategoriesBinding.inflate(inflater, container, false)
         renderStates()
@@ -62,7 +61,7 @@ class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
             combine(
                 detailViewModel.allCategories,
                 detailViewModel.homeUiState,
-                detailViewModel.selectCategoriesState
+                detailViewModel.selectCategoriesState,
             ) { a, b, c ->
                 Triple(a, b, c)
             }.collect {
@@ -74,7 +73,7 @@ class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
                     setupSelectCategoriesAdapter(
                         binding.detailRecyclerCategories,
                         allCategories,
-                        noteList.filteredCategories.map { categoryPresentationModel -> categoryPresentationModel.id }
+                        noteList.filteredCategories.map { categoryPresentationModel -> categoryPresentationModel.id },
                     ) { category, isChecked ->
                         onCheckedCategory(category, isChecked)
                     }
@@ -90,17 +89,15 @@ class SelectHomeFilterCategoriesModal : BottomSheetDialogFragment() {
         super.onDestroy()
     }
 
-
     private fun onCheckedCategory(
         category: CategoryPresentationModel,
-        isChecked: Boolean
+        isChecked: Boolean,
     ) {
         detailViewModel.onCategoryChecked(
             category,
-            isChecked
+            isChecked,
         )
     }
-
 
     companion object {
         const val TAG = "SelectCategoryModalBottomSheet"

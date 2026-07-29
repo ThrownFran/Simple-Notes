@@ -2,7 +2,11 @@ package brillembourg.notes.simple.data.user
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import brillembourg.notes.simple.data.user.UserPreferencesRepositoryImp.PreferencesKeys.FILTER_IDS
 import brillembourg.notes.simple.data.user.UserPreferencesRepositoryImp.PreferencesKeys.IS_GRID
@@ -17,10 +21,10 @@ import brillembourg.notes.simple.domain.models.NoteLayout
 import brillembourg.notes.simple.domain.models.ThemeMode
 import brillembourg.notes.simple.domain.models.UserPreferences
 import brillembourg.notes.simple.domain.repositories.UserPrefRepository
-import brillembourg.notes.simple.domain.use_cases.user.GetFilterByCategoriesUseCase
-import brillembourg.notes.simple.domain.use_cases.user.GetUserPrefUseCase
-import brillembourg.notes.simple.domain.use_cases.user.SaveFilterByCategoriesUseCase
-import brillembourg.notes.simple.domain.use_cases.user.SaveUserPrefUseCase
+import brillembourg.notes.simple.domain.usecases.user.GetFilterByCategoriesUseCase
+import brillembourg.notes.simple.domain.usecases.user.GetUserPrefUseCase
+import brillembourg.notes.simple.domain.usecases.user.SaveFilterByCategoriesUseCase
+import brillembourg.notes.simple.domain.usecases.user.SaveUserPrefUseCase
 import brillembourg.notes.simple.util.Resource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -28,7 +32,6 @@ import kotlinx.coroutines.flow.map
 import java.io.IOException
 
 class UserPreferencesRepositoryImp(val context: Context) : UserPrefRepository {
-
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = PREFERENCE_STORE)
 
     override fun getFilter(params: GetFilterByCategoriesUseCase.Params): Flow<Resource<GetFilterByCategoriesUseCase.CategoriesIds>> {
@@ -45,7 +48,7 @@ class UserPreferencesRepositoryImp(val context: Context) : UserPrefRepository {
                 val set: Set<String>? = preferences[FILTER_IDS]
                 val ids = set?.toList()?.map { it.toLong() } ?: emptyList()
                 Resource.Success(
-                    GetFilterByCategoriesUseCase.CategoriesIds(ids)
+                    GetFilterByCategoriesUseCase.CategoriesIds(ids),
                 )
             }
     }
@@ -73,10 +76,11 @@ class UserPreferencesRepositoryImp(val context: Context) : UserPrefRepository {
                     val noteLayout = preferences[IS_GRID]?.toNoteLayout()
                     val theme = preferences[THEME]?.toThemeMode()
 
-                    val userPreferences = UserPreferences(
-                        _notesLayout = noteLayout ?: NoteLayout.Vertical,
-                        _theme = theme ?: ThemeMode.Light
-                    )
+                    val userPreferences =
+                        UserPreferences(
+                            _notesLayout = noteLayout ?: NoteLayout.Vertical,
+                            _theme = theme ?: ThemeMode.Light,
+                        )
                     Resource.Success(GetUserPrefUseCase.Result(userPreferences))
                 } catch (e: Exception) {
                     Resource.Error(e)
@@ -140,5 +144,3 @@ class UserPreferencesRepositoryImp(val context: Context) : UserPrefRepository {
         val FILTER_IDS = stringSetPreferencesKey("filter_categories_ids")
     }
 }
-
-

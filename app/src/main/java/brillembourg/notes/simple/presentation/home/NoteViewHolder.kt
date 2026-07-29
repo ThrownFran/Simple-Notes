@@ -4,25 +4,23 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemNoteBinding
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
-import brillembourg.notes.simple.presentation.custom_views.fromDpToPixel
+import brillembourg.notes.simple.presentation.customviews.fromDpToPixel
 import brillembourg.notes.simple.presentation.models.NotePresentationModel
-import brillembourg.notes.simple.presentation.ui_utils.Selectable
-import brillembourg.notes.simple.presentation.ui_utils.SelectableImp
+import brillembourg.notes.simple.presentation.uiutils.Selectable
+import brillembourg.notes.simple.presentation.uiutils.SelectableImp
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
-
 
 class NoteViewHolder(
     private val getCurrentList: () -> List<NotePresentationModel>,
     private val binding: ItemNoteBinding,
     onClick: ((NotePresentationModel) -> Unit)? = null,
     private val onSelected: ((isSelected: Boolean, id: Long) -> Unit)? = null,
-    private val onReadyToDrag: ((NoteViewHolder) -> Unit)? = null
+    private val onReadyToDrag: ((NoteViewHolder) -> Unit)? = null,
 ) : RecyclerView.ViewHolder(binding.root),
     Selectable<NotePresentationModel> by SelectableImp(getCurrentList) {
-
     init {
         setupClickListeners()
         setupSelection(
@@ -32,12 +30,11 @@ class NoteViewHolder(
             onReadyToDrag = {
                 onReadyToDrag?.invoke(this)
                 setBackgroundSelectedStroke()
-            }
+            },
         )
     }
 
     private fun setupClickListeners() {
-
         binding.taskCardview.setOnClickListener {
             setClick()
         }
@@ -69,18 +66,20 @@ class NoteViewHolder(
         val categories = task.categories.toDiplayOrder()
 
         binding.taskRecyclerCategories.apply {
-            layoutManager = FlexboxLayoutManager(context)
-                .apply {
-                    flexDirection = FlexDirection.ROW
-                    justifyContent = JustifyContent.FLEX_START
-                    flexWrap = FlexWrap.WRAP
-                }
+            layoutManager =
+                FlexboxLayoutManager(context)
+                    .apply {
+                        flexDirection = FlexDirection.ROW
+                        justifyContent = JustifyContent.FLEX_START
+                        flexWrap = FlexWrap.WRAP
+                    }
             isNestedScrollingEnabled = false
             isClickable = false
-            adapter = CategoryChipColorSecondaryAdapter(
-                onClick = { setClick() },
-                onLongClick = { setLongClick() }
-            ).apply { submitList(categories) }
+            adapter =
+                CategoryChipColorSecondaryAdapter(
+                    onClick = { setClick() },
+                    onLongClick = { setLongClick() },
+                ).apply { submitList(categories) }
         }
     }
 
@@ -126,6 +125,4 @@ class NoteViewHolder(
             text = task.title
         }
     }
-
-
 }

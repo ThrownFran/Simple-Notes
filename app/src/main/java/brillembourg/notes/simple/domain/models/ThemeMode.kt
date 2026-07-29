@@ -5,7 +5,10 @@ import brillembourg.notes.simple.R
 import brillembourg.notes.simple.presentation.settings.IsOption
 
 enum class ThemeMode(var type: String) : IsOption {
-    Light("0"), Dark("1"), System("2");
+    Light("0"),
+    Dark("1"),
+    System("2"),
+    ;
 
     override fun getValue(): String {
         return type

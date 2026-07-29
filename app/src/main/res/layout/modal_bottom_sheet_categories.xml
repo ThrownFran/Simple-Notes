@@ -39,7 +39,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <brillembourg.notes.simple.presentation.custom_views.CreateItemView
+            <brillembourg.notes.simple.presentation.customviews.CreateItemView
                 android:id="@+id/select_categories_createitem"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

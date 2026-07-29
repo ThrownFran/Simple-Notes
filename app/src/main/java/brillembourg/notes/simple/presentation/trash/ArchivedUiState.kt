@@ -11,15 +11,15 @@ data class ArchivedUiState(
     val noteLayout: NoteLayout = NoteLayout.Vertical,
     val selectionModeActive: SelectionModeActive = SelectionModeActive(),
     val noteActions: NoteActions = NoteActions(),
-    val isLoading: Boolean = noteList.hasLoaded.not()
+    val isLoading: Boolean = noteList.hasLoaded.not(),
 ) : Parcelable {
-
     val emptyNote: EmptyNote
-        get() = when {
-            isLoading.not() && noteList.key.isEmpty() && noteList.notes.isEmpty() -> EmptyNote.NoArchived
-            isLoading.not() && noteList.key.isNotEmpty() && noteList.notes.isEmpty() -> EmptyNote.EmptyForSearch
-            else -> EmptyNote.None
-        }
+        get() =
+            when {
+                isLoading.not() && noteList.key.isEmpty() && noteList.notes.isEmpty() -> EmptyNote.NoArchived
+                isLoading.not() && noteList.key.isNotEmpty() && noteList.notes.isEmpty() -> EmptyNote.EmptyForSearch
+                else -> EmptyNote.None
+            }
 
     @Parcelize
     data class NoteActions(
@@ -28,8 +28,8 @@ data class ArchivedUiState(
     ) : Parcelable
 
     enum class EmptyNote {
-        None, EmptyForSearch, NoArchived
+        None,
+        EmptyForSearch,
+        NoArchived,
     }
-
 }
-

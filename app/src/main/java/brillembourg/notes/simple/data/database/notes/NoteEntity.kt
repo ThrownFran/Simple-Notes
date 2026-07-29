@@ -12,7 +12,7 @@ data class NoteEntity(
     @ColumnInfo(name = "date_created") val dateCreated: String,
     @ColumnInfo(name = "title") val title: String? = null,
     @ColumnInfo(name = "order") val order: Int,
-    @ColumnInfo(name = "is_archived") val isArchived: Boolean = false
+    @ColumnInfo(name = "is_archived") val isArchived: Boolean = false,
 )
 
 fun NoteEntity.toDomain(): Note {
@@ -23,7 +23,7 @@ fun NoteEntity.toDomain(): Note {
         content = content,
         order = order,
         date = dateCreated,
-        isArchived = isArchived
+        isArchived = isArchived,
     )
 }
 
@@ -34,5 +34,5 @@ fun Note.toEntity(): NoteEntity =
         content = content,
         order = order,
         dateCreated = date,
-        isArchived = isArchived
+        isArchived = isArchived,
     )

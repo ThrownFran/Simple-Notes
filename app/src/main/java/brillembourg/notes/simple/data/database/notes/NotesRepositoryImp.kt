@@ -6,17 +6,17 @@ import brillembourg.notes.simple.data.database.categories.toEntity
 import brillembourg.notes.simple.data.database.toDomain
 import brillembourg.notes.simple.domain.models.NoteWithCategories
 import brillembourg.notes.simple.domain.repositories.NotesRepository
-import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.AddCategoryToNoteUseCase
-import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.GetCategoriesForNoteUseCase
-import brillembourg.notes.simple.domain.use_cases.cross_categories_notes.RemoveCategoryToNoteUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.ArchiveNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.CreateNoteUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.DeleteNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.GetArchivedNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.GetNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.ReorderNotesUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.SaveNoteUseCase
-import brillembourg.notes.simple.domain.use_cases.notes.UnArchiveNotesUseCase
+import brillembourg.notes.simple.domain.usecases.crosscategoriesnotes.AddCategoryToNoteUseCase
+import brillembourg.notes.simple.domain.usecases.crosscategoriesnotes.GetCategoriesForNoteUseCase
+import brillembourg.notes.simple.domain.usecases.crosscategoriesnotes.RemoveCategoryToNoteUseCase
+import brillembourg.notes.simple.domain.usecases.notes.ArchiveNotesUseCase
+import brillembourg.notes.simple.domain.usecases.notes.CreateNoteUseCase
+import brillembourg.notes.simple.domain.usecases.notes.DeleteNotesUseCase
+import brillembourg.notes.simple.domain.usecases.notes.GetArchivedNotesUseCase
+import brillembourg.notes.simple.domain.usecases.notes.GetNotesUseCase
+import brillembourg.notes.simple.domain.usecases.notes.ReorderNotesUseCase
+import brillembourg.notes.simple.domain.usecases.notes.SaveNoteUseCase
+import brillembourg.notes.simple.domain.usecases.notes.UnArchiveNotesUseCase
 import brillembourg.notes.simple.util.GetTaskException
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
@@ -28,9 +28,8 @@ import kotlinx.coroutines.flow.transform
 
 class NotesRepositoryImp(
     private val database: NoteDatabase,
-    private val dateProvider: DateProvider
+    private val dateProvider: DateProvider,
 ) : NotesRepository {
-
     override suspend fun unArchiveTasks(params: UnArchiveNotesUseCase.Params): Resource<UnArchiveNotesUseCase.Result> {
         return safeCall {
             database.unArchiveTasks(params.ids)
@@ -44,22 +43,21 @@ class NotesRepositoryImp(
             database.archiveTasks(params.ids)
             Resource.Success(
                 ArchiveNotesUseCase.Result(
-                    if (params.ids.size > 1) UiText.NotesArchived else UiText.NoteArchived
-                )
+                    if (params.ids.size > 1) UiText.NotesArchived else UiText.NoteArchived,
+                ),
             )
         }
     }
 
-
     override suspend fun createTask(params: CreateNoteUseCase.Params): Resource<CreateNoteUseCase.Result> {
-
         return safeCall {
             val dateCreated = dateProvider.getCurrentTime()
-            val task = database.createTask(
-                title = params.title,
-                content = params.content,
-                dateCreated = dateCreated
-            ).toDomain()
+            val task =
+                database.createTask(
+                    title = params.title,
+                    content = params.content,
+                    dateCreated = dateCreated,
+                ).toDomain()
             val noteWithCategories = NoteWithCategories(task, emptyList())
             Resource.Success(CreateNoteUseCase.Result(noteWithCategories, UiText.NoteCreated))
         }
@@ -79,9 +77,10 @@ class NotesRepositoryImp(
             .distinctUntilChanged()
             .transform {
                 try {
-                    val result = GetArchivedNotesUseCase.Result(
-                        it.map { taskEntity -> taskEntity.toDomain() }
-                    )
+                    val result =
+                        GetArchivedNotesUseCase.Result(
+                            it.map { taskEntity -> taskEntity.toDomain() },
+                        )
                     emit(Resource.Success(result))
                 } catch (e: Exception) {
                     emit(Resource.Error(GetTaskException(e.message)))
@@ -124,21 +123,22 @@ class NotesRepositoryImp(
             .distinctUntilChanged()
             .transform {
                 try {
-                    val taskListDomain = it.map { taskEntity -> taskEntity.toDomain() }
-                        .filter { noteWithCategory ->
+                    val taskListDomain =
+                        it.map { taskEntity -> taskEntity.toDomain() }
+                            .filter { noteWithCategory ->
 
-                            //Empty
-                            if (params.filterByCategories.isEmpty()) return@filter true
+                                // Empty
+                                if (params.filterByCategories.isEmpty()) return@filter true
 
-                            //My filtered id is in Model
-                            noteWithCategory.categories.forEach {
-                                if (params.filterByCategories.map { it.id }.contains(it.id)) {
-                                    return@filter true
+                                // My filtered id is in Model
+                                noteWithCategory.categories.forEach {
+                                    if (params.filterByCategories.map { it.id }.contains(it.id)) {
+                                        return@filter true
+                                    }
                                 }
-                            }
 
-                            false
-                        }
+                                false
+                            }
                     val result = GetNotesUseCase.Result(taskListDomain)
                     emit(Resource.Success(result))
                 } catch (e: Exception) {
@@ -160,5 +160,4 @@ class NotesRepositoryImp(
             Resource.Success(ReorderNotesUseCase.Result(UiText.NotesReordered))
         }
     }
-
 }

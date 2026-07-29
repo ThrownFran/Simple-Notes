@@ -13,13 +13,12 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class TaskDao {
-
-    //CREATE
+    // CREATE
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun create(item: NoteEntity): Long
 
-    //GET
+    // GET
 
     @Query("SELECT * FROM taskentity WHERE is_archived = 0")
     abstract fun getList(): Flow<List<NoteEntity>>
@@ -30,7 +29,7 @@ abstract class TaskDao {
     @Query("SELECT * FROM taskentity")
     abstract suspend fun getListAsSuspend(): List<NoteEntity>
 
-    //DELETE
+    // DELETE
 
     @Query("DELETE FROM taskentity WHERE note_id = :taskId")
     abstract suspend fun delete(taskId: Long)
@@ -38,7 +37,7 @@ abstract class TaskDao {
     @Query("delete from taskentity where note_id in (:ids)")
     abstract suspend fun deleteTasks(ids: List<Long>)
 
-    //UPDATE
+    // UPDATE
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun save(task: NoteEntity)
@@ -47,7 +46,10 @@ abstract class TaskDao {
     abstract suspend fun saveTasks(itemList: List<NoteEntity>)
 
     @Query("UPDATE taskentity SET `order` = :order WHERE note_id = :id")
-    abstract suspend fun updateOrder(id: Long, order: Int)
+    abstract suspend fun updateOrder(
+        id: Long,
+        order: Int,
+    )
 
     @Query("UPDATE taskentity SET `is_archived` = 1 WHERE note_id in (:ids)")
     abstract suspend fun archive(ids: List<Long>)
@@ -59,11 +61,14 @@ abstract class TaskDao {
     @Query("SELECT * FROM taskentity WHERE is_archived = 0")
     abstract fun getNotesWithCategories(): Flow<List<NoteWithCategoriesEntity>>
 
+    @Suppress("ktlint:standard:max-line-length")
     @Transaction
-    @Query("SELECT * FROM taskentity WHERE is_archived = :isArchived AND (title LIKE '%' || :keySearch || '%' OR description LIKE '%' || :keySearch || '%')")
+    @Query(
+        "SELECT * FROM taskentity WHERE is_archived = :isArchived AND (title LIKE '%' || :keySearch || '%' OR description LIKE '%' || :keySearch || '%')",
+    )
     abstract fun getNotesWithCategories(
         isArchived: Int,
-        keySearch: String
+        keySearch: String,
     ): Flow<List<NoteWithCategoriesEntity>>
 //    @Transaction
 //    @Query("SELECT * FROM taskentity WHERE is_archived = 0")
@@ -82,5 +87,4 @@ abstract class TaskDao {
 
     @Delete
     abstract suspend fun deleteNoteCrossCategory(noteCrossRef: CategoryNoteCrossRef)
-
 }

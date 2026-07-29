@@ -16,27 +16,21 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 class DataSourceModule {
-
     @Singleton
     @Provides
-    fun getAppDatabase(@ApplicationContext context: Context): AppDatabase {
+    fun getAppDatabase(
+        @ApplicationContext context: Context,
+    ): AppDatabase {
         return AppDatabase.invoke(context)
     }
 
     @Singleton
     @Provides
-    fun noteDatabase(
-        roomDatabase: AppDatabase
-    ): NoteDatabase =
-        NoteDatabase(roomDatabase)
+    fun noteDatabase(roomDatabase: AppDatabase): NoteDatabase = NoteDatabase(roomDatabase)
 
     @Singleton
     @Provides
-    fun categoryDatabase(
-        roomDatabase: AppDatabase
-    ): CategoriesDatabase =
-        CategoriesDatabase(roomDatabase)
-
+    fun categoryDatabase(roomDatabase: AppDatabase): CategoriesDatabase = CategoriesDatabase(roomDatabase)
 
     @Singleton
     @Provides

@@ -6,9 +6,8 @@ import brillembourg.notes.simple.presentation.categories.CategoryPresentationMod
 
 class SelectCategoryViewHolder(
     private val binding: ItemSelectCategoryBinding,
-    private val onCheckChanged: (categoryPosition: Int, isChecked: Boolean) -> Unit
+    private val onCheckChanged: (categoryPosition: Int, isChecked: Boolean) -> Unit,
 ) : RecyclerView.ViewHolder(binding.root) {
-
     init {
         setupClickListeners()
     }
@@ -31,6 +30,4 @@ class SelectCategoryViewHolder(
     private fun bindName(category: CategoryPresentationModel) {
         binding.selectCategoryTextName.text = category.name
     }
-
-
 }

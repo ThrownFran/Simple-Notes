@@ -9,15 +9,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.transform
 
 class NoteDatabase(
-    private val roomDatabase: AppDatabase
+    private val roomDatabase: AppDatabase,
 ) {
-
     suspend fun createTask(
         content: String,
         dateCreated: String,
-        title: String? = null
+        title: String? = null,
     ): NoteEntity {
-
         val lastOrderPosition = calculateLastOrderPosition()
         val nextOrderPosition = lastOrderPosition + 1
 
@@ -66,7 +64,7 @@ class NoteDatabase(
         val lastOrderPosition = calculateLastOrderPosition()
         val nextOrderPosition = lastOrderPosition + 1
 
-        //New order for each task
+        // New order for each task
         ids.forEachIndexed { index, id ->
             roomDatabase.taskDao().updateOrder(id, nextOrderPosition + index)
         }
@@ -90,12 +88,18 @@ class NoteDatabase(
         roomDatabase.taskDao().saveTasks(ArrayList(taskList))
     }
 
-    suspend fun removeCategoryToNote(categoryEntity: CategoryEntity, noteEntity: NoteEntity) {
+    suspend fun removeCategoryToNote(
+        categoryEntity: CategoryEntity,
+        noteEntity: NoteEntity,
+    ) {
         roomDatabase.taskDao()
             .deleteNoteCrossCategory(CategoryNoteCrossRef(categoryEntity.id!!, noteEntity.id!!))
     }
 
-    suspend fun addCategoryToNote(categoryEntity: CategoryEntity, noteEntity: NoteEntity) {
+    suspend fun addCategoryToNote(
+        categoryEntity: CategoryEntity,
+        noteEntity: NoteEntity,
+    ) {
         roomDatabase.taskDao()
             .createNoteCrossCategory(CategoryNoteCrossRef(categoryEntity.id!!, noteEntity.id!!))
     }
@@ -110,7 +114,5 @@ class NoteDatabase(
                     emit(emptyList())
                 }
             }
-
     }
-
 }

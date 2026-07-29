@@ -9,7 +9,7 @@ import brillembourg.notes.simple.domain.models.Category
 data class CategoryEntity(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "category_id") var id: Long? = null,
     @ColumnInfo(name = "name") val name: String,
-    @ColumnInfo(name = "order") val order: Int
+    @ColumnInfo(name = "order") val order: Int,
 )
 
 fun CategoryEntity.toDomain(): Category {

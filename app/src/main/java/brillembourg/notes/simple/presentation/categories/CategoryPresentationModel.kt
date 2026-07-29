@@ -12,9 +12,8 @@ data class CategoryPresentationModel(
     var name: String,
     override var order: Int,
     override var isSelected: Boolean = false,
-    var isEditing: Boolean = false
+    var isEditing: Boolean = false,
 ) : Parcelable, HasOrder, IsSelectable
-
 
 fun Category.toPresentation(): CategoryPresentationModel {
     return CategoryPresentationModel(id, name, order)

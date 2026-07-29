@@ -24,17 +24,17 @@ import brillembourg.notes.simple.presentation.base.MainActivity
 import brillembourg.notes.simple.presentation.base.MainViewModel
 import brillembourg.notes.simple.presentation.categories.CategoryPresentationModel
 import brillembourg.notes.simple.presentation.categories.toDiplayOrder
-import brillembourg.notes.simple.presentation.custom_views.copy
-import brillembourg.notes.simple.presentation.custom_views.hideKeyboard
-import brillembourg.notes.simple.presentation.custom_views.safeUiLaunch
-import brillembourg.notes.simple.presentation.custom_views.shareText
-import brillembourg.notes.simple.presentation.custom_views.showSoftKeyboard
+import brillembourg.notes.simple.presentation.customviews.copy
+import brillembourg.notes.simple.presentation.customviews.hideKeyboard
+import brillembourg.notes.simple.presentation.customviews.safeUiLaunch
+import brillembourg.notes.simple.presentation.customviews.shareText
+import brillembourg.notes.simple.presentation.customviews.showSoftKeyboard
 import brillembourg.notes.simple.presentation.home.CategoryChipColorSecondaryAdapter
-import brillembourg.notes.simple.presentation.ui_utils.prepareTransition
-import brillembourg.notes.simple.presentation.ui_utils.setCreateNoteEnterTransition
-import brillembourg.notes.simple.presentation.ui_utils.setEditNoteEnteringTransition
-import brillembourg.notes.simple.presentation.ui_utils.showArchiveConfirmationDialog
-import brillembourg.notes.simple.presentation.ui_utils.showDeleteTasksDialog
+import brillembourg.notes.simple.presentation.uiutils.prepareTransition
+import brillembourg.notes.simple.presentation.uiutils.setCreateNoteEnterTransition
+import brillembourg.notes.simple.presentation.uiutils.setEditNoteEnteringTransition
+import brillembourg.notes.simple.presentation.uiutils.showArchiveConfirmationDialog
+import brillembourg.notes.simple.presentation.uiutils.showDeleteTasksDialog
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -44,10 +44,8 @@ import kotlinx.coroutines.flow.debounce
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent.setEventListener
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener
 
-
 @AndroidEntryPoint
 class DetailFragment : Fragment(), MenuProvider {
-
     companion object {
         fun newInstance() = DetailFragment()
     }
@@ -63,8 +61,9 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View {
         binding = FragmentDetailBinding.inflate(inflater, container, false)
         binding.viewmodel = viewModel
@@ -74,20 +73,22 @@ class DetailFragment : Fragment(), MenuProvider {
         return binding.root
     }
 
-
     private fun setupMenu() {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.STARTED)
     }
 
-    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+    override fun onCreateMenu(
+        menu: Menu,
+        menuInflater: MenuInflater,
+    ) {
         menuInflater.inflate(R.menu.menu_note, menu)
     }
 
     override fun onPrepareMenu(menu: Menu) {
         super.onPrepareMenu(menu)
-        val isNewTask = viewModel.uiDetailUiState.value.isNewTask
-        val isArchived = viewModel.uiDetailUiState.value.isArchivedTask
+        val isNewTask = viewModel.uiDetailState.value.isNewTask
+        val isArchived = viewModel.uiDetailState.value.isArchivedTask
 
         menuUnarchiveVisibility(menu, isArchived, isNewTask)
         menuArchiveVisibility(menu, isArchived, isNewTask)
@@ -98,7 +99,7 @@ class DetailFragment : Fragment(), MenuProvider {
 
     private fun menuCategoryVisibility(menu: Menu) {
         val isMenuCategoryVisible =
-            viewModel.uiDetailUiState.value.selectCategories.isCategoryMenuAvailable
+            viewModel.uiDetailState.value.selectCategories.isCategoryMenuAvailable
 
         menu.findItem(R.id.menu_note_label).apply {
             isVisible = isMenuCategoryVisible
@@ -106,7 +107,7 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     private fun menuShareAndCopyVisibility(menu: Menu) {
-        val userInput = viewModel.uiDetailUiState.value.userInput
+        val userInput = viewModel.uiDetailState.value.userInput
         val isShareOrCopyEnabled = !userInput.isNullOrEmpty()
         menu.findItem(R.id.menu_note_share).apply {
             isVisible = isShareOrCopyEnabled
@@ -119,7 +120,7 @@ class DetailFragment : Fragment(), MenuProvider {
     private fun menuDeleteVisibilityAndOptions(
         menu: Menu,
         isNewTask: Boolean,
-        isArchived: Boolean
+        isArchived: Boolean,
     ) {
         menu.findItem(R.id.menu_note_delete).apply {
             isVisible = !isNewTask
@@ -128,7 +129,7 @@ class DetailFragment : Fragment(), MenuProvider {
                     MenuItem.SHOW_AS_ACTION_ALWAYS
                 } else {
                     MenuItem.SHOW_AS_ACTION_NEVER
-                }
+                },
             )
         }
     }
@@ -136,7 +137,7 @@ class DetailFragment : Fragment(), MenuProvider {
     private fun menuArchiveVisibility(
         menu: Menu,
         isArchived: Boolean,
-        isNewTask: Boolean
+        isNewTask: Boolean,
     ) {
         menu.findItem(R.id.menu_note_archive).apply {
             isVisible = !isArchived && !isNewTask
@@ -146,7 +147,7 @@ class DetailFragment : Fragment(), MenuProvider {
     private fun menuUnarchiveVisibility(
         menu: Menu,
         isArchived: Boolean,
-        isNewTask: Boolean
+        isNewTask: Boolean,
     ) {
         menu.findItem(R.id.menu_note_unachive).apply {
             isVisible = isArchived && !isNewTask
@@ -161,7 +162,7 @@ class DetailFragment : Fragment(), MenuProvider {
                     size = 1,
                     onPositive = {
                         viewModel.onDelete()
-                    }
+                    },
                 )
                 return true
             }
@@ -170,7 +171,7 @@ class DetailFragment : Fragment(), MenuProvider {
                 showArchiveConfirmationDialog(
                     fragment = this,
                     size = 1,
-                    onPositive = { viewModel.onArchive() }
+                    onPositive = { viewModel.onArchive() },
                 )
                 return true
             }
@@ -189,8 +190,8 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     private fun generateTextToCopy(): String {
-        val title = viewModel.uiDetailUiState.value.userInput.title
-        val content = viewModel.uiDetailUiState.value.userInput.content
+        val title = viewModel.uiDetailState.value.userInput.title
+        val content = viewModel.uiDetailState.value.userInput.content
 
         return StringBuilder(title)
             .append((if (title.isNotEmpty()) "\n\n" else ""))
@@ -211,21 +212,25 @@ class DetailFragment : Fragment(), MenuProvider {
                     binding.detailEditContent.clearFocus()
                     binding.detailLinear.clearFocus()
                 }
-            })
+            },
+        )
     }
 
     private fun clickBack() {
         viewModel.onBackPressed()
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         prepareTransition(view)
 
-        if (viewModel.uiDetailUiState.value.isNewTask) {
+        if (viewModel.uiDetailState.value.isNewTask) {
             setCreateNoteEnterTransition(
                 myStartView = requireActivity().findViewById(R.id.home_fab),
-                myEndView = binding.detailLinear
+                myEndView = binding.detailLinear,
             )
         }
         renderState()
@@ -235,14 +240,13 @@ class DetailFragment : Fragment(), MenuProvider {
         val selectCategoriesModalBottomSheet = SelectNoteCategoriesModal()
         selectCategoriesModalBottomSheet.show(
             childFragmentManager,
-            SelectNoteCategoriesModal.TAG
+            SelectNoteCategoriesModal.TAG,
         )
     }
 
     private fun renderState() {
         safeUiLaunch {
-
-            viewModel.uiDetailUiState.collect { uiState ->
+            viewModel.uiDetailState.collect { uiState ->
 
                 setToolbarTitle(uiState.isNewTask)
 
@@ -271,7 +275,7 @@ class DetailFragment : Fragment(), MenuProvider {
         }
 
         safeUiLaunch {
-            viewModel.uiDetailUiState.value.getOnInputChangedFlow()
+            viewModel.uiDetailState.value.getOnInputChangedFlow()
                 .debounce(300)
                 .collect {
                     updateToolbarIcons()
@@ -287,28 +291,31 @@ class DetailFragment : Fragment(), MenuProvider {
         }
     }
 
-    private fun renderLastEdit(uiState: DetailUiState) = with(uiState) {
-        binding.detailTextLastEdit.apply {
-            if (lastEdit.isNotEmpty()) {
-                isVisible = true
-                text = getString(R.string.last_edited, lastEdit)
-            } else {
-                isVisible = false
+    private fun renderLastEdit(uiState: DetailUiState) =
+        with(uiState) {
+            binding.detailTextLastEdit.apply {
+                if (lastEdit.isNotEmpty()) {
+                    isVisible = true
+                    text = getString(R.string.last_edited, lastEdit)
+                } else {
+                    isVisible = false
+                }
             }
         }
-    }
 
     private fun setupNoteCategories(noteCategories: List<CategoryPresentationModel>) {
         binding.detailRecyclerCategories.apply {
-            layoutManager = FlexboxLayoutManager(context)
-                .apply {
-                    flexDirection = FlexDirection.ROW
-                    justifyContent = JustifyContent.FLEX_START
-                    flexWrap = FlexWrap.WRAP
-                }
-            adapter = CategoryChipColorSecondaryAdapter(onClick = {
-                viewModel.onNavigateToCategories()
-            }).apply { submitList(noteCategories.toDiplayOrder()) }
+            layoutManager =
+                FlexboxLayoutManager(context)
+                    .apply {
+                        flexDirection = FlexDirection.ROW
+                        justifyContent = JustifyContent.FLEX_START
+                        flexWrap = FlexWrap.WRAP
+                    }
+            adapter =
+                CategoryChipColorSecondaryAdapter(onClick = {
+                    viewModel.onNavigateToCategories()
+                }).apply { submitList(noteCategories.toDiplayOrder()) }
         }
     }
 
@@ -326,7 +333,7 @@ class DetailFragment : Fragment(), MenuProvider {
 
     private fun setToolbarTitle(isNewTask: Boolean) {
         if (isNewTask) {
-            //Create or Edit title
+            // Create or Edit title
             val activityBinding = (activity as MainActivity?)?.binding
             activityBinding?.toolbar?.title = getString(R.string.add_note)
         } else {
@@ -363,21 +370,22 @@ class DetailFragment : Fragment(), MenuProvider {
     }
 
     private fun setupBackPhysicalButtonListener() {
-        val onBackPressedCallback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                // Handle the back button event
-                clickBack()
+        val onBackPressedCallback =
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    // Handle the back button event
+                    clickBack()
+                }
             }
-        }
         requireActivity().onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 }
 
 fun setupExtrasToDetail(sharedView: View): FragmentNavigator.Extras {
     return FragmentNavigatorExtras(
-        //View from item list
+        // View from item list
         sharedView
-                //String mapping detail view (transition_name)
-                to sharedView.context.getString(R.string.home_shared_detail_container),
+            // String mapping detail view (transition_name)
+            to sharedView.context.getString(R.string.home_shared_detail_container),
     )
 }

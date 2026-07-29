@@ -5,9 +5,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import brillembourg.notes.simple.databinding.ItemCategoryBinding
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.Draggable
-import brillembourg.notes.simple.presentation.ui_utils.recycler_view.ItemTouchDraggableImp
-import brillembourg.notes.simple.presentation.ui_utils.setupCategoryDiffCallback
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.Draggable
+import brillembourg.notes.simple.presentation.uiutils.recyclerview.ItemTouchDraggableImp
+import brillembourg.notes.simple.presentation.uiutils.setupCategoryDiffCallback
 
 class CategoryAdapter(
     private val recyclerView: RecyclerView,
@@ -15,45 +15,48 @@ class CategoryAdapter(
     private val onClick: (task: CategoryPresentationModel) -> Unit,
     private val onSelection: (isSelected: Boolean, id: Long) -> Unit,
     private val onReorderSuccess: (reorderedTaskList: List<CategoryPresentationModel>) -> Unit,
-    private val onReorderCanceled: () -> Unit
+    private val onReorderCanceled: () -> Unit,
 ) : ListAdapter<CategoryPresentationModel, CategoryViewHolder>(setupCategoryDiffCallback()),
     Draggable<CategoryPresentationModel> by ItemTouchDraggableImp(recyclerView) {
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): CategoryViewHolder {
         return CategoryViewHolder(
             onRename = onRename,
-            binding = ItemCategoryBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            ),
+            binding =
+                ItemCategoryBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false,
+                ),
             onReadyToDrag = onStartDrag(),
             onClick = onClick,
             onSelected = onSelection,
-            getCurrentList = { currentList }
+            getCurrentList = { currentList },
         )
     }
 
-    private fun onStartDrag() = { noteViewHolder: CategoryViewHolder ->
-        startDrag(
-            recyclerView = recyclerView,
-            viewHolder = noteViewHolder,
-            onGetCurrentList = { currentList },
+    private fun onStartDrag() =
+        { noteViewHolder: CategoryViewHolder ->
+            startDrag(
+                recyclerView = recyclerView,
+                viewHolder = noteViewHolder,
+                onGetCurrentList = { currentList },
+                onSubmitList = { noteList, submitSuccess ->
+                    submitList(noteList) {
+                        submitSuccess() // Commit callback
+                    }
+                },
+                onReorderSuccess = onReorderSuccess,
+                onReorderCanceled = onReorderCanceled,
+            )
+        }
 
-            onSubmitList = { noteList, submitSuccess ->
-                submitList(noteList) {
-                    submitSuccess() //Commit callback
-                }
-            },
-
-            onReorderSuccess = onReorderSuccess,
-            onReorderCanceled = onReorderCanceled
-        )
-    }
-
-    override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: CategoryViewHolder,
+        position: Int,
+    ) {
         holder.bind(getItem(position))
     }
-
 }
-
