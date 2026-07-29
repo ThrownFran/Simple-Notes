@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        setIntent(intent)
         handleIntentReceiver(intent)
     }
 
@@ -79,7 +80,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun onIncomingContentIntent(intent: Intent) {
         intent.getStringExtra(Intent.EXTRA_TEXT)?.let {
+            navigateToHomeForIncomingContent()
             viewModel.onIncomingContentFromExternalApp(it)
+        }
+    }
+
+    private fun navigateToHomeForIncomingContent() {
+        if (navController.currentDestination?.id != R.id.homeFragment) {
+            navController.popBackStack(R.id.homeFragment, false)
         }
     }
 
@@ -170,9 +178,6 @@ class MainActivity : AppCompatActivity() {
                     closeDrawer()
                     true
                 }
-//                R.id.menu_privacy -> {
-//                    true
-//                }
                 else -> false
             }
         }
