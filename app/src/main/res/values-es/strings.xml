@@ -49,7 +49,7 @@
     <string name="all_ok">Aceptar</string>
     <string name="settings_choose_theme">Elegir tema</string>
 
-    <string name="about_developer">Si deseas ponerte en contacto con el desarrollador para proporcionar comentarios o sugerencias, utiliza este correo electrónico <a href="mailto:franbrillembourg@gmail.com?subject=Comentarios de la aplicación Notas Simples">franbrillembourg@gmail.com</a></string>
+    <string name="about_developer">Si deseas ponerte en contacto con el desarrollador para proporcionar comentarios o sugerencias, utiliza este correo electrónico <a href="mailto:franbrillembourg.dev@gmail.com?subject=Comentarios de la aplicación Notas Simples">franbrillembourg.dev@gmail.com</a></string>
     <string name="about_copyright">©2023 Francisco Brillembourg</string>
 
     <string name="about_title">Acerca de</string>
