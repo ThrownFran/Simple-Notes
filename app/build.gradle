@@ -146,14 +146,6 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 
-    implementation('de.raphaelebner:roomdatabasebackup:1.0.0-beta12') {
-        // Excluded: room-guava/room-rxjava2 are dragged to the app's Room version by Room's
-        // version-alignment mechanism, and room-guava requires minSdk 23. The app doesn't use
-        // roomdatabasebackup's Guava/RxJava2 API surface, only its plain backup/restore API.
-        exclude group: 'androidx.room', module: 'room-guava'
-        exclude group: 'androidx.room', module: 'room-rxjava2'
-    }
-
     testImplementation 'junit:junit:4.13.2'
     testImplementation "io.mockk:mockk:1.14.11"
     testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0'
