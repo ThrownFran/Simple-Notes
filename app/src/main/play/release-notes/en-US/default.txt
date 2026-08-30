@@ -1,1 +1,3 @@
-Internal testing build. Edit this file before tagging a release to describe what changed.
+- Fixed a bug where a note wasn't created when sharing text from another app
+- Updated to the latest Android SDK for improved compatibility
+- Improved backup and restore: fewer permissions required and more reliable

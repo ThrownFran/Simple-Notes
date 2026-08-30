@@ -1,1 +1,3 @@
-Compilación de pruebas internas. Edita este archivo antes de crear el tag de una release para describir los cambios.
+- Se corrigió un error por el que no se creaba una nota al compartir texto desde otra app
+- Actualización al SDK de Android más reciente para mejorar la compatibilidad
+- Se mejoró la copia de seguridad y restauración: requiere menos permisos y es más fiable
