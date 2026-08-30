@@ -10,11 +10,31 @@ plugins {
     // Add the Crashlytics Gradle plugin
     id 'com.google.firebase.crashlytics'
     id 'org.jlleitschuh.gradle.ktlint'
+    id 'com.github.triplet.play'
 }
 
 ktlint {
     android.set(true)
 }
+
+// --- Release signing ---
+// Signing only ever happens in CI: the publish workflow writes keystore.properties
+// (storeFile/storePassword/keyAlias/keyPassword) from repository secrets to an ephemeral
+// file on the runner before invoking Gradle. Locally there's no keystore.properties, so
+// `assembleRelease`/`bundleRelease` build unsigned - for a real signed local build (e.g.
+// to test a release-shaped artifact before shipping), use Android Studio's
+// Build > Generate Signed Bundle/APK wizard instead, which manages its own credentials
+// independent of this file.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def hasKeystoreProperties = keystorePropertiesFile.exists()
+def keystoreProperties = new Properties()
+if (hasKeystoreProperties) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+}
+
+// --- CD-driven versionCode ---
+// Falls back to the checked-in constant so local/unsigned builds are unaffected.
+def cdVersionCode = System.getenv("CD_VERSION_CODE")
 
 android {
     compileSdk 36
@@ -23,7 +43,7 @@ android {
         applicationId "brillembourg.notes.simple.fast"
         minSdk 21
         targetSdk 36
-        versionCode 9
+        versionCode cdVersionCode ? cdVersionCode.toInteger() : 9
         versionName "1.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -35,10 +55,26 @@ android {
         }
     }
 
+    signingConfigs {
+        if (hasKeystoreProperties) {
+            release {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+        // else: no keystore.properties (the local/no-CD case) - no release signingConfig
+        // is created, so buildTypes.release below stays unsigned.
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasKeystoreProperties) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
@@ -62,6 +98,17 @@ android {
 
 kotlin {
     jvmToolchain(21)
+}
+
+// --- Play Store publishing (Gradle Play Publisher) ---
+// The publish workflow writes the Play service-account JSON from a secret to a file and
+// exports its path via PLAY_SERVICE_ACCOUNT_JSON_PATH before invoking `publishBundle`.
+// Nothing here is used by test/ktlintCheck/assembleDebug/assembleRelease.
+play {
+    serviceAccountCredentials.set(
+        file(System.getenv("PLAY_SERVICE_ACCOUNT_JSON_PATH") ?: "play-service-account.json"),
+    )
+    track.set("internal")
 }
 
 dependencies {

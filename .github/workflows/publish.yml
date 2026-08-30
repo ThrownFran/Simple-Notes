@@ -1,0 +1,71 @@
+name: Publish to Play Store
+
+# Required repository secrets (Settings > Secrets and variables > Actions):
+#   RELEASE_KEYSTORE_BASE64  - `base64 -i release.keystore | pbcopy`, paste the result
+#   RELEASE_STORE_PASSWORD   - keystore password
+#   RELEASE_KEY_ALIAS        - key alias within the keystore
+#   RELEASE_KEY_PASSWORD     - key password
+#   PLAY_SERVICE_ACCOUNT_JSON - full contents of the GCP service-account JSON key
+#                                (Play Console > API access), pasted as-is
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch: {}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Write signing files
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          KEYSTORE_PATH="$RUNNER_TEMP/release.keystore"
+          echo "$KEYSTORE_BASE64" | base64 -d > "$KEYSTORE_PATH"
+          cat > keystore.properties <<EOF
+          storeFile=$KEYSTORE_PATH
+          storePassword=$STORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+
+      - name: Write Play service account credentials
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          CREDENTIALS_PATH="$RUNNER_TEMP/play-service-account.json"
+          echo "$PLAY_SERVICE_ACCOUNT_JSON" > "$CREDENTIALS_PATH"
+          echo "PLAY_SERVICE_ACCOUNT_JSON_PATH=$CREDENTIALS_PATH" >> "$GITHUB_ENV"
+
+      - name: Compute version code
+        run: echo "CD_VERSION_CODE=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+
+      - name: Build and publish signed AAB to internal track
+        run: ./gradlew publishReleaseBundle
+
+      - name: Surface version info
+        run: |
+          VERSION_NAME=$(grep -m1 'versionName' app/build.gradle | sed -E 's/.*versionName "(.*)".*/\1/')
+          {
+            echo "### Published to Play internal testing"
+            echo "- versionName: $VERSION_NAME"
+            echo "- versionCode: $CD_VERSION_CODE"
+            echo "- ref: ${{ github.ref_name }}"
+          } >> "$GITHUB_STEP_SUMMARY"

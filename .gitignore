@@ -14,3 +14,9 @@
 .cxx
 local.properties
 .idea
+
+# Release signing - only ever written by the CD publish workflow from secrets, or by
+# Android Studio's Generate Signed Bundle/APK wizard for local one-off signing
+keystore.properties
+*.jks
+*.keystore
