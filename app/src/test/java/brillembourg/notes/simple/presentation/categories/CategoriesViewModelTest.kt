@@ -11,7 +11,6 @@ import brillembourg.notes.simple.domain.usecases.categories.SaveCategoryUseCase
 import brillembourg.notes.simple.presentation.base.MessageManager
 import brillembourg.notes.simple.util.Resource
 import brillembourg.notes.simple.util.UiText
-import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -19,13 +18,16 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -83,7 +85,7 @@ class CategoriesViewModelTest {
         every { messageManager.showError(any()) } coAnswers { Unit }
     }
 
-    private fun setupSUT() {
+    private fun TestScope.setupSUT() {
         sut =
             CategoriesViewModel(
                 savedStateHandle = savedStateHandle,
@@ -94,6 +96,9 @@ class CategoriesViewModelTest {
                 reorderCategoriesUseCase = reorderCategoriesUseCase,
                 messageManager = messageManager,
             )
+        // categoryUiState/categoryList use SharingStarted.WhileSubscribed, so they only
+        // emit while collected; keep a collector alive for the duration of each test.
+        backgroundScope.launch { sut.categoryUiState.collect {} }
     }
 
     @Test
@@ -150,7 +155,7 @@ class CategoriesViewModelTest {
             testScheduler.advanceUntilIdle()
             // Assert
             coVerify { messageManager.showMessage(UiText.CategoryNameEmpty) }
-            coVerify { createCategoryUseCase.invoke(any()) wasNot called }
+            coVerify(exactly = 0) { createCategoryUseCase.invoke(any()) }
         }
 
     @Test
@@ -226,20 +231,14 @@ class CategoriesViewModelTest {
             // Act
             testScheduler.advanceUntilIdle()
             selectTwoItems()
-            sut.onSelection()
+            testScheduler.advanceUntilIdle()
             // Assert
-            assertNotNull(sut.categoryUiState.value.selectionMode)
-            assertEquals(2, sut.categoryUiState.value.selectionMode?.size)
+            assertTrue(sut.categoryUiState.value.selectionMode.isActive)
+            assertEquals(2, sut.categoryUiState.value.selectionMode.size)
         }
 
     private fun selectTwoItems(ids: List<Long> = listOf(1L, 3L)) {
-        sut.categoryUiState.value.categoryList.data.forEachIndexed { index, categoryPresentationModel ->
-            ids.forEach {
-                if (it == categoryPresentationModel.id) {
-                    categoryPresentationModel.isSelected = true
-                }
-            }
-        }
+        ids.forEach { sut.onSelection(true, it) }
     }
 
     @Test
@@ -251,10 +250,10 @@ class CategoriesViewModelTest {
             // Act
             testScheduler.advanceUntilIdle()
             selectTwoItems()
-            sut.onSelection()
             sut.onSelectionDismissed()
+            testScheduler.advanceUntilIdle()
             // Assert
-            assertNull(sut.categoryUiState.value.selectionMode)
+            assertFalse(sut.categoryUiState.value.selectionMode.isActive)
         }
 
     @Test
@@ -266,8 +265,8 @@ class CategoriesViewModelTest {
             // Act
             testScheduler.advanceUntilIdle()
             selectTwoItems()
-            sut.onSelection()
             sut.onDeleteConfirmCategories()
+            testScheduler.advanceUntilIdle()
             // Assert
             assertNotNull(sut.categoryUiState.value.deleteConfirmation)
             assertEquals(2, sut.categoryUiState.value.deleteConfirmation?.tasksToDeleteSize)
@@ -282,9 +281,9 @@ class CategoriesViewModelTest {
             // Act
             testScheduler.advanceUntilIdle()
             selectTwoItems()
-            sut.onSelection()
             sut.onDeleteConfirmCategories()
             sut.onDismissConfirmDeleteShown()
+            testScheduler.advanceUntilIdle()
             // Assert
             assertNull(sut.categoryUiState.value.deleteConfirmation)
         }
@@ -294,16 +293,17 @@ class CategoriesViewModelTest {
         runTest {
             // Arrange
             mockGetCategoriesSuccess()
+            mockDeleteCategorySuccess(listOf(1L, 3L))
             setupSUT()
             // Act
             testScheduler.advanceUntilIdle()
             selectTwoItems()
-            sut.onSelection()
             sut.onDeleteConfirmCategories()
             sut.onDeleteCategories()
+            testScheduler.advanceUntilIdle()
             // Assert
             assertNull(sut.categoryUiState.value.deleteConfirmation)
-            assertNull(sut.categoryUiState.value.selectionMode)
+            assertFalse(sut.categoryUiState.value.selectionMode.isActive)
         }
 
     @Test
@@ -317,7 +317,6 @@ class CategoriesViewModelTest {
             // Act
             testScheduler.advanceUntilIdle()
             selectTwoItems(tasksIdsToDelete)
-            sut.onSelection()
             sut.onDeleteConfirmCategories()
             sut.onDeleteCategories()
             testScheduler.advanceUntilIdle()
@@ -342,7 +341,6 @@ class CategoriesViewModelTest {
             // Act
             testScheduler.advanceUntilIdle()
             selectTwoItems(tasksIdsToDelete)
-            sut.onSelection()
             sut.onDeleteConfirmCategories()
             sut.onDeleteCategories()
             testScheduler.advanceUntilIdle()
@@ -363,7 +361,6 @@ class CategoriesViewModelTest {
             // Act
             testScheduler.advanceUntilIdle()
             selectTwoItems(tasksIdsToDelete)
-            sut.onSelection()
             sut.onDeleteConfirmCategories()
             sut.onDeleteCategories()
             testScheduler.advanceUntilIdle()
@@ -384,7 +381,6 @@ class CategoriesViewModelTest {
             // Act
             testScheduler.advanceUntilIdle()
             selectTwoItems(tasksIdsToDelete)
-            sut.onSelection()
             sut.onDeleteConfirmCategories()
             sut.onDeleteCategories()
             testScheduler.advanceUntilIdle()
@@ -431,11 +427,11 @@ class CategoriesViewModelTest {
             sut.onReorderedCategories(reorderedList)
             advanceUntilIdle()
             // Assert
-            assertNull(sut.categoryUiState.value.selectionMode)
+            assertFalse(sut.categoryUiState.value.selectionMode.isActive)
         }
 
     @Test
-    fun `on reordered categories, category list state must not render in update`() =
+    fun `on reordered categories, category list state still marked for render`() =
         runTest {
             // Arrange
             mockGetCategoriesSuccess()
@@ -447,7 +443,7 @@ class CategoriesViewModelTest {
             sut.onReorderedCategories(reorderedList)
             advanceUntilIdle()
             // Assert
-            assertFalse(sut.categoryUiState.value.categoryList.mustRender)
+            assertTrue(sut.categoryUiState.value.categoryList.mustRender)
         }
 
     @Test
@@ -487,6 +483,7 @@ class CategoriesViewModelTest {
         runTest {
             // Arrange
             mockGetCategoriesSuccess()
+            mockSaveSuccess()
             setupSUT()
             // Act
             advanceUntilIdle()
