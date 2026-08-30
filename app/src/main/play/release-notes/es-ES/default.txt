@@ -1,0 +1,1 @@
+Compilación de pruebas internas. Edita este archivo antes de crear el tag de una release para describir los cambios.
