@@ -11,9 +11,17 @@ The release `versionCode` used by the CD publish workflow SHALL be computed as `
 - **WHEN** the publish workflow runs multiple times (e.g. a retry after a failed upload)
 - **THEN** each run produces a strictly higher `versionCode` than any previous run, because `github.run_number` is monotonically increasing per workflow
 
-### Requirement: versionName SHALL remain a manually-maintained value
-`versionName` SHALL continue to be set directly in `app/build.gradle` as a human-maintained semantic version string. The CD publish workflow SHALL read and surface this value (e.g. in the workflow run summary or release tag reference) without attempting to derive, auto-bump, or override it.
+### Requirement: versionName SHALL be derived from the tag, or an explicit input, not a drifting constant
+On a tag-triggered publish run, `versionName` SHALL be derived from the pushed tag (stripping the leading `v` from `v*.*.*`) rather than read from a separately-maintained `app/build.gradle` constant, so the shipped version can never disagree with the tag that shipped it. On a `workflow_dispatch` run, `versionName` SHALL be taken from a required workflow input, since there is no tag to derive it from. The `app/build.gradle` constant SHALL remain only as the fallback used by local/unsigned builds.
+
+#### Scenario: Tag-triggered run derives versionName from the tag
+- **WHEN** the CD publish workflow runs from a pushed tag `v1.2.0`
+- **THEN** the resulting release's `versionName` is `1.2.0`
+
+#### Scenario: Manual run requires an explicit version input
+- **WHEN** the CD publish workflow is triggered via `workflow_dispatch` without a `version_name` input provided
+- **THEN** the workflow run fails to start (GitHub enforces the required input) rather than falling back to a stale or ambiguous version
 
 #### Scenario: Publish workflow surfaces versionName
 - **WHEN** the CD publish workflow runs
-- **THEN** the workflow's output/summary includes the `versionName` currently set in `app/build.gradle`, unmodified
+- **THEN** the workflow's output/summary includes the `versionName` actually used for that run (from the tag or the manual input), not the `app/build.gradle` fallback constant

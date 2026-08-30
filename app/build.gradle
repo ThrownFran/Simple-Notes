@@ -32,9 +32,13 @@ if (hasKeystoreProperties) {
     keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
 }
 
-// --- CD-driven versionCode ---
-// Falls back to the checked-in constant so local/unsigned builds are unaffected.
+// --- CD-driven versionCode/versionName ---
+// Both fall back to the checked-in constants so local/unsigned builds are unaffected.
+// The publish workflow derives CD_VERSION_NAME from the pushed tag (or a required manual
+// input for workflow_dispatch), so the tag is the single source of truth for what ships -
+// this constant is never relied on for a real publish.
 def cdVersionCode = System.getenv("CD_VERSION_CODE")
+def cdVersionName = System.getenv("CD_VERSION_NAME")
 
 android {
     compileSdk 36
@@ -44,7 +48,7 @@ android {
         minSdk 21
         targetSdk 36
         versionCode cdVersionCode ? cdVersionCode.toInteger() : 9
-        versionName "1.1.0"
+        versionName cdVersionName ?: "1.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
