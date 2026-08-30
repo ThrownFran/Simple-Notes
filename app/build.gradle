@@ -16,6 +16,76 @@ ktlint {
     android.set(true)
 }
 
+// --- Release signing ---
+// Local dev (macOS): keystore.properties holds only storeFile + keyAlias (non-secret).
+// storePassword/keyPassword are never written to disk - they're read from macOS Keychain
+// at build time (see KEYCHAIN_SERVICE below).
+// CI: the publish workflow writes a full keystore.properties (including passwords) from
+// GitHub Actions secrets to an ephemeral file on the runner - there's no Keychain on
+// Linux runners, so CI keeps the plaintext-file path.
+// Ambient CI runs (e.g. the day-to-day build/test workflow) that don't provide a signing
+// source are allowed to build an unsigned release artifact for validation only; outside
+// CI, a missing signing source fails the build instead of silently producing an unsigned
+// artifact.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def hasKeystoreProperties = keystorePropertiesFile.exists()
+def keystoreProperties = new Properties()
+if (hasKeystoreProperties) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+}
+def isCi = System.getenv("CI") == "true"
+def KEYCHAIN_SERVICE = "SimpleNotes-ReleaseKeystore"
+
+def readFromKeychain = { String account ->
+    def stdout = new ByteArrayOutputStream()
+    def result = exec {
+        commandLine "security", "find-generic-password", "-a", account, "-s", KEYCHAIN_SERVICE, "-w"
+        standardOutput = stdout
+        errorOutput = new ByteArrayOutputStream()
+        ignoreExitValue = true
+    }
+    return result.exitValue == 0 ? stdout.toString().trim() : null
+}
+
+// Only touch signing (including Keychain, which can prompt for access) when a task that
+// actually packages a release build is requested, so plain `test`/`ktlintCheck`/
+// `assembleDebug` runs never need a keystore or trigger a Keychain prompt.
+gradle.taskGraph.whenReady { graph ->
+    def needsReleaseSigning = graph.allTasks.any { task ->
+        task.name == "assembleRelease" || task.name == "bundleRelease" ||
+            task.name.startsWith("publishRelease") || task.name.startsWith("publishBundle")
+    }
+    if (!needsReleaseSigning) return
+
+    if (!hasKeystoreProperties) {
+        if (isCi) return
+        throw new GradleException(
+            "Release signing is not configured. Copy keystore.properties.example to " +
+                "keystore.properties and fill in your keystore details before building " +
+                "assembleRelease/bundleRelease.",
+        )
+    }
+
+    def storePassword = isCi ? keystoreProperties["storePassword"] : readFromKeychain("storePassword")
+    def keyPassword = isCi ? keystoreProperties["keyPassword"] : readFromKeychain("keyPassword")
+    if (!storePassword || !keyPassword) {
+        throw new GradleException(
+            isCi
+                ? "Release signing is not configured: keystore.properties is missing storePassword/keyPassword."
+                : "Release signing is not configured: storePassword/keyPassword not found in macOS " +
+                    "Keychain. Add them with:\n" +
+                    "  security add-generic-password -a storePassword -s $KEYCHAIN_SERVICE -w\n" +
+                    "  security add-generic-password -a keyPassword -s $KEYCHAIN_SERVICE -w",
+        )
+    }
+    android.signingConfigs.release.storePassword = storePassword
+    android.signingConfigs.release.keyPassword = keyPassword
+}
+
+// --- CD-driven versionCode ---
+// Falls back to the checked-in constant so local/unsigned builds are unaffected.
+def cdVersionCode = System.getenv("CD_VERSION_CODE")
+
 android {
     compileSdk 36
 
@@ -23,7 +93,7 @@ android {
         applicationId "brillembourg.notes.simple.fast"
         minSdk 21
         targetSdk 36
-        versionCode 9
+        versionCode cdVersionCode ? cdVersionCode.toInteger() : 9
         versionName "1.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -35,10 +105,27 @@ android {
         }
     }
 
+    signingConfigs {
+        if (hasKeystoreProperties) {
+            release {
+                storeFile file(keystoreProperties['storeFile'])
+                keyAlias keystoreProperties['keyAlias']
+                // storePassword / keyPassword are populated later, in
+                // gradle.taskGraph.whenReady above, once we know a release-packaging
+                // task actually needs them (Keychain locally, CI secrets in CI).
+            }
+        }
+        // else: isCi with no signing source (already validated above) - no release
+        // signingConfig is created, so buildTypes.release below stays unsigned.
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasKeystoreProperties) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
