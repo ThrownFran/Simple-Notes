@@ -33,6 +33,15 @@ Room schema export is enabled (`room.schemaLocation` → `app/schemas/`), and `a
 
 Use Conventional Commits (`feat:`, `fix:`, `chore:`, etc.) going forward — existing history predates this convention and is informal, so don't pattern-match old commit messages.
 
+## Workflow
+
+- Branch from the latest `origin/master` (`master` is the trunk), not from another feature branch: `git fetch origin master && git checkout -b <type>/<short-description> origin/master`.
+- Commit on that branch using Conventional Commits (see Commit style above).
+- Before opening a PR, pass the quality gates CI enforces on every PR into `master` (`.github/workflows/ci.yml`): `./gradlew ktlintCheck`, `./gradlew test`, `./gradlew assembleDebug`, `./gradlew assembleRelease`. (`CategoriesViewModelTest.kt` currently fails to compile — see Build/test above — unrelated to most changes.)
+- Test visually (build and run the app, or use the `run` skill) when the change is user-facing; skip this for pure resource/string/config changes with no logic impact.
+- Open the PR against `master` on GitHub: `gh pr create --base master`.
+- If `gh` fails with "Bad credentials", it's likely picking up a stale `GITHUB_TOKEN` env var over the keyring login — `unset GITHUB_TOKEN` and retry.
+
 ## Gotchas
 
 - `app/google-services.json` is intentionally committed (Firebase config).
