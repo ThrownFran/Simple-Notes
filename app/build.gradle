@@ -10,6 +10,7 @@ plugins {
     // Add the Crashlytics Gradle plugin
     id 'com.google.firebase.crashlytics'
     id 'org.jlleitschuh.gradle.ktlint'
+    id 'com.github.triplet.play'
 }
 
 ktlint {
@@ -149,6 +150,17 @@ android {
 
 kotlin {
     jvmToolchain(21)
+}
+
+// --- Play Store publishing (Gradle Play Publisher) ---
+// The publish workflow writes the Play service-account JSON from a secret to a file and
+// exports its path via PLAY_SERVICE_ACCOUNT_JSON_PATH before invoking `publishBundle`.
+// Nothing here is used by test/ktlintCheck/assembleDebug/assembleRelease.
+play {
+    serviceAccountCredentials.set(
+        file(System.getenv("PLAY_SERVICE_ACCOUNT_JSON_PATH") ?: "play-service-account.json"),
+    )
+    track.set("internal")
 }
 
 dependencies {
