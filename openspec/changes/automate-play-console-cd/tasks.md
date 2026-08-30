@@ -35,10 +35,7 @@
 
 ## 5. Promotion workflow
 
-- [ ] 5.1 Add a second GitHub Actions workflow (e.g. `.github/workflows/promote.yml`), triggered only via `workflow_dispatch`, with an input for the target track (e.g. `closed`/`production`) and the release/version to promote
-- [ ] 5.2 Implement the promotion using the Gradle Play Publisher plugin's promote task (or direct Play Developer API call), reusing the same service-account secret as the publish workflow
-- [ ] 5.3 Verify the promotion workflow does not run automatically as a result of the publish workflow completing (confirm via workflow trigger configuration, not just observation)
-- [ ] 5.4 Dry-run: promote the test release from task 4.9 to a non-production track (e.g. closed testing) and confirm it appears correctly in Play Console
+**Deferred — out of scope for this change.** Promoting a release from internal testing to closed/open/production tracks stays a manual Play Console action for now (Testing → Internal testing → your release → Promote release). Automating it is a reasonable follow-up once internal-track publishing has been exercised for a while, but will be proposed as its own separate OpenSpec change rather than built here.
 
 ## 6. Documentation
 

@@ -9,16 +9,16 @@ This design covers how to get from "CI validates the code" to "a maintainer can 
 ## Goals / Non-Goals
 
 **Goals:**
-- Release builds are signed with the maintainer's existing keystore, both locally and in CI, with the private key material never committed to the repo.
+- Release builds are signed with the maintainer's existing keystore in CI, with the private key material never committed to the repo and never persisted on a local machine.
 - Every CD run produces a strictly increasing `versionCode` so repeated internal-track uploads are always accepted by Play.
 - A maintainer can trigger a CD run (not on every push) that builds a signed AAB and uploads it to Play's internal testing track.
-- Promotion beyond internal testing (closed testing, production) is always a separate, explicit action — never a side effect of the internal-track publish.
 - The existing CI workflow (build/test on every push/PR) is untouched by this work; CD is additive.
 
 **Non-Goals:**
 - Creating a new release keystore — the maintainer already has one; this only wires an existing key in.
 - Automating Play Store listing content (screenshots, descriptions, release notes copy) — Fastlane-style metadata management is explicitly out of scope; this is upload-only via Gradle Play Publisher.
-- Auto-promoting from internal → production, or any staged rollout automation.
+- Automating promotion from internal testing to closed/open/production tracks, or any staged rollout automation — deliberately deferred to a future, separate change; for now, promotion is a manual action in the Play Console UI.
+- Local, Gradle-CLI-driven signed release builds — a real signed local build (if ever needed) goes through Android Studio's Generate Signed Bundle/APK wizard instead.
 - Multi-flavor / multi-module signing complexity — the project is single-module today.
 
 ## Decisions
@@ -35,8 +35,8 @@ Fastlane brings a Ruby toolchain and its own credential/config format into a pro
 **Internal-track publish is `workflow_dispatch`-triggered (or on a version tag), not on every `master` push.**
 Publishing to Play — even to internal testing — is an externally-visible, semi-irreversible action (testers get notified/updated). Tying it to every merge would mean every merged PR ships to testers automatically, which doesn't match the deliberate-gate pattern already established for this repo (required CI check, PR-based merges). A manual trigger (or optionally a `v*` tag push) keeps "merge to master" and "ship a build" as separate decisions, mirroring how branch protection already separates "code is green" from "code is on master."
 
-**Promotion to closed/production tracks is a distinct, separate workflow/job — never automatic.**
-Even after internal testing looks good, promoting to production is treated as its own deliberate action (separate `workflow_dispatch`), not a follow-on step of the publish workflow. This avoids a single click accidentally fanning out to production and keeps the blast radius of the "publish" workflow scoped to internal testers only.
+**Promotion to closed/production tracks is deferred to a future change, not built here.**
+Even after internal testing looks good, promoting to production stays a manual Play Console action for now — this avoids a single click accidentally fanning out to production and keeps the blast radius of the "publish" workflow scoped to internal testers only. A `workflow_dispatch`-triggered promotion workflow is a reasonable follow-up once internal-track publishing has been exercised for a while, but isn't part of this change.
 
 **Publish workflow triggers on pushing a `v*.*.*` tag, with `workflow_dispatch` as a manual fallback.**
 Tag-triggered releases are the standard convention for shipping from a CI/CD pipeline (mirrors `npm publish`-on-tag, PyPI, and most mobile release pipelines): pushing `v1.2.0` is an unambiguous, auditable "ship this exact commit" signal, and the tag itself becomes the human-readable record of what was released. `workflow_dispatch` stays available alongside it for a manual re-run (e.g. retrying a failed upload) without needing to re-tag. Plain `master` pushes never trigger a publish, keeping "merge to master" and "ship a build" separate, as decided above.
@@ -57,10 +57,10 @@ This is the standard secret-hygiene convention for GitHub Actions: secrets shoul
 
 ## Migration Plan
 
-1. Land `release-signing` + `release-versioning` first (Gradle changes only, additive, no CD workflow yet) — verify `assembleRelease`/`bundleRelease` still work locally with a `keystore.properties` file and that CI's existing `assembleRelease` step continues to pass once it also has secrets available (or is adjusted to skip signing verification if CI intentionally doesn't sign on every push — decide explicitly in tasks).
+1. Land `release-signing` + `release-versioning` first (Gradle changes only, additive, no CD workflow yet) — verify `assembleRelease`/`bundleRelease` continue to build unsigned locally (unchanged behavior) and that CI's existing `assembleRelease` step continues to pass unsigned.
 2. Maintainer completes the manual Play Console/GCP service-account setup out-of-band.
 3. Land `play-store-publishing`'s internal-track publish workflow, dry-run it via `workflow_dispatch` on a throwaway/test change, confirm the build lands on Play Console's internal testing track with the expected `versionCode`.
-4. Land the separate promotion workflow/job last, once internal-track publishing has been exercised at least once successfully.
+4. Promotion automation, if wanted, becomes its own future change once internal-track publishing has been exercised for a while.
 
 No rollback complexity beyond reverting the relevant workflow/Gradle changes — nothing here is a runtime/data migration; worst case a bad CD run produces a rejected or unwanted Play Console upload, which can be deactivated from Play Console directly.
 

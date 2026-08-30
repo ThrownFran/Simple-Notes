@@ -15,16 +15,12 @@ The system SHALL provide a GitHub Actions workflow, using the Gradle Play Publis
 - **WHEN** a commit is pushed directly to `master` (not tagged)
 - **THEN** no publish workflow run is triggered and nothing is uploaded to Play Console
 
-### Requirement: Promotion beyond internal testing SHALL be a separate, explicit action
-The system SHALL provide a distinct, separately-triggered mechanism (not a follow-on step of the internal-track publish workflow) for promoting a release from internal testing to closed testing or production tracks on Play Console.
+### Requirement: Promotion beyond internal testing SHALL NOT happen automatically
+Publishing to internal testing SHALL NOT, by itself or as a side effect, promote a release to closed testing, open testing, or production. Automating promotion (e.g. a separate `workflow_dispatch` workflow) is out of scope for this change and deferred to a future change; until then, promotion is a manual action performed directly in the Play Console UI.
 
 #### Scenario: Successful internal publish does not auto-promote
 - **WHEN** the internal-track publish workflow completes successfully
 - **THEN** the release remains on the internal testing track only; no closed-testing or production track is updated as a result
-
-#### Scenario: Maintainer explicitly promotes a release
-- **WHEN** a maintainer manually triggers the promotion workflow/job and specifies the target track
-- **THEN** the previously-published internal-testing release is promoted to the specified track on Play Console
 
 ### Requirement: Play Developer API access SHALL be established as a prerequisite, not part of the pipeline
 Access to the Play Developer API (a GCP service account granted permission on this app in Play Console, with its JSON key stored as a GitHub Actions secret) SHALL be configured by the maintainer outside of the codebase before the publish workflow can succeed. The pipeline SHALL NOT attempt to provision this access itself.
