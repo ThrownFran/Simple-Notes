@@ -31,7 +31,8 @@
 - [x] 4.6 Run the Gradle Play Publisher task to build and upload the signed release AAB to the internal testing track — `./gradlew publishReleaseBundle`
 - [x] 4.7 Surface `versionName` and the computed `versionCode` in the workflow run summary — reads `CD_VERSION_NAME`/`CD_VERSION_CODE` directly rather than parsing `build.gradle`
 - [x] 4.8 Add the required repository secrets: base64 keystore, store password, key alias, key password, Play service-account JSON — names documented in `publish.yml`'s header comment — done by maintainer via GitHub web UI
-- [ ] 4.9 Dry-run: push a test `v0.0.0-test`-style tag (or use `workflow_dispatch`), confirm the build lands on Play Console's internal testing track with the expected `versionCode`/`versionName` — **blocked: `publish.yml` must be merged to `master` before `workflow_dispatch` is available (confirmed via `gh workflow list` — GitHub only registers dispatchable workflows from the default branch); PR #2 pending merge**
+- [x] 4.9 Dry-run: push a test `v0.0.0-test`-style tag (or use `workflow_dispatch`), confirm the build lands on Play Console's internal testing track with the expected `versionCode`/`versionName` — `publish.yml` merged to `master` (#2), so `workflow_dispatch` is now available; first attempt hit a Play API 403 requiring a photo/video permissions declaration, root-caused to the still-present `roomdatabasebackup` dependency (fixed separately by #3, also now merged) — actual dry-run execution still pending
+- [x] 4.10 Add release notes for the internal testing track: `app/src/main/play/release-notes/{en-US,es-ES}/default.txt`, matching the app's localized languages (`values-es`); GPP's default `resourcesDir` (`app/src/main/play`) picks these up with no extra `play {}` config — placeholder text checked in, to be hand-edited before each tagged release
 
 ## 5. Promotion workflow
 
