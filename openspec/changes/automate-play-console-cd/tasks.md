@@ -18,8 +18,8 @@
 ## 3. Release versioning (Gradle)
 
 - [x] 3.1 Replace the static `versionCode` constant in `app/build.gradle` with logic that reads a `versionCode` override from an environment variable (e.g. `CD_VERSION_CODE`), falling back to the existing checked-in constant when unset (so local/CI-unsigned builds are unaffected)
-- [x] 3.2 Confirm `versionName` stays a manually-edited constant, unchanged by this task group
-- [x] 3.3 Verify locally: run `./gradlew assembleRelease` with `CD_VERSION_CODE` set, confirm the built artifact's manifest reflects the overridden value; run without it set and confirm the fallback constant is used — verified via `output-metadata.json` (1234 with override set, 9 without)
+- [x] 3.2 Revised: `versionName` also reads a `CD_VERSION_NAME` env override (falling back to the checked-in constant), so the publish workflow can derive it from the pushed tag rather than relying on a manually-edited constant staying in sync with the tag — see 4.5
+- [x] 3.3 Verify locally: run `./gradlew assembleRelease` with `CD_VERSION_CODE`/`CD_VERSION_NAME` set, confirm the built artifact's manifest reflects both overridden values; run without them set and confirm the fallback constants are used — verified via `output-metadata.json` (`versionCode` 1234, `versionName` "2.0.0-test" with overrides; checked-in constants otherwise)
 
 ## 4. Play Store publish workflow
 
@@ -27,9 +27,9 @@
 - [x] 4.2 Configure the plugin to read Play service-account credentials from a file path supplied via environment variable/secret, targeting the internal testing track by default — `play { serviceAccountCredentials.set(file(System.getenv("PLAY_SERVICE_ACCOUNT_JSON_PATH") ?: ...)); track.set("internal") }` in `app/build.gradle`
 - [x] 4.3 Add a new GitHub Actions workflow (`.github/workflows/publish.yml`) triggered on `push` of tags matching `v*.*.*` and on `workflow_dispatch`
 - [x] 4.4 In that workflow: checkout, JDK 21 setup, decode the base64 keystore secret to a file, write `keystore.properties` from secrets, write the Play service-account JSON from its secret to a file
-- [x] 4.5 Compute `CD_VERSION_CODE` from `1000 + github.run_number` and export it for the Gradle invocation
+- [x] 4.5 Compute `CD_VERSION_CODE` from `1000 + github.run_number`; compute `CD_VERSION_NAME` from the pushed tag (`v*.*.*`, `v` stripped) on tag-triggered runs, or from a required `version_name` `workflow_dispatch` input on manual runs — export both for the Gradle invocation
 - [x] 4.6 Run the Gradle Play Publisher task to build and upload the signed release AAB to the internal testing track — `./gradlew publishReleaseBundle`
-- [x] 4.7 Surface `versionName` and the computed `versionCode` in the workflow run summary
+- [x] 4.7 Surface `versionName` and the computed `versionCode` in the workflow run summary — reads `CD_VERSION_NAME`/`CD_VERSION_CODE` directly rather than parsing `build.gradle`
 - [x] 4.8 Add the required repository secrets: base64 keystore, store password, key alias, key password, Play service-account JSON — names documented in `publish.yml`'s header comment — done by maintainer via GitHub web UI
 - [ ] 4.9 Dry-run: push a test `v0.0.0-test`-style tag (or use `workflow_dispatch`), confirm the build lands on Play Console's internal testing track with the expected `versionCode`/`versionName` — **blocked: `publish.yml` must be merged to `master` before `workflow_dispatch` is available (confirmed via `gh workflow list` — GitHub only registers dispatchable workflows from the default branch); PR #2 pending merge**
 

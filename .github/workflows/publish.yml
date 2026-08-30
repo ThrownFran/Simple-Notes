@@ -11,7 +11,12 @@ name: Publish to Play Store
 on:
   push:
     tags: ['v*.*.*']
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Version name to publish (e.g. 1.2.0) - required since there is no tag to derive it from'
+        required: true
+        type: string
 
 jobs:
   publish:
@@ -57,15 +62,23 @@ jobs:
       - name: Compute version code
         run: echo "CD_VERSION_CODE=$((1000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
 
+      - name: Compute version name
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION_NAME="${{ inputs.version_name }}"
+          else
+            VERSION_NAME="${GITHUB_REF_NAME#v}"
+          fi
+          echo "CD_VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
+
       - name: Build and publish signed AAB to internal track
         run: ./gradlew publishReleaseBundle
 
       - name: Surface version info
         run: |
-          VERSION_NAME=$(grep -m1 'versionName' app/build.gradle | sed -E 's/.*versionName "(.*)".*/\1/')
           {
             echo "### Published to Play internal testing"
-            echo "- versionName: $VERSION_NAME"
+            echo "- versionName: $CD_VERSION_NAME"
             echo "- versionCode: $CD_VERSION_CODE"
             echo "- ref: ${{ github.ref_name }}"
           } >> "$GITHUB_STEP_SUMMARY"
