@@ -8,12 +8,12 @@
 ## 2. Release signing (Gradle)
 
 - [x] 2.1 Add `keystore.properties` and common keystore file extensions (`*.jks`, `*.keystore`) to `.gitignore`
-- [x] 2.2 Add a committed `keystore.properties.example` documenting the expected non-secret keys (`storeFile`, `keyAlias`) with placeholder values; `storePassword`/`keyPassword` are documented as macOS Keychain items instead, not file fields
-- [x] 2.3 Add a `signingConfigs.release` block in `app/build.gradle` that loads `storeFile`/`keyAlias` from `keystore.properties` (local) and reads `storePassword`/`keyPassword` from macOS Keychain (service `SimpleNotes-ReleaseKeystore`) locally, or from `keystore.properties` in CI; fails the build with a clear, actionable error if the required source is missing — enforced via `gradle.taskGraph.whenReady`, scoped to release-packaging tasks only, so plain `test`/`ktlintCheck`/`assembleDebug` never require a keystore or touch Keychain
+- [x] 2.2 ~~Add a committed `keystore.properties.example`~~ — superseded: signing is CI-only now (see design.md decision), there's no local file for a maintainer to copy/fill in, so no example template is needed
+- [x] 2.3 Add a `signingConfigs.release` block in `app/build.gradle` that loads `storeFile`/`storePassword`/`keyAlias`/`keyPassword` from `keystore.properties` when present, leaving `buildTypes.release` unsigned otherwise — no fail-fast error, since local `assembleRelease` is expected to be unsigned (real local signed builds go through Android Studio's Generate Signed Bundle/APK wizard instead)
 - [x] 2.4 Wire `buildTypes.release.signingConfig` to the new `signingConfigs.release`
-- [ ] 2.5 Verify locally: add the real `storePassword`/`keyPassword` to macOS Keychain (`security add-generic-password -a storePassword -s SimpleNotes-ReleaseKeystore -w` and same for `keyPassword`), fill in the real `storeFile`/`keyAlias` in `keystore.properties`, run `./gradlew assembleRelease` and `./gradlew bundleRelease`, confirm the output is signed (e.g. via `apksigner verify` or `jarsigner -verify`) — **blocked: requires your real keystore/passwords, cannot be done by the agent**
-- [x] 2.6 Verify the failure path: temporarily rename/remove local `keystore.properties`, confirm `assembleRelease` fails fast with a clear, actionable error message — verified locally, `assembleRelease` fails with the expected message and `test`/`assembleDebug` remain unaffected
-- [x] 2.7 Confirm `ci.yml`'s existing `assembleRelease` step still passes unsigned (no secrets added to that workflow) — verified locally via `CI=true ./gradlew assembleRelease` (builds unsigned successfully); no changes needed to `ci.yml`
+- [x] 2.5 Verify signing end-to-end: generated a throwaway test keystore (`keytool -genkeypair`), pointed a local `keystore.properties` at it, ran `./gradlew assembleRelease`, confirmed via `apksigner verify --print-certs` that the output APK was signed with that keystore's certificate; cleaned up the test keystore and `keystore.properties` afterward — validates the exact code path CI's publish workflow uses. Real-keystore verification happens implicitly on the first real `publishReleaseBundle` run (task 4.9)
+- [x] 2.6 Verify the no-signing-source path: confirmed `assembleRelease` with no `keystore.properties` present builds successfully and unsigned (no error) — this is the expected default for local builds
+- [x] 2.7 Confirm `ci.yml`'s existing `assembleRelease` step still passes unsigned (no secrets added to that workflow) — verified locally via `assembleRelease` with no `keystore.properties` (builds unsigned successfully); no changes needed to `ci.yml`
 
 ## 3. Release versioning (Gradle)
 
@@ -30,8 +30,8 @@
 - [x] 4.5 Compute `CD_VERSION_CODE` from `1000 + github.run_number` and export it for the Gradle invocation
 - [x] 4.6 Run the Gradle Play Publisher task to build and upload the signed release AAB to the internal testing track — `./gradlew publishReleaseBundle`
 - [x] 4.7 Surface `versionName` and the computed `versionCode` in the workflow run summary
-- [ ] 4.8 Add the required repository secrets: base64 keystore, store password, key alias, key password, Play service-account JSON — names documented in `publish.yml`'s header comment — **blocked: requires your real secret values in GitHub repo settings, cannot be done by the agent**
-- [ ] 4.9 Dry-run: push a test `v0.0.0-test`-style tag (or use `workflow_dispatch`), confirm the build lands on Play Console's internal testing track with the expected `versionCode`/`versionName` — **blocked: requires 4.8 plus completed Section 1 (Play Console API access)**
+- [x] 4.8 Add the required repository secrets: base64 keystore, store password, key alias, key password, Play service-account JSON — names documented in `publish.yml`'s header comment — done by maintainer via GitHub web UI
+- [ ] 4.9 Dry-run: push a test `v0.0.0-test`-style tag (or use `workflow_dispatch`), confirm the build lands on Play Console's internal testing track with the expected `versionCode`/`versionName` — **blocked: `publish.yml` must be merged to `master` before `workflow_dispatch` is available (confirmed via `gh workflow list` — GitHub only registers dispatchable workflows from the default branch); PR #2 pending merge**
 
 ## 5. Promotion workflow
 
