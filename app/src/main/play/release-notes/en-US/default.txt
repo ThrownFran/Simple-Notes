@@ -1,3 +1,4 @@
-- Fixed a bug where a note wasn't created when sharing text from another app
-- Updated to the latest Android SDK for improved compatibility
-- Improved backup and restore: fewer permissions required and more reliable
+• Fixed a bug where notes wouldn't create when sharing text from other apps
+• Updated to the latest Android SDK for improved compatibility
+• Backup & restore now require fewer permissions and work more reliably
+• Better app stability and performance improvements

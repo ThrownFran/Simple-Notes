@@ -1,3 +1,4 @@
-- Se corrigió un error por el que no se creaba una nota al compartir texto desde otra app
-- Actualización al SDK de Android más reciente para mejorar la compatibilidad
-- Se mejoró la copia de seguridad y restauración: requiere menos permisos y es más fiable
+• Se corrigió un error por el que no se creaban notas al compartir texto desde otras apps
+• Actualización al SDK de Android más reciente para mejorar la compatibilidad
+• Copia de seguridad y restauración: ahora requieren menos permisos y funcionan de forma más fiable
+• Mejoras de estabilidad y rendimiento de la aplicación
