@@ -1,0 +1,149 @@
+name: Release to Production
+
+# Promotes a build to the Play Store PRODUCTION track with a staged rollout.
+#
+# Trigger: manual (workflow_dispatch) only, and it must be run from a
+# `release/<major>.<minor>` branch (e.g. release/1.2) - the workflow fails
+# otherwise. Provide the rollout percentage (1-100) as the input.
+#
+# Required repository secrets (same as publish.yml):
+#   RELEASE_KEYSTORE_BASE64  - `base64 -i release.keystore | pbcopy`, paste the result
+#   RELEASE_STORE_PASSWORD   - keystore password
+#   RELEASE_KEY_ALIAS        - key alias within the keystore
+#   RELEASE_KEY_PASSWORD     - key password
+#   PLAY_SERVICE_ACCOUNT_JSON - full contents of the GCP service-account JSON key
+
+on:
+  workflow_dispatch:
+    inputs:
+      rollout_percentage:
+        description: 'Staged rollout percentage for the production track (1-100)'
+        required: true
+        type: string
+
+permissions:
+  contents: write # create the git tag + GitHub Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Guard release branch
+        run: |
+          if [[ ! "$GITHUB_REF_NAME" =~ ^release/[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::This workflow can only run from a release/<major>.<minor> branch (got '$GITHUB_REF_NAME')."
+            exit 1
+          fi
+          echo "MAJOR_MINOR=${GITHUB_REF_NAME#release/}" >> "$GITHUB_ENV"
+
+      - name: Validate rollout percentage
+        env:
+          ROLLOUT: ${{ inputs.rollout_percentage }}
+        run: |
+          if [[ ! "$ROLLOUT" =~ ^[0-9]+$ ]] || [ "$ROLLOUT" -lt 1 ] || [ "$ROLLOUT" -gt 100 ]; then
+            echo "::error::rollout_percentage must be an integer between 1 and 100 (got '$ROLLOUT')."
+            exit 1
+          fi
+          if [ "$ROLLOUT" -eq 100 ]; then
+            echo "RELEASE_STATUS=completed" >> "$GITHUB_ENV"
+          else
+            echo "RELEASE_STATUS=inProgress" >> "$GITHUB_ENV"
+            echo "USER_FRACTION=$(awk -v p="$ROLLOUT" 'BEGIN{printf "%.4f", p/100}')" >> "$GITHUB_ENV"
+          fi
+          echo "ROLLOUT_PERCENTAGE=$ROLLOUT" >> "$GITHUB_ENV"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify release notes are present
+        run: |
+          missing=0
+          for loc in en-US es-ES; do
+            file="app/src/main/play/release-notes/$loc/default.txt"
+            if [ ! -f "$file" ] || [ -z "$(tr -d '[:space:]' < "$file")" ]; then
+              echo "::error::Missing or empty release notes: $file"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Write signing files
+        env:
+          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          KEYSTORE_PATH="$RUNNER_TEMP/release.keystore"
+          echo "$KEYSTORE_BASE64" | base64 -d > "$KEYSTORE_PATH"
+          cat > keystore.properties <<EOF
+          storeFile=$KEYSTORE_PATH
+          storePassword=$STORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+
+      - name: Write Play service account credentials
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          CREDENTIALS_PATH="$RUNNER_TEMP/play-service-account.json"
+          echo "$PLAY_SERVICE_ACCOUNT_JSON" > "$CREDENTIALS_PATH"
+          echo "PLAY_SERVICE_ACCOUNT_JSON_PATH=$CREDENTIALS_PATH" >> "$GITHUB_ENV"
+
+      - name: Compute version
+        # Base offset 5000 keeps production versionCodes clear of publish.yml's
+        # internal-track range (1000 + run_number), since Play requires versionCode
+        # to be globally unique and increasing across all tracks.
+        run: |
+          echo "CD_VERSION_CODE=$((5000 + GITHUB_RUN_NUMBER))" >> "$GITHUB_ENV"
+          echo "CD_VERSION_NAME=${MAJOR_MINOR}.${GITHUB_RUN_NUMBER}" >> "$GITHUB_ENV"
+
+      - name: Publish signed AAB to production track
+        run: |
+          if [ "$RELEASE_STATUS" = "completed" ]; then
+            ./gradlew publishReleaseBundle \
+              --track production \
+              --release-status completed \
+              --release-name "$CD_VERSION_NAME"
+          else
+            ./gradlew publishReleaseBundle \
+              --track production \
+              --release-status inProgress \
+              --user-fraction "$USER_FRACTION" \
+              --release-name "$CD_VERSION_NAME"
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${CD_VERSION_NAME}" \
+            --target "$GITHUB_SHA" \
+            --title "v${CD_VERSION_NAME}" \
+            --notes-file app/src/main/play/release-notes/en-US/default.txt
+
+      - name: Surface release info
+        run: |
+          {
+            echo "### Published to Play production"
+            echo "- versionName: $CD_VERSION_NAME"
+            echo "- versionCode: $CD_VERSION_CODE"
+            echo "- track: production"
+            echo "- release status: $RELEASE_STATUS"
+            echo "- rollout: ${ROLLOUT_PERCENTAGE}%"
+            echo "- tag: v${CD_VERSION_NAME}"
+            echo "- ref: ${{ github.ref_name }}"
+          } >> "$GITHUB_STEP_SUMMARY"
